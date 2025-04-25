@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using SmartStorage_API.Model;
 
-namespace SmartStorage_API.Context;
+namespace SmartStorage_API.Model.Context;
 
 public partial class SmartStorageContext : DbContext
 {
