@@ -19,7 +19,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/storage/products",
+      "launchUrl": "api/storage/shelves",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

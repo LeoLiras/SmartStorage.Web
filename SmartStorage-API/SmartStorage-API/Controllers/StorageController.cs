@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Service;
+using SmartStorage_API.DTO;
 
 namespace SmartStorage_API.Controllers
 {
@@ -19,9 +20,23 @@ namespace SmartStorage_API.Controllers
 
         [HttpGet]
         [Route("products")]
-        public IActionResult Get()
+        public IActionResult GetProducts()
         {
-            return Ok(_storageService.FindAll());
+            return Ok(_storageService.FindAllProducts());
+        }
+
+        [HttpGet]
+        [Route("sales")]
+        public ActionResult<List<SaleDTO>> GetSales()
+        {
+            return Ok(_storageService.FindAllSales());
+        }
+
+        [HttpGet]
+        [Route("shelves")]
+        public ActionResult<List<ShelfDTO>> GetShelves()
+        {
+            return Ok(_storageService.FindAllShelves());
         }
     }
 }
