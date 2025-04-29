@@ -19,34 +19,41 @@ namespace SmartStorage_API.Controllers
             _storageService = storageService;
         }
 
-        [HttpGet]
-        [Route("products")]
+        [HttpGet("products")]
         public IActionResult GetProducts()
         {
             return Ok(_storageService.FindAllProducts());
         }
 
-        [HttpGet]
-        [Route("sales")]
-        public ActionResult<List<SaleDTO>> GetSales()
+        [HttpGet("products/{id}")]
+        public IActionResult GetProductsById(int id)
         {
-            return Ok(_storageService.FindAllSales());
+            var product = _storageService.FindProductById(id);
+
+            if (product == null) return NotFound();
+
+            return Ok(product);
         }
 
-        [HttpGet]
-        [Route("shelves")]
-        public ActionResult<List<ShelfDTO>> GetShelves()
-        {
-            return Ok(_storageService.FindAllShelves());
-        }
-
-        [HttpPost]
-        [Route("products")]
+        [HttpPost("products")]
         public IActionResult CreateNewProduct([FromBody] Product product)
         {
             if (product == null) return BadRequest();
 
             return Ok(_storageService.CreateNewProduct(product));
         }
+
+        [HttpGet("sales")]
+        public ActionResult<List<SaleDTO>> GetSales()
+        {
+            return Ok(_storageService.FindAllSales());
+        }
+
+        [HttpGet("shelves")]
+        public ActionResult<List<ShelfDTO>> GetShelves()
+        {
+            return Ok(_storageService.FindAllShelves());
+        }
+        
     }
 }

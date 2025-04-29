@@ -68,5 +68,10 @@ namespace SmartStorage_API.Service.Implementations
 
             return queryEnter.OrderBy(q => q.productName).ToList();
         }
+
+        public Product FindProductById(int id)
+        {
+            return _context.Products.SingleOrDefault(x => x.Id.Equals(id));
+        }
     }
 }
