@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Service;
 using SmartStorage_API.DTO;
+using SmartStorage_API.Model;
 
 namespace SmartStorage_API.Controllers
 {
@@ -37,6 +38,15 @@ namespace SmartStorage_API.Controllers
         public ActionResult<List<ShelfDTO>> GetShelves()
         {
             return Ok(_storageService.FindAllShelves());
+        }
+
+        [HttpPost]
+        [Route("products")]
+        public IActionResult CreateNewProduct([FromBody] Product product)
+        {
+            if (product == null) return BadRequest();
+
+            return Ok(_storageService.CreateNewProduct(product));
         }
     }
 }

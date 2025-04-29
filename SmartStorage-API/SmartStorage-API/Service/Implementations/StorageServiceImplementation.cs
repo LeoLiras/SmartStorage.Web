@@ -14,6 +14,21 @@ namespace SmartStorage_API.Service.Implementations
             _context = context;
         }
 
+        public Product CreateNewProduct(Product product)
+        {
+            try
+            {
+                _context.Add(product);
+                _context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return product;
+        }
+
         public List<Product> FindAllProducts()
         {
             return _context.Products.OrderBy(q => q.Name).ToList();
