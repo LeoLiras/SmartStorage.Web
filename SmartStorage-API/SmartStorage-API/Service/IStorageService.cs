@@ -9,6 +9,7 @@ namespace SmartStorage_API.Service
         List<Product> FindAllProducts();
         Product FindProductById(int id);
         List<SaleDTO> FindAllSales();
+        Sale CreateNewSale(NewSaleDTO newSale);
         List<ShelfDTO> FindAllShelves();
     }
 }

@@ -49,6 +49,18 @@ namespace SmartStorage_API.Controllers
             return Ok(_storageService.FindAllSales());
         }
 
+        [HttpPost("sales")]
+        public IActionResult CreateNewSale([FromBody] NewSaleDTO newSale)
+        {
+            if (newSale.ProductId == null || newSale.ProductId.Equals(0) || newSale.ProductQuantity == null || newSale.ProductQuantity.Equals(0)) return BadRequest();
+
+            var searchNewSale = _storageService.CreateNewSale(newSale);
+
+            if(searchNewSale == null) return BadRequest();
+
+            return Ok(searchNewSale);
+        }
+
         [HttpGet("shelves")]
         public ActionResult<List<ShelfDTO>> GetShelves()
         {
