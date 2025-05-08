@@ -18,15 +18,28 @@ namespace SmartStorage_API.Service.Implementations
         {
             try
             {
-                _context.Add(product);
-                _context.SaveChanges();
+                var productSearch = _context.Products.FirstOrDefault(x => x.Name == product.Name);
+
+                if(productSearch != null)
+                {
+                    productSearch.Qntd += product.Qntd;
+                    _context.SaveChanges();
+
+                    return productSearch;
+                }
+                else
+                {
+                    _context.Add(product);
+                    _context.SaveChanges();
+
+                    return product;
+                }
+                
             }
             catch (Exception)
             {
                 throw;
             }
-
-            return product;
         }
 
         public List<Product> FindAllProducts()
