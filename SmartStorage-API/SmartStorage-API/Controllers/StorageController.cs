@@ -50,9 +50,9 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost("sales")]
-        public IActionResult CreateNewSale([FromBody] NewSaleDTO newSale)
+        public IActionResult CreateNewSale([FromBody] SaleDTO newSale)
         {
-            if (newSale.ProductId == null || newSale.ProductId.Equals(0) || newSale.ProductQuantity == null || newSale.ProductQuantity.Equals(0)) return BadRequest();
+            if (newSale.productId == null || newSale.productId.Equals(0) || newSale.saleQntd == null || newSale.saleQntd.Equals(0)) return BadRequest();
 
             var searchNewSale = _storageService.CreateNewSale(newSale);
 
