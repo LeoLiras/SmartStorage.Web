@@ -5,12 +5,13 @@ namespace SmartStorage_API.Service
 {
     public interface IStorageService
     {
-        Product CreateNewProduct(Product product);
+        Product CreateNewProduct(ProductDTO product);
         List<Product> FindAllProducts();
         Product FindProductById(int id);
         List<SaleDTO> FindAllSales();
         SaleDTO CreateNewSale(SaleDTO newSale);
-        List<ShelfDTO> FindAllShelves();
+        List<ShelfDTO> FindAllProductsInShelves();
+        List<Shelf> FindAllShelf();
         Enter AllocateProductToShelf(AllocateProductToShelfDTO newAllocation);
     }
 }

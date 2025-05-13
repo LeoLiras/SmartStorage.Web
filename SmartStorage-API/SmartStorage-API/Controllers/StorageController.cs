@@ -36,7 +36,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost("products")]
-        public IActionResult CreateNewProduct([FromBody] Product product)
+        public IActionResult CreateNewProduct([FromBody] ProductDTO product)
         {
             if (product == null) return BadRequest();
 
@@ -61,11 +61,29 @@ namespace SmartStorage_API.Controllers
             return Ok(searchNewSale);
         }
 
-        [HttpGet("shelves")]
-        public ActionResult<List<ShelfDTO>> GetShelves()
+        [HttpGet("shelf")]
+        public ActionResult<List<ShelfDTO>> FindAllShelf()
         {
-            return Ok(_storageService.FindAllShelves());
+            return Ok(_storageService.FindAllShelf());
         }
-        
+
+        [HttpGet("allocation")]
+        public ActionResult<List<ShelfDTO>> GetProductsInShelves()
+        {
+            return Ok(_storageService.FindAllProductsInShelves());
+        }
+
+        [HttpPost("allocation")]
+        public IActionResult AllocateProductToShelf([FromBody] AllocateProductToShelfDTO newAllocation)
+        {
+            if (newAllocation.ProductId.Equals(0) || newAllocation.ShelfId.Equals(0) || newAllocation.ProductPrice.Equals(0.0)) return BadRequest();
+
+            var searchNewAllocation = _storageService.AllocateProductToShelf(newAllocation);
+
+            if (searchNewAllocation == null) return BadRequest();
+
+            return Ok(searchNewAllocation);
+        }
+
     }
 }

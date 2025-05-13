@@ -14,7 +14,7 @@ namespace SmartStorage_API.Service.Implementations
             _context = context;
         }
 
-        public Product CreateNewProduct(Product product)
+        public Product CreateNewProduct(ProductDTO product)
         {
             try
             {
@@ -29,10 +29,19 @@ namespace SmartStorage_API.Service.Implementations
                 }
                 else
                 {
-                    _context.Add(product);
+                    var newProduct = new Product
+                    {
+                        Name = product.Name,
+                        Descricao = product.Descricao,
+                        DateRegister = DateTime.UtcNow,
+                        Qntd = product.Qntd,
+                        EmployeeId = product.EmployeeId
+                    };
+
+                    _context.Add(newProduct);
                     _context.SaveChanges();
 
-                    return product;
+                    return newProduct;
                 }
                 
             }
@@ -127,7 +136,7 @@ namespace SmartStorage_API.Service.Implementations
             }
         }
 
-        public List<ShelfDTO> FindAllShelves()
+        public List<ShelfDTO> FindAllProductsInShelves()
         {
             var queryEnter = from enter in _context.Enters
                              join product in _context.Products on enter.IdProduct equals product.Id
@@ -148,8 +157,6 @@ namespace SmartStorage_API.Service.Implementations
         public Enter AllocateProductToShelf(AllocateProductToShelfDTO newAllocation)
         {
             var product = _context.Products.Where(p => p.Id == newAllocation.ProductId).FirstOrDefault();
-            
-            bool alreadyAllocated = _context.Enters.Any(e => e.IdProduct == newAllocation.ProductId);
 
             try
             {
@@ -157,17 +164,19 @@ namespace SmartStorage_API.Service.Implementations
                 {
                     if (product.Qntd >= newAllocation.ProductQuantity)
                     {
-                        product.Qntd = product.Qntd - newAllocation.ProductQuantity;
+                        product.Qntd -= newAllocation.ProductQuantity;
 
-                        var enter = _context.Enters.Where(e => e.IdProduct == newAllocation.ProductId).FirstOrDefault();
+                        var enter = _context.Enters.Where(e => e.IdProduct == newAllocation.ProductId && e.IdShelf == newAllocation.ShelfId).FirstOrDefault();
 
                         var shelf = _context.Shelves.Where(s => s.Id == newAllocation.ShelfId).FirstOrDefault();
 
-                        if (enter != null && shelf != null)
+                        if (shelf != null)
                         {
-                            if (alreadyAllocated && enter.IdShelf == shelf.Id && enter.Price == newAllocation.ProductPrice)
+                            if (enter != null)
                             {
                                 enter.Qntd += newAllocation.ProductQuantity;
+                                enter.Price = newAllocation.ProductPrice;
+
                                 _context.SaveChanges();
 
                                 return enter;
@@ -202,6 +211,11 @@ namespace SmartStorage_API.Service.Implementations
             }
 
             return null;
+        }
+
+        public List<Shelf> FindAllShelf()
+        {
+            return _context.Shelves.OrderBy(x => x.Name).ToList();
         }
     }
 }
