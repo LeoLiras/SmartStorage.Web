@@ -29,7 +29,7 @@ namespace SmartStorage_API.Controllers
         {
             var product = _storageService.FindProductById(id);
 
-            if (product == null) return NotFound();
+            if (product == null) return NotFound("Produto não encontrado.");
 
             return Ok(product);
         }
@@ -37,9 +37,7 @@ namespace SmartStorage_API.Controllers
         [HttpPost("products")]
         public IActionResult CreateNewProduct([FromBody] ProductDTO product)
         {
-            if (product.Qntd.Equals(0)) return BadRequest("Quantidade não pode ser igual a 0.");
-
-            if (product == null) return BadRequest();
+            if (product.Qntd.Equals(0)) return BadRequest("O campo Quantidade do Produto é obrigatório");
 
             return Ok(_storageService.CreateNewProduct(product));
         }
@@ -53,11 +51,13 @@ namespace SmartStorage_API.Controllers
         [HttpPost("sales")]
         public IActionResult CreateNewSale([FromBody] SaleDTO newSale)
         {
-            if (newSale.productId == null || newSale.productId.Equals(0) || newSale.saleQntd == null || newSale.saleQntd.Equals(0)) return BadRequest();
+            if (newSale.productId.Equals(0)) return BadRequest("O campo ID do produto é obrigatório.");
+
+            if (newSale.saleQntd.Equals(0)) return BadRequest("O campo Quantidade da Venda é obrigatório.");
 
             var searchNewSale = _storageService.CreateNewSale(newSale);
 
-            if (searchNewSale == null) return BadRequest();
+            if (searchNewSale == null) return BadRequest("Falha ao registrar a venda. Verifique se existe a quantidade informada disponível na prateleira.");
 
             return Ok(searchNewSale);
         }
@@ -77,11 +77,15 @@ namespace SmartStorage_API.Controllers
         [HttpPost("allocation")]
         public IActionResult AllocateProductToShelf([FromBody] AllocateProductToShelfDTO newAllocation)
         {
-            if (newAllocation.ProductId.Equals(0) || newAllocation.ShelfId.Equals(0) || newAllocation.ProductPrice.Equals(0.0)) return BadRequest();
+            if(newAllocation.ProductId.Equals(0)) return BadRequest("O campo ID do Produto é obrigatório.");
+
+            if (newAllocation.ShelfId.Equals(0)) return BadRequest("O campo ID da Prateleira é obrigatório.");
+
+            if (newAllocation.ProductPrice.Equals(0.0)) return BadRequest("O campo Preço do Produto é obrigatório.");
 
             var searchNewAllocation = _storageService.AllocateProductToShelf(newAllocation);
 
-            if (searchNewAllocation == null) return BadRequest();
+            if (searchNewAllocation == null) return BadRequest("Erro alocando produto a prateleira.");
 
             return Ok(searchNewAllocation);
         }
