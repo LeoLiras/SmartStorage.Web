@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SmartStorage_API.Service;
+﻿using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.DTO;
 using SmartStorage_API.Model;
+using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
 {
@@ -38,6 +37,8 @@ namespace SmartStorage_API.Controllers
         [HttpPost("products")]
         public IActionResult CreateNewProduct([FromBody] ProductDTO product)
         {
+            if (product.Qntd.Equals(0)) return BadRequest("Quantidade não pode ser igual a 0.");
+
             if (product == null) return BadRequest();
 
             return Ok(_storageService.CreateNewProduct(product));
@@ -56,7 +57,7 @@ namespace SmartStorage_API.Controllers
 
             var searchNewSale = _storageService.CreateNewSale(newSale);
 
-            if(searchNewSale == null) return BadRequest();
+            if (searchNewSale == null) return BadRequest();
 
             return Ok(searchNewSale);
         }
@@ -83,6 +84,28 @@ namespace SmartStorage_API.Controllers
             if (searchNewAllocation == null) return BadRequest();
 
             return Ok(searchNewAllocation);
+        }
+
+        [HttpGet("employees")]
+        public IActionResult GetEmployees()
+        {
+            return Ok(_storageService.FindAllEmployees());
+        }
+
+        [HttpPost("employees")]
+        public IActionResult RegisterNewEmployee(EmployeeDTO employee)
+        {
+            if(string.IsNullOrWhiteSpace(employee.Name)) return BadRequest("O campo Nome é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(employee.Rg)) return BadRequest("O campo RG é obrigatório.");
+
+            if(string.IsNullOrWhiteSpace(employee.Cpf)) return BadRequest("O campo CPF é obrigatório.");
+
+            var newEmployee = _storageService.RegisterNewEmployee(employee);
+
+            if (newEmployee == null) return BadRequest("Funcionário já registrado.");
+
+            return Ok(newEmployee);
         }
 
     }

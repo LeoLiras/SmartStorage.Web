@@ -1,7 +1,6 @@
-﻿using SmartStorage_API.Model;
+﻿using SmartStorage_API.DTO;
+using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
-using SmartStorage_API.DTO;
-using System.Runtime.CompilerServices;
 
 namespace SmartStorage_API.Service.Implementations
 {
@@ -20,9 +19,10 @@ namespace SmartStorage_API.Service.Implementations
             {
                 var productSearch = _context.Products.FirstOrDefault(x => x.Name == product.Name);
 
-                if(productSearch != null)
+                if (productSearch != null)
                 {
                     productSearch.Qntd += product.Qntd;
+
                     _context.SaveChanges();
 
                     return productSearch;
@@ -43,7 +43,7 @@ namespace SmartStorage_API.Service.Implementations
 
                     return newProduct;
                 }
-                
+
             }
             catch (Exception)
             {
@@ -216,6 +216,36 @@ namespace SmartStorage_API.Service.Implementations
         public List<Shelf> FindAllShelf()
         {
             return _context.Shelves.OrderBy(x => x.Name).ToList();
+        }
+
+        public List<Employee> FindAllEmployees()
+        {
+            return _context.Employees.OrderBy(x => x.Name).ToList();
+        }
+
+        public Employee RegisterNewEmployee(EmployeeDTO employee)
+        {
+            var searchEmployee = _context.Employees.FirstOrDefault(x => x.Cpf == employee.Cpf);
+
+            if(searchEmployee == null)
+            {
+                var newEmployee = new Employee
+                {
+                    Name = employee.Name,
+                    Cpf = employee.Cpf,
+                    Rg = employee.Rg,
+                    DateRegister = DateTime.UtcNow,
+                };
+
+                _context.Add(newEmployee);
+                _context.SaveChanges();
+
+                return newEmployee;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

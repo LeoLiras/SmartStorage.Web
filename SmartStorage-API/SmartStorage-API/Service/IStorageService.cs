@@ -13,5 +13,7 @@ namespace SmartStorage_API.Service
         List<ShelfDTO> FindAllProductsInShelves();
         List<Shelf> FindAllShelf();
         Enter AllocateProductToShelf(AllocateProductToShelfDTO newAllocation);
+        List<Employee> FindAllEmployees();
+        Employee RegisterNewEmployee(EmployeeDTO employee);
     }
 }
