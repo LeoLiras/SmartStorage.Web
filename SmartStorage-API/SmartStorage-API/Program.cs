@@ -15,6 +15,10 @@ builder.Services.AddDbContext<SmartStorageContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreConnection:ConnectionString")));
 
 builder.Services.AddScoped<IStorageService, StorageServiceImplementation>();
+builder.Services.AddScoped<IEmployeeService, EmployeeServiceImplementation>();
+builder.Services.AddScoped<IProductService, ProductServiceImplementation>();
+builder.Services.AddScoped<ISaleService, SaleServiceImplementation>();
+builder.Services.AddScoped<IShelfService, ShelfServiceImplementation>();
 
 var app = builder.Build();
 

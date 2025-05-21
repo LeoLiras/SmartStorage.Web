@@ -8,17 +8,27 @@ namespace SmartStorage_API.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private IStorageService _storageService;
+        #region Propriedades
 
-        public EmployeesController(IStorageService storageService)
+        private IEmployeeService _employeeService;
+
+        #endregion
+
+        #region Construtores
+
+        public EmployeesController(IEmployeeService employeeService)
         {
-            _storageService = storageService;
+            _employeeService = employeeService;
         }
 
+        #endregion
+
+        #region Métodos
+
         [HttpGet]
-        public IActionResult GetEmployees()
+        public IActionResult FindAllEmployees()
         {
-            return Ok(_storageService.FindAllEmployees());
+            return Ok(_employeeService.FindAllEmployees());
         }
 
         [HttpPost]
@@ -30,11 +40,14 @@ namespace SmartStorage_API.Controllers
 
             if (string.IsNullOrWhiteSpace(employee.Cpf)) return BadRequest("O campo CPF é obrigatório.");
 
-            var newEmployee = _storageService.RegisterNewEmployee(employee);
+            var newEmployee = _employeeService.RegisterNewEmployee(employee);
 
             if (newEmployee == null) return BadRequest("Funcionário já registrado.");
 
             return Ok(newEmployee);
         }
+
+        #endregion
+
     }
 }

@@ -8,23 +8,33 @@ namespace SmartStorage_API.Controllers
     [ApiController]
     public class ShelfController : ControllerBase
     {
-        private IStorageService _storageService;
+        #region Propriedades
 
-        public ShelfController(IStorageService storageService)
+        private IShelfService _shelfService;
+
+        #endregion
+
+        #region Construtores
+
+        public ShelfController(IShelfService shelfService)
         {
-            _storageService = storageService;
+            _shelfService = shelfService;
         }
+
+        #endregion
+
+        #region Métodos
 
         [HttpGet]
         public ActionResult<List<ShelfDTO>> FindAllShelf()
         {
-            return Ok(_storageService.FindAllShelf());
+            return Ok(_shelfService.FindAllShelf());
         }
 
         [HttpGet("allocation")]
         public ActionResult<List<ShelfDTO>> GetProductsInShelves()
         {
-            return Ok(_storageService.FindAllProductsInShelves());
+            return Ok(_shelfService.FindAllProductsInShelves());
         }
 
         [HttpPost("allocation")]
@@ -36,11 +46,13 @@ namespace SmartStorage_API.Controllers
 
             if (newAllocation.ProductPrice.Equals(0.0)) return BadRequest("O campo Preço do Produto é obrigatório.");
 
-            var searchNewAllocation = _storageService.AllocateProductToShelf(newAllocation);
+            var searchNewAllocation = _shelfService.AllocateProductToShelf(newAllocation);
 
             if (searchNewAllocation == null) return BadRequest("Erro alocando produto a prateleira.");
 
             return Ok(searchNewAllocation);
         }
+
+        #endregion
     }
 }

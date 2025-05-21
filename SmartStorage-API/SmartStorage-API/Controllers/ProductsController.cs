@@ -8,23 +8,33 @@ namespace SmartStorage_API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private IStorageService _storageService;
+        #region Propriedades
 
-        public ProductsController(IStorageService storageService)
+        private IProductService _productService;
+
+        #endregion
+
+        #region Construtores
+
+        public ProductsController(IProductService productService)
         {
-            _storageService = storageService;
+            _productService = productService;
         }
 
+        #endregion
+
+        #region Métodos
+
         [HttpGet]
-        public IActionResult GetProducts()
+        public IActionResult FindAllProducts()
         {
-            return Ok(_storageService.FindAllProducts());
+            return Ok(_productService.FindAllProducts());
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetProductsById(int id)
+        public IActionResult FindProductById(int id)
         {
-            var product = _storageService.FindProductById(id);
+            var product = _productService.FindProductById(id);
 
             if (product == null) return NotFound("Produto não encontrado.");
 
@@ -36,7 +46,9 @@ namespace SmartStorage_API.Controllers
         {
             if (product.Qntd.Equals(0)) return BadRequest("O campo Quantidade do Produto é obrigatório");
 
-            return Ok(_storageService.CreateNewProduct(product));
+            return Ok(_productService.CreateNewProduct(product));
         }
+
+        #endregion
     }
 }
