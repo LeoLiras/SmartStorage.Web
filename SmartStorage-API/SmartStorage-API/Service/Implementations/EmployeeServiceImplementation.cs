@@ -53,6 +53,26 @@ namespace SmartStorage_API.Service.Implementations
             }
         }
 
+        public Employee UpdateEmployee(EmployeeDTO employee)
+        {
+            var searchEmployee = _context.Employees.FirstOrDefault(x => x.Id == employee.employeeId);
+
+            if (searchEmployee == null) return null;
+
+            if(!string.IsNullOrWhiteSpace(employee.Name))
+                searchEmployee.Name = employee.Name;
+
+            if (!string.IsNullOrWhiteSpace(employee.Cpf))
+                searchEmployee.Cpf = employee.Cpf;
+
+            if (!string.IsNullOrWhiteSpace(employee.Rg))
+                searchEmployee.Rg = employee.Rg;
+
+            _context.SaveChanges();
+
+            return searchEmployee;
+        }
+
         #endregion
 
     }

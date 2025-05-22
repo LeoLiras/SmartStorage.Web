@@ -47,6 +47,18 @@ namespace SmartStorage_API.Controllers
             return Ok(newEmployee);
         }
 
+        [HttpPut]
+        public IActionResult UpdateEmployee(EmployeeDTO employee)
+        {
+            if (employee.employeeId.Equals(0)) return BadRequest("O campo ID do Colaborador é obrigatório.");
+
+            var updateEmployee = _employeeService.UpdateEmployee(employee);
+
+            if (updateEmployee == null) return BadRequest("O Colaborador com o ID informado não foi encontrado na base de dados.");
+
+            return Ok(updateEmployee);
+        }
+
         #endregion
 
     }

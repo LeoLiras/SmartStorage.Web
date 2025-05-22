@@ -7,5 +7,6 @@ namespace SmartStorage_API.Service
     {
         List<Employee> FindAllEmployees();
         Employee RegisterNewEmployee(EmployeeDTO employee);
+        Employee UpdateEmployee(EmployeeDTO employee);
     }
 }
