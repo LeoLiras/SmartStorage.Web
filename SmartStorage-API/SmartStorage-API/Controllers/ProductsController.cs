@@ -42,11 +42,34 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateNewProduct([FromBody] ProductDTO product)
+        public IActionResult CreateNewProduct([FromBody] ProductDTO newProduct)
         {
-            if (product.Qntd.Equals(0)) return BadRequest("O campo Quantidade do Produto é obrigatório");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(newProduct.productName))
+                    throw new Exception("O Nome do Produto é obrigatório.");
 
-            return Ok(_productService.CreateNewProduct(product));
+                return Ok(_productService.CreateNewProduct(newProduct));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{productId}")]
+        public IActionResult UpdateProduct(int productId, [FromBody] ProductDTO product)
+        {
+            try
+            {
+                if (productId.Equals(0)) return BadRequest("O campo ID do Produto é obrigatório.");
+
+                return Ok(_productService.UpdateProduct(productId, product));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         #endregion

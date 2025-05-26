@@ -2,12 +2,12 @@
 {
     public class ProductDTO
     {
-        public string? Name { get; set; }
+        public string? productName { get; set; }
 
-        public string? Descricao { get; set; }
+        public string? productDescricao { get; set; }
 
-        public int Qntd { get; set; }
+        public int productQntd { get; set; }
 
-        public int? EmployeeId { get; set; }
+        public int? productEmployeeId { get; set; }
     }
 }

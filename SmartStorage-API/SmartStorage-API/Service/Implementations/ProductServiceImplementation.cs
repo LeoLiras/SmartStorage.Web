@@ -35,42 +35,58 @@ namespace SmartStorage_API.Service.Implementations
 
         public Product CreateNewProduct(ProductDTO product)
         {
-            try
+            var productSearch = _context.Products.FirstOrDefault(x => x.Name == product.productName);
+
+            if (productSearch != null) throw new Exception("Produto já cadastrado");
+
+            var emplyeeSearch = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
+
+            if (emplyeeSearch == null) throw new Exception("Colaborador não encontrado com o ID informado.");
+
+            var newProduct = new Product
             {
-                var productSearch = _context.Products.FirstOrDefault(x => x.Name == product.Name);
+                Name = product.productName,
+                Descricao = product.productDescricao,
+                DateRegister = DateTime.UtcNow,
+                Qntd = product.productQntd,
+                EmployeeId = product.productEmployeeId
+            };
 
-                if (productSearch != null)
-                {
-                    productSearch.Qntd += product.Qntd;
+            _context.Add(newProduct);
+            _context.SaveChanges();
 
-                    _context.SaveChanges();
-
-                    return productSearch;
-                }
-                else
-                {
-                    var newProduct = new Product
-                    {
-                        Name = product.Name,
-                        Descricao = product.Descricao,
-                        DateRegister = DateTime.UtcNow,
-                        Qntd = product.Qntd,
-                        EmployeeId = product.EmployeeId
-                    };
-
-                    _context.Add(newProduct);
-                    _context.SaveChanges();
-
-                    return newProduct;
-                }
-
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return newProduct;
+            
         }
 
+        public Product UpdateProduct(int productId, ProductDTO product)
+        {
+                var searchProduct = _context.Products.FirstOrDefault(x => x.Id == productId);
+
+                if (searchProduct == null) throw new Exception("Produto com o ID informado não encontrado.");
+
+                if (!string.IsNullOrWhiteSpace(product.productName))
+                    searchProduct.Name = product.productName;
+
+                if (!string.IsNullOrWhiteSpace(product.productDescricao))
+                    searchProduct.Descricao = product.productDescricao;
+
+                if (!product.productQntd.Equals(0))
+                    searchProduct.Qntd = product.productQntd;
+
+                if (!product.productEmployeeId.Equals(0))
+                {
+                    var employee = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
+
+                    if (employee == null) throw new Exception("Colaborador com o ID informado não encontrado.");
+
+                    searchProduct.EmployeeId = product.productEmployeeId;
+                }
+
+                _context.SaveChanges();
+
+                return searchProduct;
+            }
         #endregion
     }
 }
