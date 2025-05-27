@@ -61,32 +61,39 @@ namespace SmartStorage_API.Service.Implementations
 
         public Product UpdateProduct(int productId, ProductDTO product)
         {
-                var searchProduct = _context.Products.FirstOrDefault(x => x.Id == productId);
+            var searchProduct = _context.Products.FirstOrDefault(x => x.Id == productId);
 
-                if (searchProduct == null) throw new Exception("Produto com o ID informado não encontrado.");
+            if (searchProduct == null) throw new Exception("Produto com o ID informado não encontrado.");
 
-                if (!string.IsNullOrWhiteSpace(product.productName))
-                    searchProduct.Name = product.productName;
+            if (!string.IsNullOrWhiteSpace(product.productName))
+            {
+                var prod = _context.Products.FirstOrDefault(x => x.Name == searchProduct.Name && x.Id != productId);
 
-                if (!string.IsNullOrWhiteSpace(product.productDescricao))
-                    searchProduct.Descricao = product.productDescricao;
+                if (prod != null) 
+                    throw new Exception("Já existe um produto cadastrado com esse nome.");
 
-                if (!product.productQntd.Equals(0))
-                    searchProduct.Qntd = product.productQntd;
-
-                if (!product.productEmployeeId.Equals(0))
-                {
-                    var employee = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
-
-                    if (employee == null) throw new Exception("Colaborador com o ID informado não encontrado.");
-
-                    searchProduct.EmployeeId = product.productEmployeeId;
-                }
-
-                _context.SaveChanges();
-
-                return searchProduct;
+                searchProduct.Name = product.productName;
             }
+                
+            if (!string.IsNullOrWhiteSpace(product.productDescricao))
+                searchProduct.Descricao = product.productDescricao;
+
+            if (!product.productQntd.Equals(0))
+                searchProduct.Qntd = product.productQntd;
+
+            if (!product.productEmployeeId.Equals(0))
+            {
+                var employee = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
+
+                if (employee == null) throw new Exception("Colaborador com o ID informado não encontrado.");
+
+                searchProduct.EmployeeId = product.productEmployeeId;
+            }
+
+            _context.SaveChanges();
+
+            return searchProduct;
+        }
         #endregion
     }
 }
