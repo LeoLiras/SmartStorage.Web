@@ -31,6 +31,20 @@ namespace SmartStorage_API.Controllers
             return Ok(_shelfService.FindAllShelf());
         }
 
+        [HttpGet("{id}")]
+        public IActionResult FindShelfById(int id)
+        {
+            if (id.Equals(0))
+                return BadRequest("O campo Id é obrigatório");
+
+            var shelf = _shelfService.FindShelfById(id);
+
+            if (shelf is null) 
+                return NotFound("Prateleira não encontrada.");
+
+            return Ok(shelf);
+        }
+
         [HttpGet("allocation")]
         public ActionResult<List<ShelfDTO>> GetProductsInShelves()
         {
@@ -40,17 +54,55 @@ namespace SmartStorage_API.Controllers
         [HttpPost("allocation")]
         public IActionResult AllocateProductToShelf([FromBody] AllocateProductToShelfDTO newAllocation)
         {
-            if (newAllocation.ProductId.Equals(0)) return BadRequest("O campo ID do Produto é obrigatório.");
+            try
+            {
+                if (newAllocation.ProductId.Equals(0)) 
+                    throw new Exception("O campo ID do Produto é obrigatório.");
 
-            if (newAllocation.ShelfId.Equals(0)) return BadRequest("O campo ID da Prateleira é obrigatório.");
+                if (newAllocation.ShelfId.Equals(0)) 
+                    throw new Exception("O campo ID da Prateleira é obrigatório.");
 
-            if (newAllocation.ProductPrice.Equals(0.0)) return BadRequest("O campo Preço do Produto é obrigatório.");
+                if (newAllocation.ProductPrice.Equals(0.0)) 
+                    throw new Exception("O campo Preço do Produto é obrigatório.");
 
-            var searchNewAllocation = _shelfService.AllocateProductToShelf(newAllocation);
+                return Ok(_shelfService.AllocateProductToShelf(newAllocation));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-            if (searchNewAllocation == null) return BadRequest("Erro alocando produto a prateleira.");
+        [HttpPost]
+        public IActionResult CreateNewShelf([FromBody] NewShelfDTO newShelf)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(newShelf.shelfName))
+                    throw new Exception("O campo Nome da Prateleira é obrigatório.");
 
-            return Ok(searchNewAllocation);
+                return Ok(_shelfService.CreateNewShelf(newShelf));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{shelfId}")]
+        public IActionResult UpdateShelf(int shelfId, [FromBody] NewShelfDTO shelf)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(shelf.shelfName))
+                    throw new Exception("O campo Nome da Prateleira é obrigatório.");
+
+                return Ok(_shelfService.UpdateShelf(shelfId, shelf.shelfName));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         #endregion

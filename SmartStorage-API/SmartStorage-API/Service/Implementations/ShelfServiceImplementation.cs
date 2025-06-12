@@ -23,6 +23,16 @@ namespace SmartStorage_API.Service.Implementations
 
         #region Métodos
 
+        public List<Shelf> FindAllShelf()
+        {
+            return _context.Shelves.OrderBy(x => x.Name).ToList();
+        }
+
+        public Shelf FindShelfById(int id)
+        {
+            return _context.Shelves.FirstOrDefault(s => s.Id == id);
+        }
+
         public List<ShelfDTO> FindAllProductsInShelves()
         {
             var queryEnter = from enter in _context.Enters
@@ -45,66 +55,77 @@ namespace SmartStorage_API.Service.Implementations
         {
             var product = _context.Products.Where(p => p.Id == newAllocation.ProductId).FirstOrDefault();
 
-            try
+            if (product is null)
+                throw new Exception("Produto não encontrado na base de dados");
+
+            if (product.Qntd < newAllocation.ProductQuantity)
+                throw new Exception("QUantidade indisponível para alocação e venda.");
+
+            product.Qntd -= newAllocation.ProductQuantity;
+
+            var enter = _context.Enters.Where(e => e.IdProduct == newAllocation.ProductId && e.IdShelf == newAllocation.ShelfId).FirstOrDefault();
+
+            if (enter is null)
             {
-                if (product != null)
+                var shelf = _context.Shelves.Where(s => s.Id == newAllocation.ShelfId).FirstOrDefault();
+
+                if (shelf is null)
+                    throw new Exception("Prateleira não encontrada na base de dados");
+
+                var newEnterProduct = new Enter
                 {
-                    if (product.Qntd >= newAllocation.ProductQuantity)
-                    {
-                        product.Qntd -= newAllocation.ProductQuantity;
+                    IdProduct = (int)product.Id,
+                    IdShelf = (int)shelf.Id,
+                    Qntd = newAllocation.ProductQuantity,
+                    DateEnter = DateTimeOffset.UtcNow.UtcDateTime,
+                    Price = newAllocation.ProductPrice
+                };
 
-                        var enter = _context.Enters.Where(e => e.IdProduct == newAllocation.ProductId && e.IdShelf == newAllocation.ShelfId).FirstOrDefault();
+                _context.Enters.Add(newEnterProduct);
+                _context.SaveChanges();
 
-                        var shelf = _context.Shelves.Where(s => s.Id == newAllocation.ShelfId).FirstOrDefault();
-
-                        if (shelf != null)
-                        {
-                            if (enter != null)
-                            {
-                                enter.Qntd += newAllocation.ProductQuantity;
-                                enter.Price = newAllocation.ProductPrice;
-
-                                _context.SaveChanges();
-
-                                return enter;
-                            }
-                            else
-                            {
-                                var newEnterProduct = new Enter
-                                {
-                                    IdProduct = (int)product.Id,
-                                    IdShelf = (int)shelf.Id,
-                                    Qntd = newAllocation.ProductQuantity,
-                                    DateEnter = DateTimeOffset.UtcNow.UtcDateTime,
-                                    Price = newAllocation.ProductPrice
-                                };
-
-                                _context.Enters.Add(newEnterProduct);
-                                _context.SaveChanges();
-
-                                return newEnterProduct;
-                            }
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                }
+                return newEnterProduct;
             }
-            catch (Exception)
+            else
             {
-                throw;
+                enter.Qntd += newAllocation.ProductQuantity;
+                enter.Price = newAllocation.ProductPrice;
+
+                _context.SaveChanges();
+
+                return enter;
             }
-
-            return null;
         }
 
-        public List<Shelf> FindAllShelf()
+        public Shelf CreateNewShelf(NewShelfDTO newShelf)
         {
-            return _context.Shelves.OrderBy(x => x.Name).ToList();
+            var shelf = new Shelf
+            {
+                Name = newShelf.shelfName,
+                DataRegister = DateTime.UtcNow,
+            };
+
+            _context.Add(shelf);
+            _context.SaveChanges();
+
+            return shelf;
         }
 
+        public Shelf UpdateShelf(int shelfId, string shelfName)
+        {
+            var shelf = _context.Shelves.FirstOrDefault(s => s.Id == shelfId);
+
+            if (shelf == null)
+                throw new Exception("Prateleira não encontrada com o ID informado");
+
+            shelf.Name = shelfName;
+
+            _context.SaveChanges();
+
+            return shelf;
+        }
+
+        
         #endregion
     }
 }
