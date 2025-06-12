@@ -2,13 +2,14 @@
 {
     public class SaleDTO
     {
-        public string? productName { get; set; }
-        public int productId { get; set; }
-        public string? shelfName { get; set; }
-        public int saleQntd { get; set; }
-        public int? enterId {  get; set; }
-        public DateTime? saleData { get; set; }
-        public decimal? enterPrice { get; set; }
-        public decimal? total { get; set; }
+        public int? saleId { get; set; }
+        public string? saleProductName { get; set; }
+        public int? saleProductId { get; set; }
+        public string? saleShelfName { get; set; }
+        public int saleSaleQntd { get; set; }
+        public int? saleEnterId {  get; set; }
+        public DateTime? saleSaleData { get; set; }
+        public decimal? saleEnterPrice { get; set; }
+        public decimal? saleTotal { get; set; }
     }
 }

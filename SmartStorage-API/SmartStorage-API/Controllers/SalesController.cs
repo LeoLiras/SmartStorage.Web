@@ -32,17 +32,44 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateNewSale([FromBody] SaleDTO newSale)
+        public IActionResult CreateNewSale([FromBody] NewSaleDTO newSale)
         {
-            if (newSale.productId.Equals(0)) return BadRequest("O campo ID do produto é obrigatório.");
+            try
+            {
+                if (newSale.saleProductId.Equals(0)) 
+                    throw new Exception("O campo ID do produto é obrigatório.");
 
-            if (newSale.saleQntd.Equals(0)) return BadRequest("O campo Quantidade da Venda é obrigatório.");
+                if (newSale.saleSaleQntd.Equals(0)) 
+                    throw new Exception("O campo Quantidade da Venda é obrigatório.");
 
-            var searchNewSale = _saleService.CreateNewSale(newSale);
+                return Ok(_saleService.CreateNewSale(newSale.saleProductId, newSale.saleSaleQntd));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-            if (searchNewSale == null) return BadRequest("Falha ao registrar a venda. Verifique se existe a quantidade informada disponível na prateleira.");
+        [HttpPut("{saleId}")]
+        public IActionResult UpdateSale(int saleId, NewSaleDTO newSale)
+        {
+            try
+            {
+                if (saleId.Equals(0))
+                    throw new Exception("O campo ID da Venda é obrigatório.");
 
-            return Ok(searchNewSale);
+                if (newSale.saleProductId.Equals(0))
+                    throw new Exception("O campo ID do produto é obrigatório.");
+
+                if (newSale.saleSaleQntd.Equals(0))
+                    throw new Exception("O campo Quantidade da Venda é obrigatório.");
+
+                return Ok(_saleService.UpdateSale(saleId, newSale.saleProductId, newSale.saleSaleQntd));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         #endregion

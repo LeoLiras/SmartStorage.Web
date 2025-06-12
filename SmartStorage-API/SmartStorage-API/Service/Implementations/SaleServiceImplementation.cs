@@ -31,47 +31,53 @@ namespace SmartStorage_API.Service.Implementations
                             join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
                             select new SaleDTO
                             {
-                                productName = product.Name,
-                                shelfName = shelf.Name,
-                                saleQntd = sale.Qntd,
-                                saleData = sale.DateSale,
-                                enterPrice = enter.Price,
+                                saleId = sale.Id,
+                                saleProductName = product.Name,
+                                saleShelfName = shelf.Name,
+                                saleSaleQntd = sale.Qntd,
+                                saleSaleData = sale.DateSale,
+                                saleEnterPrice = enter.Price,
+                                saleProductId = product.Id,
+                                saleTotal = sale.Qntd * enter.Price,
+                                saleEnterId = enter.Id
                             };
 
-            return querySale.OrderBy(q => q.productName).ToList();
+            return querySale.OrderBy(q => q.saleProductName).ToList();
         }
 
-        public SaleDTO CreateNewSale(SaleDTO newSale)
+        public SaleDTO CreateNewSale(int productId, int saleQntd)
         {
             var query = from enter in _context.Enters
                         join product in _context.Products on enter.IdProduct equals product.Id
                         join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
                         select new SaleDTO
                         {
-                            productName = product.Name,
-                            enterId = (int)enter.Id,
-                            productId = product.Id,
-                            shelfName = shelf.Name,
-                            saleQntd = enter.Qntd,
-                            enterPrice = enter.Price,
+                            saleProductName = product.Name,
+                            saleEnterId = (int)enter.Id,
+                            saleProductId = product.Id,
+                            saleShelfName = shelf.Name,
+                            saleSaleQntd = enter.Qntd,
+                            saleEnterPrice = enter.Price,
                         };
 
-            var enterFromSale = query.Where(e => e.productId == newSale.productId).FirstOrDefault();
+            var enterFromSale = query.Where(e => e.saleProductId == productId).FirstOrDefault();
 
-            if (enterFromSale == null) return null;
+            if (enterFromSale == null) 
+                throw new Exception("Não foram encontradas entradas de produto com o ID informado.");
 
-            if (enterFromSale.saleQntd >= newSale.saleQntd)
+            if (enterFromSale.saleSaleQntd >= saleQntd)
             {
-                var enter = _context.Enters.Where(e => e.Id == enterFromSale.enterId).FirstOrDefault();
+                var enter = _context.Enters.Where(e => e.Id == enterFromSale.saleEnterId).FirstOrDefault();
 
-                if (enter == null) return null;
+                if (enter == null)
+                    throw new Exception("Objeto de entrada não encontrado.");
 
-                enter.Qntd -= newSale.saleQntd;
+                enter.Qntd -= saleQntd;
 
                 var sale = new Sale
                 {
-                    IdEnter = (int)enterFromSale.enterId,
-                    Qntd = newSale.saleQntd,
+                    IdEnter = (int)enterFromSale.saleEnterId,
+                    Qntd = saleQntd,
                     DateSale = DateTime.UtcNow,
                 };
 
@@ -80,22 +86,64 @@ namespace SmartStorage_API.Service.Implementations
 
                 var newSaleReturn = new SaleDTO
                 {
-                    productName = enterFromSale.productName,
-                    productId = enterFromSale.productId,
-                    shelfName = enterFromSale.shelfName,
-                    enterId = (int)enterFromSale.enterId,
-                    enterPrice = enterFromSale.enterPrice,
-                    saleQntd = newSale.saleQntd,
-                    saleData = DateTime.UtcNow,
-                    total = newSale.saleQntd * enterFromSale.enterPrice
+                    saleProductName = enterFromSale.saleProductName,
+                    saleProductId = enterFromSale.saleProductId,
+                    saleShelfName = enterFromSale.saleShelfName,
+                    saleEnterId = (int)enterFromSale.saleEnterId,
+                    saleEnterPrice = enterFromSale.saleEnterPrice,
+                    saleSaleQntd = saleQntd,
+                    saleSaleData = DateTime.UtcNow,
+                    saleTotal = saleQntd * enterFromSale.saleEnterPrice
                 };
 
                 return newSaleReturn;
             }
             else
             {
-                return null;
+                throw new Exception("Quantidade indisponível para venda.");
             }
+        }
+
+        public SaleDTO UpdateSale(int saleId, int productId, int saleQntd)
+        {
+            var sale = _context.Sales.FirstOrDefault(s => s.Id == saleId);
+
+            if (sale == null)
+                throw new Exception("Venda não encontrada com o ID informado");
+
+            var enter = _context.Enters.FirstOrDefault(e => e.IdProduct == productId);
+
+            if (enter == null)
+                throw new Exception("Entrada não encontrada com o ID de produto informado");
+
+            if(saleQntd < sale.Qntd)
+                enter.Qntd += saleQntd;
+            else
+            {
+                if (enter.Qntd > (saleQntd - sale.Qntd))
+                    enter.Qntd -= saleQntd;
+                else
+                    throw new Exception("Não há quantidade suficiente na entrada para realizar essa atualização");
+            }
+
+            sale.Qntd = saleQntd;
+
+            _context.SaveChanges(); 
+
+            var shelf = _context.Shelves.FirstOrDefault(s => s.Id == enter.IdShelf);
+
+            var newSaleDetails = new SaleDTO
+            {
+                saleProductId = enter.ProductId,
+                saleShelfName = shelf.Name,
+                saleEnterId = enter.Id,
+                saleEnterPrice = enter.Price,
+                saleSaleQntd = saleQntd,
+                saleSaleData = DateTime.UtcNow,
+                saleTotal = saleQntd * enter.Price,
+            };
+            
+            return newSaleDetails;
         }
 
         #endregion
