@@ -81,6 +81,29 @@ namespace SmartStorage_API.Service.Implementations
             return searchEmployee;
         }
 
+        public Employee DeleteEmployee(int employeeId)
+        {
+            var employee = _context.Employees.FirstOrDefault(e => e.Id == employeeId);
+
+            if (employee is null)
+                throw new Exception("Colaborador não encontrado com o Id informado");
+
+            var products = _context.Products.Where(p => p.EmployeeId == employeeId).ToList();
+
+            if(products.Count() > 0)
+            {
+                foreach (var product in products)
+                {
+                    product.EmployeeId = null;
+                }
+            }
+            
+            _context.Remove(employee);
+
+            _context.SaveChanges();
+
+            return employee;
+        }
         #endregion
 
     }

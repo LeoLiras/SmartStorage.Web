@@ -70,6 +70,22 @@ namespace SmartStorage_API.Controllers
             
         }
 
+        [HttpDelete("{employeeId}")]
+        public IActionResult DeleteEmployee(int employeeId)
+        {
+            try
+            {
+                if (employeeId.Equals(0))
+                    throw new Exception("O campo ID do Colaborador é obrigatório.");
+
+                return Ok(_employeeService.DeleteEmployee(employeeId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         #endregion
     }
 }
