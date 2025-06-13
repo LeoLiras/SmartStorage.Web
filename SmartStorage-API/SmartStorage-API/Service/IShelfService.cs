@@ -11,5 +11,6 @@ namespace SmartStorage_API.Service
         Shelf CreateNewShelf(NewShelfDTO newShelf);
         Enter AllocateProductToShelf(AllocateProductToShelfDTO newAllocation);
         Shelf UpdateShelf(int shelfId, string shelfName);
+        Shelf DeleteShelf(int shelfId);
     }
 }

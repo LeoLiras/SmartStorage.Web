@@ -105,6 +105,22 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpDelete("{shelfId}")]
+        public IActionResult DeleteShelf(int shelfId)
+        {
+            try
+            {
+                if (shelfId.Equals(0))
+                    throw new Exception("O campo ID da Prateleira é obrigatório.");
+
+                return Ok(_shelfService.DeleteShelf(shelfId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         #endregion
     }
 }

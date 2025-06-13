@@ -125,7 +125,26 @@ namespace SmartStorage_API.Service.Implementations
             return shelf;
         }
 
-        
+        public Shelf DeleteShelf(int shelfId)
+        {
+            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(shelfId));
+
+            if (shelf is null)
+                throw new Exception("Prateleira não encontrada com o ID informado");
+
+            var enters = _context.Enters.Where(e => e.IdShelf.Equals(shelfId)).ToList();
+
+            if (enters.Any())
+                throw new Exception("Não é possível excluír a prateleira pois há entradas de produtos associadas a ela");
+
+            _context.Remove(shelf);
+
+            _context.SaveChanges();
+
+            return shelf;
+        }
+
+
         #endregion
     }
 }
