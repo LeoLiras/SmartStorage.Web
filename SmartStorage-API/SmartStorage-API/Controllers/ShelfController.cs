@@ -51,28 +51,6 @@ namespace SmartStorage_API.Controllers
             return Ok(_shelfService.FindAllProductsInShelves());
         }
 
-        [HttpPost("allocation")]
-        public IActionResult AllocateProductToShelf([FromBody] AllocateProductToShelfDTO newAllocation)
-        {
-            try
-            {
-                if (newAllocation.ProductId.Equals(0)) 
-                    throw new Exception("O campo ID do Produto é obrigatório.");
-
-                if (newAllocation.ShelfId.Equals(0)) 
-                    throw new Exception("O campo ID da Prateleira é obrigatório.");
-
-                if (newAllocation.ProductPrice.Equals(0.0)) 
-                    throw new Exception("O campo Preço do Produto é obrigatório.");
-
-                return Ok(_shelfService.AllocateProductToShelf(newAllocation));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         [HttpPost]
         public IActionResult CreateNewShelf([FromBody] NewShelfDTO newShelf)
         {
@@ -114,6 +92,44 @@ namespace SmartStorage_API.Controllers
                     throw new Exception("O campo ID da Prateleira é obrigatório.");
 
                 return Ok(_shelfService.DeleteShelf(shelfId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("allocation")]
+        public IActionResult AllocateProductToShelf([FromBody] AllocateProductToShelfDTO newAllocation)
+        {
+            try
+            {
+                if (newAllocation.ProductId.Equals(0))
+                    throw new Exception("O campo ID do Produto é obrigatório.");
+
+                if (newAllocation.ShelfId.Equals(0))
+                    throw new Exception("O campo ID da Prateleira é obrigatório.");
+
+                if (newAllocation.ProductPrice.Equals(0.0))
+                    throw new Exception("O campo Preço do Produto é obrigatório.");
+
+                return Ok(_shelfService.AllocateProductToShelf(newAllocation));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{enterId}")]
+        public IActionResult UndoAllocate(int enterId)
+        {
+            try
+            {
+                if (enterId.Equals(0))
+                    throw new Exception("O campo ID da entrada é obrigatório.");
+
+                return Ok(_shelfService.UndoAllocate(enterId));
             }
             catch (Exception ex)
             {

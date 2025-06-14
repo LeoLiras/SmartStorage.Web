@@ -51,6 +51,53 @@ namespace SmartStorage_API.Service.Implementations
             return queryEnter.OrderBy(q => q.productName).ToList();
         }
 
+        public Shelf CreateNewShelf(NewShelfDTO newShelf)
+        {
+            var shelf = new Shelf
+            {
+                Name = newShelf.shelfName,
+                DataRegister = DateTime.UtcNow,
+            };
+
+            _context.Add(shelf);
+            _context.SaveChanges();
+
+            return shelf;
+        }
+
+        public Shelf UpdateShelf(int shelfId, string shelfName)
+        {
+            var shelf = _context.Shelves.FirstOrDefault(s => s.Id == shelfId);
+
+            if (shelf == null)
+                throw new Exception("Prateleira não encontrada com o ID informado");
+
+            shelf.Name = shelfName;
+
+            _context.SaveChanges();
+
+            return shelf;
+        }
+
+        public Shelf DeleteShelf(int shelfId)
+        {
+            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(shelfId));
+
+            if (shelf is null)
+                throw new Exception("Prateleira não encontrada com o ID informado");
+
+            var enters = _context.Enters.Where(e => e.IdShelf.Equals(shelfId)).ToList();
+
+            if (enters.Count > 0)
+                throw new Exception("Não é possível excluír a prateleira pois há entradas de produtos associadas a ela");
+
+            _context.Remove(shelf);
+
+            _context.SaveChanges();
+
+            return shelf;
+        }
+
         public Enter AllocateProductToShelf(AllocateProductToShelfDTO newAllocation)
         {
             var product = _context.Products.Where(p => p.Id == newAllocation.ProductId).FirstOrDefault();
@@ -97,53 +144,23 @@ namespace SmartStorage_API.Service.Implementations
             }
         }
 
-        public Shelf CreateNewShelf(NewShelfDTO newShelf)
+        public Enter UndoAllocate(int enterId)
         {
-            var shelf = new Shelf
-            {
-                Name = newShelf.shelfName,
-                DataRegister = DateTime.UtcNow,
-            };
+            var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(enterId));
 
-            _context.Add(shelf);
-            _context.SaveChanges();
+            if (enter is null)
+                throw new Exception("Entrada não encontrada com o ID informado");
 
-            return shelf;
+            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(enter.IdProduct));
+
+            if (product is null)
+                throw new Exception("Produto não encontrado com o ID da entrada informada");
+
+            product.Qntd += enter.Qntd;
+            enter.Qntd = 0;
+
+            return enter;
         }
-
-        public Shelf UpdateShelf(int shelfId, string shelfName)
-        {
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id == shelfId);
-
-            if (shelf == null)
-                throw new Exception("Prateleira não encontrada com o ID informado");
-
-            shelf.Name = shelfName;
-
-            _context.SaveChanges();
-
-            return shelf;
-        }
-
-        public Shelf DeleteShelf(int shelfId)
-        {
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(shelfId));
-
-            if (shelf is null)
-                throw new Exception("Prateleira não encontrada com o ID informado");
-
-            var enters = _context.Enters.Where(e => e.IdShelf.Equals(shelfId)).ToList();
-
-            if (enters.Any())
-                throw new Exception("Não é possível excluír a prateleira pois há entradas de produtos associadas a ela");
-
-            _context.Remove(shelf);
-
-            _context.SaveChanges();
-
-            return shelf;
-        }
-
 
         #endregion
     }
