@@ -51,7 +51,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("{saleId}")]
-        public IActionResult UpdateSale(int saleId, NewSaleDTO newSale)
+        public IActionResult UpdateSale(int saleId, [FromBody] NewSaleDTO newSale)
         {
             try
             {
@@ -65,6 +65,22 @@ namespace SmartStorage_API.Controllers
                     throw new Exception("O campo Quantidade da Venda é obrigatório.");
 
                 return Ok(_saleService.UpdateSale(saleId, newSale.saleProductId, newSale.saleSaleQntd));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("{saleId}")]
+        public IActionResult DeleteSale(int saleId)
+        {
+            try
+            {
+                if (saleId.Equals(0))
+                    throw new Exception("O campo ID da Venda é obrigatório.");
+
+                return Ok(_saleService.DeleteSale(saleId));
             }
             catch (Exception ex)
             {

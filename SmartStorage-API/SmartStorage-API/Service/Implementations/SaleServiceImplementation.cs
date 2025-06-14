@@ -146,6 +146,27 @@ namespace SmartStorage_API.Service.Implementations
             return newSaleDetails;
         }
 
+        public Sale DeleteSale(int saleId)
+        {
+            var sale = _context.Sales.FirstOrDefault(s => s.Id.Equals(saleId));
+
+            if (sale is null)
+                throw new Exception("Venda não encontrada com o ID informado");
+
+            var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(sale.IdEnter));
+
+            if (enter is null)
+                throw new Exception("Entrada não encontrada para essa Venda");
+
+            enter.Qntd += sale.Qntd;
+
+            _context.Remove(sale);
+
+            _context.SaveChanges();
+
+            return sale;
+        }
+
         #endregion
     }
 }
