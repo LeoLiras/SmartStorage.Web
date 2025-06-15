@@ -72,6 +72,22 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpDelete("{productId}")]
+        public IActionResult DeleteProduct(int productId)
+        {
+            try
+            {
+                if (productId.Equals(0)) 
+                    throw new Exception("O campo ID do Produto é obrigatório.");
+
+                return Ok(_productService.DeleteProduct(productId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         #endregion
     }
 }

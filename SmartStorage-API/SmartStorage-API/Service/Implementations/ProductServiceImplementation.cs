@@ -94,6 +94,35 @@ namespace SmartStorage_API.Service.Implementations
 
             return searchProduct;
         }
+
+        public Product DeleteProduct(int productId)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(productId));
+
+            if (product is null)
+                throw new Exception("Produto não encontrado com o ID informado");
+
+            var enters = _context.Enters.Where(e => e.IdProduct.Equals(productId)).ToList();
+
+            if(enters.Count > 0)
+            {
+                foreach (var enter in enters)
+                {
+                    var sales = _context.Sales.Where(s => s.IdEnter.Equals(enter.Id)).ToList();
+
+                    if(sales.Count > 0)
+                        _context.Sales.RemoveRange(sales);
+
+                    _context.Remove(enter);
+                }
+            }
+
+            _context.Products.Remove(product);
+
+            _context.SaveChanges();
+
+            return product;
+        }
         #endregion
     }
 }

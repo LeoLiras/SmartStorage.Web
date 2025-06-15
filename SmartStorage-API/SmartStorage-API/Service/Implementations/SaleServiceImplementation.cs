@@ -160,7 +160,7 @@ namespace SmartStorage_API.Service.Implementations
 
             enter.Qntd += sale.Qntd;
 
-            _context.Remove(sale);
+            _context.Sales.Remove(sale);
 
             _context.SaveChanges();
 

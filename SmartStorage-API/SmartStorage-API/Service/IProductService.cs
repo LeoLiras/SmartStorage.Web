@@ -9,5 +9,6 @@ namespace SmartStorage_API.Service
         Product FindProductById(int id);
         Product CreateNewProduct(ProductDTO product);
         Product UpdateProduct(int productId, ProductDTO product);
+        Product DeleteProduct(int productId);
     }
 }

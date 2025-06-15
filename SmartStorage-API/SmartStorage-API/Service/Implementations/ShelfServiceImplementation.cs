@@ -91,7 +91,7 @@ namespace SmartStorage_API.Service.Implementations
             if (enters.Count > 0)
                 throw new Exception("Não é possível excluír a prateleira pois há entradas de produtos associadas a ela");
 
-            _context.Remove(shelf);
+            _context.Shelves.Remove(shelf);
 
             _context.SaveChanges();
 
