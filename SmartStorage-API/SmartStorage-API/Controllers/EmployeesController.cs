@@ -48,7 +48,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
-        public IActionResult RegisterNewEmployee(EmployeeDTO employee)
+        public IActionResult CreateNewEmployee(EmployeeDTO employee)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace SmartStorage_API.Controllers
                 if (string.IsNullOrWhiteSpace(employee.employeeCpf))
                     throw new Exception("O campo CPF é obrigatório.");
 
-                return Ok(_employeeService.RegisterNewEmployee(employee));
+                return Ok(_employeeService.CreateNewEmployee(employee));
             }
             catch (Exception ex)
             {

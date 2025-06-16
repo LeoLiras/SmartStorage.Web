@@ -38,7 +38,7 @@ namespace SmartStorage_API.Service.Implementations
             return employee;
         }
 
-        public Employee RegisterNewEmployee(EmployeeDTO employee)
+        public Employee CreateNewEmployee(EmployeeDTO employee)
         {
             var searchEmployee = _context.Employees.FirstOrDefault(x => x.Cpf == employee.employeeCpf);
 
