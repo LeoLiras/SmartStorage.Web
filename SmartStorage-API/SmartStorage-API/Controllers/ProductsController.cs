@@ -36,7 +36,8 @@ namespace SmartStorage_API.Controllers
         {
             var product = _productService.FindProductById(id);
 
-            if (product == null) return NotFound("Produto não encontrado.");
+            if (product == null) 
+                return NotFound("Produto não encontrado.");
 
             return Ok(product);
         }
@@ -62,7 +63,11 @@ namespace SmartStorage_API.Controllers
         {
             try
             {
-                if (productId.Equals(0)) return BadRequest("O campo ID do Produto é obrigatório.");
+                if (productId.Equals(0))
+                    throw new Exception("O campo ID do Produto é obrigatório.");
+
+                if (string.IsNullOrWhiteSpace(product.productName))
+                    throw new Exception("O Nome do Produto é obrigatório.");
 
                 return Ok(_productService.UpdateProduct(productId, product));
             }

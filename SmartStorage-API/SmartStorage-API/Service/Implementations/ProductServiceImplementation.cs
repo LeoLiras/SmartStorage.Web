@@ -37,11 +37,13 @@ namespace SmartStorage_API.Service.Implementations
         {
             var productSearch = _context.Products.FirstOrDefault(x => x.Name == product.productName);
 
-            if (productSearch != null) throw new Exception("Produto já cadastrado");
+            if (productSearch != null)
+                throw new Exception("Produto já cadastrado.");
 
             var emplyeeSearch = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
 
-            if (emplyeeSearch == null) throw new Exception("Colaborador não encontrado com o ID informado.");
+            if (emplyeeSearch == null)
+                throw new Exception("Funcionario não encontrado com o ID informado.");
 
             var newProduct = new Product
             {
@@ -53,42 +55,34 @@ namespace SmartStorage_API.Service.Implementations
             };
 
             _context.Add(newProduct);
+
             _context.SaveChanges();
 
             return newProduct;
-            
+
         }
 
         public Product UpdateProduct(int productId, ProductDTO product)
         {
             var searchProduct = _context.Products.FirstOrDefault(x => x.Id == productId);
 
-            if (searchProduct == null) throw new Exception("Produto com o ID informado não encontrado.");
+            if (searchProduct == null) 
+                throw new Exception("Produto não encontrado com o ID informado.");
 
-            if (!string.IsNullOrWhiteSpace(product.productName))
-            {
-                var prod = _context.Products.FirstOrDefault(x => x.Name == searchProduct.Name && x.Id != productId);
+            var prod = _context.Products.FirstOrDefault(x => x.Name == product.productName && x.Id != productId);
 
-                if (prod != null) 
-                    throw new Exception("Já existe um produto cadastrado com esse nome.");
+            if (prod != null)
+                throw new Exception("Já existe um produto cadastrado com esse nome.");
 
-                searchProduct.Name = product.productName;
-            }
-                
-            if (!string.IsNullOrWhiteSpace(product.productDescricao))
-                searchProduct.Descricao = product.productDescricao;
+            var employee = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
 
-            if (!product.productQntd.Equals(0))
-                searchProduct.Qntd = product.productQntd;
+            if (employee == null) 
+                throw new Exception("Colaborador com o ID informado não encontrado.");
 
-            if (!product.productEmployeeId.Equals(0))
-            {
-                var employee = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
-
-                if (employee == null) throw new Exception("Colaborador com o ID informado não encontrado.");
-
-                searchProduct.EmployeeId = product.productEmployeeId;
-            }
+            searchProduct.EmployeeId = product.productEmployeeId;
+            searchProduct.Name = product.productName;
+            searchProduct.Qntd = product.productQntd;
+            searchProduct.Descricao = product.productDescricao;
 
             _context.SaveChanges();
 
@@ -104,13 +98,13 @@ namespace SmartStorage_API.Service.Implementations
 
             var enters = _context.Enters.Where(e => e.IdProduct.Equals(productId)).ToList();
 
-            if(enters.Count > 0)
+            if (enters.Count > 0)
             {
                 foreach (var enter in enters)
                 {
                     var sales = _context.Sales.Where(s => s.IdEnter.Equals(enter.Id)).ToList();
 
-                    if(sales.Count > 0)
+                    if (sales.Count > 0)
                         _context.Sales.RemoveRange(sales);
 
                     _context.Remove(enter);
