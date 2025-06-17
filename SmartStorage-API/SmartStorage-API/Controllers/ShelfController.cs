@@ -34,15 +34,17 @@ namespace SmartStorage_API.Controllers
         [HttpGet("{id}")]
         public IActionResult FindShelfById(int id)
         {
-            if (id.Equals(0))
-                return BadRequest("O campo Id é obrigatório");
+            try
+            {
+                if (id.Equals(0))
+                    return BadRequest("O campo Id é obrigatório.");
 
-            var shelf = _shelfService.FindShelfById(id);
-
-            if (shelf is null) 
-                return NotFound("Prateleira não encontrada.");
-
-            return Ok(shelf);
+                return Ok(_shelfService.FindShelfById(id));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }  
         }
 
         [HttpGet("allocation")]
@@ -72,6 +74,9 @@ namespace SmartStorage_API.Controllers
         {
             try
             {
+                if (shelfId.Equals(0))
+                    return BadRequest("O campo Id é obrigatório.");
+
                 if (string.IsNullOrWhiteSpace(shelf.shelfName))
                     throw new Exception("O campo Nome da Prateleira é obrigatório.");
 
@@ -110,7 +115,7 @@ namespace SmartStorage_API.Controllers
                 if (newAllocation.ShelfId.Equals(0))
                     throw new Exception("O campo ID da Prateleira é obrigatório.");
 
-                if (newAllocation.ProductPrice.Equals(0.0))
+                if (newAllocation.ProductPrice.Equals(0))
                     throw new Exception("O campo Preço do Produto é obrigatório.");
 
                 return Ok(_shelfService.AllocateProductToShelf(newAllocation));
@@ -121,7 +126,7 @@ namespace SmartStorage_API.Controllers
             }
         }
 
-        [HttpPut("{enterId}")]
+        [HttpPut("allocation/{enterId}")]
         public IActionResult UndoAllocate(int enterId)
         {
             try

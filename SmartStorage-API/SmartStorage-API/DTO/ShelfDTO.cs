@@ -2,6 +2,7 @@
 {
     public class ShelfDTO
     {
+        public int? enterId { get; set; }
         public string? productName { get; set; }
         public int? productId { get; set; }
         public string? shelfName { get; set; }

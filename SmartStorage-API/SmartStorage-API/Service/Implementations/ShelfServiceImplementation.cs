@@ -30,7 +30,12 @@ namespace SmartStorage_API.Service.Implementations
 
         public Shelf FindShelfById(int id)
         {
-            return _context.Shelves.FirstOrDefault(s => s.Id == id);
+            var shelf = _context.Shelves.FirstOrDefault(s => s.Id == id);
+
+            if (shelf is null)
+                throw new Exception("Prateleira não encontrada com o ID Informado");
+
+            return shelf;
         }
 
         public List<ShelfDTO> FindAllProductsInShelves()
@@ -40,6 +45,7 @@ namespace SmartStorage_API.Service.Implementations
                              join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
                              select new ShelfDTO
                              {
+                                 enterId = enter.Id,
                                  productName = product.Name,
                                  productId = product.Id,
                                  shelfName = shelf.Name,
@@ -106,7 +112,7 @@ namespace SmartStorage_API.Service.Implementations
                 throw new Exception("Produto não encontrado na base de dados");
 
             if (product.Qntd < newAllocation.ProductQuantity)
-                throw new Exception("QUantidade indisponível para alocação e venda.");
+                throw new Exception("Quantidade indisponível para alocação e venda.");
 
             product.Qntd -= newAllocation.ProductQuantity;
 
@@ -129,6 +135,7 @@ namespace SmartStorage_API.Service.Implementations
                 };
 
                 _context.Enters.Add(newEnterProduct);
+
                 _context.SaveChanges();
 
                 return newEnterProduct;
@@ -158,6 +165,8 @@ namespace SmartStorage_API.Service.Implementations
 
             product.Qntd += enter.Qntd;
             enter.Qntd = 0;
+
+            _context.SaveChanges();
 
             return enter;
         }

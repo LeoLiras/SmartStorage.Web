@@ -1,9 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SmartStorage_API.DTO
+﻿namespace SmartStorage_API.DTO
 {
     public class NewShelfDTO
     {
-        public string? shelfName;
+        public string? shelfName { get; set; }
     }
 }
