@@ -31,6 +31,22 @@ namespace SmartStorage_API.Controllers
             return Ok(_saleService.FindAllSales());
         }
 
+        [HttpGet("{saleId}")]
+        public ActionResult<List<SaleDTO>> FindSaleById(int saleId)
+        {
+            try
+            {
+                if (saleId.Equals(0))
+                    throw new Exception("O ID da Venda é obrigatório.");
+
+                return Ok(_saleService.FindSaleById(saleId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            } 
+        }
+
         [HttpPost]
         public IActionResult CreateNewSale([FromBody] NewSaleDTO newSale)
         {

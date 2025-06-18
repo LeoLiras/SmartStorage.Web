@@ -45,6 +45,33 @@ namespace SmartStorage_API.Service.Implementations
             return querySale.OrderBy(q => q.saleProductName).ToList();
         }
 
+        public SaleDTO FindSaleById(int saleId)
+        {
+            var querySale = from sales in _context.Sales
+                            join enter in _context.Enters on sales.IdEnter equals enter.Id
+                            join product in _context.Products on enter.IdProduct equals product.Id
+                            join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
+                            select new SaleDTO
+                            {
+                                saleId = sales.Id,
+                                saleProductName = product.Name,
+                                saleShelfName = shelf.Name,
+                                saleSaleQntd = sales.Qntd,
+                                saleSaleData = sales.DateSale,
+                                saleEnterPrice = enter.Price,
+                                saleProductId = product.Id,
+                                saleTotal = sales.Qntd * enter.Price,
+                                saleEnterId = enter.Id
+                            };
+
+            var sale = querySale.FirstOrDefault(s => s.saleId.Equals(saleId));
+
+            if (sale is null)
+                throw new Exception("Venda não encontrada com o ID informado");
+
+            return sale;
+        }
+
         public SaleDTO CreateNewSale(int productId, int saleQntd)
         {
             var enter = _context.Enters.FirstOrDefault(e => e.IdProduct.Equals(productId));
