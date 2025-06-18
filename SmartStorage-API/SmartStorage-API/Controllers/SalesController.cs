@@ -58,13 +58,10 @@ namespace SmartStorage_API.Controllers
                 if (saleId.Equals(0))
                     throw new Exception("O campo ID da Venda é obrigatório.");
 
-                if (newSale.saleProductId.Equals(0))
-                    throw new Exception("O campo ID do produto é obrigatório.");
-
                 if (newSale.saleSaleQntd.Equals(0))
                     throw new Exception("O campo Quantidade da Venda é obrigatório.");
 
-                return Ok(_saleService.UpdateSale(saleId, newSale.saleProductId, newSale.saleSaleQntd));
+                return Ok(_saleService.UpdateSale(saleId, newSale.saleSaleQntd));
             }
             catch (Exception ex)
             {

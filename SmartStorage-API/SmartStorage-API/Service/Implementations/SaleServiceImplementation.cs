@@ -47,42 +47,43 @@ namespace SmartStorage_API.Service.Implementations
 
         public SaleDTO CreateNewSale(int productId, int saleQntd)
         {
-            var query = from enter in _context.Enters
-                        join product in _context.Products on enter.IdProduct equals product.Id
-                        join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
-                        select new SaleDTO
-                        {
-                            saleProductName = product.Name,
-                            saleEnterId = (int)enter.Id,
-                            saleProductId = product.Id,
-                            saleShelfName = shelf.Name,
-                            saleSaleQntd = enter.Qntd,
-                            saleEnterPrice = enter.Price,
-                        };
+            var enter = _context.Enters.FirstOrDefault(e => e.IdProduct.Equals(productId));
 
-            var enterFromSale = query.Where(e => e.saleProductId == productId).FirstOrDefault();
+            if(enter is null)
+                throw new Exception("Entrada não encontrada com o ID do Produto informado.");
 
-            if (enterFromSale == null) 
-                throw new Exception("Não foram encontradas entradas de produto com o ID informado.");
-
-            if (enterFromSale.saleSaleQntd >= saleQntd)
+            if (enter.Qntd >= saleQntd)
             {
-                var enter = _context.Enters.Where(e => e.Id == enterFromSale.saleEnterId).FirstOrDefault();
-
-                if (enter == null)
-                    throw new Exception("Objeto de entrada não encontrado.");
-
                 enter.Qntd -= saleQntd;
 
                 var sale = new Sale
                 {
-                    IdEnter = (int)enterFromSale.saleEnterId,
+                    IdEnter = enter.Id,
                     Qntd = saleQntd,
                     DateSale = DateTime.UtcNow,
                 };
 
-                _context.Add(sale);
+                _context.Sales.Add(sale);
+
                 _context.SaveChanges();
+
+                var query = from enters in _context.Enters
+                            join product in _context.Products on enter.IdProduct equals product.Id
+                            join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
+                            select new SaleDTO
+                            {
+                                saleProductName = product.Name,
+                                saleEnterId = (int)enter.Id,
+                                saleProductId = product.Id,
+                                saleShelfName = shelf.Name,
+                                saleSaleQntd = enter.Qntd,
+                                saleEnterPrice = enter.Price,
+                            };
+
+                var enterFromSale = query.Where(e => e.saleProductId == productId).FirstOrDefault();
+
+                if (enterFromSale is null)
+                    throw new Exception("Erro consultando detalhes da Entrada do Produto.");
 
                 var newSaleReturn = new SaleDTO
                 {
@@ -104,26 +105,28 @@ namespace SmartStorage_API.Service.Implementations
             }
         }
 
-        public SaleDTO UpdateSale(int saleId, int productId, int saleQntd)
+        public SaleDTO UpdateSale(int saleId, int saleQntd)
         {
             var sale = _context.Sales.FirstOrDefault(s => s.Id == saleId);
-
+            
             if (sale == null)
                 throw new Exception("Venda não encontrada com o ID informado");
 
-            var enter = _context.Enters.FirstOrDefault(e => e.IdProduct == productId);
+            var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(sale.IdEnter));
 
             if (enter == null)
-                throw new Exception("Entrada não encontrada com o ID de produto informado");
+                throw new Exception("Entrada não encontrada com o ID de Venda informado");
 
             if(saleQntd < sale.Qntd)
                 enter.Qntd += saleQntd;
             else
             {
-                if (enter.Qntd > (saleQntd - sale.Qntd))
-                    enter.Qntd -= saleQntd;
+                var rest = (saleQntd - sale.Qntd);
+
+                if (enter.Qntd > rest)
+                    enter.Qntd -= rest;
                 else
-                    throw new Exception("Não há quantidade suficiente na entrada para realizar essa atualização");
+                    throw new Exception("Não há quantidade suficiente na entrada do Produto para realizar essa atualização");
             }
 
             sale.Qntd = saleQntd;
@@ -156,7 +159,7 @@ namespace SmartStorage_API.Service.Implementations
             var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(sale.IdEnter));
 
             if (enter is null)
-                throw new Exception("Entrada não encontrada para essa Venda");
+                throw new Exception("Entrada não encontrada com o ID de Venda informado.");
 
             enter.Qntd += sale.Qntd;
 
