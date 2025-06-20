@@ -57,6 +57,25 @@ namespace SmartStorage_API.Service.Implementations
             return queryEnter.OrderBy(q => q.productName).ToList();
         }
 
+        public ShelfDTO FindProductInShelfById(int enterId)
+        {
+            var queryEnter = from enter in _context.Enters
+                             join product in _context.Products on enter.IdProduct equals product.Id
+                             join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
+                             select new ShelfDTO
+                             {
+                                 enterId = enter.Id,
+                                 productName = product.Name,
+                                 productId = product.Id,
+                                 shelfName = shelf.Name,
+                                 qntd = enter.Qntd,
+                                 allocateData = shelf.DataRegister,
+                                 price = enter.Price,
+                             };
+
+            return queryEnter.FirstOrDefault(e => e.enterId.Equals(enterId));
+        }
+
         public Shelf CreateNewShelf(NewShelfDTO newShelf)
         {
             var shelf = new Shelf

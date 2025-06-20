@@ -53,6 +53,20 @@ namespace SmartStorage_API.Controllers
             return Ok(_shelfService.FindAllProductsInShelves());
         }
 
+        [HttpGet("allocation/{enterId}")]
+        public ActionResult<List<ShelfDTO>> FindProductInShelfById(int enterId)
+        {
+            if (enterId.Equals(0))
+                return BadRequest("O ID da entrada é obrigatório");
+
+            var enter = _shelfService.FindProductInShelfById(enterId);
+
+            if (enter is null)
+                return NotFound("Entrada não encontrada com o ID informado");
+
+            return Ok(enter);
+        }
+
         [HttpPost]
         public IActionResult CreateNewShelf([FromBody] NewShelfDTO newShelf)
         {

@@ -6,6 +6,7 @@ namespace SmartStorage_API.Service
     public interface IShelfService
     {
         List<ShelfDTO> FindAllProductsInShelves();
+        ShelfDTO FindProductInShelfById(int enterId);
         List<Shelf> FindAllShelf();
         Shelf FindShelfById(int id);
         Shelf UpdateShelf(int shelfId, string shelfName);
