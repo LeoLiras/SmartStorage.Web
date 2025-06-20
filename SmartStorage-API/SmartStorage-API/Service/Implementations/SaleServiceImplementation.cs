@@ -91,7 +91,6 @@ namespace SmartStorage_API.Service.Implementations
                 };
 
                 _context.Sales.Add(sale);
-
                 _context.SaveChanges();
 
                 var query = from enters in _context.Enters
@@ -191,7 +190,6 @@ namespace SmartStorage_API.Service.Implementations
             enter.Qntd += sale.Qntd;
 
             _context.Sales.Remove(sale);
-
             _context.SaveChanges();
 
             return sale;

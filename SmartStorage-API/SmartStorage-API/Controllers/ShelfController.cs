@@ -37,7 +37,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (id.Equals(0))
-                    return BadRequest("O campo Id é obrigatório.");
+                    throw new Exception("O campo Id é obrigatório.");
 
                 return Ok(_shelfService.FindShelfById(id));
             }
@@ -56,15 +56,17 @@ namespace SmartStorage_API.Controllers
         [HttpGet("allocation/{enterId}")]
         public ActionResult<List<ShelfDTO>> FindProductInShelfById(int enterId)
         {
-            if (enterId.Equals(0))
-                return BadRequest("O ID da entrada é obrigatório");
+            try
+            {
+                if (enterId.Equals(0))
+                    return BadRequest("O ID da entrada é obrigatório");
 
-            var enter = _shelfService.FindProductInShelfById(enterId);
-
-            if (enter is null)
-                return NotFound("Entrada não encontrada com o ID informado");
-
-            return Ok(enter);
+                return Ok(_shelfService.FindProductInShelfById(enterId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }    
         }
 
         [HttpPost]

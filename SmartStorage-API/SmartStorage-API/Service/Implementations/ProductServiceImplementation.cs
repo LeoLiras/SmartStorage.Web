@@ -30,7 +30,12 @@ namespace SmartStorage_API.Service.Implementations
 
         public Product FindProductById(int id)
         {
-            return _context.Products.SingleOrDefault(x => x.Id.Equals(id));
+            var product = _context.Products.SingleOrDefault(x => x.Id.Equals(id));
+
+            if (product is null)
+                throw new Exception("Produto não encontrado com o ID informado");
+
+            return product;
         }
 
         public Product CreateNewProduct(ProductDTO product)
@@ -55,7 +60,6 @@ namespace SmartStorage_API.Service.Implementations
             };
 
             _context.Add(newProduct);
-
             _context.SaveChanges();
 
             return newProduct;
@@ -112,7 +116,6 @@ namespace SmartStorage_API.Service.Implementations
             }
 
             _context.Products.Remove(product);
-
             _context.SaveChanges();
 
             return product;

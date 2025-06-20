@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.DTO;
+using SmartStorage_API.Model;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
@@ -34,12 +35,14 @@ namespace SmartStorage_API.Controllers
         [HttpGet("{id}")]
         public IActionResult FindProductById(int id)
         {
-            var product = _productService.FindProductById(id);
-
-            if (product == null) 
-                return NotFound("Produto não encontrado.");
-
-            return Ok(product);
+            try
+            {
+                return Ok(_productService.FindProductById(id));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }  
         }
 
         [HttpPost]

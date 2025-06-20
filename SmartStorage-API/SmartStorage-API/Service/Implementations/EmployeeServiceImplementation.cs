@@ -105,7 +105,6 @@ namespace SmartStorage_API.Service.Implementations
             }
             
             _context.Employees.Remove(employee);
-
             _context.SaveChanges();
 
             return employee;

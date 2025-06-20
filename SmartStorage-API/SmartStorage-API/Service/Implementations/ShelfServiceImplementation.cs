@@ -59,21 +59,26 @@ namespace SmartStorage_API.Service.Implementations
 
         public ShelfDTO FindProductInShelfById(int enterId)
         {
-            var queryEnter = from enter in _context.Enters
-                             join product in _context.Products on enter.IdProduct equals product.Id
-                             join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
+            var queryEnter = from enters in _context.Enters
+                             join product in _context.Products on enters.IdProduct equals product.Id
+                             join shelf in _context.Shelves on enters.IdShelf equals shelf.Id
                              select new ShelfDTO
                              {
-                                 enterId = enter.Id,
+                                 enterId = enters.Id,
                                  productName = product.Name,
                                  productId = product.Id,
                                  shelfName = shelf.Name,
-                                 qntd = enter.Qntd,
+                                 qntd = enters.Qntd,
                                  allocateData = shelf.DataRegister,
-                                 price = enter.Price,
+                                 price = enters.Price,
                              };
 
-            return queryEnter.FirstOrDefault(e => e.enterId.Equals(enterId));
+            var enter = queryEnter.FirstOrDefault(e => e.enterId.Equals(enterId));
+
+            if (enter is null)
+                throw new Exception("Entrada não encontrada com o ID informado");
+
+            return enter;
         }
 
         public Shelf CreateNewShelf(NewShelfDTO newShelf)
@@ -117,7 +122,6 @@ namespace SmartStorage_API.Service.Implementations
                 throw new Exception("Não é possível excluír a prateleira pois há entradas de produtos associadas a ela");
 
             _context.Shelves.Remove(shelf);
-
             _context.SaveChanges();
 
             return shelf;

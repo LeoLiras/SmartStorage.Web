@@ -91,8 +91,7 @@ namespace SmartStorage_API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-            }
-            
+            } 
         }
 
         [HttpDelete("{employeeId}")]
