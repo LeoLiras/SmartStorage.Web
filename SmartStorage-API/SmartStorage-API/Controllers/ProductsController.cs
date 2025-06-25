@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.DTO;
-using SmartStorage_API.Model;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
 {
+    [ApiVersion($"{Utils.apiVersion}")]
     [Route("api/storage/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
@@ -42,7 +43,7 @@ namespace SmartStorage_API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-            }  
+            }
         }
 
         [HttpPost]
@@ -85,7 +86,7 @@ namespace SmartStorage_API.Controllers
         {
             try
             {
-                if (productId.Equals(0)) 
+                if (productId.Equals(0))
                     throw new Exception("O campo ID do Produto é obrigatório.");
 
                 return Ok(_productService.DeleteProduct(productId));

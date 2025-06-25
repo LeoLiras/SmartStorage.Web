@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.DTO;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
 {
+    [ApiVersion($"{Utils.apiVersion}")]
     [Route("api/storage/[controller]")]
     [ApiController]
     public class SalesController : ControllerBase

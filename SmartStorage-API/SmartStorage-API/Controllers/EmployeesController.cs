@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.DTO;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
 {
-    [Route("api/storage/[controller]")]
+    [ApiVersion($"{Utils.apiVersion}")]
+    [Route("api/storage/[controller]/v{version:apiVersion}")]
     [ApiController]
     public class EmployeesController : ControllerBase
     {
