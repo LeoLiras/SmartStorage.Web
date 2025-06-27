@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage_API.Data.VO;
 using SmartStorage_API.DTO;
 using SmartStorage_API.Service;
 
@@ -50,17 +51,17 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateNewEmployee(EmployeeDTO employee)
+        public IActionResult CreateNewEmployee(EmployeeVO employee)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(employee.employeeName))
+                if (string.IsNullOrWhiteSpace(employee.Name))
                     throw new Exception("O campo Nome é obrigatório.");
 
-                if (string.IsNullOrWhiteSpace(employee.employeeRg))
+                if (string.IsNullOrWhiteSpace(employee.Rg))
                     throw new Exception("O campo RG é obrigatório.");
 
-                if (string.IsNullOrWhiteSpace(employee.employeeCpf))
+                if (string.IsNullOrWhiteSpace(employee.Cpf))
                     throw new Exception("O campo CPF é obrigatório.");
 
                 return Ok(_employeeService.CreateNewEmployee(employee));
@@ -72,21 +73,12 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("{employeeId}")]
-        public IActionResult UpdateEmployee(int employeeId, [FromBody] EmployeeDTO employee)
+        public IActionResult UpdateEmployee(int employeeId, [FromBody] EmployeeVO employee)
         {
             try
             {
                 if (employeeId.Equals(0)) 
                     throw new Exception("O campo ID do Funcionário é obrigatório.");
-
-                if (string.IsNullOrWhiteSpace(employee.employeeName))
-                    throw new Exception("O campo Nome é obrigatório.");
-
-                if (string.IsNullOrWhiteSpace(employee.employeeRg))
-                    throw new Exception("O campo RG é obrigatório.");
-
-                if (string.IsNullOrWhiteSpace(employee.employeeCpf))
-                    throw new Exception("O campo CPF é obrigatório.");
 
                 return Ok(_employeeService.UpdateEmployee(employeeId, employee));
             }

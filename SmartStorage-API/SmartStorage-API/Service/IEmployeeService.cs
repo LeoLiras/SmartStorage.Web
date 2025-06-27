@@ -1,14 +1,13 @@
-﻿using SmartStorage_API.DTO;
-using SmartStorage_API.Model;
+﻿using SmartStorage_API.Data.VO;
 
 namespace SmartStorage_API.Service
 {
     public interface IEmployeeService
     {
-        List<Employee> FindAllEmployees();
-        Employee FindEmployeeById(int employeeId);
-        Employee CreateNewEmployee(EmployeeDTO employee);
-        Employee UpdateEmployee(int employeeId, EmployeeDTO employee);
-        Employee DeleteEmployee(int employeeId);    
+        List<EmployeeVO> FindAllEmployees();
+        EmployeeVO FindEmployeeById(int employeeId);
+        EmployeeVO CreateNewEmployee(EmployeeVO employee);
+        EmployeeVO UpdateEmployee(int employeeId, EmployeeVO employee);
+        EmployeeVO DeleteEmployee(int employeeId);
     }
 }

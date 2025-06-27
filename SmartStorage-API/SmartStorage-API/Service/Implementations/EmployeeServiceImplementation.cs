@@ -1,15 +1,18 @@
-﻿using SmartStorage_API.DTO;
+﻿using SmartStorage_API.Data.Converter.Implementations;
+using SmartStorage_API.Data.VO;
 using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
 
 namespace SmartStorage_API.Service.Implementations
 {
-    
+
     public class EmployeeServiceImplementation : IEmployeeService
     {
         #region Propriedades
 
         private readonly SmartStorageContext _context;
+
+        private readonly EmployeeConverter _converter;
 
         #endregion
 
@@ -18,76 +21,77 @@ namespace SmartStorage_API.Service.Implementations
         public EmployeeServiceImplementation(SmartStorageContext context)
         {
             _context = context;
+            _converter = new EmployeeConverter();
         }
 
         #endregion
 
         #region Métodos
-        public List<Employee> FindAllEmployees()
+        public List<EmployeeVO> FindAllEmployees()
         {
-            return _context.Employees.OrderBy(x => x.Name).ToList();
+            return _converter.Parse(_context.Employees.OrderBy(x => x.Name).ToList());
         }
 
-        public Employee FindEmployeeById(int employeeId)
+        public EmployeeVO FindEmployeeById(int employeeId)
         {
             var employee = _context.Employees.FirstOrDefault(e => e.Id.Equals(employeeId));
 
             if (employee is null)
                 throw new Exception("Funcionário não encontrado com o ID informado");
 
-            return employee;
+            return _converter.Parse(employee);
         }
 
-        public Employee CreateNewEmployee(EmployeeDTO employee)
+        public EmployeeVO CreateNewEmployee(EmployeeVO employee)
         {
-            var searchEmployee = _context.Employees.FirstOrDefault(x => x.Cpf == employee.employeeCpf);
+            var searchEmployee = _context.Employees.FirstOrDefault(x => x.Cpf == employee.Cpf);
 
             if (searchEmployee != null)
                 throw new Exception("Funcionário já registrado com o CPF informado.");
-            
+
             var newEmployee = new Employee
             {
-                Name = employee.employeeName,
-                Cpf = employee.employeeCpf,
-                Rg = employee.employeeRg,
+                Name = employee.Name,
+                Cpf = employee.Cpf,
+                Rg = employee.Rg,
                 DateRegister = DateTime.UtcNow,
             };
 
             _context.Add(newEmployee);
             _context.SaveChanges();
 
-            return newEmployee;
+            return _converter.Parse(newEmployee);
         }
 
-        public Employee UpdateEmployee(int employeeId, EmployeeDTO employee)
+        public EmployeeVO UpdateEmployee(int employeeId, EmployeeVO employee)
         {
             var searchEmployee = _context.Employees.FirstOrDefault(x => x.Id == employeeId);
 
             if (searchEmployee == null)
                 throw new Exception("Funcionário com ID informado não encontrado na base de dados.");
 
-            if (!string.IsNullOrWhiteSpace(employee.employeeCpf))
+            if (!string.IsNullOrWhiteSpace(employee.Cpf))
             {
-                var searchEmployeeCpf = _context.Employees.FirstOrDefault(x => x.Cpf == employee.employeeCpf && x.Id != employeeId);
+                var searchEmployeeCpf = _context.Employees.FirstOrDefault(x => x.Cpf == employee.Cpf && x.Id != employeeId);
 
                 if (searchEmployeeCpf != null)
                     throw new Exception("Funcionário já registrado com o CPF informado.");
 
-                searchEmployee.Cpf = employee.employeeCpf;
+                searchEmployee.Cpf = employee.Cpf;
             }
-                
-            if (!string.IsNullOrWhiteSpace(employee.employeeName))
-                searchEmployee.Name = employee.employeeName;
 
-            if (!string.IsNullOrWhiteSpace(employee.employeeRg))
-                searchEmployee.Rg = employee.employeeRg;
+            if (!string.IsNullOrWhiteSpace(employee.Name))
+                searchEmployee.Name = employee.Name;
+
+            if (!string.IsNullOrWhiteSpace(employee.Rg))
+                searchEmployee.Rg = employee.Rg;
 
             _context.SaveChanges();
 
-            return searchEmployee;
+            return _converter.Parse(searchEmployee);
         }
 
-        public Employee DeleteEmployee(int employeeId)
+        public EmployeeVO DeleteEmployee(int employeeId)
         {
             var employee = _context.Employees.FirstOrDefault(e => e.Id == employeeId);
 
@@ -96,18 +100,18 @@ namespace SmartStorage_API.Service.Implementations
 
             var products = _context.Products.Where(p => p.EmployeeId == employeeId).ToList();
 
-            if(products.Count() > 0)
+            if (products.Count() > 0)
             {
                 foreach (var product in products)
                 {
                     product.EmployeeId = null;
                 }
             }
-            
+
             _context.Employees.Remove(employee);
             _context.SaveChanges();
 
-            return employee;
+            return _converter.Parse(employee);
         }
 
         #endregion
