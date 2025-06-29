@@ -1,14 +1,15 @@
-﻿using SmartStorage_API.DTO;
+﻿using SmartStorage_API.Data.VO;
+using SmartStorage_API.DTO;
 using SmartStorage_API.Model;
 
 namespace SmartStorage_API.Service
 {
     public interface IProductService
     {
-        List<Product> FindAllProducts();
-        Product FindProductById(int id);
-        Product CreateNewProduct(ProductDTO product);
-        Product UpdateProduct(int productId, ProductDTO product);
-        Product DeleteProduct(int productId);
+        List<ProductVO> FindAllProducts();
+        ProductVO FindProductById(int id);
+        ProductVO CreateNewProduct(ProductVO product);
+        ProductVO UpdateProduct(int productId, ProductVO product);
+        ProductVO DeleteProduct(int productId);
     }
 }

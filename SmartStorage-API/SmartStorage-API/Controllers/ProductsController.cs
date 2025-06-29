@@ -1,12 +1,13 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage_API.Data.VO;
 using SmartStorage_API.DTO;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
 {
     [ApiVersion($"{Utils.apiVersion}")]
-    [Route("api/storage/[controller]")]
+    [Route("api/storage/[controller]/v{version:apiVersion}")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -47,11 +48,11 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateNewProduct([FromBody] ProductDTO newProduct)
+        public IActionResult CreateNewProduct([FromBody] ProductVO newProduct)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(newProduct.productName))
+                if (string.IsNullOrWhiteSpace(newProduct.Name))
                     throw new Exception("O Nome do Produto é obrigatório.");
 
                 return Ok(_productService.CreateNewProduct(newProduct));
@@ -63,15 +64,12 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("{productId}")]
-        public IActionResult UpdateProduct(int productId, [FromBody] ProductDTO product)
+        public IActionResult UpdateProduct(int productId, [FromBody] ProductVO product)
         {
             try
             {
                 if (productId.Equals(0))
                     throw new Exception("O campo ID do Produto é obrigatório.");
-
-                if (string.IsNullOrWhiteSpace(product.productName))
-                    throw new Exception("O Nome do Produto é obrigatório.");
 
                 return Ok(_productService.UpdateProduct(productId, product));
             }

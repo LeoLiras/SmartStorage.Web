@@ -1,4 +1,5 @@
-﻿using SmartStorage_API.DTO;
+﻿using SmartStorage_API.Data.Converter.Implementations;
+using SmartStorage_API.Data.VO;
 using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
 
@@ -10,6 +11,8 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly SmartStorageContext _context;
 
+        private readonly ProductConverter _converter;
+
         #endregion
 
         #region Construtores
@@ -17,83 +20,91 @@ namespace SmartStorage_API.Service.Implementations
         public ProductServiceImplementation(SmartStorageContext context)
         {
             _context = context;
+            _converter = new ProductConverter();
         }
 
         #endregion
 
         #region Métodos
 
-        public List<Product> FindAllProducts()
+        public List<ProductVO> FindAllProducts()
         {
-            return _context.Products.OrderBy(q => q.Name).ToList();
+            return _converter.Parse(_context.Products.OrderBy(q => q.Name).ToList());
         }
 
-        public Product FindProductById(int id)
+        public ProductVO FindProductById(int id)
         {
             var product = _context.Products.SingleOrDefault(x => x.Id.Equals(id));
 
             if (product is null)
                 throw new Exception("Produto não encontrado com o ID informado");
 
-            return product;
+            return _converter.Parse(product);
         }
 
-        public Product CreateNewProduct(ProductDTO product)
+        public ProductVO CreateNewProduct(ProductVO product)
         {
-            var productSearch = _context.Products.FirstOrDefault(x => x.Name == product.productName);
+            var productSearch = _context.Products.FirstOrDefault(x => x.Name == product.Name);
 
             if (productSearch != null)
                 throw new Exception("Produto já cadastrado.");
 
-            var emplyeeSearch = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
+            var emplyeeSearch = _context.Employees.FirstOrDefault(x => x.Id == product.EmployeeId);
 
             if (emplyeeSearch == null)
                 throw new Exception("Funcionario não encontrado com o ID informado.");
 
             var newProduct = new Product
             {
-                Name = product.productName,
-                Descricao = product.productDescricao,
+                Name = product.Name,
+                Descricao = product.Descricao,
                 DateRegister = DateTime.UtcNow,
-                Qntd = product.productQntd,
-                EmployeeId = product.productEmployeeId
+                Qntd = product.Qntd,
+                EmployeeId = product.EmployeeId
             };
 
             _context.Add(newProduct);
             _context.SaveChanges();
 
-            return newProduct;
+            return _converter.Parse(newProduct);
 
         }
 
-        public Product UpdateProduct(int productId, ProductDTO product)
+        public ProductVO UpdateProduct(int productId, ProductVO product)
         {
             var searchProduct = _context.Products.FirstOrDefault(x => x.Id == productId);
 
-            if (searchProduct == null) 
+            if (searchProduct == null)
                 throw new Exception("Produto não encontrado com o ID informado.");
 
-            var prod = _context.Products.FirstOrDefault(x => x.Name == product.productName && x.Id != productId);
+            var prod = _context.Products.FirstOrDefault(x => x.Name == product.Name && x.Id != productId);
 
             if (prod != null)
                 throw new Exception("Já existe um produto cadastrado com esse nome.");
 
-            var employee = _context.Employees.FirstOrDefault(x => x.Id == product.productEmployeeId);
+            var employee = _context.Employees.FirstOrDefault(x => x.Id == product.EmployeeId);
 
-            if (employee == null) 
+            if (employee == null)
                 throw new Exception("Colaborador com o ID informado não encontrado.");
 
-            searchProduct.EmployeeId = product.productEmployeeId;
-            searchProduct.Name = product.productName;
-            searchProduct.Qntd = product.productQntd;
-            searchProduct.Descricao = product.productDescricao;
+            if (!product.EmployeeId.Equals(0))
+                searchProduct.EmployeeId = product.EmployeeId;
+
+            if (!string.IsNullOrWhiteSpace(product.Name))
+                searchProduct.Name = product.Name;
+
+            if (!product.EmployeeId.Equals(0))
+                searchProduct.Qntd = product.Qntd;
+
+            if (!string.IsNullOrWhiteSpace(product.Descricao))
+                searchProduct.Descricao = product.Descricao;
 
             _context.SaveChanges();
 
-            return searchProduct;
+            return _converter.Parse(searchProduct);
         }
 
-        public Product DeleteProduct(int productId)
+        public ProductVO DeleteProduct(int productId)
         {
             var product = _context.Products.FirstOrDefault(p => p.Id.Equals(productId));
 
@@ -118,7 +129,7 @@ namespace SmartStorage_API.Service.Implementations
             _context.Products.Remove(product);
             _context.SaveChanges();
 
-            return product;
+            return _converter.Parse(product);
         }
         #endregion
     }
