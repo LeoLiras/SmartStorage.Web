@@ -1,4 +1,5 @@
-﻿using SmartStorage_API.DTO;
+﻿using SmartStorage_API.Data.Converter.Implementations;
+using SmartStorage_API.Data.VO;
 using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
 
@@ -10,6 +11,8 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly SmartStorageContext _context;
 
+        private readonly SaleConverter _converter;
+
         #endregion
 
         #region Construtores
@@ -17,66 +20,33 @@ namespace SmartStorage_API.Service.Implementations
         public SaleServiceImplementation(SmartStorageContext context)
         {
             _context = context;
+            _converter = new SaleConverter(_context);
         }
 
         #endregion
 
         #region Métodos
 
-        public List<SaleDTO> FindAllSales()
+        public List<SaleVO> FindAllSales()
         {
-            var querySale = from sale in _context.Sales
-                            join enter in _context.Enters on sale.IdEnter equals enter.Id
-                            join product in _context.Products on enter.IdProduct equals product.Id
-                            join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
-                            select new SaleDTO
-                            {
-                                saleId = sale.Id,
-                                saleProductName = product.Name,
-                                saleShelfName = shelf.Name,
-                                saleSaleQntd = sale.Qntd,
-                                saleSaleData = sale.DateSale,
-                                saleEnterPrice = enter.Price,
-                                saleProductId = product.Id,
-                                saleTotal = sale.Qntd * enter.Price,
-                                saleEnterId = enter.Id
-                            };
-
-            return querySale.OrderBy(q => q.saleProductName).ToList();
+            return _converter.Parse(_context.Sales.OrderBy(s => s.Id).ToList());
         }
 
-        public SaleDTO FindSaleById(int saleId)
+        public SaleVO FindSaleById(int saleId)
         {
-            var querySale = from sales in _context.Sales
-                            join enter in _context.Enters on sales.IdEnter equals enter.Id
-                            join product in _context.Products on enter.IdProduct equals product.Id
-                            join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
-                            select new SaleDTO
-                            {
-                                saleId = sales.Id,
-                                saleProductName = product.Name,
-                                saleShelfName = shelf.Name,
-                                saleSaleQntd = sales.Qntd,
-                                saleSaleData = sales.DateSale,
-                                saleEnterPrice = enter.Price,
-                                saleProductId = product.Id,
-                                saleTotal = sales.Qntd * enter.Price,
-                                saleEnterId = enter.Id
-                            };
-
-            var sale = querySale.FirstOrDefault(s => s.saleId.Equals(saleId));
+            var sale = _context.Sales.FirstOrDefault(s => s.Id.Equals(saleId));
 
             if (sale is null)
                 throw new Exception("Venda não encontrada com o ID informado");
 
-            return sale;
+            return _converter.Parse(sale);
         }
 
-        public SaleDTO CreateNewSale(int productId, int saleQntd)
+        public SaleVO CreateNewSale(int productId, int saleQntd)
         {
             var enter = _context.Enters.FirstOrDefault(e => e.IdProduct.Equals(productId));
 
-            if(enter is null)
+            if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID do Produto informado.");
 
             if (enter.Qntd >= saleQntd)
@@ -93,37 +63,7 @@ namespace SmartStorage_API.Service.Implementations
                 _context.Sales.Add(sale);
                 _context.SaveChanges();
 
-                var query = from enters in _context.Enters
-                            join product in _context.Products on enter.IdProduct equals product.Id
-                            join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
-                            select new SaleDTO
-                            {
-                                saleProductName = product.Name,
-                                saleEnterId = (int)enter.Id,
-                                saleProductId = product.Id,
-                                saleShelfName = shelf.Name,
-                                saleSaleQntd = enter.Qntd,
-                                saleEnterPrice = enter.Price,
-                            };
-
-                var enterFromSale = query.Where(e => e.saleProductId == productId).FirstOrDefault();
-
-                if (enterFromSale is null)
-                    throw new Exception("Erro consultando detalhes da Entrada do Produto.");
-
-                var newSaleReturn = new SaleDTO
-                {
-                    saleProductName = enterFromSale.saleProductName,
-                    saleProductId = enterFromSale.saleProductId,
-                    saleShelfName = enterFromSale.saleShelfName,
-                    saleEnterId = (int)enterFromSale.saleEnterId,
-                    saleEnterPrice = enterFromSale.saleEnterPrice,
-                    saleSaleQntd = saleQntd,
-                    saleSaleData = DateTime.UtcNow,
-                    saleTotal = saleQntd * enterFromSale.saleEnterPrice
-                };
-
-                return newSaleReturn;
+                return _converter.Parse(sale);
             }
             else
             {
@@ -131,10 +71,10 @@ namespace SmartStorage_API.Service.Implementations
             }
         }
 
-        public SaleDTO UpdateSale(int saleId, int saleQntd)
+        public SaleVO UpdateSale(int saleId, int saleQntd)
         {
             var sale = _context.Sales.FirstOrDefault(s => s.Id == saleId);
-            
+
             if (sale == null)
                 throw new Exception("Venda não encontrada com o ID informado");
 
@@ -143,7 +83,7 @@ namespace SmartStorage_API.Service.Implementations
             if (enter == null)
                 throw new Exception("Entrada não encontrada com o ID de Venda informado");
 
-            if(saleQntd < sale.Qntd)
+            if (saleQntd < sale.Qntd)
                 enter.Qntd += saleQntd;
             else
             {
@@ -157,25 +97,14 @@ namespace SmartStorage_API.Service.Implementations
 
             sale.Qntd = saleQntd;
 
-            _context.SaveChanges(); 
+            _context.SaveChanges();
 
             var shelf = _context.Shelves.FirstOrDefault(s => s.Id == enter.IdShelf);
 
-            var newSaleDetails = new SaleDTO
-            {
-                saleProductId = enter.ProductId,
-                saleShelfName = shelf.Name,
-                saleEnterId = enter.Id,
-                saleEnterPrice = enter.Price,
-                saleSaleQntd = saleQntd,
-                saleSaleData = DateTime.UtcNow,
-                saleTotal = saleQntd * enter.Price,
-            };
-            
-            return newSaleDetails;
+            return _converter.Parse(sale);
         }
 
-        public Sale DeleteSale(int saleId)
+        public SaleVO DeleteSale(int saleId)
         {
             var sale = _context.Sales.FirstOrDefault(s => s.Id.Equals(saleId));
 
@@ -192,7 +121,7 @@ namespace SmartStorage_API.Service.Implementations
             _context.Sales.Remove(sale);
             _context.SaveChanges();
 
-            return sale;
+            return _converter.Parse(sale);
         }
 
         #endregion

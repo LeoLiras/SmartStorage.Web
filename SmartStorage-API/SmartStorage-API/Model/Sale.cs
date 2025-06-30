@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SmartStorage_API.Model;
+﻿namespace SmartStorage_API.Model;
 
 public partial class Sale
 {

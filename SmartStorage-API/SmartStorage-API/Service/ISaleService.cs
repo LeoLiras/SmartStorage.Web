@@ -1,14 +1,14 @@
-﻿using SmartStorage_API.DTO;
+﻿using SmartStorage_API.Data.VO;
 using SmartStorage_API.Model;
 
 namespace SmartStorage_API.Service
 {
     public interface ISaleService
     {
-        List<SaleDTO> FindAllSales();
-        SaleDTO FindSaleById(int saleId);
-        SaleDTO CreateNewSale(int productId, int saleQntd);
-        SaleDTO UpdateSale(int saleId, int saleQntd);
-        Sale DeleteSale(int saleId);
+        List<SaleVO> FindAllSales();
+        SaleVO FindSaleById(int saleId);
+        SaleVO CreateNewSale(int productId, int saleQntd);
+        SaleVO UpdateSale(int saleId, int saleQntd);
+        SaleVO DeleteSale(int saleId);
     }
 }
