@@ -1,12 +1,13 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage_API.Data.VO;
 using SmartStorage_API.DTO;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
 {
     [ApiVersion($"{Utils.apiVersion}")]
-    [Route("api/storage/[controller]")]
+    [Route("api/storage/[controller]/v{version:apiVersion}")]
     [ApiController]
     public class ShelfController : ControllerBase
     {
@@ -28,7 +29,7 @@ namespace SmartStorage_API.Controllers
         #region Métodos
 
         [HttpGet]
-        public ActionResult<List<ShelfDTO>> FindAllShelf()
+        public ActionResult<List<ShelfVO>> FindAllShelf()
         {
             return Ok(_shelfService.FindAllShelf());
         }
@@ -39,7 +40,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (id.Equals(0))
-                    throw new Exception("O campo Id é obrigatório.");
+                    throw new Exception("O campo Id da Prateleira é obrigatório.");
 
                 return Ok(_shelfService.FindShelfById(id));
             }
@@ -50,13 +51,13 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpGet("allocation")]
-        public ActionResult<List<ShelfDTO>> GetProductsInShelves()
+        public ActionResult<List<ShelfVO>> GetProductsInShelves()
         {
             return Ok(_shelfService.FindAllProductsInShelves());
         }
 
         [HttpGet("allocation/{enterId}")]
-        public ActionResult<List<ShelfDTO>> FindProductInShelfById(int enterId)
+        public ActionResult<List<ShelfVO>> FindProductInShelfById(int enterId)
         {
             try
             {
@@ -72,11 +73,11 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateNewShelf([FromBody] NewShelfDTO newShelf)
+        public IActionResult CreateNewShelf([FromBody] ShelfVO newShelf)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(newShelf.shelfName))
+                if (string.IsNullOrWhiteSpace(newShelf.Name))
                     throw new Exception("O campo Nome da Prateleira é obrigatório.");
 
                 return Ok(_shelfService.CreateNewShelf(newShelf));
@@ -88,17 +89,17 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("{shelfId}")]
-        public IActionResult UpdateShelf(int shelfId, [FromBody] NewShelfDTO shelf)
+        public IActionResult UpdateShelf(int shelfId, [FromBody] ShelfVO shelf)
         {
             try
             {
                 if (shelfId.Equals(0))
                     return BadRequest("O campo Id é obrigatório.");
 
-                if (string.IsNullOrWhiteSpace(shelf.shelfName))
+                if (string.IsNullOrWhiteSpace(shelf.Name))
                     throw new Exception("O campo Nome da Prateleira é obrigatório.");
 
-                return Ok(_shelfService.UpdateShelf(shelfId, shelf.shelfName));
+                return Ok(_shelfService.UpdateShelf(shelfId, shelf.Name));
             }
             catch (Exception ex)
             {
@@ -123,7 +124,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost("allocation")]
-        public IActionResult AllocateProductToShelf([FromBody] AllocateProductToShelfDTO newAllocation)
+        public IActionResult AllocateProductToShelf([FromBody] EnterVO newAllocation)
         {
             try
             {
@@ -135,6 +136,9 @@ namespace SmartStorage_API.Controllers
 
                 if (newAllocation.ProductPrice.Equals(0))
                     throw new Exception("O campo Preço do Produto é obrigatório.");
+
+                if (newAllocation.ProductQuantity.Equals(0))
+                    throw new Exception("O campo Quantidade do Produto é obrigatório.");
 
                 return Ok(_shelfService.AllocateProductToShelf(newAllocation));
             }

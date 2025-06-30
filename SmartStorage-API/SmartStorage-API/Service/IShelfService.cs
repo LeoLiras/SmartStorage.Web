@@ -1,19 +1,19 @@
-﻿using SmartStorage_API.DTO;
-using SmartStorage_API.Model;
+﻿using SmartStorage_API.Data.VO;
+using SmartStorage_API.DTO;
 
 namespace SmartStorage_API.Service
 {
     public interface IShelfService
     {
-        List<ShelfDTO> FindAllProductsInShelves();
-        ShelfDTO FindProductInShelfById(int enterId);
-        List<Shelf> FindAllShelf();
-        Shelf FindShelfById(int id);
-        Shelf UpdateShelf(int shelfId, string shelfName);
-        Shelf DeleteShelf(int shelfId);
-        Shelf CreateNewShelf(NewShelfDTO newShelf);
-        Enter AllocateProductToShelf(AllocateProductToShelfDTO newAllocation);
-        Enter UndoAllocate(int enterId);
+        List<EnterVO> FindAllProductsInShelves();
+        EnterVO FindProductInShelfById(int enterId);
+        List<ShelfVO> FindAllShelf();
+        ShelfVO FindShelfById(int id);
+        ShelfVO UpdateShelf(int shelfId, string shelfName);
+        ShelfVO DeleteShelf(int shelfId);
+        ShelfVO CreateNewShelf(ShelfVO newShelf);
+        EnterVO AllocateProductToShelf(EnterVO newAllocation);
+        EnterVO UndoAllocate(int enterId);
 
     }
 }

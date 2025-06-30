@@ -1,4 +1,6 @@
-﻿using SmartStorage_API.DTO;
+﻿using SmartStorage_API.Data.Converter.Implementations;
+using SmartStorage_API.Data.VO;
+using SmartStorage_API.DTO;
 using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
 
@@ -10,6 +12,10 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly SmartStorageContext _context;
 
+        private readonly ShelfConverter _converterShelf;
+
+        private readonly EnterConverter _converterEnter;
+
         #endregion
 
         #region Construtores
@@ -17,85 +23,59 @@ namespace SmartStorage_API.Service.Implementations
         public ShelfServiceImplementation(SmartStorageContext context)
         {
             _context = context;
+            _converterShelf = new ShelfConverter();
+            _converterEnter = new EnterConverter(_context);
         }
 
         #endregion
 
         #region Métodos
 
-        public List<Shelf> FindAllShelf()
+        public List<ShelfVO> FindAllShelf()
         {
-            return _context.Shelves.OrderBy(x => x.Name).ToList();
+            return _converterShelf.Parse(_context.Shelves.OrderBy(x => x.Name).ToList());
         }
 
-        public Shelf FindShelfById(int id)
+        public ShelfVO FindShelfById(int id)
         {
             var shelf = _context.Shelves.FirstOrDefault(s => s.Id == id);
 
             if (shelf is null)
                 throw new Exception("Prateleira não encontrada com o ID Informado");
 
-            return shelf;
+            return _converterShelf.Parse(shelf);
         }
 
-        public List<ShelfDTO> FindAllProductsInShelves()
+        public List<EnterVO> FindAllProductsInShelves()
         {
-            var queryEnter = from enter in _context.Enters
-                             join product in _context.Products on enter.IdProduct equals product.Id
-                             join shelf in _context.Shelves on enter.IdShelf equals shelf.Id
-                             select new ShelfDTO
-                             {
-                                 enterId = enter.Id,
-                                 productName = product.Name,
-                                 productId = product.Id,
-                                 shelfName = shelf.Name,
-                                 qntd = enter.Qntd,
-                                 allocateData = shelf.DataRegister,
-                                 price = enter.Price,
-                             };
-
-            return queryEnter.OrderBy(q => q.productName).ToList();
+            return _converterEnter.Parse(_context.Enters.OrderBy(e => e.Id).ToList());
         }
 
-        public ShelfDTO FindProductInShelfById(int enterId)
+        public EnterVO FindProductInShelfById(int enterId)
         {
-            var queryEnter = from enters in _context.Enters
-                             join product in _context.Products on enters.IdProduct equals product.Id
-                             join shelf in _context.Shelves on enters.IdShelf equals shelf.Id
-                             select new ShelfDTO
-                             {
-                                 enterId = enters.Id,
-                                 productName = product.Name,
-                                 productId = product.Id,
-                                 shelfName = shelf.Name,
-                                 qntd = enters.Qntd,
-                                 allocateData = shelf.DataRegister,
-                                 price = enters.Price,
-                             };
-
-            var enter = queryEnter.FirstOrDefault(e => e.enterId.Equals(enterId));
+            var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(enterId));
 
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID informado");
 
-            return enter;
+            return _converterEnter.Parse(enter);
         }
 
-        public Shelf CreateNewShelf(NewShelfDTO newShelf)
+        public ShelfVO CreateNewShelf(ShelfVO newShelf)
         {
             var shelf = new Shelf
             {
-                Name = newShelf.shelfName,
+                Name = newShelf.Name,
                 DataRegister = DateTime.UtcNow,
             };
 
             _context.Add(shelf);
             _context.SaveChanges();
 
-            return shelf;
+            return _converterShelf.Parse(shelf);
         }
 
-        public Shelf UpdateShelf(int shelfId, string shelfName)
+        public ShelfVO UpdateShelf(int shelfId, string shelfName)
         {
             var shelf = _context.Shelves.FirstOrDefault(s => s.Id == shelfId);
 
@@ -106,10 +86,10 @@ namespace SmartStorage_API.Service.Implementations
 
             _context.SaveChanges();
 
-            return shelf;
+            return _converterShelf.Parse(shelf);
         }
 
-        public Shelf DeleteShelf(int shelfId)
+        public ShelfVO DeleteShelf(int shelfId)
         {
             var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(shelfId));
 
@@ -124,10 +104,10 @@ namespace SmartStorage_API.Service.Implementations
             _context.Shelves.Remove(shelf);
             _context.SaveChanges();
 
-            return shelf;
+            return _converterShelf.Parse(shelf);
         }
 
-        public Enter AllocateProductToShelf(AllocateProductToShelfDTO newAllocation)
+        public EnterVO AllocateProductToShelf(EnterVO newAllocation)
         {
             var product = _context.Products.Where(p => p.Id == newAllocation.ProductId).FirstOrDefault();
 
@@ -161,7 +141,7 @@ namespace SmartStorage_API.Service.Implementations
 
                 _context.SaveChanges();
 
-                return newEnterProduct;
+                return _converterEnter.Parse(newEnterProduct);
             }
             else
             {
@@ -170,11 +150,11 @@ namespace SmartStorage_API.Service.Implementations
 
                 _context.SaveChanges();
 
-                return enter;
+                return _converterEnter.Parse(enter);
             }
         }
 
-        public Enter UndoAllocate(int enterId)
+        public EnterVO UndoAllocate(int enterId)
         {
             var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(enterId));
 
@@ -191,7 +171,7 @@ namespace SmartStorage_API.Service.Implementations
 
             _context.SaveChanges();
 
-            return enter;
+            return _converterEnter.Parse(enter);
         }
 
         #endregion
