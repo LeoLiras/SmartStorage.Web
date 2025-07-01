@@ -2,7 +2,7 @@
 
 namespace SmartStorage_API.Service
 {
-    public interface IEmployeeService
+    public interface IEmployeeBusiness
     {
         List<EmployeeVO> FindAllEmployees();
         EmployeeVO FindEmployeeById(int employeeId);

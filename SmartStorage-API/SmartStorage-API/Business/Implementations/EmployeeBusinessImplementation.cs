@@ -6,7 +6,7 @@ using SmartStorage_API.Model.Context;
 namespace SmartStorage_API.Service.Implementations
 {
 
-    public class EmployeeServiceImplementation : IEmployeeService
+    public class EmployeeBusinessImplementation : IEmployeeBusiness
     {
         #region Propriedades
 
@@ -18,7 +18,7 @@ namespace SmartStorage_API.Service.Implementations
 
         #region Construtores
 
-        public EmployeeServiceImplementation(SmartStorageContext context)
+        public EmployeeBusinessImplementation(SmartStorageContext context)
         {
             _context = context;
             _converter = new EmployeeConverter();

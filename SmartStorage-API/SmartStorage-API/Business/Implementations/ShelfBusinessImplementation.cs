@@ -1,12 +1,11 @@
 ﻿using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Data.VO;
-using SmartStorage_API.DTO;
 using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
 
 namespace SmartStorage_API.Service.Implementations
 {
-    public class ShelfServiceImplementation : IShelfService
+    public class ShelfBusinessImplementation : IShelfBusiness
     {
         #region Propriedades
 
@@ -20,7 +19,7 @@ namespace SmartStorage_API.Service.Implementations
 
         #region Construtores
 
-        public ShelfServiceImplementation(SmartStorageContext context)
+        public ShelfBusinessImplementation(SmartStorageContext context)
         {
             _context = context;
             _converterShelf = new ShelfConverter();

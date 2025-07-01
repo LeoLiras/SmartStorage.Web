@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Data.VO;
-using SmartStorage_API.DTO;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
@@ -13,13 +12,13 @@ namespace SmartStorage_API.Controllers
     {
         #region Propriedades
 
-        private IEmployeeService _employeeService;
+        private IEmployeeBusiness _employeeService;
 
         #endregion
 
         #region Construtores
 
-        public EmployeesController(IEmployeeService employeeService)
+        public EmployeesController(IEmployeeBusiness employeeService)
         {
             _employeeService = employeeService;
         }
@@ -77,7 +76,7 @@ namespace SmartStorage_API.Controllers
         {
             try
             {
-                if (employeeId.Equals(0)) 
+                if (employeeId.Equals(0))
                     throw new Exception("O campo ID do Funcionário é obrigatório.");
 
                 return Ok(_employeeService.UpdateEmployee(employeeId, employee));
@@ -85,7 +84,7 @@ namespace SmartStorage_API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-            } 
+            }
         }
 
         [HttpDelete("{employeeId}")]

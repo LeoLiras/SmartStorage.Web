@@ -12,13 +12,13 @@ namespace SmartStorage_API.Controllers
     {
         #region Propriedades
 
-        private ISaleService _saleService;
+        private ISaleBusiness _saleService;
 
         #endregion
 
         #region Construtores
 
-        public SalesController(ISaleService saleService)
+        public SalesController(ISaleBusiness saleService)
         {
             _saleService = saleService;
         }

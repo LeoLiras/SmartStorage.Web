@@ -16,10 +16,10 @@ builder.Services.AddDbContext<SmartStorageContext>(options =>
 
 builder.Services.AddApiVersioning();
 
-builder.Services.AddScoped<IEmployeeService, EmployeeServiceImplementation>();
-builder.Services.AddScoped<IProductService, ProductServiceImplementation>();
-builder.Services.AddScoped<ISaleService, SaleServiceImplementation>();
-builder.Services.AddScoped<IShelfService, ShelfServiceImplementation>();
+builder.Services.AddScoped<IEmployeeBusiness, EmployeeBusinessImplementation>();
+builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
+builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();
+builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
 
 var app = builder.Build();
 

@@ -5,7 +5,7 @@ using SmartStorage_API.Model.Context;
 
 namespace SmartStorage_API.Service.Implementations
 {
-    public class SaleServiceImplementation : ISaleService
+    public class SaleBusinessImplementation : ISaleBusiness
     {
         #region Propriedades
 
@@ -17,7 +17,7 @@ namespace SmartStorage_API.Service.Implementations
 
         #region Construtores
 
-        public SaleServiceImplementation(SmartStorageContext context)
+        public SaleBusinessImplementation(SmartStorageContext context)
         {
             _context = context;
             _converter = new SaleConverter(_context);

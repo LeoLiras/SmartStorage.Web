@@ -1,9 +1,8 @@
 ﻿using SmartStorage_API.Data.VO;
-using SmartStorage_API.DTO;
 
 namespace SmartStorage_API.Service
 {
-    public interface IShelfService
+    public interface IShelfBusiness
     {
         List<EnterVO> FindAllProductsInShelves();
         EnterVO FindProductInShelfById(int enterId);

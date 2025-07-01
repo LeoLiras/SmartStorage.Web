@@ -1,10 +1,8 @@
 ﻿using SmartStorage_API.Data.VO;
-using SmartStorage_API.DTO;
-using SmartStorage_API.Model;
 
 namespace SmartStorage_API.Service
 {
-    public interface IProductService
+    public interface IProductBusiness
     {
         List<ProductVO> FindAllProducts();
         ProductVO FindProductById(int id);

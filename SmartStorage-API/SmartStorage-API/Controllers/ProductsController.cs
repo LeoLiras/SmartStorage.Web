@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Data.VO;
-using SmartStorage_API.DTO;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
@@ -13,13 +12,13 @@ namespace SmartStorage_API.Controllers
     {
         #region Propriedades
 
-        private IProductService _productService;
+        private IProductBusiness _productService;
 
         #endregion
 
         #region Construtores
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductBusiness productService)
         {
             _productService = productService;
         }

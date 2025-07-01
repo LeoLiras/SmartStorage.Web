@@ -3,7 +3,7 @@ using SmartStorage_API.Model;
 
 namespace SmartStorage_API.Service
 {
-    public interface ISaleService
+    public interface ISaleBusiness
     {
         List<SaleVO> FindAllSales();
         SaleVO FindSaleById(int saleId);

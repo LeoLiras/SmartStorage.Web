@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Data.VO;
-using SmartStorage_API.DTO;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
@@ -13,13 +12,13 @@ namespace SmartStorage_API.Controllers
     {
         #region Propriedades
 
-        private IShelfService _shelfService;
+        private IShelfBusiness _shelfService;
 
         #endregion
 
         #region Construtores
 
-        public ShelfController(IShelfService shelfService)
+        public ShelfController(IShelfBusiness shelfService)
         {
             _shelfService = shelfService;
         }
