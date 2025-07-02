@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Data.VO;
+using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
@@ -28,12 +29,14 @@ namespace SmartStorage_API.Controllers
         #region Métodos
 
         [HttpGet]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult FindAllEmployees()
         {
             return Ok(_employeeService.FindAllEmployees());
         }
 
         [HttpGet("{employeeId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult FindEmployeeById(int employeeId)
         {
             try
@@ -50,6 +53,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult CreateNewEmployee(EmployeeVO employee)
         {
             try
@@ -72,6 +76,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("{employeeId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UpdateEmployee(int employeeId, [FromBody] EmployeeVO employee)
         {
             try
@@ -88,6 +93,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpDelete("{employeeId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult DeleteEmployee(int employeeId)
         {
             try

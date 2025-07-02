@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using SmartStorage_API.Hypermedia.Enricher;
+using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Model.Context;
 using SmartStorage_API.Service;
 using SmartStorage_API.Service.Implementations;
@@ -13,6 +15,11 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<SmartStorageContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreConnection:ConnectionString")));
+
+var filterOptions = new HyperMediaFilterOptions();
+filterOptions.ContentResponseEnricherList.Add(new EmployeeEnricher());
+
+builder.Services.AddSingleton(filterOptions);
 
 builder.Services.AddApiVersioning();
 
@@ -32,5 +39,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+app.MapControllerRoute("DefaultApi", "{controller=values}/{id?}");
 
 app.Run();

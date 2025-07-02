@@ -8,7 +8,7 @@ namespace SmartStorage_API.Hypermedia
 
         public string href;
 
-        private string Href {
+        public string Href {
             get
             {
                 object _lock = new object();
