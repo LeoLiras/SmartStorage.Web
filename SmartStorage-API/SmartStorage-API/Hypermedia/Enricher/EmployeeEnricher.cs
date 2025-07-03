@@ -32,7 +32,7 @@ namespace SmartStorage_API.Hypermedia.Enricher
             content.Links.Add(new HyperMediaLink()
             {
                 Action = HttpActionVerb.PUT,
-                Href = link,
+                Href = link + "/<<ID>>",
                 Rel = RelationType.self,
                 Type = ResponseTypeFormat.DefaultPut,
             });
@@ -40,7 +40,7 @@ namespace SmartStorage_API.Hypermedia.Enricher
             content.Links.Add(new HyperMediaLink()
             {
                 Action = HttpActionVerb.DELETE,
-                Href = link,
+                Href = link + "/<<ID>>",
                 Rel = RelationType.self,
                 Type = ResponseTypeFormat.DefaultDelete,
             });
