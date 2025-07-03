@@ -19,6 +19,7 @@ builder.Services.AddDbContext<SmartStorageContext>(options =>
 var filterOptions = new HyperMediaFilterOptions();
 filterOptions.ContentResponseEnricherList.Add(new EmployeeEnricher());
 filterOptions.ContentResponseEnricherList.Add(new ProductEnricher());
+filterOptions.ContentResponseEnricherList.Add(new SaleEnricher());
 
 builder.Services.AddSingleton(filterOptions);
 

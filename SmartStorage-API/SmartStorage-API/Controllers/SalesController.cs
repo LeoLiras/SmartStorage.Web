@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Data.VO;
+using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
@@ -28,12 +29,14 @@ namespace SmartStorage_API.Controllers
         #region Métodos
 
         [HttpGet]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public ActionResult<List<SaleVO>> FindAllSales()
         {
             return Ok(_saleService.FindAllSales());
         }
 
         [HttpGet("{saleId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public ActionResult<List<SaleVO>> FindSaleById(int saleId)
         {
             try
@@ -50,6 +53,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult CreateNewSale([FromBody] SaleVO newSale)
         {
             try
@@ -69,6 +73,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("{saleId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UpdateSale(int saleId, [FromBody] SaleVO newSale)
         {
             try
@@ -88,6 +93,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpDelete("{saleId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult DeleteSale(int saleId)
         {
             try
