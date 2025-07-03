@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Data.VO;
 using SmartStorage_API.Hypermedia.Constants;
+using System.Text;
 
 namespace SmartStorage_API.Hypermedia.Enricher
 {
     public class ProductEnricher : ContentResponseEnricher<ProductVO>
     {
-        private readonly object _lock = new object();
-
         protected override Task EnrichModel(ProductVO content, IUrlHelper urlHelper)
         {
-            var path = "storage/product/v1";
+            var path = "storage/product";
             string link = getLink(content.Id, urlHelper, path);
 
             content.Links.Add(new HyperMediaLink()
@@ -32,7 +31,7 @@ namespace SmartStorage_API.Hypermedia.Enricher
             content.Links.Add(new HyperMediaLink()
             {
                 Action = HttpActionVerb.PUT,
-                Href = link + "/{id}",
+                Href = link,
                 Rel = RelationType.self,
                 Type = ResponseTypeFormat.DefaultPut,
             });
@@ -40,19 +39,20 @@ namespace SmartStorage_API.Hypermedia.Enricher
             content.Links.Add(new HyperMediaLink()
             {
                 Action = HttpActionVerb.DELETE,
-                Href = link + "/{id}",
+                Href = link,
                 Rel = RelationType.self,
                 Type = ResponseTypeFormat.DefaultDelete,
             });
 
-            return null;
+            return Task.CompletedTask;
         }
 
         private string getLink(int id, IUrlHelper urlHelper, string path)
         {
-            lock (_lock)
+            lock (this)
             {
-                return $"https://localhost:44330/api/{path}";
+                var url = new { controller = path, id };
+                return new StringBuilder(urlHelper.Link("DefaultApi", url)).Replace("%2f", "/").ToString();
             }
         }
     }
