@@ -1,9 +1,9 @@
-﻿using SmartStorage_API.Model;
-using System.Text.Json.Serialization;
+﻿using SmartStorage_API.Hypermedia;
+using SmartStorage_API.Hypermedia.Abstract;
 
 namespace SmartStorage_API.Data.VO
 {
-    public partial class ProductVO
+    public partial class ProductVO : ISupportHyperMedia
     {
         public int Id { get; set; }
 
@@ -16,5 +16,7 @@ namespace SmartStorage_API.Data.VO
         public int Qntd { get; set; }
 
         public int? EmployeeId { get; set; }
+
+        public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
     }
 }

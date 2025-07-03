@@ -4,13 +4,13 @@ using SmartStorage_API.Hypermedia.Constants;
 
 namespace SmartStorage_API.Hypermedia.Enricher
 {
-    public class EmployeeEnricher : ContentResponseEnricher<EmployeeVO>
+    public class ProductEnricher : ContentResponseEnricher<ProductVO>
     {
         private readonly object _lock = new object();
 
-        protected override Task EnrichModel(EmployeeVO content, IUrlHelper urlHelper)
+        protected override Task EnrichModel(ProductVO content, IUrlHelper urlHelper)
         {
-            var path = "storage/employees/v1";
+            var path = "storage/product/v1";
             string link = getLink(content.Id, urlHelper, path);
 
             content.Links.Add(new HyperMediaLink()
@@ -52,8 +52,6 @@ namespace SmartStorage_API.Hypermedia.Enricher
         {
             lock (_lock)
             {
-                //var url = new { controller = path, id = id };
-                //return new StringBuilder(urlHelper.Link("DefaultApi", url)).Replace("%2f", "/").ToString();
                 return $"https://localhost:44330/api/{path}";
             }
         }
