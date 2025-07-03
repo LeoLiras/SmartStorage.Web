@@ -20,6 +20,8 @@ var filterOptions = new HyperMediaFilterOptions();
 filterOptions.ContentResponseEnricherList.Add(new EmployeeEnricher());
 filterOptions.ContentResponseEnricherList.Add(new ProductEnricher());
 filterOptions.ContentResponseEnricherList.Add(new SaleEnricher());
+filterOptions.ContentResponseEnricherList.Add(new ShelfEnricher());
+filterOptions.ContentResponseEnricherList.Add(new EnterEnricher());
 
 builder.Services.AddSingleton(filterOptions);
 

@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Data.VO;
+using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Service;
 
 namespace SmartStorage_API.Controllers
@@ -28,12 +29,14 @@ namespace SmartStorage_API.Controllers
         #region Métodos
 
         [HttpGet]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public ActionResult<List<ShelfVO>> FindAllShelf()
         {
             return Ok(_shelfService.FindAllShelf());
         }
 
         [HttpGet("{id}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult FindShelfById(int id)
         {
             try
@@ -50,12 +53,14 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpGet("allocation")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public ActionResult<List<ShelfVO>> GetProductsInShelves()
         {
             return Ok(_shelfService.FindAllProductsInShelves());
         }
 
         [HttpGet("allocation/{enterId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public ActionResult<List<ShelfVO>> FindProductInShelfById(int enterId)
         {
             try
@@ -72,6 +77,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult CreateNewShelf([FromBody] ShelfVO newShelf)
         {
             try
@@ -88,6 +94,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("{shelfId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UpdateShelf(int shelfId, [FromBody] ShelfVO shelf)
         {
             try
@@ -107,6 +114,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpDelete("{shelfId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult DeleteShelf(int shelfId)
         {
             try
@@ -123,6 +131,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost("allocation")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult AllocateProductToShelf([FromBody] EnterVO newAllocation)
         {
             try
@@ -148,6 +157,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("allocation/{enterId}")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UndoAllocate(int enterId)
         {
             try
