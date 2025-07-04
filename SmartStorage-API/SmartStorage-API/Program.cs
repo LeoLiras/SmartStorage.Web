@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using SmartStorage_API;
 using SmartStorage_API.Hypermedia.Enricher;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Model.Context;
@@ -11,7 +14,27 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc(Utils.apiVersion,
+        new OpenApiInfo
+        {
+            Title = "SmartStorage - API",
+            Version = Utils.apiVersion,
+            Description = "SmartStorage - API",
+            Contact = new OpenApiContact
+            {
+                Name = "Leonardo de Lira Siqueira",
+                Url = new Uri("https://github.com/LeoLiras")
+            }
+        });
+});
 
 builder.Services.AddDbContext<SmartStorageContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreConnection:ConnectionString")));
@@ -41,6 +64,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint($"/swagger/{Utils.apiVersion}/swagger.json",
+        $"SmartStorage - API - {Utils.apiVersion}");
+});
+
+var options = new RewriteOptions();
+options.AddRedirect("^$", "swagger");
+
+app.UseRewriter(options);
 
 app.MapControllers();
 
