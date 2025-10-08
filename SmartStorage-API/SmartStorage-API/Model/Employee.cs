@@ -1,19 +1,27 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace SmartStorage_API.Model;
 
 public partial class Employee
 {
-    public int Id { get; set; }
+    [Key]
+    public int EmpId { get; set; }
 
-    public string? Name { get; set; }
+    [Required(ErrorMessage ="O nome do colaborador é obrigatório.")]
+    [StringLength(100, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
+    public string? EmpName { get; set; }
 
-    public string? Cpf { get; set; }
+    [Required(ErrorMessage = "O CPF do colaborador é obrigatório.")]
+    [StringLength(11, MinimumLength = 11, ErrorMessage = "CPF com formato incorreto.")]
+    public string? EmpCpf { get; set; }
 
-    public string? Rg { get; set; }
+    [Required(ErrorMessage = "O RG do colaborador é obrigatório.")]
+    [StringLength(15)]
+    public string? EmpRg { get; set; }
 
-    public DateTime DateRegister { get; set; }
+    public DateTime EmpDateRegister { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    public virtual ICollection<Product>? Products { get; set; }
 }

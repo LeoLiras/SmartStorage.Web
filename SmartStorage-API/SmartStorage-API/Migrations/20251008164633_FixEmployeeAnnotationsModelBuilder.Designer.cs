@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartStorage_API.Model.Context;
 
@@ -11,9 +12,11 @@ using SmartStorage_API.Model.Context;
 namespace SmartStorage_API.Migrations
 {
     [DbContext(typeof(SmartStorageContext))]
-    partial class SmartStorageContextModelSnapshot : ModelSnapshot
+    [Migration("20251008164633_FixEmployeeAnnotationsModelBuilder")]
+    partial class FixEmployeeAnnotationsModelBuilder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartStorage_API.Model.Context;
 
@@ -11,9 +12,11 @@ using SmartStorage_API.Model.Context;
 namespace SmartStorage_API.Migrations
 {
     [DbContext(typeof(SmartStorageContext))]
-    partial class SmartStorageContextModelSnapshot : ModelSnapshot
+    [Migration("20251008164430_FixEmployeeAnnotations")]
+    partial class FixEmployeeAnnotations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,20 +36,24 @@ namespace SmartStorage_API.Migrations
                     b.Property<string>("EmpCpf")
                         .IsRequired()
                         .HasMaxLength(11)
-                        .HasColumnType("nvarchar(11)");
+                        .HasColumnType("nvarchar(11)")
+                        .HasColumnName("cpf");
 
                     b.Property<DateTime>("EmpDateRegister")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_register");
 
                     b.Property<string>("EmpName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("name");
 
                     b.Property<string>("EmpRg")
                         .IsRequired()
                         .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasColumnType("nvarchar(15)")
+                        .HasColumnName("rg");
 
                     b.HasKey("EmpId");
 

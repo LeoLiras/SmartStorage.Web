@@ -30,14 +30,6 @@ public partial class SmartStorageContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Employee>(entity =>
-        {
-            entity.Property(e => e.Cpf).HasColumnName("cpf");
-            entity.Property(e => e.DateRegister).HasColumnName("date_register");
-            entity.Property(e => e.Name).HasColumnName("name");
-            entity.Property(e => e.Rg).HasColumnName("rg");
-        });
-
         modelBuilder.Entity<Enter>(entity =>
         {
             entity.ToTable("Enter");

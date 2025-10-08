@@ -49,7 +49,7 @@ namespace SmartStorage_API.Service.Implementations
             if (productSearch != null)
                 throw new Exception("Produto já cadastrado.");
 
-            var emplyeeSearch = _context.Employees.FirstOrDefault(x => x.Id == product.EmployeeId);
+            var emplyeeSearch = _context.Employees.FirstOrDefault(x => x.EmpId == product.EmployeeId);
 
             if (emplyeeSearch == null)
                 throw new Exception("Funcionario não encontrado com o ID informado.");
@@ -82,7 +82,7 @@ namespace SmartStorage_API.Service.Implementations
             if (prod != null)
                 throw new Exception("Já existe um produto cadastrado com esse nome.");
 
-            var employee = _context.Employees.FirstOrDefault(x => x.Id == product.EmployeeId);
+            var employee = _context.Employees.FirstOrDefault(x => x.EmpId == product.EmployeeId);
 
             if (employee == null)
                 throw new Exception("Colaborador com o ID informado não encontrado.");

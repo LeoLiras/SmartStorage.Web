@@ -13,11 +13,11 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new Employee
             {
-                Id = origin.Id,
-                Name = origin.Name,
-                Cpf = origin.Cpf,
-                Rg = origin.Rg,
-                DateRegister = origin.DateRegister
+                EmpId = origin.Id,
+                EmpName = origin.Name,
+                EmpCpf = origin.Cpf,
+                EmpRg = origin.Rg,
+                EmpDateRegister = origin.DateRegister
             };
         }
 
@@ -28,11 +28,11 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new EmployeeVO
             {
-                Id = origin.Id,
-                Name = origin.Name,
-                Cpf = origin.Cpf,
-                Rg = origin.Rg,
-                DateRegister = origin.DateRegister
+                Id = origin.EmpId,
+                Name = origin.EmpName,
+                Cpf = origin.EmpCpf,
+                Rg = origin.EmpRg,
+                DateRegister = origin.EmpDateRegister
             };
         }
 
