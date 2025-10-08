@@ -28,10 +28,6 @@ public partial class SmartStorageContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=smart-storage;Username=postgres;Password=root");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Employee>(entity =>
@@ -95,7 +91,7 @@ public partial class SmartStorageContext : DbContext
             entity.HasIndex(e => e.EnterId, "IX_Sale_enterId");
 
             entity.Property(e => e.DateSale)
-                .HasDefaultValueSql("'2024-07-08 00:00:00-03'::timestamp with time zone")
+                .HasDefaultValueSql("'2024-07-08 00:00:00-03'")
                 .HasColumnName("date_sale");
             entity.Property(e => e.EnterId).HasColumnName("enterId");
             entity.Property(e => e.IdEnter).HasColumnName("id_enter");

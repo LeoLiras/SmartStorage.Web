@@ -37,7 +37,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddDbContext<SmartStorageContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreConnection:ConnectionString")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
 
 var filterOptions = new HyperMediaFilterOptions();
 filterOptions.ContentResponseEnricherList.Add(new EmployeeEnricher());
