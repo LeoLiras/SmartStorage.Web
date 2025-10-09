@@ -39,7 +39,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
             if (enter is null)
                 return new SaleVO();
 
-            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(enter.EntProId));
+            var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(enter.EntProId));
 
             var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(enter.EntSheId));
 
@@ -49,8 +49,8 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 IdEnter = origin.IdEnter,
                 Qntd = origin.Qntd,
                 DateSale = origin.DateSale,
-                ProductId = product is null ? 0 : product.Id,
-                ProductName = product is null ? string.Empty : product.Name,
+                ProductId = product is null ? 0 : product.ProId,
+                ProductName = product is null ? string.Empty : product.ProName,
                 ShelfName = shelf is null ? string.Empty : shelf.Name,
                 EnterPrice = enter is null? 0.0m : enter.EntPrice,
                 SaleTotal = enter is null ? 0.0m : enter.EntPrice * origin.Qntd

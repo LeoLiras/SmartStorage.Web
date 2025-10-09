@@ -21,13 +21,13 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(origin.EntSheId));
 
-            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(origin.EntProId));
+            var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(origin.EntProId));
 
             return new EnterVO
             {
                 Id = origin.EntId,
                 ProductId = origin.EntProId,
-                ProductName = product is null ? string.Empty : product.Name,
+                ProductName = product is null ? string.Empty : product.ProName,
                 ProductQuantity = origin.EntQntd,
                 ProductPrice = origin.EntPrice,
                 ShelfId = origin.EntSheId,

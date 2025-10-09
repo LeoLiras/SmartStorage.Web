@@ -43,22 +43,9 @@ public partial class SmartStorageContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Product-PK");
+            entity.HasIndex(e => e.ProEmpId, "IX_Product_employeeId");
 
-            entity.ToTable("Product");
-
-            entity.HasIndex(e => e.EmployeeId, "IX_Product_employeeId");
-
-            entity.Property(e => e.DateRegister).HasColumnName("date_register");
-            entity.Property(e => e.Descricao).HasColumnName("descricao");
-            entity.Property(e => e.EmployeeId).HasColumnName("employeeId");
-            entity.Property(e => e.EmployeeId1)
-                .HasDefaultValue(0)
-                .HasColumnName("employee_id");
-            entity.Property(e => e.Name).HasColumnName("name");
-            entity.Property(e => e.Qntd).HasColumnName("qntd");
-
-            entity.HasOne(d => d.Employee).WithMany(p => p.Products).HasForeignKey(d => d.EmployeeId);
+            entity.HasOne(d => d.Employee).WithMany(p => p.Products).HasForeignKey(d => d.ProEmpId);
         });
 
         modelBuilder.Entity<Sale>(entity =>

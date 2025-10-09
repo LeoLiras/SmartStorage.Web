@@ -1,29 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace SmartStorage_API.Model;
 
 public partial class Product
 {
-    public int Id { get; set; }
+    [Key]
+    public int ProId { get; set; }
 
-    public string? Name { get; set; }
+    [Required(ErrorMessage = "O nome do produto é obrigatório.")]
+    [StringLength(100, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
+    public string? ProName { get; set; }
 
-    public string? Descricao { get; set; }
+    [Required(ErrorMessage = "A descrição do produto é obrigatória.")]
+    [StringLength(300, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
+    public string? ProDescription { get; set; }
 
-    public DateTime DateRegister { get; set; }
+    [Required(ErrorMessage = "A data de registro do produto é obrigatória.")]
+    public DateTime ProDateRegister { get; set; }
 
-    public int Qntd { get; set; }
+    [Required(ErrorMessage = "A quantidade do produto é obrigatória.")]
+    public int ProQntd { get; set; }
 
-    public int? EmployeeId { get; set; }
+    public int? ProEmpId { get; set; }
 
-    [JsonIgnore]
-    public int EmployeeId1 { get; set; }
+    public byte[]? ProImage { get; set; }
 
     [JsonIgnore]
     public virtual Employee? Employee { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<Enter> Enters { get; set; } = new List<Enter>();
+    public virtual ICollection<Enter>? Enters { get; set; }
 }

@@ -108,15 +108,15 @@ namespace SmartStorage_API.Service.Implementations
 
         public EnterVO AllocateProductToShelf(EnterVO newAllocation)
         {
-            var product = _context.Products.Where(p => p.Id == newAllocation.ProductId).FirstOrDefault();
+            var product = _context.Products.Where(p => p.ProId == newAllocation.ProductId).FirstOrDefault();
 
             if (product is null)
                 throw new Exception("Produto não encontrado na base de dados");
 
-            if (product.Qntd < newAllocation.ProductQuantity)
+            if (product.ProQntd < newAllocation.ProductQuantity)
                 throw new Exception("Quantidade indisponível para alocação e venda.");
 
-            product.Qntd -= newAllocation.ProductQuantity;
+            product.ProQntd -= newAllocation.ProductQuantity;
 
             var enter = _context.Enters.Where(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId).FirstOrDefault();
 
@@ -129,7 +129,7 @@ namespace SmartStorage_API.Service.Implementations
 
                 var newEnterProduct = new Enter
                 {
-                    EntProId = (int)product.Id,
+                    EntProId = (int)product.ProId,
                     EntSheId = (int)shelf.Id,
                     EntQntd = newAllocation.ProductQuantity,
                     EntDateEnter = DateTimeOffset.UtcNow.UtcDateTime,
@@ -160,12 +160,12 @@ namespace SmartStorage_API.Service.Implementations
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID informado");
 
-            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(enter.EntProId));
+            var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(enter.EntProId));
 
             if (product is null)
                 throw new Exception("Produto não encontrado com o ID da entrada informada");
 
-            product.Qntd += enter.EntQntd;
+            product.ProQntd += enter.EntQntd;
             enter.EntQntd = 0;
 
             _context.SaveChanges();

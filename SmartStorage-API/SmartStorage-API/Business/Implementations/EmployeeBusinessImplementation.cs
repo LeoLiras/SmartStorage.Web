@@ -98,13 +98,13 @@ namespace SmartStorage_API.Service.Implementations
             if (employee is null)
                 throw new Exception("Funcionário não encontrado com o Id informado");
 
-            var products = _context.Products.Where(p => p.EmployeeId == employeeId).ToList();
+            var products = _context.Products.Where(p => p.ProEmpId == employeeId).ToList();
 
             if (products.Count() > 0)
             {
                 foreach (var product in products)
                 {
-                    product.EmployeeId = null;
+                    product.ProEmpId = null;
                 }
             }
 

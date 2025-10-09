@@ -13,12 +13,12 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new Product
             {
-                Id = origin.Id,
-                Name = origin.Name,
-                Descricao = origin.Descricao,
-                DateRegister = origin.DateRegister,
-                Qntd = origin.Qntd,
-                EmployeeId = origin.EmployeeId,
+                ProId = origin.Id,
+                ProName = origin.Name,
+                ProDescription = origin.Descricao,
+                ProDateRegister = origin.DateRegister,
+                ProQntd = origin.Qntd,
+                ProEmpId = origin.EmployeeId,
             };
         }
 
@@ -29,12 +29,12 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new ProductVO
             {
-                Id = origin.Id,
-                Name = origin.Name,
-                Descricao = origin.Descricao,
-                DateRegister = origin.DateRegister,
-                Qntd = origin.Qntd,
-                EmployeeId = origin.EmployeeId,
+                Id = origin.ProId,
+                Name = origin.ProName,
+                Descricao = origin.ProDescription,
+                DateRegister = origin.ProDateRegister,
+                Qntd = origin.ProQntd,
+                EmployeeId = origin.ProEmpId,
             };
         }
 
