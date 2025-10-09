@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace SmartStorage_API.Model;
 
+[Table("Employee", Schema = "dbo")]
 public partial class Employee
 {
     [Key]
