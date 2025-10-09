@@ -13,9 +13,9 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new Shelf
             {
-                Id = origin.Id,
-                Name = origin.Name,
-                DataRegister = origin.DataRegister
+                SheId = origin.Id,
+                SheName = origin.Name,
+                SheDataRegister = origin.DataRegister
             };
         }
 
@@ -26,9 +26,9 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new ShelfVO
             {
-                Id = origin.Id,
-                Name = origin.Name,
-                DataRegister = origin.DataRegister
+                Id = origin.SheId,
+                Name = origin.SheName,
+                DataRegister = origin.SheDataRegister
             };
         }
 

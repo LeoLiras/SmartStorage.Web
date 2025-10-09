@@ -99,7 +99,7 @@ namespace SmartStorage_API.Service.Implementations
 
             _context.SaveChanges();
 
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id == enter.EntSheId);
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == enter.EntSheId);
 
             return _converter.Parse(sale);
         }

@@ -19,7 +19,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
             if (origin == null)
                 return null;
 
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(origin.EntSheId));
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId.Equals(origin.EntSheId));
 
             var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(origin.EntProId));
 
@@ -31,7 +31,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 ProductQuantity = origin.EntQntd,
                 ProductPrice = origin.EntPrice,
                 ShelfId = origin.EntSheId,
-                ShelfName = shelf is null ? string.Empty : shelf.Name,
+                ShelfName = shelf is null ? string.Empty : shelf.SheName,
                 DateEnter = origin.EntDateEnter,
             };
         }

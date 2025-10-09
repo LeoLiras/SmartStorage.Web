@@ -55,14 +55,6 @@ public partial class SmartStorageContext : DbContext
             entity.HasOne(d => d.Enter).WithMany(p => p.Sales).HasForeignKey(d => d.SalEntId);
         });
 
-        modelBuilder.Entity<Shelf>(entity =>
-        {
-            entity.ToTable("Shelf");
-
-            entity.Property(e => e.DataRegister).HasColumnName("data_register");
-            entity.Property(e => e.Name).HasColumnName("name");
-        });
-
         modelBuilder.Entity<User>(entity =>
         {
             entity.ToTable("User");

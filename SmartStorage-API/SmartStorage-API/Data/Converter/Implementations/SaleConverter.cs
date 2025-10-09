@@ -41,7 +41,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(enter.EntProId));
 
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(enter.EntSheId));
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId.Equals(enter.EntSheId));
 
             return new SaleVO
             {
@@ -51,7 +51,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 DateSale = origin.SalDateSale,
                 ProductId = product is null ? 0 : product.ProId,
                 ProductName = product is null ? string.Empty : product.ProName,
-                ShelfName = shelf is null ? string.Empty : shelf.Name,
+                ShelfName = shelf is null ? string.Empty : shelf.SheName,
                 EnterPrice = enter is null? 0.0m : enter.EntPrice,
                 SaleTotal = enter is null ? 0.0m : enter.EntPrice * origin.SalQntd
             };

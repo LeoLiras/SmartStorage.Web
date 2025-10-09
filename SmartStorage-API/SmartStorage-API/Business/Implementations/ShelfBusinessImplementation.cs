@@ -32,12 +32,12 @@ namespace SmartStorage_API.Service.Implementations
 
         public List<ShelfVO> FindAllShelf()
         {
-            return _converterShelf.Parse(_context.Shelves.OrderBy(x => x.Name).ToList());
+            return _converterShelf.Parse(_context.Shelves.OrderBy(x => x.SheName).ToList());
         }
 
         public ShelfVO FindShelfById(int id)
         {
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id == id);
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == id);
 
             if (shelf is null)
                 throw new Exception("Prateleira não encontrada com o ID Informado");
@@ -64,8 +64,8 @@ namespace SmartStorage_API.Service.Implementations
         {
             var shelf = new Shelf
             {
-                Name = newShelf.Name,
-                DataRegister = DateTime.UtcNow,
+                SheName = newShelf.Name,
+                SheDataRegister = DateTime.UtcNow,
             };
 
             _context.Add(shelf);
@@ -76,12 +76,12 @@ namespace SmartStorage_API.Service.Implementations
 
         public ShelfVO UpdateShelf(int shelfId, string shelfName)
         {
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id == shelfId);
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId);
 
             if (shelf == null)
                 throw new Exception("Prateleira não encontrada com o ID informado");
 
-            shelf.Name = shelfName;
+            shelf.SheName = shelfName;
 
             _context.SaveChanges();
 
@@ -90,7 +90,7 @@ namespace SmartStorage_API.Service.Implementations
 
         public ShelfVO DeleteShelf(int shelfId)
         {
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(shelfId));
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId.Equals(shelfId));
 
             if (shelf is null)
                 throw new Exception("Prateleira não encontrada com o ID informado");
@@ -122,7 +122,7 @@ namespace SmartStorage_API.Service.Implementations
 
             if (enter is null)
             {
-                var shelf = _context.Shelves.Where(s => s.Id == newAllocation.ShelfId).FirstOrDefault();
+                var shelf = _context.Shelves.Where(s => s.SheId == newAllocation.ShelfId).FirstOrDefault();
 
                 if (shelf is null)
                     throw new Exception("Prateleira não encontrada na base de dados");
@@ -130,7 +130,7 @@ namespace SmartStorage_API.Service.Implementations
                 var newEnterProduct = new Enter
                 {
                     EntProId = (int)product.ProId,
-                    EntSheId = (int)shelf.Id,
+                    EntSheId = (int)shelf.SheId,
                     EntQntd = newAllocation.ProductQuantity,
                     EntDateEnter = DateTimeOffset.UtcNow.UtcDateTime,
                     EntPrice = newAllocation.ProductPrice
