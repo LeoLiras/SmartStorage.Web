@@ -47,12 +47,12 @@ namespace SmartStorage_API.Service.Implementations
 
         public List<EnterVO> FindAllProductsInShelves()
         {
-            return _converterEnter.Parse(_context.Enters.OrderBy(e => e.Id).ToList());
+            return _converterEnter.Parse(_context.Enters.OrderBy(e => e.EntId).ToList());
         }
 
         public EnterVO FindProductInShelfById(int enterId)
         {
-            var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(enterId));
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
 
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID informado");
@@ -95,7 +95,7 @@ namespace SmartStorage_API.Service.Implementations
             if (shelf is null)
                 throw new Exception("Prateleira não encontrada com o ID informado");
 
-            var enters = _context.Enters.Where(e => e.IdShelf.Equals(shelfId)).ToList();
+            var enters = _context.Enters.Where(e => e.EntSheId.Equals(shelfId)).ToList();
 
             if (enters.Count > 0)
                 throw new Exception("Não é possível excluír a prateleira pois há entradas de produtos associadas a ela");
@@ -118,7 +118,7 @@ namespace SmartStorage_API.Service.Implementations
 
             product.Qntd -= newAllocation.ProductQuantity;
 
-            var enter = _context.Enters.Where(e => e.IdProduct == newAllocation.ProductId && e.IdShelf == newAllocation.ShelfId).FirstOrDefault();
+            var enter = _context.Enters.Where(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId).FirstOrDefault();
 
             if (enter is null)
             {
@@ -129,11 +129,11 @@ namespace SmartStorage_API.Service.Implementations
 
                 var newEnterProduct = new Enter
                 {
-                    IdProduct = (int)product.Id,
-                    IdShelf = (int)shelf.Id,
-                    Qntd = newAllocation.ProductQuantity,
-                    DateEnter = DateTimeOffset.UtcNow.UtcDateTime,
-                    Price = newAllocation.ProductPrice
+                    EntProId = (int)product.Id,
+                    EntSheId = (int)shelf.Id,
+                    EntQntd = newAllocation.ProductQuantity,
+                    EntDateEnter = DateTimeOffset.UtcNow.UtcDateTime,
+                    EntPrice = newAllocation.ProductPrice
                 };
 
                 _context.Enters.Add(newEnterProduct);
@@ -144,8 +144,8 @@ namespace SmartStorage_API.Service.Implementations
             }
             else
             {
-                enter.Qntd += newAllocation.ProductQuantity;
-                enter.Price = newAllocation.ProductPrice;
+                enter.EntQntd += newAllocation.ProductQuantity;
+                enter.EntPrice = newAllocation.ProductPrice;
 
                 _context.SaveChanges();
 
@@ -155,18 +155,18 @@ namespace SmartStorage_API.Service.Implementations
 
         public EnterVO UndoAllocate(int enterId)
         {
-            var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(enterId));
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
 
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID informado");
 
-            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(enter.IdProduct));
+            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(enter.EntProId));
 
             if (product is null)
                 throw new Exception("Produto não encontrado com o ID da entrada informada");
 
-            product.Qntd += enter.Qntd;
-            enter.Qntd = 0;
+            product.Qntd += enter.EntQntd;
+            enter.EntQntd = 0;
 
             _context.SaveChanges();
 

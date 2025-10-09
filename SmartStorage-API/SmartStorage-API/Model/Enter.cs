@@ -1,34 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace SmartStorage_API.Model;
 
 public partial class Enter
 {
-    public int Id { get; set; }
+    [Key]
+    public int EntId { get; set; }
 
-    public int IdProduct { get; set; }
+    [Required(ErrorMessage = "A seleção do produto é obrigatória.")]
+    public int EntProId { get; set; }
 
-    public int IdShelf { get; set; }
+    [Required(ErrorMessage = "A seleção da prateleira é obrigatória.")]
+    public int EntSheId { get; set; }
 
-    public DateTime DateEnter { get; set; }
+    [Required(ErrorMessage = "A data da entrada é obrigatória.")]
+    public DateTime EntDateEnter { get; set; }
 
-    [JsonIgnore]
-    public int? ProductId { get; set; }
+    [Required(ErrorMessage = "A quantidade da entrada é obrigatória.")]
+    [DefaultValue(typeof(int), "0")]
+    public int EntQntd { get; set; }
 
-    [JsonIgnore]
-    public int? ShelfId { get; set; }
-
-    public int Qntd { get; set; }
-
-    public decimal Price { get; set; }
+    [Required(ErrorMessage = "O preço da entrada é obrigatório.")]
+    [Precision(18,2)]
+    public decimal EntPrice { get; set; }
 
     [JsonIgnore]
     public virtual Product? Product { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
+    public virtual ICollection<Sale>? Sales { get; set; }
 
     [JsonIgnore]
     public virtual Shelf? Shelf { get; set; }

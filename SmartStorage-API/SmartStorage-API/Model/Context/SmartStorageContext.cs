@@ -32,28 +32,13 @@ public partial class SmartStorageContext : DbContext
     {
         modelBuilder.Entity<Enter>(entity =>
         {
-            entity.ToTable("Enter");
+            entity.HasIndex(e => e.EntProId, "IX_Enter_productId");
 
-            entity.HasIndex(e => e.ProductId, "IX_Enter_productId");
+            entity.HasIndex(e => e.EntSheId, "IX_Enter_shelfId");
 
-            entity.HasIndex(e => e.ShelfId, "IX_Enter_shelfId");
+            entity.HasOne(d => d.Product).WithMany(p => p.Enters).HasForeignKey(d => d.EntProId);
 
-            entity.Property(e => e.DateEnter).HasColumnName("date_enter");
-            entity.Property(e => e.IdProduct).HasColumnName("id_product");
-            entity.Property(e => e.IdShelf).HasColumnName("id_shelf");
-            entity.Property(e => e.Price)
-                .HasPrecision(18, 2)
-                .HasDefaultValueSql("10.00")
-                .HasColumnName("price");
-            entity.Property(e => e.ProductId).HasColumnName("productId");
-            entity.Property(e => e.Qntd)
-                .HasDefaultValue(0)
-                .HasColumnName("qntd");
-            entity.Property(e => e.ShelfId).HasColumnName("shelfId");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.Enters).HasForeignKey(d => d.ProductId);
-
-            entity.HasOne(d => d.Shelf).WithMany(p => p.Enters).HasForeignKey(d => d.ShelfId);
+            entity.HasOne(d => d.Shelf).WithMany(p => p.Enters).HasForeignKey(d => d.EntSheId);
         });
 
         modelBuilder.Entity<Product>(entity =>

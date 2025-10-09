@@ -34,14 +34,14 @@ namespace SmartStorage_API.Data.Converter.Implementations
             if (origin == null)
                 return null;
 
-            var enter = _context.Enters.FirstOrDefault(e => e.Id.Equals(origin.IdEnter));
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(origin.IdEnter));
 
             if (enter is null)
                 return new SaleVO();
 
-            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(enter.IdProduct));
+            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(enter.EntProId));
 
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(enter.IdShelf));
+            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(enter.EntSheId));
 
             return new SaleVO
             {
@@ -52,8 +52,8 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 ProductId = product is null ? 0 : product.Id,
                 ProductName = product is null ? string.Empty : product.Name,
                 ShelfName = shelf is null ? string.Empty : shelf.Name,
-                EnterPrice = enter is null? 0.0m : enter.Price,
-                SaleTotal = enter is null ? 0.0m : enter.Price * origin.Qntd
+                EnterPrice = enter is null? 0.0m : enter.EntPrice,
+                SaleTotal = enter is null ? 0.0m : enter.EntPrice * origin.Qntd
             };
         }
 

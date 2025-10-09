@@ -111,13 +111,13 @@ namespace SmartStorage_API.Service.Implementations
             if (product is null)
                 throw new Exception("Produto não encontrado com o ID informado");
 
-            var enters = _context.Enters.Where(e => e.IdProduct.Equals(productId)).ToList();
+            var enters = _context.Enters.Where(e => e.EntProId.Equals(productId)).ToList();
 
             if (enters.Count > 0)
             {
                 foreach (var enter in enters)
                 {
-                    var sales = _context.Sales.Where(s => s.IdEnter.Equals(enter.Id)).ToList();
+                    var sales = _context.Sales.Where(s => s.IdEnter.Equals(enter.EntId)).ToList();
 
                     if (sales.Count > 0)
                         _context.Sales.RemoveRange(sales);

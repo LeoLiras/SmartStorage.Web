@@ -19,20 +19,20 @@ namespace SmartStorage_API.Data.Converter.Implementations
             if (origin == null)
                 return null;
 
-            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(origin.IdShelf));
+            var shelf = _context.Shelves.FirstOrDefault(s => s.Id.Equals(origin.EntSheId));
 
-            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(origin.IdProduct));
+            var product = _context.Products.FirstOrDefault(p => p.Id.Equals(origin.EntProId));
 
             return new EnterVO
             {
-                Id = origin.Id,
-                ProductId = origin.IdProduct,
+                Id = origin.EntId,
+                ProductId = origin.EntProId,
                 ProductName = product is null ? string.Empty : product.Name,
-                ProductQuantity = origin.Qntd,
-                ProductPrice = origin.Price,
-                ShelfId = origin.IdShelf,
+                ProductQuantity = origin.EntQntd,
+                ProductPrice = origin.EntPrice,
+                ShelfId = origin.EntSheId,
                 ShelfName = shelf is null ? string.Empty : shelf.Name,
-                DateEnter = origin.DateEnter,
+                DateEnter = origin.EntDateEnter,
             };
         }
 
@@ -43,12 +43,12 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new Enter
             {
-                Id = origin.Id,
-                ProductId = origin.ProductId,
-                Qntd= origin.ProductQuantity,
-                Price = origin.ProductPrice,
-                IdShelf = origin.ShelfId,
-                DateEnter = origin.DateEnter,
+                EntId = origin.Id,
+                EntProId = origin.ProductId,
+                EntQntd= origin.ProductQuantity,
+                EntPrice = origin.ProductPrice,
+                EntSheId = origin.ShelfId,
+                EntDateEnter = origin.DateEnter,
             };
         }
 
