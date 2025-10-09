@@ -117,7 +117,7 @@ namespace SmartStorage_API.Service.Implementations
             {
                 foreach (var enter in enters)
                 {
-                    var sales = _context.Sales.Where(s => s.IdEnter.Equals(enter.EntId)).ToList();
+                    var sales = _context.Sales.Where(s => s.SalEntId.Equals(enter.EntId)).ToList();
 
                     if (sales.Count > 0)
                         _context.Sales.RemoveRange(sales);

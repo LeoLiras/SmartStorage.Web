@@ -22,10 +22,10 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new Sale
             {
-                Id = origin.Id,
-                IdEnter = origin.IdEnter,
-                Qntd = origin.Qntd,
-                DateSale = origin.DateSale
+                SalId = origin.Id,
+                SalEntId = origin.IdEnter,
+                SalQntd = origin.Qntd,
+                SalDateSale = origin.DateSale
             };
         }
 
@@ -34,7 +34,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
             if (origin == null)
                 return null;
 
-            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(origin.IdEnter));
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(origin.SalEntId));
 
             if (enter is null)
                 return new SaleVO();
@@ -45,15 +45,15 @@ namespace SmartStorage_API.Data.Converter.Implementations
 
             return new SaleVO
             {
-                Id = origin.Id,
-                IdEnter = origin.IdEnter,
-                Qntd = origin.Qntd,
-                DateSale = origin.DateSale,
+                Id = origin.SalId,
+                IdEnter = origin.SalEntId,
+                Qntd = origin.SalQntd,
+                DateSale = origin.SalDateSale,
                 ProductId = product is null ? 0 : product.ProId,
                 ProductName = product is null ? string.Empty : product.ProName,
                 ShelfName = shelf is null ? string.Empty : shelf.Name,
                 EnterPrice = enter is null? 0.0m : enter.EntPrice,
-                SaleTotal = enter is null ? 0.0m : enter.EntPrice * origin.Qntd
+                SaleTotal = enter is null ? 0.0m : enter.EntPrice * origin.SalQntd
             };
         }
 

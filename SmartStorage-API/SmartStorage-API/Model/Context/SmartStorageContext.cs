@@ -50,20 +50,9 @@ public partial class SmartStorageContext : DbContext
 
         modelBuilder.Entity<Sale>(entity =>
         {
-            entity.ToTable("Sale");
+            entity.HasIndex(e => e.SalEntId, "IX_Sale_enterId");
 
-            entity.HasIndex(e => e.EnterId, "IX_Sale_enterId");
-
-            entity.Property(e => e.DateSale)
-                .HasDefaultValueSql("'2024-07-08 00:00:00-03'")
-                .HasColumnName("date_sale");
-            entity.Property(e => e.EnterId).HasColumnName("enterId");
-            entity.Property(e => e.IdEnter).HasColumnName("id_enter");
-            entity.Property(e => e.Qntd)
-                .HasDefaultValue(0)
-                .HasColumnName("qntd");
-
-            entity.HasOne(d => d.Enter).WithMany(p => p.Sales).HasForeignKey(d => d.EnterId);
+            entity.HasOne(d => d.Enter).WithMany(p => p.Sales).HasForeignKey(d => d.SalEntId);
         });
 
         modelBuilder.Entity<Shelf>(entity =>

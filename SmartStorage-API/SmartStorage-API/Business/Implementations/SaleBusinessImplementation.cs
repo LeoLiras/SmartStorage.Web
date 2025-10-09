@@ -29,12 +29,12 @@ namespace SmartStorage_API.Service.Implementations
 
         public List<SaleVO> FindAllSales()
         {
-            return _converter.Parse(_context.Sales.OrderBy(s => s.Id).ToList());
+            return _converter.Parse(_context.Sales.OrderBy(s => s.SalId).ToList());
         }
 
         public SaleVO FindSaleById(int saleId)
         {
-            var sale = _context.Sales.FirstOrDefault(s => s.Id.Equals(saleId));
+            var sale = _context.Sales.FirstOrDefault(s => s.SalId.Equals(saleId));
 
             if (sale is null)
                 throw new Exception("Venda não encontrada com o ID informado");
@@ -55,9 +55,9 @@ namespace SmartStorage_API.Service.Implementations
 
                 var sale = new Sale
                 {
-                    IdEnter = enter.EntId,
-                    Qntd = saleQntd,
-                    DateSale = DateTime.UtcNow,
+                    SalEntId = enter.EntId,
+                    SalQntd = saleQntd,
+                    SalDateSale = DateTime.UtcNow,
                 };
 
                 _context.Sales.Add(sale);
@@ -73,21 +73,21 @@ namespace SmartStorage_API.Service.Implementations
 
         public SaleVO UpdateSale(int saleId, int saleQntd)
         {
-            var sale = _context.Sales.FirstOrDefault(s => s.Id == saleId);
+            var sale = _context.Sales.FirstOrDefault(s => s.SalId == saleId);
 
             if (sale == null)
                 throw new Exception("Venda não encontrada com o ID informado");
 
-            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.IdEnter));
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.SalEntId));
 
             if (enter == null)
                 throw new Exception("Entrada não encontrada com o ID de Venda informado");
 
-            if (saleQntd < sale.Qntd)
+            if (saleQntd < sale.SalQntd)
                 enter.EntQntd += saleQntd;
             else
             {
-                var rest = (saleQntd - sale.Qntd);
+                var rest = (saleQntd - sale.SalQntd);
 
                 if (enter.EntQntd > rest)
                     enter.EntQntd -= rest;
@@ -95,7 +95,7 @@ namespace SmartStorage_API.Service.Implementations
                     throw new Exception("Não há quantidade suficiente na entrada do Produto para realizar essa atualização");
             }
 
-            sale.Qntd = saleQntd;
+            sale.SalQntd = saleQntd;
 
             _context.SaveChanges();
 
@@ -106,17 +106,17 @@ namespace SmartStorage_API.Service.Implementations
 
         public SaleVO DeleteSale(int saleId)
         {
-            var sale = _context.Sales.FirstOrDefault(s => s.Id.Equals(saleId));
+            var sale = _context.Sales.FirstOrDefault(s => s.SalId.Equals(saleId));
 
             if (sale is null)
                 throw new Exception("Venda não encontrada com o ID informado");
 
-            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.IdEnter));
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.SalEntId));
 
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID de Venda informado.");
 
-            enter.EntQntd += sale.Qntd;
+            enter.EntQntd += sale.SalQntd;
 
             _context.Sales.Remove(sale);
             _context.SaveChanges();

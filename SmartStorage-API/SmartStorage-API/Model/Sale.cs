@@ -1,16 +1,20 @@
-﻿namespace SmartStorage_API.Model;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SmartStorage_API.Model;
 
 public partial class Sale
 {
-    public int Id { get; set; }
+    [Key]
+    public int SalId { get; set; }
 
-    public int IdEnter { get; set; }
+    [Required(ErrorMessage = "O ID da entrada relativa a venda é obrigatório.")]
+    public int SalEntId { get; set; }
 
-    public int? EnterId { get; set; }
+    [Required(ErrorMessage = "A quantidade da venda é obrigatória.")]
+    public int SalQntd { get; set; }
 
-    public int Qntd { get; set; }
-
-    public DateTime DateSale { get; set; }
+    [Required(ErrorMessage = "A data da venda é obrigatória.")]
+    public DateTime SalDateSale { get; set; }
 
     public virtual Enter? Enter { get; set; }
 }
