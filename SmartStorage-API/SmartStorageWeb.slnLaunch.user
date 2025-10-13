@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "SmartStorage-API\\SmartStorage.API.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SmartStorage.Blazor\\SmartStorage.Blazor.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
