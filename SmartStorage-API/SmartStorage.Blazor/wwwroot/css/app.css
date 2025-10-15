@@ -101,3 +101,12 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
+
+.mud-nav-link:hover {
+    background-color: #1976d2 !important;
+    color: white !important;
+}
+
+.mud-nav-link-active {
+    color: #1976d2;
+}
