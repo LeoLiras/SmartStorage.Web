@@ -65,19 +65,6 @@
     color: white;
 }
 
-/*My code*/
-
-.menu-item:hover {
-    background-color: #ff660020 !important; /* cor de fundo com transparência */
-    color: #ffa500 !important; /* muda texto e ícone no hover */
-}
-
-/* link ativo (clicado / página atual) */
-.menu .mud-nav-link.active {
-    background-color: #ff6600 !important;
-    color: #ffffff !important;
-}
-
 @media (min-width: 641px) {
     .navbar-toggler {
         display: none;
