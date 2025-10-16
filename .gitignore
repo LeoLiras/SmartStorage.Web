@@ -53,3 +53,7 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 .vs/
+
+# Ignora apenas os arquivos .csproj.user
+*.csproj.user
+
