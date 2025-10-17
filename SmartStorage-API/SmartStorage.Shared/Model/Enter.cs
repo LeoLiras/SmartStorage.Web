@@ -26,7 +26,6 @@ public partial class Enter
     public int EntQntd { get; set; }
 
     [Required(ErrorMessage = "O preço da entrada é obrigatório.")]
-    [Precision(18,2)]
     public decimal EntPrice { get; set; }
 
     [JsonIgnore]

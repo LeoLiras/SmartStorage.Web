@@ -12,4 +12,8 @@
     <PackageReference Include="MudBlazor" Version="8.13.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SmartStorage.Shared\SmartStorage.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

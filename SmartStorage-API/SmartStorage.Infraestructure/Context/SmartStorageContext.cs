@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using SmartStorage_API.Model;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace SmartStorage_API.Model.Context;
 
@@ -35,6 +32,8 @@ public partial class SmartStorageContext : DbContext
             entity.HasIndex(e => e.EntProId, "IX_Enter_productId");
 
             entity.HasIndex(e => e.EntSheId, "IX_Enter_shelfId");
+
+            entity.Property(p => p.EntPrice).HasPrecision(18, 2);
 
             entity.HasOne(d => d.Product).WithMany(p => p.Enters).HasForeignKey(d => d.EntProId);
 
