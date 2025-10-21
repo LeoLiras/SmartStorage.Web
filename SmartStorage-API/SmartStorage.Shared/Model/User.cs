@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SmartStorage_API.Model;
+namespace SmartStorage_Shared.Model;
 
 public partial class User
 {

@@ -1,7 +1,7 @@
 ﻿using SmartStorage_API.Data.Converter.Contract;
 using SmartStorage_API.Data.VO;
-using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
+using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Data.Converter.Implementations
 {
@@ -45,7 +45,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
             {
                 EntId = origin.Id,
                 EntProId = origin.ProductId,
-                EntQntd= origin.ProductQuantity,
+                EntQntd = origin.ProductQuantity,
                 EntPrice = origin.ProductPrice,
                 EntSheId = origin.ShelfId,
                 EntDateEnter = origin.DateEnter,

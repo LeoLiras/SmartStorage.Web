@@ -1,6 +1,6 @@
 ﻿using SmartStorage_API.Data.Converter.Contract;
 using SmartStorage_API.Data.VO;
-using SmartStorage_API.Model;
+using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Data.Converter.Implementations
 {

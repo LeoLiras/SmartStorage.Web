@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Model.Context;
 

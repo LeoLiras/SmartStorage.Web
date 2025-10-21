@@ -4,11 +4,13 @@
     "Projects": [
       {
         "Path": "SmartStorage-API\\SmartStorage.API.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "http"
       },
       {
         "Path": "SmartStorage.Blazor\\SmartStorage.Blazor.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "http"
       }
     ]
   }

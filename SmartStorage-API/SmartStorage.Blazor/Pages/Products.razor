@@ -1,7 +1,15 @@
 ﻿@page "/product"
 
+@inject HttpClient Http
+
 <Alert></Alert>
 
 @code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        var products = await Http.GetFromJsonAsync<List<Product>>("api/storage/shelf/v1/allocation");
+        var name = products[0].ProName;
+    }
 
 }

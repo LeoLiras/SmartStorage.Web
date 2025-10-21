@@ -55,7 +55,20 @@ builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();
 builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Blazor",
+        policy => policy
+            .WithOrigins(allowedOrigins ?? Array.Empty<string>())
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 var app = builder.Build();
+
+app.UseCors("Blazor");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

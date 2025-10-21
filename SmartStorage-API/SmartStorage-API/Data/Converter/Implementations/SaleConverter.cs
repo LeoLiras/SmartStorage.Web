@@ -1,7 +1,7 @@
 ﻿using SmartStorage_API.Data.Converter.Contract;
 using SmartStorage_API.Data.VO;
-using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
+using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Data.Converter.Implementations
 {
@@ -52,7 +52,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 ProductId = product is null ? 0 : product.ProId,
                 ProductName = product is null ? string.Empty : product.ProName,
                 ShelfName = shelf is null ? string.Empty : shelf.SheName,
-                EnterPrice = enter is null? 0.0m : enter.EntPrice,
+                EnterPrice = enter is null ? 0.0m : enter.EntPrice,
                 SaleTotal = enter is null ? 0.0m : enter.EntPrice * origin.SalQntd
             };
         }

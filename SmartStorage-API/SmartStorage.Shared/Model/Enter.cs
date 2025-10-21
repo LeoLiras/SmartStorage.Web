@@ -1,10 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace SmartStorage_API.Model;
+namespace SmartStorage_Shared.Model;
 
 [Table("Enter", Schema = "dbo")]
 public partial class Enter

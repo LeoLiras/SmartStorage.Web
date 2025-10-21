@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace SmartStorage_API.Model;
+namespace SmartStorage_Shared.Model;
 
 [Table("Product", Schema = "dbo")]
 public partial class Product

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SmartStorage_API.Model;
+namespace SmartStorage_Shared.Model;
 
 [Table("Sale", Schema = "dbo")]
 public partial class Sale
