@@ -16,7 +16,7 @@ namespace SmartStorage_Shared.VO
 
         public int? EmployeeId { get; set; }
 
-        public Product Parse(ProductVO origin)
+        public static Product Parse(ProductVO origin)
         {
             if (origin == null)
                 return null;
@@ -32,7 +32,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public List<Product> Parse(List<ProductVO> origin)
+        public static List<Product> ParseList(List<ProductVO> origin)
         {
             if (origin == null)
                 return null;

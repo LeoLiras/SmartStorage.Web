@@ -1,6 +1,6 @@
 ﻿@page "/product"
 
-@inject HttpClient Http
+@inject ApiExtensions api
 
 <Alert></Alert>
 
@@ -8,8 +8,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var products = await Http.GetFromJsonAsync<List<Product>>("api/storage/shelf/v1/allocation");
-        var name = products[0].ProName;
+        var newProduct = new ProductVO
+        {
+            Name = "TesteAPIExtension",
+            Descricao = "Test",
+            DateRegister = DateTime.Now,
+            Qntd = 10,
+            EmployeeId = 1
+        };
+
+       var result = await api.Post<ProductVO>("api/storage/products/v1", newProduct);
     }
 
 }

@@ -29,7 +29,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Employee> Parse(List<EmployeeVO> origin)
+        public static List<Employee> ParseList(List<EmployeeVO> origin)
         {
             if (origin == null)
                 return null;

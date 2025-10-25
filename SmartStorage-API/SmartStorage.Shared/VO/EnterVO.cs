@@ -36,7 +36,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Enter> Parse(List<EnterVO> origin)
+        public static List<Enter> ParseList(List<EnterVO> origin)
         {
             if (origin == null)
                 return null;

@@ -23,7 +23,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Shelf> Parse(List<ShelfVO> origin)
+        public static List<Shelf> ParseList(List<ShelfVO> origin)
         {
             if (origin == null)
                 return null;
