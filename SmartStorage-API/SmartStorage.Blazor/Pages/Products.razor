@@ -1,23 +1,46 @@
 ﻿@page "/product"
+@using System.Text
 
 @inject ApiExtensions api
 
-<Alert></Alert>
+@if(products is null)
+{
+    <Loading></Loading>
+}
+else if(products.Count == 0)
+{
+    <MudAlert Severity="Severity.Warning">There are no products registred in database.</MudAlert>
+}
+else
+{
+    <MudButton Class="m-2" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary">Add New Product</MudButton>
+
+    foreach(var product in products)
+    {
+        <div style="margin: 10px">
+            <MudCard Class="card-hover" Style="width: 300px;">
+                <MudCardMedia Image=@Encoding.UTF8.GetString(product.ProImage) Height="200" />
+                <MudCardContent>
+                    <MudText Typo="Typo.h5">@product.Name</MudText>
+                    <MudText Typo="Typo.body2">@product.Descricao</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success">Edit</MudButton>
+                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </div>
+    }
+}
+
+
 
 @code {
+    List<ProductVO>? products;
 
     protected override async Task OnInitializedAsync()
     {
-        var newProduct = new ProductVO
-        {
-            Name = "TesteAPIExtension",
-            Descricao = "Test",
-            DateRegister = DateTime.Now,
-            Qntd = 10,
-            EmployeeId = 1
-        };
-
-       var result = await api.Post<ProductVO>("api/storage/products/v1", newProduct);
+        products = await api.Get<ProductVO>("api/storage/products/v1");
     }
 
 }
