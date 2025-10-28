@@ -16,6 +16,8 @@ namespace SmartStorage_Shared.VO
 
         public int? EmployeeId { get; set; }
 
+        public byte[]? ProImage { get; set; }
+
         public static Product Parse(ProductVO origin)
         {
             if (origin == null)

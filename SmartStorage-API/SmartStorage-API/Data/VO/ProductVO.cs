@@ -17,6 +17,8 @@ namespace SmartStorage_API.Data.VO
 
         public int? EmployeeId { get; set; }
 
+        public byte[]? ProImage { get; set; }
+
         public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
     }
 }
