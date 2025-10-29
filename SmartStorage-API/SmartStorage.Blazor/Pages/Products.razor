@@ -40,7 +40,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        products = await api.Get<ProductVO>("api/storage/products/v1");
+        products = await api.Get<ProductVO>();
     }
 
 }
