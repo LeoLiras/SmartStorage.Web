@@ -25,7 +25,7 @@ else
                     <MudText Typo="Typo.body2">@product.Descricao</MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success">Edit</MudButton>
+                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" Href=@($"product/edit/{@product.Id}")>Edit</MudButton>
                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
                 </MudCardActions>
             </MudCard>

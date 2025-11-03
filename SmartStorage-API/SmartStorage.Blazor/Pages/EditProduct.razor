@@ -1,0 +1,161 @@
+﻿@page "/product/edit/{productId:int}"
+
+@inject ApiExtensions api
+
+
+@using System.ComponentModel.DataAnnotations
+
+@if(product is null)
+{
+    <Loading></Loading>
+}
+else
+{
+    <EditForm Model="product" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12" sm="7" xl="12">
+            <MudCard Class="mt-3">
+                <MudCardContent>
+                    <MudTextField Label="Product Name" @bind-Value="product.Name" For="@(() => product.Name)" />
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="7" xl="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Product Description" @bind-Value="product.Descricao" For="@(() => product.Descricao)" />
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+            <MudItem xs="12" sm="12" xl="12">
+                <div style="display: flex; gap: 8px;">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudNumericField Label="Product Quantity" @bind-Value="product.Qntd" For="(() => product.Qntd)" />
+                        </MudCardContent>
+                    </MudCard>
+                    <MudCard>
+                        <MudCardContent>
+                            <MudDatePicker Label="Date Register" @bind-Date="productDate" Color="Color.Info" />
+                        </MudCardContent>
+                    </MudCard>
+                </div>
+        </MudItem>
+        <MudItem xs="12" sm="12" xl="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudSelect T="EmployeeVO" @bind-Value="selectedEmployee" Label="Select Employee" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
+                        @foreach (var emp in employees)
+                        {
+                            <MudSelectItem Value="@emp">@emp.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="12" xl="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Image" @bind-Value="fileName" ReadOnly="true" />
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="12" xl="12">
+           <div style="display: flex; gap: 8px;">
+                <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Image">
+                            Upload Image
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+                <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" OnClick="@ClearFileAsync">
+                    Clear
+                </MudButton>
+           </div>
+        </MudItem>
+        <MudItem xs="12" sm="12">
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Edit</MudButton>
+        </MudItem>
+        @* <MudItem xs="12" sm="5">
+            <MudPaper Class="pa-4 mud-height-full">
+                <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
+                @if (success)
+                {
+                    <MudText Color="Color.Success">Success</MudText>
+                }
+                else
+                {
+                    <MudText Color="@Color.Error">
+                        <ValidationSummary />
+                    </MudText>
+                }
+            </MudPaper>
+        </MudItem> *@
+    </MudGrid>
+</EditForm>
+}
+
+
+
+
+@code {
+    [Parameter]
+    public int productId { get; set; }
+
+    private ProductVO? product;
+    private List<EmployeeVO>? employees;
+    private EmployeeVO? selectedEmployee;
+
+    private DateTime? productDate = DateTime.Today;
+
+    IBrowserFile? file;
+    private string? fileName;
+
+    #region Events
+    protected override async Task OnParametersSetAsync()
+    {
+        product = await api.GetById<ProductVO>(productId);
+        employees = await api.Get<EmployeeVO>();
+    }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        StateHasChanged();
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async void UploadFile(IBrowserFile file)
+    {
+        this.file = file;
+        fileName = file.Name;
+
+        using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+
+        product.ProImage = memoryStream.ToArray();
+    }
+
+    private Task ClearFileAsync()
+    {
+        file = null;
+        fileName = string.Empty;
+
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    
+    
+
+    
+}
+
+  
