@@ -186,7 +186,7 @@ namespace SmartStorage.Blazor.Utils
         /// <param name="vo"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<TVO?> Put<TVO>(TVO vo) where TVO : class
+        public async Task<TVO?> Put<TVO>(TVO vo, int id) where TVO : class
         {
             var url = ReturnEndpoint<TVO>(ERequestTypes.PUT);
 
@@ -196,7 +196,7 @@ namespace SmartStorage.Blazor.Utils
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
 
-            var response = await _http.PutAsJsonAsync(url, vo);
+            var response = await _http.PutAsJsonAsync($"{url}/{id}", vo);
 
             response.EnsureSuccessStatusCode();
 

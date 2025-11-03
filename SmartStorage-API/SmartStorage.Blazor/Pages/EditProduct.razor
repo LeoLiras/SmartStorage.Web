@@ -1,6 +1,7 @@
 ﻿@page "/product/edit/{productId:int}"
 
 @inject ApiExtensions api
+@inject NavigationManager nav
 
 
 @using System.ComponentModel.DataAnnotations
@@ -120,8 +121,11 @@ else
         employees = await api.Get<EmployeeVO>();
     }
 
-    private void OnValidSubmit(EditContext context)
+    private async Task OnValidSubmit(EditContext context)
     {
+        await api.Put<ProductVO>(product, productId);
+        nav.NavigateTo("product");
+        
         StateHasChanged();
     }
 
