@@ -2,11 +2,12 @@
 
 @inject ApiExtensions api
 @inject NavigationManager nav
+@inject ShowDialog ShowDialog
 
 
 @using System.ComponentModel.DataAnnotations
 
-@if(product is null)
+@if(product is null || loading)
 {
     <Loading></Loading>
 }
@@ -79,21 +80,6 @@ else
         <MudItem xs="12" sm="12">
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Edit</MudButton>
         </MudItem>
-        @* <MudItem xs="12" sm="5">
-            <MudPaper Class="pa-4 mud-height-full">
-                <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
-                @if (success)
-                {
-                    <MudText Color="Color.Success">Success</MudText>
-                }
-                else
-                {
-                    <MudText Color="@Color.Error">
-                        <ValidationSummary />
-                    </MudText>
-                }
-            </MudPaper>
-        </MudItem> *@
     </MudGrid>
 </EditForm>
 }
@@ -114,6 +100,8 @@ else
     IBrowserFile? file;
     private string? fileName;
 
+    bool loading = false;
+
     #region Events
     protected override async Task OnParametersSetAsync()
     {
@@ -123,9 +111,10 @@ else
 
     private async Task OnValidSubmit(EditContext context)
     {
-        await api.Put<ProductVO>(product, productId);
-        nav.NavigateTo("product");
-        
+        var result = await api.Put<ProductVO>(product, productId);
+
+        await ShowDialog.ShowDialogAsync("Product updated successfully", "Success", Color.Success, "product");
+
         StateHasChanged();
     }
 
