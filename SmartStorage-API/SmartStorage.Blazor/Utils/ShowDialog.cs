@@ -13,13 +13,14 @@ namespace SmartStorage.Blazor.Utils
             _dialogService = dialogService;
         }
 
-        public async Task ShowDialogAsync(string message, string title = "", Color color = Color.Info, string Navigate = "")
+        public async Task ShowDialogAsync(string message, string title = "", Color color = Color.Info, string navigate = "", bool showCancel = false)
         {
             var parameters = new DialogParameters<Dialog>
         {
             { x => x.ContentText, message },
             { x => x.Color, color },
-            {x => x.Navigate, Navigate }
+            {x => x.Navigate, navigate },
+            {x => x.ShowCancel, showCancel }
         };
 
             await _dialogService.ShowAsync<Dialog>(title, parameters);

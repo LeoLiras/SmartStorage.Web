@@ -5,7 +5,10 @@
         <MudText>@ContentText</MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
+        @if (ShowCancel)
+        {
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+        }
         <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">Ok</MudButton>
     </DialogActions>
 </MudDialog>
@@ -18,10 +21,13 @@
     public string ContentText { get; set; }
 
     [Parameter]
+    public string Navigate { get; set; }
+
+    [Parameter]
     public Color Color { get; set; }
 
     [Parameter]
-    public string Navigate { get; set; }
+    public bool ShowCancel { get; set; } = false;
 
     private void Submit()
     {

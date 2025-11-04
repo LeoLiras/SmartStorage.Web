@@ -111,6 +111,8 @@ else
 
     private async Task OnValidSubmit(EditContext context)
     {
+        loading = true;
+
         var result = await api.Put<ProductVO>(product, productId);
 
         await ShowDialog.ShowDialogAsync("Product updated successfully", "Success", Color.Success, "product");
