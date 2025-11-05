@@ -1,7 +1,7 @@
 ﻿@using static SmartStorage.Blazor.Enums.DialogStates
 @inject NavigationManager nav
 
-<MudDialog Style="">
+<MudDialog Style="@($"background-color: {backgroundColor}; color: white;")">
     <DialogContent>
         <MudText>@ContentText</MudText>
     </DialogContent>
@@ -41,20 +41,40 @@
     [Parameter]
     public EDialogStates State { get; set; } = EDialogStates.Success;
 
-
     [Parameter]
     public EDialogStates dialogState { get; set; } = EDialogStates.Success;
 
-    public Color buttonColor { get; set; }
-    public Color stateColor { get; set; }
 
-    // protected override Task OnInitializedAsync()
-    // {
-    //     if(dialogState == EDialogStates.Success)
-    //     {
-    //         buttonColor = Color.Primary;
-    //     }
-    // }
+    private string backgroundColor { get; set; }
+    public Color buttonColor { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Default is success
+        switch (State)
+        {
+            case EDialogStates.Success:
+                backgroundColor = "#34eb4f";
+                buttonColor = Color.Success;
+                break;
+            case EDialogStates.Error:
+                backgroundColor = "#eb1532";
+                buttonColor = Color.Error;
+                break;
+            case EDialogStates.Warning:
+                backgroundColor = "#f7e519";
+                buttonColor = Color.Warning;
+                break;
+            case EDialogStates.Info:
+                backgroundColor = "#2293f0";
+                buttonColor = Color.Info;
+                break;
+            default:
+                backgroundColor = "#34eb4f";
+                buttonColor = Color.Success;
+                break;
+        }
+    }
 
     private void Submit()
     {
@@ -62,7 +82,7 @@
 
         if(!string.IsNullOrWhiteSpace(Navigate))
             nav.NavigateTo(Navigate);
-    } 
-
+    }
+    
     private void Cancel() => MudDialog.Cancel();
 }
