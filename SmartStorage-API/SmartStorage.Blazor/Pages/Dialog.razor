@@ -1,6 +1,7 @@
-﻿@inject NavigationManager nav
+﻿@using static SmartStorage.Blazor.Enums.DialogStates
+@inject NavigationManager nav
 
-<MudDialog>
+<MudDialog Style="">
     <DialogContent>
         <MudText>@ContentText</MudText>
     </DialogContent>
@@ -9,7 +10,15 @@
         {
             <MudButton OnClick="Cancel">Cancel</MudButton>
         }
-        <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">Ok</MudButton>
+
+        @if (ShowYes)
+        {
+            <MudButton Color="@buttonColor" Variant="Variant.Filled" OnClick="Submit">Yes</MudButton>
+        }
+        else
+        {
+            <MudButton Color="@buttonColor" Variant="Variant.Filled" OnClick="Submit">Ok</MudButton>
+        }
     </DialogActions>
 </MudDialog>
 
@@ -24,10 +33,28 @@
     public string Navigate { get; set; }
 
     [Parameter]
-    public Color Color { get; set; }
+    public bool ShowCancel { get; set; } = false;
 
     [Parameter]
-    public bool ShowCancel { get; set; } = false;
+    public bool ShowYes { get; set; } = false;
+
+    [Parameter]
+    public EDialogStates State { get; set; } = EDialogStates.Success;
+
+
+    [Parameter]
+    public EDialogStates dialogState { get; set; } = EDialogStates.Success;
+
+    public Color buttonColor { get; set; }
+    public Color stateColor { get; set; }
+
+    // protected override Task OnInitializedAsync()
+    // {
+    //     if(dialogState == EDialogStates.Success)
+    //     {
+    //         buttonColor = Color.Primary;
+    //     }
+    // }
 
     private void Submit()
     {

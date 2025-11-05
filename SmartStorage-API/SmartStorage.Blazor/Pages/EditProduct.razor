@@ -6,6 +6,7 @@
 
 
 @using System.ComponentModel.DataAnnotations
+@using static SmartStorage.Blazor.Enums.DialogStates
 
 @if(product is null || loading)
 {
@@ -115,7 +116,7 @@ else
 
         var result = await api.Put<ProductVO>(product, productId);
 
-        await ShowDialog.ShowDialogAsync("Product updated successfully", "Success", Color.Success, "product");
+        await ShowDialog.ShowDialogAsync("Product updated successfully", "Success", "product", EDialogStates.Success);
 
         StateHasChanged();
     }

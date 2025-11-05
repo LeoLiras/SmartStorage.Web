@@ -1,5 +1,6 @@
 ﻿using MudBlazor;
 using SmartStorage.Blazor.Pages;
+using static SmartStorage.Blazor.Enums.DialogStates;
 
 
 namespace SmartStorage.Blazor.Utils
@@ -13,13 +14,13 @@ namespace SmartStorage.Blazor.Utils
             _dialogService = dialogService;
         }
 
-        public async Task ShowDialogAsync(string message, string title = "", Color color = Color.Info, string navigate = "", bool showCancel = false)
+        public async Task ShowDialogAsync(string message, string title = "", string navigate = "", EDialogStates state = EDialogStates.Success, bool showCancel = false, bool showYes = false)
         {
             var parameters = new DialogParameters<Dialog>
         {
             { x => x.ContentText, message },
-            { x => x.Color, color },
             {x => x.Navigate, navigate },
+            {x => x.ShowYes, showYes },
             {x => x.ShowCancel, showCancel }
         };
 
