@@ -8,7 +8,7 @@
     <DialogActions>
         @if (ShowCancel)
         {
-            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
         }
 
         @if (ShowYes)
@@ -33,19 +33,19 @@
     public string Navigate { get; set; }
 
     [Parameter]
-    public bool ShowCancel { get; set; } = false;
+    public bool ShowCancel { get; set; }
 
     [Parameter]
-    public bool ShowYes { get; set; } = false;
+    public bool ShowYes { get; set; }
 
     [Parameter]
-    public EDialogStates State { get; set; } = EDialogStates.Success;
+    public EDialogStates State { get; set; }
 
     [Parameter]
     public EDialogStates dialogState { get; set; } = EDialogStates.Success;
 
 
-    private string backgroundColor { get; set; }
+    private string? backgroundColor { get; set; }
     public Color buttonColor { get; set; }
 
     protected override async Task OnInitializedAsync()
