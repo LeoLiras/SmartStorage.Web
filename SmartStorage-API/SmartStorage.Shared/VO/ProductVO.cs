@@ -14,7 +14,7 @@ namespace SmartStorage_Shared.VO
 
         public int Qntd { get; set; }
 
-        public int? EmployeeId { get; set; }
+        public int EmployeeId { get; set; }
 
         public byte[]? ProImage { get; set; }
 

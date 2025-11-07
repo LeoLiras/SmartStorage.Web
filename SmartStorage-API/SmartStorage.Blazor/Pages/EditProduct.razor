@@ -3,12 +3,13 @@
 @inject ApiExtensions api
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
+@inject VariablesExtensions app
 
 
 @using System.ComponentModel.DataAnnotations
 @using static SmartStorage.Blazor.Enums.DialogStates
 
-@if(product is null || loading)
+@if(product is null || employees is null || loading)
 {
     <Loading></Loading>
 }
@@ -48,10 +49,10 @@ else
         <MudItem xs="12" sm="12" xl="12">
             <MudCard>
                 <MudCardContent>
-                    <MudSelect T="EmployeeVO" @bind-Value="selectedEmployee" Label="Select Employee" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
+                    <MudSelect T="int" @bind-Value="product.EmployeeId" Label="Select Employee" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
                         @foreach (var emp in employees)
                         {
-                            <MudSelectItem Value="@emp">@emp.Name</MudSelectItem>
+                            <MudSelectItem Value="@emp.Id">@emp.Name</MudSelectItem>
                         }
                     </MudSelect>
                 </MudCardContent>
@@ -94,7 +95,6 @@ else
 
     private ProductVO? product;
     private List<EmployeeVO>? employees;
-    private EmployeeVO? selectedEmployee;
 
     private DateTime? productDate = DateTime.Today;
 
@@ -106,7 +106,11 @@ else
     #region Events
     protected override async Task OnParametersSetAsync()
     {
-        product = await api.GetById<ProductVO>(productId);
+        if (app.ActualProduct is null)
+            product = await api.GetById<ProductVO>(productId);
+        else
+            product = app.ActualProduct;
+
         employees = await api.Get<EmployeeVO>();
     }
 

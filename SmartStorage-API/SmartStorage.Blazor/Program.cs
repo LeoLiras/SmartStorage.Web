@@ -14,5 +14,6 @@ builder.Services.AddMudServices();
 
 builder.Services.AddScoped<ApiExtensions>();
 builder.Services.AddScoped<ShowDialog>();
+builder.Services.AddScoped<VariablesExtensions>();
 
 await builder.Build().RunAsync();

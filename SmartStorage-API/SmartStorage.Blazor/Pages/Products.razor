@@ -2,6 +2,8 @@
 @using System.Text
 
 @inject ApiExtensions api
+@inject NavigationManager nav
+@inject VariablesExtensions app
 
 @if(products is null)
 {
@@ -25,7 +27,7 @@ else
                     <MudText Typo="Typo.body2">@product.Descricao</MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" Href=@($"product/edit/{@product.Id}")>Edit</MudButton>
+                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Edit</MudButton>
                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
                 </MudCardActions>
             </MudCard>
@@ -41,6 +43,13 @@ else
     protected override async Task OnInitializedAsync()
     {
         products = await api.Get<ProductVO>();
+    }
+
+    private void Edit(int productId)
+    {
+        app.ActualProduct = products.FirstOrDefault(p => p.Id.Equals(productId));
+
+        nav.NavigateTo($"product/edit/{productId}");
     }
 
 }
