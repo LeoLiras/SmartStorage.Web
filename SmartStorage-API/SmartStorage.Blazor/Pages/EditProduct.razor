@@ -86,9 +86,6 @@ else
 </EditForm>
 }
 
-
-
-
 @code {
     [Parameter]
     public int productId { get; set; }
@@ -104,6 +101,7 @@ else
     bool loading = false;
 
     #region Events
+
     protected override async Task OnParametersSetAsync()
     {
         if (app.ActualProduct is null)
@@ -111,7 +109,10 @@ else
         else
             product = app.ActualProduct;
 
-        employees = await api.Get<EmployeeVO>();
+        if (app.Employees is null)
+            employees = await api.Get<EmployeeVO>();
+        else
+            employees = app.Employees;
     }
 
     private async Task OnValidSubmit(EditContext context)
