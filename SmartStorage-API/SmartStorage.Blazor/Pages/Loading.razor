@@ -2,13 +2,13 @@
     <div style="display: flex; gap: 8px;">
         <MudImage Fluid="true" Width="50" Height="100" Src="images/loading.gif" Alt="Swedish Farm House" Class="rounded-lg" />
 
-        @if(string.IsNullOrWhiteSpace(message))
+        @if(string.IsNullOrWhiteSpace(Message))
         {
             <MudText>Loading...</MudText>
         }
         else
         {
-            <MudText>@message</MudText>
+            <MudText>@Message</MudText>
         } 
     </div>
 </MudAlert>
@@ -16,6 +16,6 @@
 @code{
 
     [Parameter]
-    public string message { get; set; }
+    public string Message { get; set; }
 }
 
