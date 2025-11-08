@@ -1,5 +1,21 @@
 ﻿<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-3">
-    Loading... 
-    <MudImage Fluid="true" Width="50" Height="100" Src="images/loading.gif" Alt="Swedish Farm House" Class="rounded-lg" />
+    <div style="display: flex; gap: 8px;">
+        <MudImage Fluid="true" Width="50" Height="100" Src="images/loading.gif" Alt="Swedish Farm House" Class="rounded-lg" />
+
+        @if(string.IsNullOrWhiteSpace(message))
+        {
+            <MudText>Loading...</MudText>
+        }
+        else
+        {
+            <MudText>@message</MudText>
+        } 
+    </div>
 </MudAlert>
+
+@code{
+
+    [Parameter]
+    public string message { get; set; }
+}
 
