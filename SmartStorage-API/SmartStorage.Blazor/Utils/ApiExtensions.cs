@@ -54,19 +54,25 @@ namespace SmartStorage.Blazor.Utils
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(nameof(url), message: "O campo URL é obrigatório.");
 
-            var voList = await _http.GetFromJsonAsync<List<TVO>>(url);
+            var response = await _http.GetAsync(url);
 
-            if (voList == null)
-                return null;
+            if (response.IsSuccessStatusCode)
+            {
+                var parseListMethod = typeof(TVO).GetMethod("ParseList", new[] { typeof(List<TVO>) });
 
-            var parseListMethod = typeof(TVO).GetMethod("ParseList", new[] { typeof(List<TVO>) });
+                if (parseListMethod == null)
+                    throw new InvalidOperationException($"O método ParseList(List<{typeof(TVO).Name}>) não foi encontrado.");
 
-            if (parseListMethod == null)
-                throw new InvalidOperationException($"O método ParseList(List<{typeof(TVO).Name}>) não foi encontrado.");
+                var modelList = (List<T>)parseListMethod.Invoke(null, new object[] { response })!;
 
-            var modelList = (List<T>)parseListMethod.Invoke(null, new object[] { voList })!;
+                return modelList;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
 
-            return modelList;
+                throw new ApiException((int)response.StatusCode, error);
+            }  
         }
 
         /// <summary>
@@ -82,12 +88,18 @@ namespace SmartStorage.Blazor.Utils
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(nameof(url), message: "O campo URL é obrigatório.");
 
-            var voList = await _http.GetFromJsonAsync<List<TVO>>(url);
+            var response = await _http.GetAsync(url);
 
-            if (voList == null)
-                return null;
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<TVO>>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
 
-            return voList;
+                throw new ApiException((int)response.StatusCode, error);
+            }
         }
 
         /// <summary>
@@ -109,19 +121,25 @@ namespace SmartStorage.Blazor.Utils
             if (id == 0)
                 throw new ArgumentNullException(nameof(url), message: "O campo ID é obrigatório.");
 
-            var vo = await _http.GetFromJsonAsync<TVO>($"{url}/{id}");
+            var response = await _http.GetAsync($"{url}/{id}");
 
-            if (vo == null)
-                return default;
+            if (response.IsSuccessStatusCode)
+            {
+                var parseMethod = typeof(TVO).GetMethod("Parse", new[] { typeof(TVO) });
 
-            var parseMethod = typeof(TVO).GetMethod("Parse", new[] { typeof(TVO) });
+                if (parseMethod == null)
+                    throw new InvalidOperationException($"O método Parse({typeof(TVO).Name}) não foi encontrado.");
 
-            if (parseMethod == null)
-                throw new InvalidOperationException($"O método Parse({typeof(TVO).Name}) não foi encontrado.");
+                var model = (T)parseMethod.Invoke(null, new object[] { response })!;
 
-            var model = (T)parseMethod.Invoke(null, new object[] { vo })!;
+                return model;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
 
-            return model;
+                throw new ApiException((int)response.StatusCode, error);
+            }
         }
 
         /// <summary>
@@ -177,11 +195,16 @@ namespace SmartStorage.Blazor.Utils
 
             var response = await _http.PostAsJsonAsync(url, vo);
 
-            response.EnsureSuccessStatusCode();
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<TVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
 
-            var result = await response.Content.ReadFromJsonAsync<TVO>();
-
-            return result;
+                throw new ApiException((int)response.StatusCode, error);
+            }
         }
 
         /// <summary>
