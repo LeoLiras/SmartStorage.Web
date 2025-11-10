@@ -1,4 +1,5 @@
 ﻿using SmartStorage_Shared.Model;
+using System.ComponentModel.DataAnnotations;
 
 namespace SmartStorage_Shared.VO
 {
@@ -6,10 +7,16 @@ namespace SmartStorage_Shared.VO
     {
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "O nome do colaborador é obrigatório.")]
+        [StringLength(100, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
         public string? Name { get; set; }
 
+        [Required(ErrorMessage = "O RG do colaborador é obrigatório.")]
+        [StringLength(15)]
         public string? Rg { get; set; }
 
+        [Required(ErrorMessage = "O CPF do colaborador é obrigatório.")]
+        [StringLength(11, MinimumLength = 11, ErrorMessage = "CPF com formato incorreto.")]
         public string? Cpf { get; set; }
 
         public DateTime DateRegister { get; set; }

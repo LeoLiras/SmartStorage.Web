@@ -1,4 +1,5 @@
 ﻿using SmartStorage_Shared.Model;
+using System.ComponentModel.DataAnnotations;
 
 namespace SmartStorage_Shared.VO
 {
@@ -6,12 +7,18 @@ namespace SmartStorage_Shared.VO
     {
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "O nome do produto é obrigatório.")]
+        [StringLength(100, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
         public string? Name { get; set; }
 
+        [Required(ErrorMessage = "A descrição do produto é obrigatória.")]
+        [StringLength(300, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
         public string? Descricao { get; set; }
 
+        [Required(ErrorMessage = "A data de registro do produto é obrigatória.")]
         public DateTime DateRegister { get; set; }
 
+        [Required(ErrorMessage = "A quantidade do produto é obrigatória.")]
         public int Qntd { get; set; }
 
         public int EmployeeId { get; set; }
