@@ -3,7 +3,7 @@
 
 <MudDialog Style="@($"background-color: {backgroundColor}; color: white;")">
     <DialogContent>
-        <MudText>@ContentText</MudText>
+        <MudText>@((MarkupString)ContentText.Replace("\n", "<br>"))</MudText>
     </DialogContent>
     <DialogActions>
         @if (ShowCancel)
@@ -62,7 +62,7 @@
                 buttonColor = Color.Error;
                 break;
             case EDialogStates.Warning:
-                backgroundColor = "#f7e519";
+                backgroundColor = "#ffcc00";
                 buttonColor = Color.Warning;
                 break;
             case EDialogStates.Info:
