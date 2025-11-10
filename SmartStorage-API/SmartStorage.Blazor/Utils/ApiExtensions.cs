@@ -143,12 +143,18 @@ namespace SmartStorage.Blazor.Utils
             if (id == 0)
                 throw new ArgumentNullException(nameof(url), message: "O campo ID é obrigatório.");
 
-            var vo = await _http.GetFromJsonAsync<TVO>($"{url}/{id}");
+            var response = await _http.GetAsync($"{url}/{id}");
 
-            if (vo == null)
-                return default;
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<TVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
 
-            return vo;
+                throw new ApiException((int)response.StatusCode, error);
+            }
         }
 
         /// <summary>
@@ -198,11 +204,16 @@ namespace SmartStorage.Blazor.Utils
 
             var response = await _http.PutAsJsonAsync($"{url}/{id}", vo);
 
-            response.EnsureSuccessStatusCode();
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<TVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
 
-            var result = await response.Content.ReadFromJsonAsync<TVO>();
-
-            return result;
+                throw new ApiException((int)response.StatusCode, error);
+            }
         }
 
         private string ReturnEndpoint<TVO>(ERequestTypes type) where TVO : class

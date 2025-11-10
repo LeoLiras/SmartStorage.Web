@@ -117,13 +117,22 @@ else
 
     private async Task OnValidSubmit(EditContext context)
     {
-        loading = true;
+        try
+        {
+            loading = true;
 
-        var result = await api.Put<ProductVO>(product, productId);
+            var result = await api.Put<ProductVO>(product, productId);
 
-        await ShowDialog.ShowDialogAsync("Product updated successfully", "Success", "product", EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Product updated successfully", "Success", "product", EDialogStates.Success);
 
-        StateHasChanged();
+            StateHasChanged();
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Error uploading product\n{ex.Message}", "Error", state:EDialogStates.Warning);  
+        }
     }
 
     #endregion
