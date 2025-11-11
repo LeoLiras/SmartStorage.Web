@@ -1,11 +1,13 @@
 ﻿@page "/product"
 @using System.Text
+@using static SmartStorage.Blazor.Enums.DialogStates
 
 @inject ApiExtensions api
 @inject NavigationManager nav
 @inject VariablesExtensions app
+@inject ShowDialog ShowDialog
 
-@if(products is null)
+@if(products is null || loading)
 {
     <Loading></Loading>
 }
@@ -28,7 +30,7 @@ else
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Edit</MudButton>
-                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(product.Id)">Delete</MudButton>
                 </MudCardActions>
             </MudCard>
         </div>
@@ -39,6 +41,7 @@ else
 
 @code {
     List<ProductVO>? products;
+    bool loading = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -50,6 +53,26 @@ else
         app.ActualProduct = products.FirstOrDefault(p => p.Id.Equals(productId));
 
         nav.NavigateTo($"product/edit/{productId}");
+    }
+
+    private async void Delete(int productId)
+    {
+        try
+        {
+            loading = true;
+
+            var result = await api.Delete<ProductVO>(productId);
+
+            await ShowDialog.ShowDialogAsync("Produto deletado com sucesso.", "Sucesso", "product", EDialogStates.Success);
+
+            nav.NavigateTo($"product");
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Erro deletando produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
+        }
     }
 
 }

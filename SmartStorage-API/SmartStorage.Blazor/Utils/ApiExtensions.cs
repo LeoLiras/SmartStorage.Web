@@ -49,7 +49,7 @@ namespace SmartStorage.Blazor.Utils
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<List<T>?> Get<TVO, T>() where TVO : class
         {
-            var url = ReturnEndpoint<TVO>(ERequestTypes.GETAll);
+            var url = ReturnEndpoint<TVO>();
 
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(nameof(url), message: "O campo URL é obrigatório.");
@@ -83,7 +83,7 @@ namespace SmartStorage.Blazor.Utils
         /// <returns></returns>
         public async Task<List<TVO>?> Get<TVO>() where TVO : class
         {
-            var url = ReturnEndpoint<TVO>(ERequestTypes.GETAll);
+            var url = ReturnEndpoint<TVO>();
 
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(nameof(url), message: "O campo URL é obrigatório.");
@@ -113,7 +113,7 @@ namespace SmartStorage.Blazor.Utils
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<T?> GetById<TVO, T>(int id) where TVO : class
         {
-            var url = ReturnEndpoint<TVO>(ERequestTypes.GetId);
+            var url = ReturnEndpoint<TVO>();
 
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(nameof(url), message: "O campo URL é obrigatório.");
@@ -153,7 +153,7 @@ namespace SmartStorage.Blazor.Utils
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<TVO?> GetById<TVO>(int id) where TVO : class
         {
-            var url = ReturnEndpoint<TVO>(ERequestTypes.GetId);
+            var url = ReturnEndpoint<TVO>();
 
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(nameof(url), message: "O campo URL é obrigatório.");
@@ -185,7 +185,7 @@ namespace SmartStorage.Blazor.Utils
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<TVO?> Post<TVO>(TVO vo) where TVO : class
         {
-            var url = ReturnEndpoint<TVO>(ERequestTypes.POST);
+            var url = ReturnEndpoint<TVO>();
 
             if (vo == null)
                 throw new ArgumentNullException(nameof(vo), message: "O parâmetro VO é obrigatório.");
@@ -217,7 +217,7 @@ namespace SmartStorage.Blazor.Utils
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<TVO?> Put<TVO>(TVO vo, int id) where TVO : class
         {
-            var url = ReturnEndpoint<TVO>(ERequestTypes.PUT);
+            var url = ReturnEndpoint<TVO>();
 
             if (vo == null)
                 throw new ArgumentNullException(nameof(vo), message: "O parâmetro VO é obrigatório.");
@@ -239,7 +239,28 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
-        private string ReturnEndpoint<TVO>(ERequestTypes type) where TVO : class
+        public async Task<TVO?> Delete<TVO>(int id) where TVO : class
+        {
+            var url = ReturnEndpoint<TVO>();
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.DeleteAsync($"{url}/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<TVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        private string ReturnEndpoint<TVO>() where TVO : class
         {
             if (typeof(TVO) == typeof(EmployeeVO))
                 return employeesEndpoint;

@@ -104,15 +104,30 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        if (app.ActualProduct is null)
-            product = await api.GetById<ProductVO>(productId);
-        else
-            product = app.ActualProduct;
+        try
+        {
+            loading = true;
 
-        if (app.Employees is null)
-            employees = await api.Get<EmployeeVO>();
-        else
-            employees = app.Employees;
+            if (app.ActualProduct is null)
+                product = await api.GetById<ProductVO>(productId);
+            else
+                product = app.ActualProduct;
+
+            if (app.Employees is null)
+                employees = await api.Get<EmployeeVO>();
+            else
+                employees = app.Employees;
+
+            loading = false;
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
+
+            nav.NavigateTo($"product");
+        }
     }
 
     private async Task OnValidSubmit(EditContext context)
