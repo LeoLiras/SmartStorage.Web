@@ -5,9 +5,7 @@
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 
-
 @using System.ComponentModel.DataAnnotations
-@using static SmartStorage.Blazor.Enums.DialogStates
 
 @if(product is null || employees is null || loading)
 {
@@ -138,7 +136,7 @@ else
 
             var result = await api.Put<ProductVO>(product, productId);
 
-            await ShowDialog.ShowDialogAsync("Product atualizado com sucesso", "Sucesso", "product", EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Produto atualizado com sucesso", "Sucesso", "product", EDialogStates.Success);
 
             StateHasChanged();
         }
@@ -146,7 +144,7 @@ else
         {
             loading = false;
 
-            await ShowDialog.ShowDialogAsync($"Error atualizando o produto.\n{ex.Message}", "Erro", state:EDialogStates.Warning);  
+            await ShowDialog.ShowDialogAsync($"Erro atualizando o produto.\n{ex.Message}", "Erro", state:EDialogStates.Warning);  
         }
     }
 

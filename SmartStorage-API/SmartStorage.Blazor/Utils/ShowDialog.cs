@@ -1,7 +1,6 @@
 ﻿using MudBlazor;
+using SmartStorage.Blazor.Enums;
 using SmartStorage.Blazor.Pages;
-using static SmartStorage.Blazor.Enums.DialogStates;
-
 
 namespace SmartStorage.Blazor.Utils
 {
