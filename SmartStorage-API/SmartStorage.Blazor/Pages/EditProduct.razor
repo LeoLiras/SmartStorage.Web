@@ -138,7 +138,7 @@ else
 
             var result = await api.Put<ProductVO>(product, productId);
 
-            await ShowDialog.ShowDialogAsync("Product updated successfully", "Success", "product", EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Product atualizado com sucesso", "Sucesso", "product", EDialogStates.Success);
 
             StateHasChanged();
         }
@@ -146,7 +146,7 @@ else
         {
             loading = false;
 
-            await ShowDialog.ShowDialogAsync($"Error uploading product\n{ex.Message}", "Error", state:EDialogStates.Warning);  
+            await ShowDialog.ShowDialogAsync($"Error atualizando o produto.\n{ex.Message}", "Erro", state:EDialogStates.Warning);  
         }
     }
 

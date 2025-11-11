@@ -13,11 +13,11 @@
 }
 else if(products.Count == 0)
 {
-    <MudAlert Severity="Severity.Warning">There are no products registred in database.</MudAlert>
+    <MudAlert Severity="Severity.Warning">Não há produtos registrados no banco de dados.</MudAlert>
 }
 else
 {
-    <MudButton Class="m-2" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary">Add New Product</MudButton>
+    <MudButton Class="m-2" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary">Adicionar novo produto</MudButton>
 
     foreach(var product in products)
     {
@@ -29,8 +29,8 @@ else
                     <MudText Typo="Typo.body2">@product.Descricao</MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Edit</MudButton>
-                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(product.Id)">Delete</MudButton>
+                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Editar</MudButton>
+                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(product.Id)">Excluír</MudButton>
                 </MudCardActions>
             </MudCard>
         </div>
@@ -71,7 +71,7 @@ else
         {
             loading = false;
 
-            await ShowDialog.ShowDialogAsync($"Erro deletando produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
+            await ShowDialog.ShowDialogAsync($"Erro deletando produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
     }
 
