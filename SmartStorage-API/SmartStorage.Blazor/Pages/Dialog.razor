@@ -7,12 +7,12 @@
     <DialogActions>
         @if (ShowCancel)
         {
-            <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="@buttonColor" Variant="Variant.Filled" OnClick="Cancel">Cancelar</MudButton>
         }
 
         @if (ShowYes)
         {
-            <MudButton Color="@buttonColor" Variant="Variant.Filled" OnClick="Submit">Yes</MudButton>
+            <MudButton Color="@buttonColor" Variant="Variant.Filled" OnClick="Submit">Sim</MudButton>
         }
         else
         {
@@ -57,7 +57,7 @@
                 buttonColor = Color.Success;
                 break;
             case EDialogStates.Error:
-                backgroundColor = "#eb1532";
+                backgroundColor = "#e57373";
                 buttonColor = Color.Error;
                 break;
             case EDialogStates.Warning:

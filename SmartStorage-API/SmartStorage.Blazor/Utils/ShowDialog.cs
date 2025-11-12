@@ -13,7 +13,7 @@ namespace SmartStorage.Blazor.Utils
             _dialogService = dialogService;
         }
 
-        public async Task ShowDialogAsync(string message, string title = "", string navigate = "", EDialogStates state = EDialogStates.Success, bool showCancel = false, bool showYes = false)
+        public async Task<bool> ShowDialogAsync(string message, string title = "", string navigate = "", EDialogStates state = EDialogStates.Success, bool showCancel = false, bool showYes = false)
         {
             var parameters = new DialogParameters<Dialog>
             {
@@ -24,7 +24,14 @@ namespace SmartStorage.Blazor.Utils
                 { x => x.ShowCancel, showCancel }
             };
 
-            await _dialogService.ShowAsync<Dialog>(title, parameters);
+            var dialog = await _dialogService.ShowAsync<Dialog>(title, parameters);
+
+            var result = await dialog.Result;
+
+            if (result.Canceled)
+                return false;
+            
+            return true;
         }
     }
 }

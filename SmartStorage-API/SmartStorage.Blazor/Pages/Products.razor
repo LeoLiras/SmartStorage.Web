@@ -58,13 +58,19 @@ else
     {
         try
         {
-            loading = true;
+            var dialog = await ShowDialog.ShowDialogAsync("Tem certeza que deseja deletar o produto?.", "Confirmação", state: EDialogStates.Error, showCancel: true, showYes: true);
 
-            var result = await api.Delete<ProductVO>(productId);
+            if (dialog)
+            {
+                loading = true;
 
-            await ShowDialog.ShowDialogAsync("Produto deletado com sucesso.", "Sucesso", "product", EDialogStates.Success);
+                var result = await api.Delete<ProductVO>(productId);
 
-            nav.NavigateTo($"product");
+                loading = false;
+
+                await ShowDialog.ShowDialogAsync("Produto deletado com sucesso.", "Sucesso", "product", EDialogStates.Success);
+            }
+            
         }
         catch (ApiException ex)
         {
