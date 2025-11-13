@@ -81,9 +81,9 @@ else
     private string ProcessImage(ProductVO product)
     {
         if (product.ProImage is null)
-            return null;
-        else
-            return Encoding.UTF8.GetString(product.ProImage);
+            return app.DefaultImage;
+
+        return Encoding.UTF8.GetString(product.ProImage);
     }
 
 }
