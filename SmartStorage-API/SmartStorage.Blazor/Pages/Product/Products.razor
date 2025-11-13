@@ -6,6 +6,8 @@
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
 
+<MudButton Class="m-2" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary">Adicionar novo produto</MudButton>
+
 @if(products is null || loading)
 {
     <Loading></Loading>
@@ -16,8 +18,6 @@ else if(products.Count == 0)
 }
 else
 {
-    <MudButton Class="m-2" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Tertiary">Adicionar novo produto</MudButton>
-
     foreach(var product in products)
     {
         <div style="margin: 10px">

@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 using SmartStorage.Blazor.Enums;
-using SmartStorage.Blazor.Pages;
+using SmartStorage.Blazor.Pages.Dialog;
 
 namespace SmartStorage.Blazor.Utils
 {
@@ -30,7 +30,7 @@ namespace SmartStorage.Blazor.Utils
 
             if (result.Canceled)
                 return false;
-            
+
             return true;
         }
     }
