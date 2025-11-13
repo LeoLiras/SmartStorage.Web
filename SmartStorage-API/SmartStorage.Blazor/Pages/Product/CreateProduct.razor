@@ -1,0 +1,30 @@
+﻿@page "/product/insert"
+
+@inject ApiExtensions api
+@inject ShowDialog ShowDialog
+
+<ProductForm ProductId="0" OnSave="InsertProduct"></ProductForm>
+
+@code {
+
+    #region Events
+
+    private async Task InsertProduct(ProductVO product)
+    {
+        try
+        {
+            var result = await api.Post<ProductVO>(product);
+
+            await ShowDialog.ShowDialogAsync("Produto criado com sucesso.", "Sucesso", "product", EDialogStates.Success);
+
+            StateHasChanged();
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro inserindo o produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+    }
+
+    #endregion
+
+}

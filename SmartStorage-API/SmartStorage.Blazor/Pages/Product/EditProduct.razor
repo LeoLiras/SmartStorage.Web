@@ -1,9 +1,7 @@
 ﻿@page "/product/edit/{productId:int}"
 
 @inject ApiExtensions api
-@inject NavigationManager nav
 @inject ShowDialog ShowDialog
-@inject VariablesExtensions app
 
 <ProductForm ProductId="productId" OnSave="UpdateProduct"></ProductForm>
 

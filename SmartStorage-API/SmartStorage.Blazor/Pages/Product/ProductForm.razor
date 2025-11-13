@@ -90,7 +90,7 @@ else
     [Parameter] 
     public EventCallback<ProductVO> OnSave { get; set; }
 
-    private ProductVO? product;
+    private ProductVO? product = new ProductVO();
     private List<EmployeeVO>? employees;
 
     private DateTime? productDate = DateTime.Today;
