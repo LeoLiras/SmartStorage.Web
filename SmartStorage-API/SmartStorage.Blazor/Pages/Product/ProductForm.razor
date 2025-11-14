@@ -15,14 +15,14 @@ else
             <MudItem xs="12" sm="7" xl="12">
                 <MudCard Class="mt-3">
                     <MudCardContent>
-                        <MudTextField Label="Product Name" @bind-Value="product.Name" For="@(() => product.Name)" />
+                        <MudTextField Label="Nome do Produto" @bind-Value="product.Name" For="@(() => product.Name)" />
                     </MudCardContent>
                 </MudCard>
             </MudItem>
             <MudItem xs="12" sm="7" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudTextField Label="Product Description" @bind-Value="product.Descricao" For="@(() => product.Descricao)" />
+                        <MudTextField Label="Descrição" @bind-Value="product.Descricao" For="@(() => product.Descricao)" />
                     </MudCardContent>
                 </MudCard>
             </MudItem>
@@ -30,12 +30,12 @@ else
                 <div style="display: flex; gap: 8px;">
                     <MudCard>
                         <MudCardContent>
-                            <MudNumericField Label="Product Quantity" @bind-Value="product.Qntd" For="(() => product.Qntd)" />
+                            <MudNumericField Label="Quantidade" @bind-Value="product.Qntd" For="(() => product.Qntd)" />
                         </MudCardContent>
                     </MudCard>
                     <MudCard>
                         <MudCardContent>
-                            <MudDatePicker Label="Date Register" @bind-Date="productDate" Color="Color.Info" />
+                            <MudDatePicker Label="Date de Registro" @bind-Date="productDate" Color="Color.Info" />
                         </MudCardContent>
                     </MudCard>
                 </div>
@@ -43,7 +43,7 @@ else
             <MudItem xs="12" sm="12" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudSelect T="int" @bind-Value="product.EmployeeId" Label="Select Employee" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
+                        <MudSelect T="int" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
                             @foreach (var emp in employees)
                             {
                                 <MudSelectItem Value="@emp.Id">@emp.Name</MudSelectItem>
@@ -55,7 +55,7 @@ else
             <MudItem xs="12" sm="12" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudTextField Label="Image" @bind-Value="fileName" ReadOnly="true" />
+                        <MudTextField Label="Imagem" @bind-Value="fileName" ReadOnly="true" />
                     </MudCardContent>
                 </MudCard>
             </MudItem>
@@ -64,17 +64,24 @@ else
                     <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
                         <ActivatorContent>
                             <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Image">
-                                Upload Image
+                                Adicionar Imagem
                             </MudButton>
                         </ActivatorContent>
                     </MudFileUpload>
                     <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" OnClick="@ClearFileAsync">
-                        Clear
+                        Limpar
                     </MudButton>
                 </div>
             </MudItem>
             <MudItem xs="12" sm="12">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Edit</MudButton>
+                @if(ProductId != 0)
+                {
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Atualizar</MudButton>
+                }
+                else
+                {
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Criar</MudButton>
+                }
             </MudItem>
         </MudGrid>
     </EditForm>

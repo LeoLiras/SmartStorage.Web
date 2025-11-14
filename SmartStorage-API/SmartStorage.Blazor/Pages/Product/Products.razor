@@ -37,13 +37,24 @@ else
 }
 
 @code {
+
+    #region Properties
+
     List<ProductVO>? products;
     bool loading = false;
 
+    #endregion
+
+    #region Events
+
     protected override async Task OnInitializedAsync()
     {
-        products = await api.Get<ProductVO>();
+        await GetProducts();
     }
+
+    #endregion
+
+    #region Methods
 
     private void Edit(int productId)
     {
@@ -52,23 +63,26 @@ else
         nav.NavigateTo($"product/edit/{productId}");
     }
 
-    private async void Delete(int productId)
+    private async Task Delete(int productId)
     {
         try
         {
-            var dialog = await ShowDialog.ShowDialogAsync("Tem certeza que deseja deletar o produto?.", "Confirmação", state: EDialogStates.Error, showCancel: true, showYes: true);
+            var dialogConfirmmation = await ShowDialog.ShowDialogAsync("Tem certeza que deseja deletar o produto?.", "Confirmação", state: EDialogStates.Error, showCancel: true, showYes: true);
 
-            if (dialog)
+            if (dialogConfirmmation)
             {
                 loading = true;
 
+                StateHasChanged();
+
                 var result = await api.Delete<ProductVO>(productId);
 
-                loading = false;
+                await GetProducts();
 
                 await ShowDialog.ShowDialogAsync("Produto deletado com sucesso.", "Sucesso", "product", EDialogStates.Success);
-            }
 
+                loading = false;
+            }
         }
         catch (ApiException ex)
         {
@@ -76,6 +90,11 @@ else
 
             await ShowDialog.ShowDialogAsync($"Erro deletando produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
+    }
+
+    private async Task GetProducts()
+    {
+        products = await api.Get<ProductVO>();
     }
 
     private string ProcessImage(ProductVO product)
@@ -86,4 +105,6 @@ else
         return Encoding.UTF8.GetString(product.ProImage);
     }
 
+    #endregion
+  
 }

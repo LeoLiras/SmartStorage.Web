@@ -7,10 +7,14 @@
 
 @code {
 
+    #region Properties
+
     [Parameter]
     public int productId { get; set; }
 
-    #region Events
+    #endregion
+    
+    #region Methods
 
     private async Task UpdateProduct(ProductVO product)
     {
