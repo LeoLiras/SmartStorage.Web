@@ -99,6 +99,9 @@ namespace SmartStorage_API.Service.Implementations
             if (!string.IsNullOrWhiteSpace(product.Descricao))
                 searchProduct.ProDescription = product.Descricao;
 
+            if(product.ProImage.Count() > 0)
+                searchProduct.ProImage = product.ProImage;
+
             _context.SaveChanges();
 
             return _converter.Parse(searchProduct);

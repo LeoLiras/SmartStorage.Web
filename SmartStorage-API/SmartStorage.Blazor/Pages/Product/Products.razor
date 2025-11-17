@@ -102,7 +102,16 @@ else
         if (product.ProImage is null)
             return app.DefaultImage;
 
-        return Encoding.UTF8.GetString(product.ProImage);
+        string contentType = string.Empty;
+
+        if (product.ProImage[0] == 0xFF && product.ProImage[1] == 0xD8)
+            contentType = "jpeg";
+
+        if (product.ProImage[0] == 0x89 && product.ProImage[1] == 0x50)
+            contentType = "png";
+
+        var base64 = Convert.ToBase64String(product.ProImage);
+        return $"data:image/{contentType};base64,{base64}";
     }
 
     #endregion
