@@ -60,7 +60,8 @@ namespace SmartStorage_API.Service.Implementations
                 ProDescription = product.Descricao,
                 ProDateRegister = DateTime.UtcNow,
                 ProQntd = product.Qntd,
-                ProEmpId = product.EmployeeId
+                ProEmpId = product.EmployeeId,
+                ProImage = product.ProImage
             };
 
             _context.Add(newProduct);
@@ -99,8 +100,7 @@ namespace SmartStorage_API.Service.Implementations
             if (!string.IsNullOrWhiteSpace(product.Descricao))
                 searchProduct.ProDescription = product.Descricao;
 
-            if(product.ProImage.Count() > 0)
-                searchProduct.ProImage = product.ProImage;
+            searchProduct.ProImage = product.ProImage;
 
             _context.SaveChanges();
 

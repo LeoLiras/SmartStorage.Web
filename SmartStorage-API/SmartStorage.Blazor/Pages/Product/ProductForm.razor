@@ -55,7 +55,14 @@ else
             <MudItem xs="12" sm="12" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudTextField Label="Imagem" @bind-Value="fileName" ReadOnly="true" />
+                        <MudTextField Label="Imagem" @bind-Value="fileName" Disabled="true"/>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="6" sm="6" xl="6">
+                <MudCard>
+                    <MudCardContent>
+                        <MudCardMedia Image=@ProcessImage(product) Height="500" />
                     </MudCardContent>
                 </MudCard>
             </MudItem>
@@ -163,14 +170,35 @@ else
         await stream.CopyToAsync(memoryStream);
 
         product.ProImage = memoryStream.ToArray();
+
+        StateHasChanged();
     }
 
-    private Task ClearFileAsync()
+    private async void ClearFileAsync()
     {
         file = null;
         fileName = string.Empty;
 
-        return Task.CompletedTask;
+        product.ProImage = null;
+
+        StateHasChanged();
+    }
+
+    private string ProcessImage(ProductVO product)
+    {
+        if (product.ProImage is null)
+            return app.DefaultImage;
+
+        string contentType = string.Empty;
+
+        if (product.ProImage[0] == 0xFF && product.ProImage[1] == 0xD8)
+            contentType = "jpeg";
+
+        if (product.ProImage[0] == 0x89 && product.ProImage[1] == 0x50)
+            contentType = "png";
+
+        var base64 = Convert.ToBase64String(product.ProImage);
+        return $"data:image/{contentType};base64,{base64}";
     }
 
     #endregion
