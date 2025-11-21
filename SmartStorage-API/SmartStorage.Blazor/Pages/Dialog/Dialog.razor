@@ -23,13 +23,13 @@
 
 @code {
     [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; }
+    private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter]
-    public string ContentText { get; set; }
+    public string ContentText { get; set; } = string.Empty;
 
     [Parameter]
-    public string Navigate { get; set; }
+    public string Navigate { get; set; } = string.Empty;
 
     [Parameter]
     public bool ShowCancel { get; set; }
@@ -47,7 +47,7 @@
     private string? backgroundColor { get; set; }
     public Color buttonColor { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         //Default is success
         switch (State)

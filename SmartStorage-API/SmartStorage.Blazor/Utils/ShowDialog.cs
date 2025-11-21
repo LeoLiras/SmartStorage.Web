@@ -28,7 +28,7 @@ namespace SmartStorage.Blazor.Utils
 
             var result = await dialog.Result;
 
-            if (result.Canceled)
+            if (result is null || result.Canceled)
                 return false;
 
             return true;

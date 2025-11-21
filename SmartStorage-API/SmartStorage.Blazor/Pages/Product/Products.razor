@@ -21,21 +21,24 @@ else
     <MudGrid Justify="Justify.Center">
         <MudItem xs="12" sm="12" xl="12">
             <div style="display: flex; flex-wrap: wrap;">
-                @foreach (var product in PagedProducts)
+                @if(PagedProducts is not null)
                 {
-                    <div style="margin: 10px;">
-                        <MudCard Class="card-hover" Style="width: 300px; height: 430px;">
-                            <MudCardMedia Image=@ProcessImage(product) Height="200" />
-                            <MudCardContent>
-                                <MudText Typo="Typo.h5">@product.Name</MudText>
-                                <MudText Typo="Typo.body2">@product.Descricao</MudText>
-                            </MudCardContent>
-                            <MudCardActions>
-                                <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Editar</MudButton>
-                                <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(product.Id)">Excluír</MudButton>
-                            </MudCardActions>
-                        </MudCard>
-                    </div>
+                    foreach (var product in PagedProducts)
+                    {
+                        <div style="margin: 10px;">
+                            <MudCard Class="card-hover" Style="width: 300px; height: 430px;">
+                                <MudCardMedia Image=@ProcessImage(product) Height="200" />
+                                <MudCardContent>
+                                    <MudText Typo="Typo.h5">@product.Name</MudText>
+                                    <MudText Typo="Typo.body2">@product.Descricao</MudText>
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Editar</MudButton>
+                                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(product.Id)">Excluír</MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </div>
+                    }
                 }
             </div>
         </MudItem>
@@ -49,12 +52,12 @@ else
 
     #region Properties
 
-    List<ProductVO>? products;
+    List<ProductVO>? products = new();
 
     private int currentPage = 1;
     private int pageSize = 10;
 
-    private IEnumerable<ProductVO> PagedProducts => products.Skip((currentPage - 1) * pageSize).Take(pageSize);
+    private IEnumerable<ProductVO>? PagedProducts => products == null ? Enumerable.Empty<ProductVO>() : products.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
     bool loading = false;
 
@@ -73,9 +76,12 @@ else
 
     private void Edit(int productId)
     {
-        app.ActualProduct = products.FirstOrDefault(p => p.Id.Equals(productId));
+        if(products is not null)
+        {
+            app.ActualProduct = products.FirstOrDefault(p => p.Id.Equals(productId));
 
-        nav.NavigateTo($"product/edit/{productId}");
+            nav.NavigateTo($"product/edit/{productId}");
+        } 
     }
 
     private async Task Delete(int productId)

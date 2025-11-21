@@ -7,7 +7,7 @@
 {
     <Loading Message="Carregando..."></Loading>
 }
-else
+else if(product is not null)
 {
     <EditForm Model="product" OnValidSubmit="OnValidSubmit">
         <DataAnnotationsValidator />
@@ -44,9 +44,12 @@ else
                 <MudCard>
                     <MudCardContent>
                         <MudSelect T="int" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
-                            @foreach (var emp in employees)
+                            @if(employees is not null)
                             {
-                                <MudSelectItem Value="@emp.Id">@emp.Name</MudSelectItem>
+                                foreach (var emp in employees)
+                                {
+                                    <MudSelectItem Value="@emp.Id">@emp.Name</MudSelectItem>
+                                }
                             }
                         </MudSelect>
                     </MudCardContent>
@@ -104,8 +107,8 @@ else
     [Parameter] 
     public EventCallback<ProductVO> OnSave { get; set; }
 
-    private ProductVO? product = new ProductVO();
-    private List<EmployeeVO>? employees;
+    private ProductVO? product = new();
+    private List<EmployeeVO>? employees = new();
 
     private DateTime? productDate = DateTime.Today;
 
@@ -169,17 +172,19 @@ else
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
 
-        product.ProImage = memoryStream.ToArray();
+        if(product is not null)
+            product.ProImage = memoryStream.ToArray();
 
         StateHasChanged();
     }
 
-    private async void ClearFileAsync()
+    private void ClearFileAsync()
     {
         file = null;
         fileName = string.Empty;
 
-        product.ProImage = null;
+        if(product is not null)
+            product.ProImage = null;
 
         StateHasChanged();
     }
