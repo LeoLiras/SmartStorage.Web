@@ -1,0 +1,54 @@
+﻿@page "/products-shelves"
+
+@inject ApiExtensions api
+
+@if(productsInShelves is null)
+{
+    <Loading Message="Carregando produtos nas prateleiras..."></Loading>
+}
+else if(productsInShelves.Count == 0)
+{
+    <MudAlert Severity="Severity.Warning">Não há produtos alocados para venda nas prateleiras.</MudAlert>
+}
+else
+{
+    <MudTable Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="false">
+        <HeaderContent>
+            <MudTh>Produto</MudTh>
+            <MudTh>Preço</MudTh>
+            <MudTh>Quantidade</MudTh>
+            <MudTh>Prateleira</MudTh>
+            <MudTh>Data de Entrada</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nr">@context.ProductName</MudTd>
+            <MudTd DataLabel="Sign">@context.ProductPrice</MudTd>
+            <MudTd DataLabel="Name">@context.ProductQuantity</MudTd>
+            <MudTd DataLabel="Position">@context.ShelfName</MudTd>
+            <MudTd DataLabel="Molar mass">@context.DateEnter</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}
+
+@code {
+
+    #region Properties
+
+    List<EnterVO>? productsInShelves = new();
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnInitializedAsync()
+    {
+        productsInShelves = await api.Get<EnterVO>();
+    }
+
+    #endregion
+    
+
+}
