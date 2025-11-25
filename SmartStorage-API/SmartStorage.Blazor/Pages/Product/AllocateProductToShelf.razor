@@ -5,6 +5,8 @@
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 
+<MudText Typo="Typo.h3" Class="mt-3" Color="Color.Info">Alocar produto para prateleira</MudText>
+
 <EditForm Model="enter" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
     <MudGrid>
@@ -39,7 +41,7 @@
         <MudItem xs="12" sm="12" xl="12">
             <MudCard>
                 <MudCardContent>
-                    <MudSelect T="int" @bind-Value="product.EmployeeId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" AdornmentColor="Color.Info">
+                    <MudSelect T="int" @bind-Value="enter.ShelfId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" AdornmentColor="Color.Info">
                         @if (shelves is not null)
                         {
                             foreach (var shelf in shelves)
@@ -90,6 +92,10 @@
                     product = app.ActualProduct;
             }
 
+            shelves = await api.Get<ShelfVO>();
+
+            AtribuirDados();
+
             loading = false;
         }
         catch (ApiException ex)
@@ -109,6 +115,17 @@
     private async Task OnValidSubmit()
     {
         //await OnSave.InvokeAsync(product);
+    }
+
+    private void AtribuirDados()
+    {
+        if(product is not null)
+        {
+            enter.ProductId = product.Id;
+            enter.ProductName = product.Name;
+        }
+
+        enter.DateEnter = Convert.ToDateTime(DateTime.Now.ToString("G"));
     }
 
     #endregion
