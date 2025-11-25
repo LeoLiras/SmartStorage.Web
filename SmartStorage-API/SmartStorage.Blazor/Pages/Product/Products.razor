@@ -37,6 +37,9 @@ else
                                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Editar</MudButton>
                                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(product.Id)">Excluír</MudButton>
                                 </MudCardActions>
+                                <MudCardActions>
+                                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Send" Color="Color.Secondary" OnClick="() => AllocateToShelf(product.Id)">Alocar para prateleira</MudButton>
+                                </MudCardActions>
                             </MudCard>
                         </div>
                     }
@@ -111,6 +114,16 @@ else
             loading = false;
 
             await ShowDialog.ShowDialogAsync($"Erro deletando produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+    }
+
+    private void AllocateToShelf(int productId)
+    {
+        if (products is not null)
+        {
+            app.ActualProduct = products.FirstOrDefault(p => p.Id.Equals(productId));
+
+            nav.NavigateTo($"product/allocation/{productId}");
         }
     }
 

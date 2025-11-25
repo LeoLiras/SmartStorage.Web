@@ -1,0 +1,118 @@
+﻿@page "/product/allocation/{productId:int}"
+
+@inject ApiExtensions api
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+
+<EditForm Model="enter" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12" sm="12" xl="12">
+                <MudCard Class="mt-3">
+                    <MudCardContent>
+                        <MudDatePicker Disabled="true" Label="Date de Registro" @bind-Date="entryDate" Color="Color.Info" />
+                    </MudCardContent>
+                </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="7" xl="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Produto" @bind-Value="enter.ProductName" For="@(() => enter.ProductName)" Disabled="true"/>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="12" xl="12">
+            <div style="display: flex; gap: 8px;">
+                <MudCard>
+                    <MudCardContent>
+                        <MudNumericField Format="F1" Label="Preço" @bind-Value="enter.ProductPrice" For="(() => enter.ProductPrice)" />
+                    </MudCardContent>
+                </MudCard>
+                <MudCard>
+                    <MudCardContent>
+                        <MudNumericField Label="Quantidade" @bind-Value="enter.ProductQuantity" For="(() => enter.ProductQuantity)" />
+                    </MudCardContent>
+                </MudCard>
+            </div>
+        </MudItem>
+        <MudItem xs="12" sm="12" xl="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudSelect T="int" @bind-Value="product.EmployeeId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" AdornmentColor="Color.Info">
+                        @if (shelves is not null)
+                        {
+                            foreach (var shelf in shelves)
+                            {
+                                <MudSelectItem Value="@shelf.Id">@shelf.Name</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="12">
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Alocar para venda</MudButton>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+@code {
+
+    #region Properties
+
+    [Parameter]
+    public int productId { get; set; }
+
+    private ProductVO? product = new();
+    private EnterVO? enter = new();
+    private List<ShelfVO>? shelves = new();
+
+    private DateTime? entryDate = DateTime.Today;
+
+    bool loading = false;
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            loading = true;
+
+            if (productId != 0)
+            {
+                if (app.ActualProduct is null)
+                    product = await api.GetById<ProductVO>(productId);
+                else
+                    product = app.ActualProduct;
+            }
+
+            loading = false;
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
+
+            nav.NavigateTo($"product");
+        }
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task OnValidSubmit()
+    {
+        //await OnSave.InvokeAsync(product);
+    }
+
+    #endregion
+
+    
+
+}
