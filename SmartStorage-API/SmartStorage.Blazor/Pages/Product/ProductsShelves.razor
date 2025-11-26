@@ -25,7 +25,7 @@ else
             <MudTd DataLabel="Sign">@context.ProductPrice</MudTd>
             <MudTd DataLabel="Name">@context.ProductQuantity</MudTd>
             <MudTd DataLabel="Position">@context.ShelfName</MudTd>
-            <MudTd DataLabel="Molar mass">@context.DateEnter</MudTd>
+            <MudTd DataLabel="Molar mass">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager />

@@ -15,7 +15,7 @@
         {
             var result = await api.Post<ProductVO>(product);
 
-            await ShowDialog.ShowDialogAsync("Produto criado com sucesso.", "Sucesso", "product", EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Produto criado com sucesso.", "Sucesso", "products", EDialogStates.Success);
 
             StateHasChanged();
         }

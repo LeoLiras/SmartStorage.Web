@@ -149,7 +149,7 @@ else if(product is not null)
 
             await ShowDialog.ShowDialogAsync($"Erro ao buscar produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
 
-            nav.NavigateTo($"product");
+            nav.NavigateTo($"products");
         }
     }
 

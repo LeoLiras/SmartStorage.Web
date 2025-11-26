@@ -7,7 +7,7 @@
 
 <MudText Typo="Typo.h3" Class="mt-3" Color="Color.Info">Alocar produto para prateleira</MudText>
 
-<EditForm Model="enter" OnValidSubmit="OnValidSubmit">
+<EditForm Model="enter" OnValidSubmit="AllocateProduct">
     <DataAnnotationsValidator />
     <MudGrid>
         <MudItem xs="12" sm="12" xl="12">
@@ -104,7 +104,7 @@
 
             await ShowDialog.ShowDialogAsync($"Erro ao buscar produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
 
-            nav.NavigateTo($"product");
+            nav.NavigateTo($"products");
         }
     }
 
@@ -112,20 +112,37 @@
 
     #region Methods
 
-    private async Task OnValidSubmit()
+    private async Task AllocateProduct()
     {
-        //await OnSave.InvokeAsync(product);
+        try
+        {
+            if (enter is null)
+                return;
+
+            var result = await api.Post<EnterVO>(enter);
+
+            await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", "products", EDialogStates.Success);
+
+            StateHasChanged();
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro atualizando o produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
     }
 
     private void AtribuirDados()
     {
+        if (enter is null)
+            enter = new();
+
         if(product is not null)
         {
             enter.ProductId = product.Id;
             enter.ProductName = product.Name;
         }
 
-        enter.DateEnter = Convert.ToDateTime(DateTime.Now.ToString("G"));
+        enter.DateEnter = DateTime.Now;
     }
 
     #endregion

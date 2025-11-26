@@ -132,7 +132,7 @@ namespace SmartStorage_API.Service.Implementations
                     EntProId = (int)product.ProId,
                     EntSheId = (int)shelf.SheId,
                     EntQntd = newAllocation.ProductQuantity,
-                    EntDateEnter = DateTimeOffset.UtcNow.UtcDateTime,
+                    EntDateEnter = newAllocation.DateEnter,
                     EntPrice = newAllocation.ProductPrice
                 };
 
