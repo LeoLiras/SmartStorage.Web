@@ -7,57 +7,60 @@
 
 <MudText Typo="Typo.h3" Class="mt-3" Color="Color.Info">Alocar produto para prateleira</MudText>
 
-<EditForm Model="enter" OnValidSubmit="AllocateProduct">
-    <DataAnnotationsValidator />
-    <MudGrid>
-        <MudItem xs="12" sm="12" xl="12">
+@if(enter is not null)
+{
+    <EditForm Model="enter" OnValidSubmit="AllocateProduct">
+        <DataAnnotationsValidator />
+        <MudGrid>
+            <MudItem xs="12" sm="12" xl="12">
                 <MudCard Class="mt-3">
                     <MudCardContent>
                         <MudDatePicker Disabled="true" Label="Date de Registro" @bind-Date="entryDate" Color="Color.Info" />
                     </MudCardContent>
                 </MudCard>
-        </MudItem>
-        <MudItem xs="12" sm="7" xl="12">
-            <MudCard>
-                <MudCardContent>
-                    <MudTextField Label="Produto" @bind-Value="enter.ProductName" For="@(() => enter.ProductName)" Disabled="true"/>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-        <MudItem xs="12" sm="12" xl="12">
-            <div style="display: flex; gap: 8px;">
+            </MudItem>
+            <MudItem xs="12" sm="7" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudNumericField Format="F1" Label="Preço" @bind-Value="enter.ProductPrice" For="(() => enter.ProductPrice)" />
+                        <MudTextField Label="Produto" @bind-Value="enter.ProductName" For="@(() => enter.ProductName)" Disabled="true" />
                     </MudCardContent>
                 </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="12" xl="12">
+                <div style="display: flex; gap: 8px;">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudNumericField Format="F1" Label="Preço" @bind-Value="enter.ProductPrice" For="(() => enter.ProductPrice)" />
+                        </MudCardContent>
+                    </MudCard>
+                    <MudCard>
+                        <MudCardContent>
+                            <MudNumericField Label="Quantidade" @bind-Value="enter.ProductQuantity" For="(() => enter.ProductQuantity)" />
+                        </MudCardContent>
+                    </MudCard>
+                </div>
+            </MudItem>
+            <MudItem xs="12" sm="12" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudNumericField Label="Quantidade" @bind-Value="enter.ProductQuantity" For="(() => enter.ProductQuantity)" />
-                    </MudCardContent>
-                </MudCard>
-            </div>
-        </MudItem>
-        <MudItem xs="12" sm="12" xl="12">
-            <MudCard>
-                <MudCardContent>
-                    <MudSelect T="int" @bind-Value="enter.ShelfId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" AdornmentColor="Color.Info">
-                        @if (shelves is not null)
-                        {
-                            foreach (var shelf in shelves)
+                        <MudSelect T="int" @bind-Value="enter.ShelfId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" AdornmentColor="Color.Info">
+                            @if (shelves is not null)
                             {
-                                <MudSelectItem Value="@shelf.Id">@shelf.Name</MudSelectItem>
+                                foreach (var shelf in shelves)
+                                {
+                                    <MudSelectItem Value="@shelf.Id">@shelf.Name</MudSelectItem>
+                                }
                             }
-                        }
-                    </MudSelect>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-        <MudItem xs="12" sm="12">
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Alocar para venda</MudButton>
-        </MudItem>
-    </MudGrid>
-</EditForm>
+                        </MudSelect>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Alocar para venda</MudButton>
+            </MudItem>
+        </MudGrid>
+    </EditForm>
+}
 
 @code {
 
