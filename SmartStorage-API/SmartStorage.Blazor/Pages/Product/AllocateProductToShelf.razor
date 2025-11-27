@@ -92,7 +92,10 @@
                     product = app.ActualProduct;
             }
 
-            shelves = await api.Get<ShelfVO>();
+            if (app.Shelves.Count() == 0)
+                shelves = await api.Get<ShelfVO>();
+            else
+                shelves = app.Shelves;
 
             AtribuirDados();
 
