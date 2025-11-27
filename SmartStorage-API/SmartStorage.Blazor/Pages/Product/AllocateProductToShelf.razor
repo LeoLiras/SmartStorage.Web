@@ -107,7 +107,7 @@
 
             await ShowDialog.ShowDialogAsync($"Erro ao buscar produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
 
-            nav.NavigateTo($"products");
+            nav.NavigateTo(app.productsInStock);
         }
     }
 
@@ -124,7 +124,7 @@
 
             var result = await api.Post<EnterVO>(enter);
 
-            await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", "products", EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", app.productsInStock, EDialogStates.Success);
 
             StateHasChanged();
         }

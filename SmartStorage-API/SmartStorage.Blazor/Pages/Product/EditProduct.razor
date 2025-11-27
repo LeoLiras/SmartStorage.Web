@@ -2,6 +2,7 @@
 
 @inject ApiExtensions api
 @inject ShowDialog ShowDialog
+@inject VariablesExtensions app
 
 <ProductForm ProductId="productId" OnSave="UpdateProduct"></ProductForm>
 
@@ -22,7 +23,7 @@
         {
             var result = await api.Put<ProductVO>(product, productId);
 
-            await ShowDialog.ShowDialogAsync("Produto atualizado com sucesso", "Sucesso", "products", EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Produto atualizado com sucesso", "Sucesso", app.productsInStock, EDialogStates.Success);
 
             StateHasChanged();
         }
