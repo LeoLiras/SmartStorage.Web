@@ -24,7 +24,12 @@ namespace SmartStorage.Blazor.Utils
                 { x => x.ShowCancel, showCancel }
             };
 
-            var dialog = await _dialogService.ShowAsync<Dialog>(title, parameters);
+            DialogOptions options = new DialogOptions
+            {
+                BackdropClick = false
+            };
+
+            var dialog = await _dialogService.ShowAsync<Dialog>(title, parameters, options);
 
             var result = await dialog.Result;
 
