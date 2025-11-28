@@ -1,6 +1,7 @@
 ﻿@page "/products-shelves"
 
 @inject ApiExtensions api
+@inject VariablesExtensions app
 
 @if(productsInShelves is null || loading)
 {
@@ -76,7 +77,10 @@ else
     {
         loading = true;
 
-        productsInShelves = await api.Get<EnterVO>();
+        if (app.ProductEntries is null || app.ProductEntries.Count() == 0)
+            productsInShelves = await api.Get<EnterVO>();
+        else
+            productsInShelves = app.ProductEntries;
 
         if (productsInShelves is null)
             return;
