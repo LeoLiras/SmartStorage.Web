@@ -2,7 +2,7 @@
 
 @inject ApiExtensions api
 
-@if(productsInShelves is null)
+@if(productsInShelves is null || loading)
 {
     <Loading Message="Carregando produtos nas prateleiras..."></Loading>
 }
@@ -46,6 +46,8 @@ else
 
     string searchString = string.Empty;
 
+    bool loading = false;
+
     #endregion
 
     #region Methods
@@ -72,7 +74,16 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        loading = true;
+
         productsInShelves = await api.Get<EnterVO>();
+
+        if (productsInShelves is null)
+            return;
+
+        productsInShelves.Sort((a, b) => string.Compare(a.ShelfName, b.ShelfName, StringComparison.OrdinalIgnoreCase));
+
+        loading = false;
     }
 
     #endregion
