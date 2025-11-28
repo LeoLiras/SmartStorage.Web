@@ -28,7 +28,7 @@ namespace SmartStorage_Shared.VO
         [Required(ErrorMessage = "A data da entrada é obrigatória.")]
         public DateTime DateEnter { get; set; }
 
-        public static Enter Parse(EnterVO origin)
+        public static Enter? Parse(EnterVO origin)
         {
             if (origin == null)
                 return null;
@@ -44,7 +44,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Enter> ParseList(List<EnterVO> origin)
+        public static List<Enter?>? ParseList(List<EnterVO> origin)
         {
             if (origin == null)
                 return null;

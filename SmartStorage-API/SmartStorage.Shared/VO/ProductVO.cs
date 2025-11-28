@@ -25,7 +25,7 @@ namespace SmartStorage_Shared.VO
 
         public byte[]? ProImage { get; set; }
 
-        public static Product Parse(ProductVO origin)
+        public static Product? Parse(ProductVO origin)
         {
             if (origin == null)
                 return null;
@@ -41,7 +41,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Product> ParseList(List<ProductVO> origin)
+        public static List<Product?>? ParseList(List<ProductVO> origin)
         {
             if (origin == null)
                 return null;

@@ -26,7 +26,7 @@ namespace SmartStorage_Shared.VO
         [Required(ErrorMessage = "A data da venda é obrigatória.")]
         public DateTime DateSale { get; set; }
 
-        public static Sale Parse(SaleVO origin)
+        public static Sale? Parse(SaleVO origin)
         {
             if (origin == null)
                 return null;
@@ -40,7 +40,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Sale> ParseList(List<SaleVO> origin)
+        public static List<Sale?>? ParseList(List<SaleVO> origin)
         {
             if (origin == null)
                 return null;

@@ -21,7 +21,7 @@ namespace SmartStorage_Shared.VO
 
         public DateTime DateRegister { get; set; }
 
-        public static Employee Parse(EmployeeVO origin)
+        public static Employee? Parse(EmployeeVO origin)
         {
             if (origin == null)
                 return null;
@@ -36,7 +36,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Employee> ParseList(List<EmployeeVO> origin)
+        public static List<Employee?>? ParseList(List<EmployeeVO> origin)
         {
             if (origin == null)
                 return null;

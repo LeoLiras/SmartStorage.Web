@@ -14,7 +14,7 @@ namespace SmartStorage_Shared.VO
         [Required(ErrorMessage = "A data de registro da prateleira é obrigatória.")]
         public DateTime DataRegister { get; set; }
 
-        public static Shelf Parse(ShelfVO origin)
+        public static Shelf? Parse(ShelfVO origin)
         {
             if (origin == null)
                 return null;
@@ -27,7 +27,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Shelf> ParseList(List<ShelfVO> origin)
+        public static List<Shelf?>? ParseList(List<ShelfVO> origin)
         {
             if (origin == null)
                 return null;

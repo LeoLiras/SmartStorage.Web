@@ -7,7 +7,11 @@
 
 <MudText Typo="Typo.h3" Class="mt-3" Color="Color.Info">Alocar produto para prateleira</MudText>
 
-@if(enter is not null)
+@if(product is null || loading)
+{
+    <Loading Message="Carregando..."></Loading>
+}
+else if(enter is not null)
 {
     <EditForm Model="enter" OnValidSubmit="AllocateProduct">
         <DataAnnotationsValidator />
@@ -95,7 +99,7 @@
                     product = app.ActualProduct;
             }
 
-            if (app.Shelves.Count() == 0)
+            if (app.Shelves is null || app.Shelves.Count() == 0)
                 shelves = await api.Get<ShelfVO>();
             else
                 shelves = app.Shelves;
@@ -122,6 +126,8 @@
     {
         try
         {
+            loading = true;
+
             if (enter is null)
                 return;
 
@@ -130,9 +136,13 @@
             await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", app.productsInStock, EDialogStates.Success);
 
             StateHasChanged();
+
+            loading = false;
         }
         catch (ApiException ex)
         {
+            loading = false;
+
             await ShowDialog.ShowDialogAsync($"Erro atualizando o produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
     }
