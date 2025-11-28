@@ -12,7 +12,12 @@ else if(productsInShelves.Count == 0)
 }
 else
 {
-    <MudTable Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="false">
+    <MudTable Class="mt-3" Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="false" Filter="new Func<EnterVO, bool>(FilterFuncAux)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Protudos nas prateleiras para venda</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
         <HeaderContent>
             <MudTh>Produto</MudTh>
             <MudTh>Preço</MudTh>
@@ -38,6 +43,28 @@ else
     #region Properties
 
     List<EnterVO>? productsInShelves = new();
+
+    string searchString = string.Empty;
+
+    #endregion
+
+    #region Methods
+
+    private bool FilterFuncAux(EnterVO productsInShelves) => FilterFunc(productsInShelves, searchString);
+
+    private bool FilterFunc(EnterVO productsInShelves, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        if (productsInShelves is null || string.IsNullOrWhiteSpace(productsInShelves.ProductName))
+            return true;
+
+        if (productsInShelves.ProductName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
 
     #endregion
 
