@@ -15,7 +15,7 @@ else
 {
     <MudTable Class="mt-3" Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="true" Filter="new Func<EnterVO, bool>(FilterFuncAux)" RowsPerPage="10">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Protudos nas prateleiras para venda</MudText>
+            <MudText Typo="Typo.h6">Produtos nas prateleiras para venda</MudText>
             <MudSpacer />
             <MudTextField @bind-Value="searchString" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
@@ -27,11 +27,13 @@ else
             <MudTh>Data de Entrada</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Nr">@context.ProductName</MudTd>
-            <MudTd DataLabel="Sign">@context.ProductPrice</MudTd>
-            <MudTd DataLabel="Name">@context.ProductQuantity</MudTd>
-            <MudTd DataLabel="Position">@context.ShelfName</MudTd>
-            <MudTd DataLabel="Molar mass">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
+            <MudTd DataLabel="Produto">@context.ProductName</MudTd>
+            <MudTd DataLabel="Preco">@context.ProductPrice</MudTd>
+            <MudTd DataLabel="Quantidade">@context.ProductQuantity</MudTd>
+            <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
+            <MudTd DataLabel="Data de Entrada">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
+            <MudTd DataLabel="Vender"><MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success"></MudIconButton></MudTooltip></MudTd>
+            <MudTd DataLabel="Retornar alocacao"><MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning"></MudIconButton></MudTooltip></MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager HideRowsPerPage="true"/>
