@@ -13,7 +13,7 @@ else if(productsInShelves.Count == 0)
 }
 else
 {
-    <MudTable Class="mt-3" Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="false" Filter="new Func<EnterVO, bool>(FilterFuncAux)">
+    <MudTable Class="mt-3" Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="true" Filter="new Func<EnterVO, bool>(FilterFuncAux)" RowsPerPage="10">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Protudos nas prateleiras para venda</MudText>
             <MudSpacer />
@@ -34,7 +34,7 @@ else
             <MudTd DataLabel="Molar mass">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
         </RowTemplate>
         <PagerContent>
-            <MudTablePager />
+            <MudTablePager HideRowsPerPage="true"/>
         </PagerContent>
     </MudTable>
 }
