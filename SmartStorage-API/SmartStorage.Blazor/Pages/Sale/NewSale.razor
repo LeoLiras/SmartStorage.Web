@@ -1,4 +1,6 @@
-﻿@inject ApiExtensions api
+﻿@page "/product/sale/{entryId:int}"
+
+@inject ApiExtensions api
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -15,7 +17,7 @@ else
             <MudItem xs="12" sm="12" xl="12">
                 <MudCard Class="mt-3">
                     <MudCardContent>
-                        <MudDatePicker Disabled="true" Label="Date de Registro" @bind-Date="saleDate" Color="Color.Info" />
+                        <MudDatePicker Disabled="true" Label="Date de Registro" Color="Color.Info" Date="@DateTime.Today"/>
                     </MudCardContent>
                 </MudCard>
             </MudItem>
@@ -47,11 +49,12 @@ else
     #region Properties
 
     [Parameter]
-    public int productId { get; set; }
+    public int entryId { get; set; }
 
     private SaleVO? newSale = new();
+    private EnterVO? entry = new();
     private ProductVO? product = new();
-    private DateTime? saleDate = DateTime.Today;
+
     private bool loading = false;
 
     #endregion
@@ -64,12 +67,20 @@ else
         {
             loading = true;
 
-            if (productId != 0)
+            if (entryId != 0)
             {
-                if (app.ActualProduct is null)
-                    product = await api.GetById<ProductVO>(productId);
+                if (app.ActualEntry is null)
+                    entry = await api.GetById<EnterVO>(entryId);
                 else
-                    product = app.ActualProduct;
+                    entry = app.ActualEntry;
+
+                if(entry is not null)
+                {
+                    if (app.ActualProduct is null)
+                        product = await api.GetById<ProductVO>(entry.ProductId);
+                    else
+                        product = app.ActualProduct;
+                }
             }
 
             AtribuirDados();
@@ -80,7 +91,7 @@ else
         {
             loading = false;
 
-            await ShowDialog.ShowDialogAsync($"Erro ao buscar produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar entrada e produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
 
             nav.NavigateTo(app.productsInStock);
         }
@@ -104,7 +115,6 @@ else
             newSale.ProductName = product.Name;
             newSale.DateSale = DateTime.Now;
         }
-        
     }
 
     #endregion

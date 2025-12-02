@@ -2,6 +2,7 @@
 
 @inject ApiExtensions api
 @inject VariablesExtensions app
+@inject NavigationManager nav
 
 @if(productsInShelves is null || loading)
 {
@@ -32,7 +33,7 @@ else
             <MudTd DataLabel="Quantidade">@context.ProductQuantity</MudTd>
             <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
             <MudTd DataLabel="Data de Entrada">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
-            <MudTd DataLabel="Vender"><MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success"></MudIconButton></MudTooltip></MudTd>
+            <MudTd DataLabel="Vender"><MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success" OnClick="@(() => SaleProduct(context.Id))"></MudIconButton></MudTooltip></MudTd>
             <MudTd DataLabel="Retornar alocacao"><MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning"></MudIconButton></MudTooltip></MudTd>
         </RowTemplate>
         <PagerContent>
@@ -50,26 +51,6 @@ else
     string searchString = string.Empty;
 
     bool loading = false;
-
-    #endregion
-
-    #region Methods
-
-    private bool FilterFuncAux(EnterVO productsInShelves) => FilterFunc(productsInShelves, searchString);
-
-    private bool FilterFunc(EnterVO productsInShelves, string searchString)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-
-        if (productsInShelves is null || string.IsNullOrWhiteSpace(productsInShelves.ProductName))
-            return true;
-
-        if (productsInShelves.ProductName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
-    }
 
     #endregion
 
@@ -93,6 +74,42 @@ else
     }
 
     #endregion
+
+    #region Methods
+
+    private bool FilterFuncAux(EnterVO productsInShelves) => FilterFunc(productsInShelves, searchString);
+
+    private bool FilterFunc(EnterVO productsInShelves, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        if (productsInShelves is null || string.IsNullOrWhiteSpace(productsInShelves.ProductName))
+            return true;
+
+        if (productsInShelves.ProductName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+    private async void SaleProduct(int entryId)
+    {
+        if(productsInShelves is not null)
+        {
+            app.ActualEntry = productsInShelves.FirstOrDefault(e => e.Id.Equals(entryId));
+
+            if (app.ActualEntry is not null)
+                app.ActualProduct = await api.GetById<ProductVO>(app.ActualEntry.ProductId);
+
+            nav.NavigateTo($"product/sale/{entryId}");
+        }
+        
+    }
+
+    #endregion
+
+    
     
 
 }

@@ -18,6 +18,8 @@ namespace SmartStorage.Blazor.Utils
 
         public ProductVO? ActualProduct { get; set; } = new();
 
+        public EnterVO? ActualEntry { get; set; } = new();
+
         #endregion
 
         #region Pages
