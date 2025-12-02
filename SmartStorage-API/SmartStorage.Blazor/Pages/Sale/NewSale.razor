@@ -1,0 +1,114 @@
+﻿@inject ApiExtensions api
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+
+@if(newSale is null || loading)
+{
+    <Loading Message="Carregando..."></Loading>
+}
+else
+{
+    <EditForm Model="newSale" OnValidSubmit="SaleProduct">
+        <DataAnnotationsValidator />
+        <MudGrid>
+            <MudItem xs="12" sm="12" xl="12">
+                <MudCard Class="mt-3">
+                    <MudCardContent>
+                        <MudDatePicker Disabled="true" Label="Date de Registro" @bind-Date="saleDate" Color="Color.Info" />
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="7" xl="12">
+                <MudCard>
+                    <MudCardContent>
+                        <MudTextField Label="Produto" @bind-Value="newSale.ProductName" For="@(() => newSale.ProductName)" Disabled="true" />
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="12" xl="12">
+                <div style="display: flex; gap: 8px;">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudNumericField Label="Quantidade" @bind-Value="newSale.Qntd" For="(() => newSale.Qntd)" />
+                        </MudCardContent>
+                    </MudCard>
+                </div>
+            </MudItem>
+            <MudItem xs="12" sm="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Alocar para venda</MudButton>
+            </MudItem>
+        </MudGrid>
+    </EditForm>
+}
+
+@code {
+
+    #region Properties
+
+    [Parameter]
+    public int productId { get; set; }
+
+    private SaleVO? newSale = new();
+    private ProductVO? product = new();
+    private DateTime? saleDate = DateTime.Today;
+    private bool loading = false;
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            loading = true;
+
+            if (productId != 0)
+            {
+                if (app.ActualProduct is null)
+                    product = await api.GetById<ProductVO>(productId);
+                else
+                    product = app.ActualProduct;
+            }
+
+            AtribuirDados();
+
+            loading = false;
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
+
+            nav.NavigateTo(app.productsInStock);
+        }
+    }
+
+    #endregion
+
+    #region Methods
+
+    private Task SaleProduct()
+    {
+        return Task.CompletedTask;
+    }
+
+    private void AtribuirDados()
+    {
+        if(product is not null)
+        {
+            newSale = new();
+
+            newSale.ProductName = product.Name;
+            newSale.DateSale = DateTime.Now;
+        }
+        
+    }
+
+    #endregion
+
+    
+
+}
