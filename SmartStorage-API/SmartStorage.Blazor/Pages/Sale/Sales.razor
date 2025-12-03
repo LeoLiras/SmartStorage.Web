@@ -3,8 +3,6 @@
 @inject ApiExtensions api
 @inject VariablesExtensions app
 
-<MudText Typo="Typo.h3" Class="mt-3" Color="Color.Info">Produtos Vendidos</MudText>
-
 @if (sales is null || loading)
 {
     <Loading Message="Carregando produtos vendidos..."></Loading>
@@ -17,7 +15,7 @@ else
 {
     <MudTable Class="mt-3" Items="@sales" Dense="false" Hover="true" Bordered="false" Striped="true" Filter="new Func<SaleVO, bool>(FilterFuncAux)" RowsPerPage="10">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Produtos nas prateleiras para venda</MudText>
+            <MudText Typo="Typo.h6">Produtos Vendidos</MudText>
             <MudSpacer />
             <MudTextField @bind-Value="searchString" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
