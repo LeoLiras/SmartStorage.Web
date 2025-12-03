@@ -31,7 +31,7 @@ namespace SmartStorage.Blazor.Utils
         //Produtos alocados para venda (nas prateleiras)
         private string entersEndpoint = "api/storage/shelf/v1/allocation";
 
-        private string salesEndpoint = "api/storage/sales/v1/1";
+        private string salesEndpoint = "api/storage/sales/v1";
 
         private string employeesEndpoint = "api/storage/employees/v1";
 

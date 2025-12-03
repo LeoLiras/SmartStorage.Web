@@ -26,6 +26,8 @@ namespace SmartStorage.Blazor.Utils
 
         public string productsInStock { get; } = "products";
 
+        public string productsInShelves { get; } = "products/shelves";
+
         #endregion
 
         #region Others

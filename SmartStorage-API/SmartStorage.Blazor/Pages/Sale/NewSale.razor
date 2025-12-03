@@ -30,7 +30,7 @@ else
                     </MudCard>
                     <MudCard>
                         <MudCardContent>
-                            <MudNumericField Label="Quantidade disponível" Disabled="true" @bind-Value="entry.ProductQuantity" For="(() => entry.ProductQuantity)" />
+                            <MudNumericField Label="Quantidade disponível" Disabled="true" @bind-Value="entry.ProductQuantity" For="(() => entry.ProductQuantity)"/>
                         </MudCardContent>
                     </MudCard>
                     <MudCard>
@@ -44,7 +44,7 @@ else
                 <div style="display: flex; gap: 8px;">
                     <MudCard>
                         <MudCardContent>
-                            <MudNumericField Label="Quantidade da venda" @bind-Value="newSale.Qntd" For="(() => newSale.Qntd)" />
+                            <MudNumericField T="int" Label="Quantidade da venda" For="(() => newSale.Qntd)" ValueChanged="CalculateTotal"/>
                         </MudCardContent>
                     </MudCard>
                     <MudCard>
@@ -129,20 +129,53 @@ else
 
     #region Methods
 
-    private Task SaleProduct()
+    private async Task SaleProduct()
     {
-        return Task.CompletedTask;
+        try
+        {
+            loading = true;
+
+            if (entry is null || newSale is null)
+                return;
+
+            await api.Post<SaleVO>(newSale);
+
+            await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelves, EDialogStates.Success);
+
+            app.ProductEntries = await api.Get<EnterVO>();
+
+            StateHasChanged();
+
+            loading = false;
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Erro atualizando a venda.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
     }
 
     private void AtribuirDados()
     {
-        if(product is not null)
-        {
-            newSale = new();
+        if (product is null || entry is null)
+            return;
 
-            newSale.ProductName = product.Name;
-            newSale.DateSale = DateTime.Now;
-        }
+        newSale = new();
+
+        newSale.ProductName = product.Name;
+        newSale.DateSale = DateTime.Now;
+        newSale.IdEnter = entry.Id;
+        newSale.ProductId = product.Id;  
+    }
+
+    private void CalculateTotal(int qntd)
+    {
+        if (newSale is null)
+            return;
+
+        newSale.Qntd = qntd;
+        newSale.SaleTotal = entry.ProductPrice *  qntd;
     }
 
     #endregion
