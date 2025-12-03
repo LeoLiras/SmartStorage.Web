@@ -12,6 +12,8 @@ namespace SmartStorage.Blazor.Utils
 
         public List<ShelfVO>? Shelves { get; set; } = new();
 
+        public List<SaleVO>? Sales { get; set; } = new();
+
         #endregion
 
         #region Objects

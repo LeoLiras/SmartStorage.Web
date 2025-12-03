@@ -20,6 +20,7 @@ else
         app.Employees = await api.Get<EmployeeVO>();
         app.Shelves = await api.Get<ShelfVO>();
         app.ProductEntries = await api.Get<EnterVO>();
+        app.Sales = await api.Get<SaleVO>();
     }
 }
 

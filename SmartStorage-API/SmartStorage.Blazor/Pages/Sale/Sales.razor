@@ -1,0 +1,100 @@
+﻿@page "/sales"
+
+@inject ApiExtensions api
+@inject VariablesExtensions app
+
+<MudText Typo="Typo.h3" Class="mt-3" Color="Color.Info">Produtos Vendidos</MudText>
+
+@if (sales is null || loading)
+{
+    <Loading Message="Carregando produtos vendidos..."></Loading>
+}
+else if (sales.Count() == 0)
+{
+    <MudAlert Severity="Severity.Warning">Não há produtos vendidos.</MudAlert>
+}
+else
+{
+    <MudTable Class="mt-3" Items="@sales" Dense="false" Hover="true" Bordered="false" Striped="true" Filter="new Func<SaleVO, bool>(FilterFuncAux)" RowsPerPage="10">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Produtos nas prateleiras para venda</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Produto</MudTh>
+            <MudTh>Preço</MudTh>
+            <MudTh>Quantidade</MudTh>
+            <MudTh>Prateleira</MudTh>
+            <MudTh>Data de Venda</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Produto">@context.ProductName</MudTd>
+            <MudTd DataLabel="Preco">@context.EnterPrice</MudTd>
+            <MudTd DataLabel="Quantidade">@context.Qntd</MudTd>
+            <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
+            <MudTd DataLabel="Data de Entrada">@context.DateSale.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager HideRowsPerPage="true" />
+        </PagerContent>
+    </MudTable>
+}
+
+@code {
+
+    #region Properties
+
+    private List<SaleVO>? sales = new List<SaleVO>();
+
+    private bool loading = false;
+
+    string searchString = string.Empty;
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+
+        if (app.Sales is null || app.Sales.Count() == 0)
+            sales = await api.Get<SaleVO>();
+        else
+            sales = app.Sales;
+
+        if (sales is null)
+            return;
+
+        sales.Sort((a, b) => string.Compare(a.DateSale.ToString(), b.ProductName, StringComparison.OrdinalIgnoreCase));
+
+        loading = false;
+    }
+
+    #endregion
+
+    #region Methods
+
+    private bool FilterFuncAux(SaleVO sales) => FilterFunc(sales, searchString);
+
+    private bool FilterFunc(SaleVO sales, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        if (sales is null || string.IsNullOrWhiteSpace(sales.ProductName))
+            return true;
+
+        if (sales.ProductName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+    #endregion
+    
+
+    
+
+}
