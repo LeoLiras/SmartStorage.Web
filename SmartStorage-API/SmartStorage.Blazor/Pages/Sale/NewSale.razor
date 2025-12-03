@@ -83,7 +83,7 @@ else
 
     private bool loading = false;
 
-    private decimal totalValue => entry.ProductPrice * newSale.Qntd;
+    private decimal totalValue => entry!.ProductPrice * newSale!.Qntd;
 
     #endregion
 
@@ -140,9 +140,9 @@ else
 
             await api.Post<SaleVO>(newSale);
 
-            await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelves, EDialogStates.Success);
-
             app.ProductEntries = await api.Get<EnterVO>();
+
+            await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelves, EDialogStates.Success);
 
             StateHasChanged();
 
@@ -171,7 +171,7 @@ else
 
     private void CalculateTotal(int qntd)
     {
-        if (newSale is null)
+        if (newSale is null || entry is null)
             return;
 
         newSale.Qntd = qntd;
