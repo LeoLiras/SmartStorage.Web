@@ -58,7 +58,7 @@ namespace SmartStorage_API.Service.Implementations
                 {
                     SalEntId = enter.EntId,
                     SalQntd = saleQntd,
-                    SalDateSale = DateTime.UtcNow,
+                    SalDateSale = DateTime.Now,
                 };
 
                 _context.Sales.Add(sale);
