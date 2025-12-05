@@ -1,7 +1,8 @@
-﻿@page "/sales"
+﻿@page "/products/sales"
 
 @inject ApiExtensions api
 @inject VariablesExtensions app
+@inject ShowDialog ShowDialog
 
 @if (sales is null || loading)
 {
@@ -23,6 +24,7 @@ else
             <MudTh>Produto</MudTh>
             <MudTh>Preço</MudTh>
             <MudTh>Quantidade</MudTh>
+            <MudTh>Total</MudTh>
             <MudTh>Prateleira</MudTh>
             <MudTh>Data de Venda</MudTh>
         </HeaderContent>
@@ -30,8 +32,10 @@ else
             <MudTd DataLabel="Produto">@context.ProductName</MudTd>
             <MudTd DataLabel="Preco">@context.EnterPrice</MudTd>
             <MudTd DataLabel="Quantidade">@context.Qntd</MudTd>
+            <MudTd DataLabel="Total">@context.SaleTotal</MudTd>
             <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
             <MudTd DataLabel="Data de Entrada">@context.DateSale.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
+            <MudTd DataLabel="Cancelar venda"><MudTooltip Text="Cancelar venda"><MudIconButton Icon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="@(() => CancelSale(context.Id))"></MudIconButton></MudTooltip></MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager HideRowsPerPage="true" />
@@ -88,6 +92,38 @@ else
             return true;
 
         return false;
+    }
+
+    private async Task CancelSale(int saleId)
+    {
+        try
+        {
+            var dialogConfirmmation = await ShowDialog.ShowDialogAsync("Tem certeza que deseja cancelar a venda? A quantidade dos produtos será acrescida nas entradas.", "Confirmação", state: EDialogStates.Error, showCancel: true, showYes: true);
+
+            if (dialogConfirmmation)
+            {
+                loading = true;
+
+                await api.Delete<SaleVO>(saleId);
+
+                app.Sales = await api.Get<SaleVO>();
+                sales = app.Sales;
+
+                app.ProductEntries = await api.Get<EnterVO>();
+
+                await ShowDialog.ShowDialogAsync("Venda cancelada com sucesso.", "Sucesso", app.productsSalesPage, EDialogStates.Success);
+
+                StateHasChanged();
+
+                loading = false;
+            }
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Erro cancelando a venda.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
     }
 
     #endregion

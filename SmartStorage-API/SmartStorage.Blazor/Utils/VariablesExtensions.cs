@@ -30,6 +30,8 @@ namespace SmartStorage.Blazor.Utils
 
         public string productsInShelves { get; } = "products/shelves";
 
+        public string productsSalesPage { get; } = "products/sales";
+
         #endregion
 
         #region Others
