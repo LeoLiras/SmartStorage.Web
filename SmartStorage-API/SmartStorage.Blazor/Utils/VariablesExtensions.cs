@@ -26,9 +26,9 @@ namespace SmartStorage.Blazor.Utils
 
         #region Pages
 
-        public string productsInStock { get; } = "products";
+        public string productsInStockPage { get; } = "products";
 
-        public string productsInShelves { get; } = "products/shelves";
+        public string productsInShelvesPage { get; } = "products/shelves";
 
         public string productsSalesPage { get; } = "products/sales";
 

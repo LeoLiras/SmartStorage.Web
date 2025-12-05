@@ -121,7 +121,7 @@ else
 
             await ShowDialog.ShowDialogAsync($"Erro ao buscar entrada e produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
 
-            nav.NavigateTo(app.productsInStock);
+            nav.NavigateTo(app.productsInStockPage);
         }
     }
 
@@ -142,7 +142,7 @@ else
 
             app.ProductEntries = await api.Get<EnterVO>();
 
-            await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelves, EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
 
             StateHasChanged();
 

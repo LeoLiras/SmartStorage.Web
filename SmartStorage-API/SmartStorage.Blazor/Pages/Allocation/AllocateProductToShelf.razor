@@ -114,7 +114,7 @@ else if(enter is not null)
 
             await ShowDialog.ShowDialogAsync($"Erro ao buscar produto.\n{ex.Message}", "Error", state: EDialogStates.Warning);
 
-            nav.NavigateTo(app.productsInStock);
+            nav.NavigateTo(app.productsInStockPage);
         }
     }
 
@@ -133,7 +133,7 @@ else if(enter is not null)
 
             var result = await api.Post<EnterVO>(enter);
 
-            await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", app.productsInStock, EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", app.productsInStockPage, EDialogStates.Success);
 
             StateHasChanged();
 
