@@ -133,6 +133,8 @@ else if(enter is not null)
 
             var result = await api.Post<EnterVO>(enter);
 
+            app.ProductEntries = await api.Get<EnterVO>();
+
             await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", app.productsInStockPage, EDialogStates.Success);
 
             StateHasChanged();
