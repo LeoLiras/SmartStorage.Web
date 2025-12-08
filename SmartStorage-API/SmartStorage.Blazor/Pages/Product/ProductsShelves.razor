@@ -124,11 +124,11 @@ else
 
                 var result = await api.Put<EnterVO>(entry, entryId);
 
-                await ShowDialog.ShowDialogAsync("Alocação desfeita com sucesso.", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
-
-                ReloadData();
+                await ReloadData();
 
                 StateHasChanged();
+
+                await ShowDialog.ShowDialogAsync("Alocação desfeita com sucesso.", "Sucesso", state:EDialogStates.Success); 
             }
         }
         catch (ApiException ex)
@@ -137,16 +137,14 @@ else
         }
     }
 
-    private async void ReloadData()
+    private async Task ReloadData()
     {
+        app.ProductEntries = new();
         app.ProductEntries = await api.Get<EnterVO>();
 
-        productsInShelves = app.ProductEntries;
+        if (app.ProductEntries is not null)
+            productsInShelves = app.ProductEntries.OrderBy(p => p.ProductQuantity == 0).ThenBy(p => p.ShelfName, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     #endregion
-
-    
-    
-
 }
