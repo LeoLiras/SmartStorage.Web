@@ -3,6 +3,7 @@
 @inject ApiExtensions api
 @inject VariablesExtensions app
 @inject NavigationManager nav
+@inject ShowDialog ShowDialog
 
 @if(productsInShelves is null || loading)
 {
@@ -34,7 +35,7 @@ else
             <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
             <MudTd DataLabel="Data de Entrada">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
             <MudTd DataLabel="Vender"><MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success" OnClick="@(() => SaleProduct(context.Id))"></MudIconButton></MudTooltip></MudTd>
-            <MudTd DataLabel="Retornar alocacao"><MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning"></MudIconButton></MudTooltip></MudTd>
+            <MudTd DataLabel="Retornar alocacao"><MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning" OnClick="@(() => UndoAllocation(context.Id))"></MudIconButton></MudTooltip></MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager HideRowsPerPage="true"/>
@@ -47,6 +48,7 @@ else
     #region Properties
 
     List<EnterVO>? productsInShelves = new();
+    EnterVO? entry = new();
 
     string searchString = string.Empty;
 
@@ -104,7 +106,42 @@ else
 
             nav.NavigateTo($"product/sale/{entryId}");
         }
-        
+
+    }
+
+    private async void UndoAllocation(int entryId)
+    {
+        try
+        {
+            var confimation = await ShowDialog.ShowDialogAsync("Tem certeza que deseja cancelar a alocação? O produto será devolvido ao estoque.", "Confirmação", state: EDialogStates.Warning, showCancel: true, showYes: true);
+
+            if (confimation)
+            {
+                entry = await api.GetById<EnterVO>(entryId);
+
+                if (entry is null)
+                    return;
+
+                var result = await api.Put<EnterVO>(entry, entryId);
+
+                await ShowDialog.ShowDialogAsync("Alocação desfeita com sucesso.", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
+
+                ReloadData();
+
+                StateHasChanged();
+            }
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro alocando o produto de volta para o estoque.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+    }
+
+    private async void ReloadData()
+    {
+        app.ProductEntries = await api.Get<EnterVO>();
+
+        productsInShelves = app.ProductEntries;
     }
 
     #endregion
