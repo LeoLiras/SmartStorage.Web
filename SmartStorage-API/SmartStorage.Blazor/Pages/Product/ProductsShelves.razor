@@ -15,7 +15,7 @@ else if(productsInShelves.Count == 0)
 }
 else
 {
-    <MudTable Class="mt-3" Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="true" Filter="new Func<EnterVO, bool>(FilterFuncAux)" RowsPerPage="10">
+    <MudTable Class="mt-3" Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="true" Filter="new Func<EnterVO, bool>(FilterFuncAux)" RowsPerPage="100">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Produtos nas prateleiras para venda</MudText>
             <MudSpacer />
@@ -70,7 +70,7 @@ else
         if (productsInShelves is null)
             return;
 
-        productsInShelves.Sort((a, b) => string.Compare(a.ShelfName, b.ShelfName, StringComparison.OrdinalIgnoreCase));
+        productsInShelves = productsInShelves.OrderBy(p => p.ProductQuantity == 0).ThenBy(p => p.ShelfName, StringComparer.OrdinalIgnoreCase).ToList();
 
         loading = false;
     }
