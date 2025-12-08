@@ -32,6 +32,7 @@ else
                                 <MudCardContent>
                                     <MudText Typo="Typo.h5">@product.Name</MudText>
                                     <MudText Typo="Typo.body2">@product.Descricao</MudText>
+                                    <MudText Typo="Typo.body2">Quantidade em estoque: @product.Qntd</MudText>
                                 </MudCardContent>
                                 <MudCardActions>
                                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Editar</MudButton>
