@@ -1,0 +1,86 @@
+﻿@page "/products/insight"
+
+@inject ApiExtensions api
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+
+@if(sales is null || loading)
+{
+    <Loading Message="Carregando Insights..."></Loading>
+}
+else if(sales.Count == 0)
+{
+    <MudAlert Severity="Severity.Warning">Não há insights disponíveis.</MudAlert>
+}
+else
+{
+    <MudPaper Class="doc-section-component-container">
+        <MudChart ChartType="ChartType.Line" ChartSeries="@_series" @bind-SelectedIndex="_index" XAxisLabels="@_xAxisLabels" Width="650px" Height="350px" />
+    </MudPaper>
+}
+
+
+
+@code {
+    #region Properties
+
+    List<SaleVO>? sales = new();
+    private double[] monthlySales = new double[12];
+
+    bool loading = false;
+
+    private int _index = -1;
+
+    private List<ChartSeries> _series = new List<ChartSeries>();
+
+    private string[] _xAxisLabels = { "Jan", "Feb", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Sep", "Out", "Nov", "Dez" };
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+
+        if (app.Sales is null || app.Sales.Count() == 0)
+            sales = await api.Get<SaleVO>();
+        else
+            sales = app.Sales;
+
+        if (sales is null)
+            return;
+
+        monthlySales = sales
+                            .GroupBy(s => new { s.DateSale.Year, s.DateSale.Month })
+                            .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+                            .GroupBy(g => g.Key.Month)
+                            .Select(g => g.Sum(s => s.Sum(x => (double)x.SaleTotal)))
+                            .ToArray();
+
+        await LoadChart();
+
+        loading = false;
+    }
+
+    #endregion
+
+    #region Methods
+
+    private Task LoadChart()
+    {
+        _series = new List<ChartSeries>()
+        {
+            new ChartSeries()
+            {
+                Name = "Vendas",
+                Data = monthlySales
+            }
+        };
+
+        return Task.CompletedTask;
+    }
+    #endregion
+    
+}
