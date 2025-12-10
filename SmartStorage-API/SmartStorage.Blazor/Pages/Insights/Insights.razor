@@ -1,4 +1,5 @@
 ﻿@page "/products/insight"
+@using System.Globalization
 
 @inject ApiExtensions api
 @inject NavigationManager nav
@@ -34,7 +35,7 @@ else
 
     private List<ChartSeries> _series = new List<ChartSeries>();
 
-    private string[] _xAxisLabels = { "Jan", "Feb", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Sep", "Out", "Nov", "Dez" };
+    private string[] _xAxisLabels = { };
 
     #endregion
 
@@ -52,12 +53,20 @@ else
         if (sales is null)
             return;
 
-        monthlySales = sales
-                            .GroupBy(s => new { s.DateSale.Year, s.DateSale.Month })
-                            .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
-                            .GroupBy(g => g.Key.Month)
-                            .Select(g => g.Sum(s => s.Sum(x => (double)x.SaleTotal)))
-                            .ToArray();
+        var groupedSales = sales
+            .GroupBy(s => new { s.DateSale.Year, s.DateSale.Month })
+            .OrderBy(g => g.Key.Year)
+            .ThenBy(g => g.Key.Month)
+            .ToList();
+
+        _xAxisLabels = groupedSales
+            .Select(g => new DateTime(g.Key.Year, g.Key.Month, 1)
+            .ToString("MMM", new CultureInfo("pt-BR")))
+            .ToArray();
+
+        monthlySales = groupedSales
+            .Select(g => g.Sum(x => (double)x.SaleTotal))
+            .ToArray();
 
         await LoadChart();
 
