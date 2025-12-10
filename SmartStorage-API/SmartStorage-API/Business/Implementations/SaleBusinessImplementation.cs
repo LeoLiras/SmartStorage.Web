@@ -43,9 +43,9 @@ namespace SmartStorage_API.Service.Implementations
             return _converter.Parse(sale);
         }
 
-        public SaleVO CreateNewSale(int productId, int saleQntd)
+        public SaleVO CreateNewSale(int enterId, int saleQntd, DateTime dateSale)
         {
-            var enter = _context.Enters.FirstOrDefault(e => e.EntProId.Equals(productId));
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
 
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID do Produto informado.");
@@ -58,7 +58,7 @@ namespace SmartStorage_API.Service.Implementations
                 {
                     SalEntId = enter.EntId,
                     SalQntd = saleQntd,
-                    SalDateSale = DateTime.Now,
+                    SalDateSale = dateSale,
                 };
 
                 _context.Sales.Add(sale);

@@ -49,7 +49,7 @@ else
                     </MudCard>
                     <MudCard>
                         <MudCardContent>
-                            <MudDatePicker Disabled="true" Label="Data da venda" Color="Color.Info" Date="@DateTime.Today" />
+                            <MudDatePicker Label="Data da venda" Color="Color.Info" @bind-Date="dateSale"/>
                         </MudCardContent>
                     </MudCard>
                 </div>
@@ -80,6 +80,8 @@ else
     private SaleVO? newSale = new();
     private EnterVO? entry = new();
     private ProductVO? product = new();
+
+    DateTime? dateSale = DateTime.Now;
 
     private bool loading = false;
 
@@ -135,12 +137,15 @@ else
         {
             loading = true;
 
+            AtribuirDados();
+
             if (entry is null || newSale is null)
                 return;
 
             await api.Post<SaleVO>(newSale);
 
             app.ProductEntries = await api.Get<EnterVO>();
+            app.Sales = await api.Get<SaleVO>();
 
             await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
 
@@ -158,13 +163,11 @@ else
 
     private void AtribuirDados()
     {
-        if (product is null || entry is null)
+        if (product is null || entry is null || newSale is null)
             return;
 
-        newSale = new();
-
         newSale.ProductName = product.Name;
-        newSale.DateSale = DateTime.Now;
+        newSale.DateSale = Convert.ToDateTime(dateSale.ToString());
         newSale.IdEnter = entry.Id;
         newSale.ProductId = product.Id;  
     }

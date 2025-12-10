@@ -64,7 +64,7 @@ namespace SmartStorage_API.Controllers
                 if (newSale.Qntd.Equals(0))
                     throw new Exception("O campo Quantidade da Venda é obrigatório.");
 
-                return Ok(_saleService.CreateNewSale(newSale.ProductId, newSale.Qntd));
+                return Ok(_saleService.CreateNewSale(newSale.IdEnter, newSale.Qntd, newSale.DateSale));
             }
             catch (Exception ex)
             {
