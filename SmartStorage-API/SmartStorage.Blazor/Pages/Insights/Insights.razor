@@ -19,9 +19,7 @@ else
 
     <div style="width:650px; margin-top: 20px">
         <MudPaper Class="doc-section-component-container">
-        
-                <MudChart ChartType="ChartType.Line" ChartSeries="@_series" @bind-SelectedIndex="_index" XAxisLabels="@_xAxisLabels" Width="650px" Height="350px" />
-       
+            <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" @bind-SelectedIndex="_index" XAxisLabels="@totalSalesXAxis" Width="650px" Height="350px" />
         </MudPaper>
     </div>
 }
@@ -32,15 +30,15 @@ else
     #region Properties
 
     List<SaleVO>? sales = new();
-    private double[] monthlySales = new double[12];
-
+    
     bool loading = false;
 
     private int _index = -1;
 
-    private List<ChartSeries> _series = new List<ChartSeries>();
-
-    private string[] _xAxisLabels = { };
+    //Total sales chart
+    private double[] totalSalesMonthly = new double[12];
+    private List<ChartSeries> totalSalesSeries = new List<ChartSeries>();
+    private string[] totalSalesXAxis = { };
 
     #endregion
 
@@ -65,16 +63,16 @@ else
             .ThenBy(g => g.Key.Month)
             .ToList();
 
-        _xAxisLabels = totalSales
+        totalSalesXAxis = totalSales
             .Select(g => new DateTime(g.Key.Year, g.Key.Month, 1)
             .ToString("MMM", new CultureInfo("pt-BR")))
             .ToArray();
 
-        monthlySales = totalSales
+        totalSalesMonthly = totalSales
             .Select(g => g.Sum(x => (double)x.SaleTotal))
             .ToArray();
 
-        await LoadChart();
+        await LoadChartsData();
 
         loading = false;
     }
@@ -83,14 +81,14 @@ else
 
     #region Methods
 
-    private Task LoadChart()
+    private Task LoadChartsData()
     {
-        _series = new List<ChartSeries>()
+        totalSalesSeries = new List<ChartSeries>()
         {
             new ChartSeries()
             {
                 Name = "Vendas",
-                Data = monthlySales
+                Data = totalSalesMonthly
             }
         };
 
