@@ -58,18 +58,19 @@ else
         if (sales is null)
             return;
 
-        var groupedSales = sales
+        var totalSales = sales
+            .Where(s => s.DateSale.Year.Equals(DateTime.Now.Year))
             .GroupBy(s => new { s.DateSale.Year, s.DateSale.Month })
             .OrderBy(g => g.Key.Year)
             .ThenBy(g => g.Key.Month)
             .ToList();
 
-        _xAxisLabels = groupedSales
+        _xAxisLabels = totalSales
             .Select(g => new DateTime(g.Key.Year, g.Key.Month, 1)
             .ToString("MMM", new CultureInfo("pt-BR")))
             .ToArray();
 
-        monthlySales = groupedSales
+        monthlySales = totalSales
             .Select(g => g.Sum(x => (double)x.SaleTotal))
             .ToArray();
 
