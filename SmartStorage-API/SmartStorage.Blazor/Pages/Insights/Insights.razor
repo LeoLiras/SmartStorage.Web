@@ -16,10 +16,15 @@ else if(sales.Count == 0)
 }
 else
 {
-
     <div style="width:650px; margin-top: 20px">
         <MudPaper Class="doc-section-component-container">
             <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" @bind-SelectedIndex="_index" XAxisLabels="@totalSalesXAxis" Width="650px" Height="350px" />
+        </MudPaper>
+    </div>
+
+    <div style="width:650px; margin-top: 20px">
+        <MudPaper Class="doc-section-component-container">
+            <MudChart ChartType="ChartType.Bar" ChartSeries="@bestSellingSeries" @bind-SelectedIndex="_index" XAxisLabels="@bestSellingXAxis" Width="650px" Height="350px"></MudChart>
         </MudPaper>
     </div>
 }
@@ -30,15 +35,18 @@ else
     #region Properties
 
     List<SaleVO>? sales = new();
-    
+
     bool loading = false;
 
     private int _index = -1;
 
     //Total sales chart
-    private double[] totalSalesMonthly = new double[12];
     private List<ChartSeries> totalSalesSeries = new List<ChartSeries>();
     private string[] totalSalesXAxis = { };
+
+    //Best-selling montlhy chart
+    private List<ChartSeries> bestSellingSeries = new List<ChartSeries>();
+    private string[] bestSellingXAxis = { };
 
     #endregion
 
@@ -56,6 +64,7 @@ else
         if (sales is null)
             return;
 
+        //Total sales
         var totalSales = sales
             .Where(s => s.DateSale.Year.Equals(DateTime.Now.Year))
             .GroupBy(s => new { s.DateSale.Year, s.DateSale.Month })
@@ -68,21 +77,10 @@ else
             .ToString("MMM", new CultureInfo("pt-BR")))
             .ToArray();
 
-        totalSalesMonthly = totalSales
+        var totalSalesMonthly = totalSales
             .Select(g => g.Sum(x => (double)x.SaleTotal))
             .ToArray();
 
-        await LoadChartsData();
-
-        loading = false;
-    }
-
-    #endregion
-
-    #region Methods
-
-    private Task LoadChartsData()
-    {
         totalSalesSeries = new List<ChartSeries>()
         {
             new ChartSeries()
@@ -92,8 +90,53 @@ else
             }
         };
 
-        return Task.CompletedTask;
+        //Best-selling montlhy
+        var bestSellersPerMonth = sales
+            .Where(s => s.DateSale.Year == DateTime.Now.Year)
+            .GroupBy(s => s.DateSale.Month)
+            .Select(monthGroup => new
+            {
+                Month = monthGroup.Key,
+                TopProducts = monthGroup
+                    .GroupBy(s => s.ProductName)
+                    .Select(g => new
+                    {
+                        ProductName = g.Key,
+                        TotalSales = g.Sum(x => x.SaleTotal)
+                    })
+                    .OrderByDescending(x => x.TotalSales)
+                    .Take(5)
+                    .ToList()
+            })
+            .OrderBy(x => x.Month)
+            .ToList();
+
+        bestSellingXAxis = bestSellersPerMonth
+            .Select(m => new DateTime(DateTime.Now.Year, m.Month, 1).ToString("MMMM"))
+            .ToArray();
+
+        var productNames = bestSellersPerMonth
+            .SelectMany(m => m.TopProducts.Select(p => p.ProductName))
+            .Distinct()
+            .ToList();
+
+        bestSellingSeries = productNames
+            .Select(product => new ChartSeries
+            {
+                Name = product ?? "",
+                Data = bestSellersPerMonth
+                    .Select(m => (double)(m.TopProducts.FirstOrDefault(p => p.ProductName == product)?.TotalSales ?? 0))
+                    .ToArray()
+            })
+            .ToList();
+
+        loading = false;
     }
+
+    #endregion
+
+    #region Methods
+
     #endregion
     
 }
