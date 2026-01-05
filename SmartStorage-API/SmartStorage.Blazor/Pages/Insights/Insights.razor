@@ -18,18 +18,18 @@ else
 {
     <div style="width:650px; margin-top: 20px">
         <MudPaper Class="doc-section-component-container">
+            <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Total Vendido (R$)</MudText>
             <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" @bind-SelectedIndex="_index" XAxisLabels="@totalSalesXAxis" Width="650px" Height="350px" />
         </MudPaper>
     </div>
 
     <div style="width:650px; margin-top: 20px">
         <MudPaper Class="doc-section-component-container">
+            <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Os Mais Vendidos</MudText>
             <MudChart ChartType="ChartType.Bar" ChartSeries="@bestSellingSeries" @bind-SelectedIndex="_index" XAxisLabels="@bestSellingXAxis" Width="650px" Height="350px"></MudChart>
         </MudPaper>
     </div>
 }
-
-
 
 @code {
     #region Properties
