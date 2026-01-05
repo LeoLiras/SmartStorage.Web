@@ -35,14 +35,14 @@ else
             @foreach (var msg in chatMessages)
             {
                 <MudChat ChatPosition="@msg.Position">
-                    <MudAvatar>
+                    <MudAvatar Style="background-color:transparent">
                         @if (msg.IsUser)
                         {
-                            <MudIcon Icon="@Icons.Material.Filled.Person" />
+                            <MudIcon Icon="@Icons.Material.Outlined.Person" Color="Color.Info"/>
                         }
                         else
                         {
-                            <MudIcon Icon="@Icons.Material.Filled.Android" />
+                            <MudIcon Icon="@Icons.Material.Outlined.Android" Style="color:green;" />
                         }
                     </MudAvatar>
 
