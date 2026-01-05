@@ -29,6 +29,43 @@ else
             <MudChart ChartType="ChartType.Bar" ChartSeries="@bestSellingSeries" @bind-SelectedIndex="_index" XAxisLabels="@bestSellingXAxis" Width="650px" Height="350px"></MudChart>
         </MudPaper>
     </div>
+
+    <MudPaper Class="doc-section-component-container; mt-5" Style="width:650px; border:2px solid var(--mud-palette-lines-default); border-radius:8px;">
+        <div style="display:flex; flex-direction:column; gap:12px; max-height:400px; overflow:auto;">
+            @foreach (var msg in chatMessages)
+            {
+                <MudChat ChatPosition="@msg.Position">
+                    <MudAvatar>
+                        @if (msg.IsUser)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Person" />
+                        }
+                        else
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Android" />
+                        }
+                    </MudAvatar>
+
+                    <MudChatBubble>
+                        @msg.Text
+                    </MudChatBubble>
+                </MudChat>
+            }
+        </div>
+    </MudPaper>
+
+    <div style="display:flex; flex-direction:column; gap:12px; width:650px; max-height:400px; overflow:auto;">
+        <MudTextField @bind-Value="currentInput"
+                      Placeholder="Digite sua mensagem..."
+                      Variant="Variant.Outlined"
+                      FullWidth
+                      Lines="1"
+                      Class="mt-3" />
+    </div>
+    
+    <MudButton OnClick="SendMessage" Variant="Variant.Filled" Color="Color.Info" Class="mt-2">
+        Enviar
+    </MudButton>
 }
 
 @code {
@@ -47,6 +84,11 @@ else
     //Best-selling montlhy chart
     private List<ChartSeries> bestSellingSeries = new List<ChartSeries>();
     private string[] bestSellingXAxis = { };
+
+    //Chat
+    private List<ChatMessage> chatMessages = new();
+
+    private string currentInput = "";
 
     #endregion
 
@@ -130,12 +172,35 @@ else
             })
             .ToList();
 
+        chatMessages.Add(new ChatMessage { Text = "Olá, tudo bem? Me faça uma pergunta!", IsUser = false });
+
         loading = false;
     }
 
     #endregion
 
     #region Methods
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(currentInput))
+            return;
+
+        // Adiciona mensagem do usuário
+        chatMessages.Add(new ChatMessage { Text = currentInput, IsUser = true });
+
+        var prompt = currentInput;
+        currentInput = "";
+
+        // Chamada real da IA entra aqui depois
+        var aiResponse = await SimularIA(prompt);
+
+        // Adiciona resposta da IA
+        chatMessages.Add(new ChatMessage { Text = aiResponse, IsUser = false });
+    }
+
+    private Task<string> SimularIA(string text)
+        => Task.FromResult($"Resposta da IA para: {text}");
 
     #endregion
     
