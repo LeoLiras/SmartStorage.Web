@@ -16,21 +16,19 @@ else if(sales.Count == 0)
 }
 else
 {
-    <div style="width:650px; margin-top: 20px">
-        <MudPaper Class="doc-section-component-container">
+    <div style="display: flex; gap: 8px; width: 1308px;" class="mt-3">
+        <MudPaper Style="width:650px; padding:16px; box-sizing:border-box;">
             <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Total Vendido (R$)</MudText>
-            <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" @bind-SelectedIndex="_index" XAxisLabels="@totalSalesXAxis" Width="650px" Height="350px" />
+            <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" XAxisLabels="@totalSalesXAxis" Width="100%" Height="350px" />
         </MudPaper>
-    </div>
 
-    <div style="width:650px; margin-top: 20px">
-        <MudPaper Class="doc-section-component-container">
+        <MudPaper Style="width:650px; padding:16px; box-sizing:border-box;">
             <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Os Mais Vendidos</MudText>
-            <MudChart ChartType="ChartType.Bar" ChartSeries="@bestSellingSeries" @bind-SelectedIndex="_index" XAxisLabels="@bestSellingXAxis" Width="650px" Height="350px"></MudChart>
+            <MudChart ChartType="ChartType.Bar" ChartSeries="@bestSellingSeries" XAxisLabels="@bestSellingXAxis" Width="100%" Height="350px" />
         </MudPaper>
     </div>
 
-    <MudPaper Class="doc-section-component-container; mt-5" Style="width:650px; border:2px solid var(--mud-palette-lines-default); border-radius:8px;">
+    <MudPaper Class="doc-section-component-container; mt-10" Style="width:650px; border:2px solid var(--mud-palette-lines-default); border-radius:8px;">
         <div style="display:flex; flex-direction:column; gap:12px; max-height:400px; overflow:auto;">
             @foreach (var msg in chatMessages)
             {
