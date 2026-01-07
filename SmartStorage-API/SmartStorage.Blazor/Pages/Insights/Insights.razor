@@ -1,5 +1,9 @@
 ﻿@page "/products/insight"
+
 @using System.Globalization
+@using System.Threading.Tasks
+@using Google.GenAI
+@using Google.GenAI.Types
 
 @inject ApiExtensions api
 @inject NavigationManager nav
@@ -184,21 +188,26 @@ else
         if (string.IsNullOrWhiteSpace(currentInput))
             return;
 
-        // Adiciona mensagem do usuário
         chatMessages.Add(new ChatMessage { Text = currentInput, IsUser = true });
 
         var prompt = currentInput;
         currentInput = "";
 
-        // Chamada real da IA entra aqui depois
-        var aiResponse = await SimularIA(prompt);
+        var aiResponse = await AIRequest(prompt);
 
-        // Adiciona resposta da IA
         chatMessages.Add(new ChatMessage { Text = aiResponse, IsUser = false });
     }
 
-    private Task<string> SimularIA(string text)
-        => Task.FromResult($"Resposta da IA para: {text}");
+    private async Task<string> AIRequest(string text)
+    {
+        var client = new Client(apiKey: "AIzaSyDq9Ulayewm2GLlJzeEOYnLX_uTRwNvsg4");
+
+        var response = await client.Models.GenerateContentAsync(
+          model: "gemini-2.5-flash", contents: text
+        );
+
+        return response?.Candidates?[0]?.Content?.Parts?[0]?.Text?.Replace("**", System.Environment.NewLine) ?? "";
+    }
 
     #endregion
     
