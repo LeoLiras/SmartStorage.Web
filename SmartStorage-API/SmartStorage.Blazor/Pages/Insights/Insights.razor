@@ -4,6 +4,7 @@
 @using System.Threading.Tasks
 @using Google.GenAI
 @using Google.GenAI.Types
+@using System.Text.Json
 
 @inject ApiExtensions api
 @inject NavigationManager nav
@@ -89,8 +90,8 @@ else
 
     //Chat
     private List<ChatMessage> chatMessages = new();
-
     private string currentInput = "";
+    private int requisitions = 0;
 
     #endregion
 
@@ -190,20 +191,30 @@ else
 
         chatMessages.Add(new ChatMessage { Text = currentInput, IsUser = true });
 
-        var prompt = currentInput;
-        currentInput = "";
+        if(sales is not null)
+        {
+            var salesToPrompt = sales.OrderByDescending(s => s.DateSale).Take(10);
+            var json = JsonSerializer.Serialize(salesToPrompt);
 
-        var aiResponse = await AIRequest(prompt);
+            var prompt = currentInput;
+            currentInput = "";
 
-        chatMessages.Add(new ChatMessage { Text = aiResponse, IsUser = false });
+            var aiResponse = await AIRequest(prompt, json);
+
+            chatMessages.Add(new ChatMessage { Text = aiResponse, IsUser = false });
+        }
+        else
+        {
+            chatMessages.Add(new ChatMessage { Text = "Desculpe-me, não há vendas para serem analisadas", IsUser = false });
+        }  
     }
 
-    private async Task<string> AIRequest(string text)
+    private async Task<string> AIRequest(string text, string data)
     {
-        var client = new Client(apiKey: "AIzaSyDq9Ulayewm2GLlJzeEOYnLX_uTRwNvsg4");
+        var client = new Client(apiKey: "AIzaSyBL8QG5dPL_hre7tZTYPGhC0Hcmi0myyOs");
 
         var response = await client.Models.GenerateContentAsync(
-          model: "gemini-2.5-flash", contents: text
+          model: "gemini-2.5-flash", contents: $"{text}: {data}"
         );
 
         return response?.Candidates?[0]?.Content?.Parts?[0]?.Text?.Replace("**", System.Environment.NewLine) ?? "";
