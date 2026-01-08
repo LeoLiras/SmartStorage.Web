@@ -214,7 +214,7 @@ else
         var client = new Client(apiKey: "AIzaSyBL8QG5dPL_hre7tZTYPGhC0Hcmi0myyOs");
 
         var response = await client.Models.GenerateContentAsync(
-          model: "gemini-2.5-flash", contents: $"{text}: {data}"
+          model: "gemini-2.5-flash", contents: $"{text}: {data}. Apenas texto, não utilize tabelas."
         );
 
         return response?.Candidates?[0]?.Content?.Parts?[0]?.Text?.Replace("**", System.Environment.NewLine) ?? "";
