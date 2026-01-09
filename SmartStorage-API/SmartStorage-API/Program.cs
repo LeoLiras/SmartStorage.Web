@@ -55,6 +55,8 @@ builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();
 builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
 
+builder.Configuration.AddEnvironmentVariables();
+
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 
 builder.Services.AddCors(options =>

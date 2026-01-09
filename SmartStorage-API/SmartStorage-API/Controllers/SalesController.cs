@@ -109,6 +109,25 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpPost("analyse/ai")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public async Task<IActionResult> AnalyseAI([FromBody] string text)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(text))
+                    throw new Exception("O texto da requisição é obrigatório.");
+
+                var result = await _saleService.AnalyseAI(text);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         #endregion
     }
 }

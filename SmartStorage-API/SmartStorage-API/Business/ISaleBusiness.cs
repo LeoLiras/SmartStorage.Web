@@ -10,5 +10,6 @@ namespace SmartStorage_API.Service
         SaleVO CreateNewSale(int enterId, int saleQntd, DateTime dateSale);
         SaleVO UpdateSale(int saleId, int saleQntd);
         SaleVO DeleteSale(int saleId);
+        Task<string> AnalyseAI(string text);
     }
 }

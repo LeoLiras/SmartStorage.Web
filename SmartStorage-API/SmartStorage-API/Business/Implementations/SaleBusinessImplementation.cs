@@ -3,6 +3,9 @@ using SmartStorage_API.Data.VO;
 using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
 using SmartStorage_Shared.Model;
+using System.Threading.Tasks;
+using Google.GenAI;
+using Google.GenAI.Types;
 
 namespace SmartStorage_API.Service.Implementations
 {
@@ -123,6 +126,17 @@ namespace SmartStorage_API.Service.Implementations
             _context.SaveChanges();
 
             return _converter.Parse(sale);
+        }
+
+        public async Task<string> AnalyseAI(string text)
+        {
+            var client = new Client(apiKey: System.Environment.GetEnvironmentVariable("GOOGLE_API_KEY"));
+
+            var response = await client.Models.GenerateContentAsync(
+              model: "gemini-2.5-flash", contents: $"{text}. Apenas texto, não utilize tabelas e separe em tópicos."
+            );
+
+            return response?.Candidates?[0]?.Content?.Parts?[0]?.Text?.Replace("**", System.Environment.NewLine) ?? "";
         }
 
         #endregion
