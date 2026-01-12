@@ -54,6 +54,11 @@ else
         </div>
     </MudPaper>
 
+    if (loadingAiResponse)
+    {
+        <MudImage Fluid="true" Width="50" Height="50" Src="images/loading.gif" Alt="Swedish Farm House" Class="rounded-lg" />
+    }
+
     <div style="display:flex; flex-direction:column; gap:12px; width:650px; max-height:400px; overflow:auto;">
         <MudTextField @bind-Value="currentInput"
                       Placeholder="Digite sua mensagem..."
@@ -74,6 +79,7 @@ else
     List<SaleVO>? sales = new();
 
     bool loading = false;
+    bool loadingAiResponse = false;
 
     //Total sales chart
     private List<ChartSeries> totalSalesSeries = new List<ChartSeries>();
@@ -169,7 +175,7 @@ else
             })
             .ToList();
 
-        chatMessages.Add(new ChatMessage { Text = "Olá, tudo bem? Me faça uma pergunta!", IsUser = false });
+        chatMessages.Add(new ChatMessage { Text = "Olá, como posso ajudar?", IsUser = false });
 
         loading = false;
     }
@@ -193,9 +199,13 @@ else
             var text = currentInput;
             currentInput = "";
 
+            loadingAiResponse = true;
+
             var aiResponse = await api.PostAnalyseAI($"{text}:{json}");
 
             chatMessages.Add(new ChatMessage { Text = aiResponse ?? "", IsUser = false });
+
+            loadingAiResponse = false;
         }
         else
         {
