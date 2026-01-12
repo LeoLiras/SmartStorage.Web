@@ -48,7 +48,7 @@ else
 
                     <MudChatBubble>
                         <MudText Style="white-space: pre-line;">
-                            @msg.Text
+                            @msg.Text.Replace("* **", "-").Replace("**", "")
                         </MudText>
                     </MudChatBubble>
                 </MudChat>
