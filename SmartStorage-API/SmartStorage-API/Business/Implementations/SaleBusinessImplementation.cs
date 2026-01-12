@@ -136,7 +136,7 @@ namespace SmartStorage_API.Service.Implementations
               model: "gemini-2.5-flash", contents: $"{text}. Apenas texto, não utilize tabelas e separe em tópicos."
             );
 
-            return response?.Candidates?[0]?.Content?.Parts?[0]?.Text?.Replace("**", System.Environment.NewLine) ?? "";
+            return response?.Candidates?[0]?.Content?.Parts?[0]?.Text ?? "";
         }
 
         #endregion

@@ -47,7 +47,7 @@ else
                     </MudAvatar>
 
                     <MudChatBubble>
-                        @msg.Text
+                        @((MarkupString)msg.Text.Replace("\n", "<br/>"))
                     </MudChatBubble>
                 </MudChat>
             }
