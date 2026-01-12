@@ -67,7 +67,8 @@ else
                       Variant="Variant.Outlined"
                       FullWidth
                       Lines="1"
-                      Class="mt-3" />
+                      Class="mt-3"
+                      OnKeyDown="HandleKeyDown"/>
     </div>
     
     <MudButton OnClick="SendMessage" Variant="Variant.Filled" Color="Color.Info" Class="mt-2">
@@ -180,6 +181,14 @@ else
         chatMessages.Add(new ChatMessage { Text = "Olá, como posso ajudar?", IsUser = false });
 
         loading = false;
+    }
+
+    private async void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendMessage();
+        }
     }
 
     #endregion
