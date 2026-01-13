@@ -128,6 +128,19 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpGet("export-excel")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public ActionResult GenerateExcel()
+        {
+            var report = _saleService.GenerateExcel();
+
+            return File(
+                report,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
+            );
+        }
+
         #endregion
     }
 }

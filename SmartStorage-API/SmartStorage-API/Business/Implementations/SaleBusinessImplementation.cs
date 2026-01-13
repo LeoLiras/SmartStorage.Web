@@ -1,11 +1,10 @@
-﻿using SmartStorage_API.Data.Converter.Implementations;
+﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Google.GenAI;
+using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Data.VO;
-using SmartStorage_API.Model;
 using SmartStorage_API.Model.Context;
 using SmartStorage_Shared.Model;
-using System.Threading.Tasks;
-using Google.GenAI;
-using Google.GenAI.Types;
 
 namespace SmartStorage_API.Service.Implementations
 {
@@ -137,6 +136,53 @@ namespace SmartStorage_API.Service.Implementations
             );
 
             return response?.Candidates?[0]?.Content?.Parts?[0]?.Text ?? "";
+        }
+
+        public byte[] GenerateExcel()
+        {
+            var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).Take(100).ToList();
+
+            using var wb = new XLWorkbook();
+            var ws = wb.Worksheets.Add($"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}");
+
+            int row = 1;
+
+            ws.Cell(row, 1).Value = "Produto";
+            ws.Cell(row, 2).Value = "Prateleira";
+            ws.Cell(row, 3).Value = "Data";
+            ws.Cell(row, 4).Value = "Quantidade";
+            ws.Cell(row, 5).Value = "Preço de Venda";
+            ws.Cell(row, 6).Value = "Total";
+
+            ws.Range(row, 1, row, 6).Style.Font.Bold = true;
+            ws.Range(row, 1, row, 6).Style.Fill.BackgroundColor = XLColor.LightGray;
+
+            row++;
+
+            foreach (var sale in sales)
+            {
+                ws.Cell(row, 1).Value = sale.ProductName;
+                ws.Cell(row, 2).Value = sale.ShelfName;
+                ws.Cell(row, 3).Value = sale.DateSale;
+                ws.Cell(row, 4).Value = sale.Qntd;
+                ws.Cell(row, 5).Value = sale.EnterPrice;
+                ws.Cell(row, 5).Style.NumberFormat.Format = "R$ #,##0.00";
+                ws.Cell(row, 6).Value = sale.SaleTotal;
+                ws.Cell(row, 6).Style.NumberFormat.Format = "R$ #,##0.00";
+
+                row++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            ws.Range(1, 1, row - 1, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Range(1, 1, row - 1, 6).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            ws.Range(1, 1, row - 1, 6).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            using var ms = new MemoryStream();
+            wb.SaveAs(ms);
+
+            return ms.ToArray();
         }
 
         #endregion

@@ -7,6 +7,8 @@
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
+@inject IJSRuntime js
+
 
 @if(sales is null || loading)
 {
@@ -72,12 +74,9 @@ else
         <MudIconButton OnClick="SendMessage" Icon="@Icons.Material.Filled.Send" Variant="Variant.Filled" Color="Color.Info" Class="mt-2" />
     </div>
 
-    
-    
     <div class="mt-2">
-        
         <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Error">PDF</MudButton>
-        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Archive" Color="Color.Success">Excel</MudButton>
+        <MudButton OnClick="ExportExcel" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Archive" Color="Color.Success">Excel</MudButton>
     </div>
 }
 
@@ -227,6 +226,18 @@ else
         {
             chatMessages.Add(new ChatMessage { Text = "Desculpe-me, não há vendas para serem analisadas.", IsUser = false });
         }  
+    }
+
+    private async Task ExportExcel()
+    {
+        var report = await api.GetSalesExcelReport();
+
+        await js.InvokeVoidAsync(
+            "downloadExcel",
+            $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            report
+        );
     }
 
     #endregion
