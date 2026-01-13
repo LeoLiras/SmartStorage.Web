@@ -1,7 +1,6 @@
 ﻿@page "/products/insight"
 
 @using System.Globalization
-@using System.Text.Json
 
 @inject ApiExtensions api
 @inject NavigationManager nav
@@ -208,17 +207,13 @@ else
 
         if(sales is not null)
         {
-            var salesToPrompt = sales.OrderByDescending(s => s.DateSale).Take(10);
-            var json = JsonSerializer.Serialize(salesToPrompt);
-
-            var text = currentInput;
-            currentInput = "";
-
             loadingAiResponse = true;
 
-            var aiResponse = await api.PostAnalyseAI($"{text}:{json}");
+            var aiResponse = await api.PostAnalyseAI($"Apenas texto, não utilize tabelas e separe em tópicos somente se necessário. {currentInput}");
 
             chatMessages.Add(new ChatMessage { Text = aiResponse ?? "", IsUser = false });
+
+            currentInput = "";
 
             loadingAiResponse = false;
         }
