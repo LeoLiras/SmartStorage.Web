@@ -141,6 +141,17 @@ namespace SmartStorage_API.Controllers
             );
         }
 
+        [HttpGet("export-pdf")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public async Task<ActionResult> GeneratePdf()
+        {
+            return File(
+                await _saleService.GeneratePdf(),
+                "application/pdf",
+                $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
+            );
+        }
+
         #endregion
     }
 }

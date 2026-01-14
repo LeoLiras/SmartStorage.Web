@@ -12,5 +12,6 @@ namespace SmartStorage_API.Service
         SaleVO DeleteSale(int saleId);
         Task<string> AnalyseAI(string text);
         byte[] GenerateExcel();
+        Task<byte[]> GeneratePdf();
     }
 }

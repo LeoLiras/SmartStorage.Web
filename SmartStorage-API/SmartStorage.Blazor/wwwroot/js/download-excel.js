@@ -1,4 +1,4 @@
-﻿window.downloadExcel = (filename, contentType, bytes) => {
+﻿window.downloadFile = (filename, contentType, bytes) => {
     const blob = new Blob([new Uint8Array(bytes)], { type: contentType });
     const link = document.createElement("a");
 

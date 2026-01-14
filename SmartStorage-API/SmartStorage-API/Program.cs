@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 using SmartStorage_API;
 using SmartStorage_API.Hypermedia.Enricher;
 using SmartStorage_API.Hypermedia.Filters;
@@ -9,6 +10,8 @@ using SmartStorage_API.Service;
 using SmartStorage_API.Service.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

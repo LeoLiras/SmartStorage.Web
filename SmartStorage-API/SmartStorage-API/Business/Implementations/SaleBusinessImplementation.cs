@@ -5,6 +5,10 @@ using SmartStorage_API.Data.VO;
 using SmartStorage_API.Model.Context;
 using SmartStorage_Shared.Model;
 using System.Text.Json;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using System.Globalization;
 
 namespace SmartStorage_API.Service.Implementations
 {
@@ -143,7 +147,7 @@ namespace SmartStorage_API.Service.Implementations
 
         public byte[] GenerateExcel()
         {
-            var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).Take(100).ToList();
+            var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).ToList();
 
             using var wb = new XLWorkbook();
             var ws = wb.Worksheets.Add($"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}");
@@ -186,6 +190,86 @@ namespace SmartStorage_API.Service.Implementations
             wb.SaveAs(ms);
 
             return ms.ToArray();
+        }
+
+        public async Task<byte[]> GeneratePdf()
+        {
+            var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).ToList();
+
+            Func<IContainer, IContainer> cellStyle = c =>
+                c.Border(1)
+                .BorderColor(Colors.Grey.Lighten2)
+                .Padding(5);
+
+            var reportAi = await AnalyseAI("Faça um resumo das minhas vendas em texto corrente (somente um texto normal, sem tópicos ou tabelas), para que eu coloque no meu relatório. Apenas me dê o resumo, sem saudações.");
+            
+            return Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12));
+
+                    page.Header()
+                        .Text($"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}")
+                        .SemiBold().FontSize(36).FontColor(Colors.Blue.Medium);
+
+                    page.Content()
+                        .PaddingVertical(1, Unit.Centimetre)
+                        .Column(x =>
+                        {
+                            x.Spacing(20);
+
+                            x.Item().AlignLeft().Text($"Emitido em: {DateTime.Now.ToString("F", new CultureInfo("pt-BR"))}");
+
+                            x.Spacing(20);
+
+                            x.Item().AlignCenter().Text(reportAi);
+
+                            x.Spacing(20);
+
+                            x.Item().Table(t =>
+                            {
+                                t.ColumnsDefinition(c =>
+                                {
+                                    c.RelativeColumn();
+                                    c.RelativeColumn();
+                                    c.RelativeColumn();
+                                    c.RelativeColumn();
+                                    c.RelativeColumn();
+                                    c.RelativeColumn();
+                                });
+
+                                t.Header(h =>
+                                {
+                                    h.Cell().Element(cellStyle).Text("Produto").Bold();
+                                    h.Cell().Element(cellStyle).Text("Prateleira").Bold();
+                                    h.Cell().Element(cellStyle).Text("Data").Bold();
+                                    h.Cell().Element(cellStyle).Text("Quantidade").Bold();
+                                    h.Cell().Element(cellStyle).Text("Preço de Venda").Bold();
+                                    h.Cell().Element(cellStyle).Text("Total da Venda").Bold();
+                                });
+
+                                foreach(var sale in sales)
+                                {
+                                    t.Cell().Element(cellStyle).Text(sale.ProductName);
+                                    t.Cell().Element(cellStyle).Text(sale.ShelfName);
+                                    t.Cell().Element(cellStyle).Text(sale.DateSale.ToString("d"));
+                                    t.Cell().Element(cellStyle).Text(sale.Qntd.ToString());
+                                    t.Cell().Element(cellStyle).Text($"R$ {sale.EnterPrice.ToString()}");
+                                    t.Cell().Element(cellStyle).Text($"R$ {sale.SaleTotal.ToString()}");
+                                }
+                            });
+                        });
+
+                    page.Footer()
+                        .AlignRight()
+                        .Text(x =>{ x.CurrentPageNumber();});
+                });
+            })
+            .GeneratePdf();
         }
 
         #endregion

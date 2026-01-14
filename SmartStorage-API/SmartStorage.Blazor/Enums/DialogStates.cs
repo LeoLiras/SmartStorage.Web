@@ -7,4 +7,10 @@
         Info,
         Warning
     }
+
+    public enum FileTypes
+    {
+        PDF = 1,
+        Excel
+    }
 }

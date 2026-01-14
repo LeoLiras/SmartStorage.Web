@@ -74,7 +74,7 @@ else
     </div>
 
     <div class="mt-2">
-        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Error">PDF</MudButton>
+        <MudButton OnClick="ExportPdf" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Error">PDF</MudButton>
         <MudButton OnClick="ExportExcel" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Archive" Color="Color.Success">Excel</MudButton>
     </div>
 }
@@ -225,12 +225,24 @@ else
 
     private async Task ExportExcel()
     {
-        var report = await api.GetSalesExcelReport();
+        var report = await api.GetSalesReport(FileTypes.Excel);
 
         await js.InvokeVoidAsync(
-            "downloadExcel",
+            "downloadFile",
             $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            report
+        );
+    }
+
+    private async Task ExportPdf()
+    {
+        var report = await api.GetSalesReport(FileTypes.PDF);
+
+        await js.InvokeVoidAsync(
+            "downloadFile",
+            $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.pdf",
+            "application/pdf",
             report
         );
     }

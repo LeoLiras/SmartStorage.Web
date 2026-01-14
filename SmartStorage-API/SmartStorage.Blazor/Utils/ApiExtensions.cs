@@ -1,4 +1,5 @@
-﻿using SmartStorage_Shared.VO;
+﻿using SmartStorage.Blazor.Enums;
+using SmartStorage_Shared.VO;
 using System.Net.Http.Json;
 
 namespace SmartStorage.Blazor.Utils
@@ -212,9 +213,14 @@ namespace SmartStorage.Blazor.Utils
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ApiException"></exception>
-        public async Task<byte[]> GetSalesExcelReport()
+        public async Task<byte[]> GetSalesReport(FileTypes fileType)
         {
-            var url = $"{salesEndpoint}/export-excel";
+            var url = "";
+
+            if(fileType == FileTypes.Excel)
+                url = $"{salesEndpoint}/export-excel";
+            else
+                url = $"{salesEndpoint}/export-pdf";
 
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
