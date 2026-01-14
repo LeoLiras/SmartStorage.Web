@@ -1,14 +1,16 @@
 ﻿using ClosedXML.Excel;
 using Google.GenAI;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using ScottPlot;
 using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Data.VO;
 using SmartStorage_API.Model.Context;
 using SmartStorage_Shared.Model;
-using System.Text.Json;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 using System.Globalization;
+using System.Linq;
+using System.Text.Json;
 
 namespace SmartStorage_API.Service.Implementations
 {
@@ -194,41 +196,90 @@ namespace SmartStorage_API.Service.Implementations
 
         public async Task<byte[]> GeneratePdf()
         {
-            var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).ToList();
-
+            //Table grade
             Func<IContainer, IContainer> cellStyle = c =>
                 c.Border(1)
-                .BorderColor(Colors.Grey.Lighten2)
+                .BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2)
                 .Padding(5);
 
-            var reportAi = await AnalyseAI("Faça um resumo das minhas vendas em texto corrente (somente um texto normal, sem tópicos ou tabelas), para que eu coloque no meu relatório. Apenas me dê o resumo, sem saudações.");
-            
+            //var reportAi = await AnalyseAI("Faça um resumo das minhas vendas em texto corrente (somente um texto normal, sem tópicos ou tabelas), para que eu coloque no meu relatório. Apenas me dê o resumo, sem saudações.");
+
+            var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).ToList();
+
+            //============================= Chart: Most saled int the month =============================
+
+            var mostSaledMonth = sales
+                .GroupBy(x => x.ProductName)
+                .Select(p => new
+                {
+                    Product = p.Key,
+                    Quantity = p.Sum(x => x.Qntd)
+                })
+                .OrderByDescending(x => x.Quantity)
+                .Take(10)
+                .ToList();
+
+            Plot mostSaledMonthPlot = new();
+
+            mostSaledMonthPlot.Add.Bars(mostSaledMonth.Select(p => (double)p.Quantity).ToArray());
+            mostSaledMonthPlot.Axes.Margins(bottom: 0);
+
+            Tick[] ticks = mostSaledMonth
+                .Select((x, index) => new Tick(index, x.Product))
+                .ToArray();
+
+            mostSaledMonthPlot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(ticks);
+            mostSaledMonthPlot.Axes.Bottom.TickLabelStyle.Rotation = 45;
+            mostSaledMonthPlot.Axes.Bottom.TickLabelStyle.Alignment = Alignment.MiddleLeft;
+            mostSaledMonthPlot.Axes.Bottom.TickLabelStyle.FontSize = 20;
+
+            float largestLabelWidth = 0;
+            using Paint paint = Paint.NewDisposablePaint();
+            foreach (Tick tick in ticks)
+            {
+                PixelSize size = mostSaledMonthPlot.Axes.Bottom.TickLabelStyle.Measure(tick.Label, paint).Size;
+                largestLabelWidth = Math.Max(largestLabelWidth, size.Width);
+            }
+
+            mostSaledMonthPlot.Axes.Bottom.MinimumSize = largestLabelWidth;
+            mostSaledMonthPlot.Axes.Right.MinimumSize = largestLabelWidth;
+
+            var mostSaledMonthChart = mostSaledMonthPlot.GetImageBytes(1000, 600);
+
+            //============================= Chart: Most saled int the month =============================
+
             return Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4);
                     page.Margin(2, Unit.Centimetre);
-                    page.PageColor(Colors.White);
+                    page.PageColor(QuestPDF.Helpers.Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(12));
 
                     page.Header()
-                        .Text($"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}")
-                        .SemiBold().FontSize(36).FontColor(Colors.Blue.Medium);
+                        .AlignRight()
+                        .Text(x => { x.CurrentPageNumber(); });
 
                     page.Content()
                         .PaddingVertical(1, Unit.Centimetre)
                         .Column(x =>
                         {
+                            x.Item().AlignCenter().Text($"Relatório de Vendas").Bold().FontSize(20);
+
                             x.Spacing(20);
 
                             x.Item().AlignLeft().Text($"Emitido em: {DateTime.Now.ToString("F", new CultureInfo("pt-BR"))}");
 
                             x.Spacing(20);
 
-                            x.Item().AlignCenter().Text(reportAi);
+                            //x.Item().AlignCenter().Text(reportAi);
 
                             x.Spacing(20);
+
+                            x.Item().Image(mostSaledMonthChart).FitWidth();
+
+                            x.Item().PageBreak();
 
                             x.Item().Table(t =>
                             {
@@ -244,12 +295,12 @@ namespace SmartStorage_API.Service.Implementations
 
                                 t.Header(h =>
                                 {
-                                    h.Cell().Element(cellStyle).Text("Produto").Bold();
-                                    h.Cell().Element(cellStyle).Text("Prateleira").Bold();
-                                    h.Cell().Element(cellStyle).Text("Data").Bold();
-                                    h.Cell().Element(cellStyle).Text("Quantidade").Bold();
-                                    h.Cell().Element(cellStyle).Text("Preço de Venda").Bold();
-                                    h.Cell().Element(cellStyle).Text("Total da Venda").Bold();
+                                    h.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten1).Element(cellStyle).Text("Produto").Bold();
+                                    h.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten1).Element(cellStyle).Text("Prateleira").Bold();
+                                    h.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten1).Element(cellStyle).Text("Data").Bold();
+                                    h.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten1).Element(cellStyle).Text("Quantidade").Bold();
+                                    h.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten1).Element(cellStyle).Text("Preço de Venda").Bold();
+                                    h.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten1).Element(cellStyle).Text("Total da Venda").Bold();
                                 });
 
                                 foreach(var sale in sales)
@@ -264,9 +315,7 @@ namespace SmartStorage_API.Service.Implementations
                             });
                         });
 
-                    page.Footer()
-                        .AlignRight()
-                        .Text(x =>{ x.CurrentPageNumber();});
+                    
                 });
             })
             .GeneratePdf();

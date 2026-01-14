@@ -57,7 +57,7 @@ else
         </div>
     </MudPaper>
 
-    if (loadingAiResponse)
+    if (loadingReport)
     {
         <MudImage Fluid="true" Width="50" Height="50" Src="images/loading.gif" Alt="Swedish Farm House" Class="rounded-lg" />
     }
@@ -85,7 +85,7 @@ else
     List<SaleVO>? sales = new();
 
     bool loading = false;
-    bool loadingAiResponse = false;
+    bool loadingReport = false;
 
     //Total sales chart
     private List<ChartSeries> totalSalesSeries = new List<ChartSeries>();
@@ -207,7 +207,7 @@ else
 
         if(sales is not null)
         {
-            loadingAiResponse = true;
+            loadingReport = true;
 
             var aiResponse = await api.PostAnalyseAI($"Apenas texto, não utilize tabelas e separe em tópicos somente se necessário. {currentInput}");
 
@@ -215,7 +215,7 @@ else
 
             currentInput = "";
 
-            loadingAiResponse = false;
+            loadingReport = false;
         }
         else
         {
@@ -225,6 +225,8 @@ else
 
     private async Task ExportExcel()
     {
+        loadingReport = true;
+
         var report = await api.GetSalesReport(FileTypes.Excel);
 
         await js.InvokeVoidAsync(
@@ -233,10 +235,14 @@ else
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             report
         );
+
+        loadingReport = false;
     }
 
     private async Task ExportPdf()
     {
+        loadingReport = true;
+
         var report = await api.GetSalesReport(FileTypes.PDF);
 
         await js.InvokeVoidAsync(
@@ -245,6 +251,8 @@ else
             "application/pdf",
             report
         );
+
+        loadingReport = false;
     }
 
     #endregion
