@@ -132,24 +132,38 @@ namespace SmartStorage_API.Controllers
         [TypeFilter(typeof(HyperMediaFilter))]
         public ActionResult GenerateExcel()
         {
-            var report = _saleService.GenerateExcel();
+            try
+            {
+                var report = _saleService.GenerateExcel();
 
-            return File(
-                report,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
-            );
+                return File(
+                    report,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("export-pdf")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public async Task<ActionResult> GeneratePdf()
         {
-            return File(
-                await _saleService.GeneratePdf(),
-                "application/pdf",
-                $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
-            );
+            try
+            {
+                return File(
+                    await _saleService.GeneratePdf(),
+                    "application/pdf",
+                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         #endregion

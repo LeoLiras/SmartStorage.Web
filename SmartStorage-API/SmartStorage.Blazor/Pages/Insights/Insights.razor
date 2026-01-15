@@ -225,34 +225,48 @@ else
 
     private async Task ExportExcel()
     {
-        loadingReport = true;
+        try
+        {
+            loadingReport = true;
 
-        var report = await api.GetSalesReport(FileTypes.Excel);
+            var report = await api.GetSalesReport(FileTypes.Excel);
 
-        await js.InvokeVoidAsync(
-            "downloadFile",
-            $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.xlsx",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            report
-        );
+            await js.InvokeVoidAsync(
+                "downloadFile",
+                $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                report
+            );
 
-        loadingReport = false;
+            loadingReport = false;
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro gerando o Excel.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
     }
 
     private async Task ExportPdf()
     {
-        loadingReport = true;
+        try
+        {
+            loadingReport = true;
 
-        var report = await api.GetSalesReport(FileTypes.PDF);
+            var report = await api.GetSalesReport(FileTypes.PDF);
 
-        await js.InvokeVoidAsync(
-            "downloadFile",
-            $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.pdf",
-            "application/pdf",
-            report
-        );
+            await js.InvokeVoidAsync(
+                "downloadFile",
+                $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.pdf",
+                "application/pdf",
+                report
+            );
 
-        loadingReport = false;
+            loadingReport = false;
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro gerando o PDF.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }  
     }
 
     #endregion

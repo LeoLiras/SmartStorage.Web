@@ -151,6 +151,9 @@ namespace SmartStorage_API.Service.Implementations
         {
             var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).ToList();
 
+            if (sales is null)
+                throw new Exception("Ainda não há vendas no mês corrente.");
+
             using var wb = new XLWorkbook();
             var ws = wb.Worksheets.Add($"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}");
 
@@ -196,6 +199,11 @@ namespace SmartStorage_API.Service.Implementations
 
         public async Task<byte[]> GeneratePdf()
         {
+            var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).ToList();
+
+            if (sales is null)
+                throw new Exception("Ainda não há vendas no mês corrente.");
+
             //Table grade
             Func<IContainer, IContainer> cellStyle = c =>
                 c.Border(1)
@@ -204,9 +212,7 @@ namespace SmartStorage_API.Service.Implementations
 
             //var reportAi = await AnalyseAI("Faça um resumo das minhas vendas em texto corrente (somente um texto normal, sem tópicos ou tabelas), para que eu coloque no meu relatório. Apenas me dê o resumo, sem saudações.");
 
-            var sales = FindAllSales().Where(s => s.DateSale.Month == DateTime.Now.Month).ToList();
-
-            //============================= Chart: Most saled int the month =============================
+            //============================= Chart: Most saled in the month =============================
 
             var mostSaledMonth = sales
                 .GroupBy(x => x.ProductName)
@@ -221,21 +227,23 @@ namespace SmartStorage_API.Service.Implementations
 
             Plot mostSaledMonthPlot = new();
 
+            mostSaledMonthPlot.Title("Produtos mais vendidos do mês.", size: 25);
+
             mostSaledMonthPlot.Add.Bars(mostSaledMonth.Select(p => (double)p.Quantity).ToArray());
             mostSaledMonthPlot.Axes.Margins(bottom: 0);
 
-            Tick[] ticks = mostSaledMonth
+            Tick[] mostSaledMonthTicks = mostSaledMonth
                 .Select((x, index) => new Tick(index, x.Product))
                 .ToArray();
 
-            mostSaledMonthPlot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(ticks);
+            mostSaledMonthPlot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(mostSaledMonthTicks);
             mostSaledMonthPlot.Axes.Bottom.TickLabelStyle.Rotation = 45;
             mostSaledMonthPlot.Axes.Bottom.TickLabelStyle.Alignment = Alignment.MiddleLeft;
             mostSaledMonthPlot.Axes.Bottom.TickLabelStyle.FontSize = 20;
 
             float largestLabelWidth = 0;
             using Paint paint = Paint.NewDisposablePaint();
-            foreach (Tick tick in ticks)
+            foreach (Tick tick in mostSaledMonthTicks)
             {
                 PixelSize size = mostSaledMonthPlot.Axes.Bottom.TickLabelStyle.Measure(tick.Label, paint).Size;
                 largestLabelWidth = Math.Max(largestLabelWidth, size.Width);
@@ -246,7 +254,41 @@ namespace SmartStorage_API.Service.Implementations
 
             var mostSaledMonthChart = mostSaledMonthPlot.GetImageBytes(1000, 600);
 
-            //============================= Chart: Most saled int the month =============================
+            //============================= Chart: Most saled in the month =============================
+
+            //============================= Chart: Total Saled =============================
+
+            var yearSales = FindAllSales()
+                .Where(s => s.DateSale.Year.Equals(DateTime.Now.Year))
+                .GroupBy(s => s.DateSale.Month)
+                .Select(s => new
+                {
+                    Month = s.Key,
+                    Total = s.Sum(x => x.SaleTotal)
+                })
+                .OrderBy(s => s.Month)
+                .ToList();
+
+            double[] totals = yearSales.Select(x => (double)x.Total).ToArray();
+            double[] months = yearSales.Select(x => (double) (x.Month - 1)).ToArray();
+
+            string[] monthNames = { "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"};
+
+            Tick[] totalSaledTicks = yearSales.Select(x => new Tick(x.Month - 1, monthNames[x.Month - 1])).ToArray();
+
+            var totalSaledPlot = new Plot();
+            totalSaledPlot.Title($"Total de Vendas por Mês");
+            totalSaledPlot.YLabel("Valor Total (R$)");
+            totalSaledPlot.XLabel("Mês");
+
+            totalSaledPlot.Add.ScatterLine(months, totals);
+            totalSaledPlot.Axes.Margins(0.1, 0.1);
+
+            totalSaledPlot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(totalSaledTicks);
+
+            var totalSaledChart = totalSaledPlot.GetImageBytes(1000, 600);
+
+            //============================= Chart: Total Saled =============================
 
             return Document.Create(container =>
             {
@@ -271,13 +313,15 @@ namespace SmartStorage_API.Service.Implementations
 
                             x.Item().AlignLeft().Text($"Emitido em: {DateTime.Now.ToString("F", new CultureInfo("pt-BR"))}");
 
-                            x.Spacing(20);
+                            x.Item().PageBreak();
 
                             //x.Item().AlignCenter().Text(reportAi);
 
+                            x.Item().Image(mostSaledMonthChart).FitWidth();
+
                             x.Spacing(20);
 
-                            x.Item().Image(mostSaledMonthChart).FitWidth();
+                            x.Item().Image(totalSaledChart).FitWidth();
 
                             x.Item().PageBreak();
 
