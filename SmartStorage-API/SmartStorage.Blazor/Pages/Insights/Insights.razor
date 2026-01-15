@@ -20,13 +20,13 @@ else if(sales.Count == 0)
 else
 {
     <MudPaper Width="70%" Class="doc-section-component-container; mt-3">
-        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Total Vendido (R$)</MudText>
+        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Total Vendido Mensalmente (R$)</MudText>
         <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" XAxisLabels="@totalSalesXAxis" Width="100%" />
     </MudPaper>
 
     <MudPaper Width="70%" Height="500px" Class="pa-4; mt-3">
         <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Participação das vendas (%)</MudText>
-        <MudChart Width="100%" ChartType="ChartType.Pie" InputData="@top5TotalSaled.ToArray()"  InputLabels="@top5Labels.ToArray()" />
+        <MudChart Width="100%" ChartType="ChartType.Pie" InputData="@topTotalSaled.ToArray()" InputLabels="@topTotalSaledLabels.ToArray()" />
     </MudPaper>
 
     <MudPaper Class="doc-section-component-container; mt-10" Style="width:650px; border:2px solid var(--mud-palette-lines-default); border-radius:8px;">
@@ -90,8 +90,8 @@ else
     private string[] totalSalesXAxis = { };
 
     //Best-selling montlhy chart
-    private List<double> top5TotalSaled;
-    private List<string> top5Labels;
+    private List<double> topTotalSaled = new();
+    private List<string?> topTotalSaledLabels = new();
 
     //Chat
     private List<ChatMessage> chatMessages = new();
@@ -118,7 +118,7 @@ else
         if (sales is null)
             return;
 
-        //Total sales
+        //============================================ Total Saled Chart (R$) ============================================
         var totalSales = sales
             .Where(s => s.DateSale.Year.Equals(DateTime.Now.Year))
             .GroupBy(s => new { s.DateSale.Year, s.DateSale.Month })
@@ -139,12 +139,12 @@ else
         {
             new ChartSeries()
             {
-                Name = "Vendas",
+                Name = "Vendas (R$)",
                 Data = totalSalesMonthly
             }
         };
 
-        //mostSaledMonth
+        //============================================ Total Saled Chart (R$) ============================================
         var totalSaled = sales.Where(x => x.DateSale.Year == DateTime.Now.Year && x.DateSale.Month == DateTime.Now.Month).Sum(x => x.SaleTotal);
 
         var salesByProduct = sales
@@ -160,25 +160,26 @@ else
 
         var top5Saled = salesByProduct.Take(5).ToList();
 
-        top5TotalSaled = top5Saled
+        topTotalSaled = top5Saled
             .Select(x => Math.Round((double)((x.Total / totalSaled) * 100), 2))
             .ToList();
 
-        top5Labels = top5Saled
+        topTotalSaledLabels = top5Saled
             .Select(x => x.Product)
             .ToList();
 
-        var othersTotal = salesByProduct
+        var othersSaledTotal = salesByProduct
             .Skip(5)
             .Sum(x => (double)x.Total);
 
-        if (othersTotal > 0)
+        if (othersSaledTotal > 0)
         {
-            var total = Math.Round((othersTotal / (double)totalSaled) * 100, 2);
+            var total = Math.Round((othersSaledTotal / (double)totalSaled) * 100, 2);
 
-            top5TotalSaled.Add(othersTotal);
-            top5Labels.Add("Outros");
+            topTotalSaled.Add(othersSaledTotal);
+            topTotalSaledLabels.Add("Outros");
         }
+        //============================================ Total Saled Chart (R$) ============================================
 
         chatMessages.Add(new ChatMessage { Text = "Olá, como posso ajudar?", IsUser = false });
 
