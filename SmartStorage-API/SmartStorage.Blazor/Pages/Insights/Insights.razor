@@ -19,17 +19,15 @@ else if(sales.Count == 0)
 }
 else
 {
-    <div style="display: flex; gap: 8px; width: 1308px;" class="mt-3">
-        <MudPaper Style="width:650px; padding:16px; box-sizing:border-box;">
-            <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Total Vendido (R$)</MudText>
-            <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" XAxisLabels="@totalSalesXAxis" Width="100%" Height="350px" />
-        </MudPaper>
+    <MudPaper Width="70%" Class="doc-section-component-container; mt-3">
+        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Total Vendido (R$)</MudText>
+        <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" XAxisLabels="@totalSalesXAxis" Width="100%" />
+    </MudPaper>
 
-        <MudPaper Style="width:650px; padding:16px; box-sizing:border-box;">
-            <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Os Mais Vendidos</MudText>
-            <MudChart ChartType="ChartType.Bar" ChartSeries="@bestSellingSeries" XAxisLabels="@bestSellingXAxis" Width="100%" Height="350px" />
-        </MudPaper>
-    </div>
+    <MudPaper Width="70%" Height="500px" Class="pa-4; mt-3">
+        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Participação das vendas (%)</MudText>
+        <MudChart Width="100%" ChartType="ChartType.Pie" InputData="@top5TotalSaled.ToArray()"  InputLabels="@top5Labels.ToArray()" />
+    </MudPaper>
 
     <MudPaper Class="doc-section-component-container; mt-10" Style="width:650px; border:2px solid var(--mud-palette-lines-default); border-radius:8px;">
         <div style="display:flex; flex-direction:column; gap:12px; max-height:400px; overflow:auto;">
@@ -92,13 +90,18 @@ else
     private string[] totalSalesXAxis = { };
 
     //Best-selling montlhy chart
-    private List<ChartSeries> bestSellingSeries = new List<ChartSeries>();
-    private string[] bestSellingXAxis = { };
+    private List<double> top5TotalSaled;
+    private List<string> top5Labels;
 
     //Chat
     private List<ChatMessage> chatMessages = new();
     private string currentInput = "";
 
+    private AxisChartOptions _axisOptions = new AxisChartOptions
+    {
+        XAxisLabelRotation = -100,
+        MatchBoundsToSize = true
+    };
     #endregion
 
     #region Events
@@ -141,45 +144,41 @@ else
             }
         };
 
-        //Best-selling montlhy
-        var bestSellersPerMonth = sales
-            .Where(s => s.DateSale.Year == DateTime.Now.Year)
-            .GroupBy(s => s.DateSale.Month)
-            .Select(monthGroup => new
+        //mostSaledMonth
+        var totalSaled = sales.Where(x => x.DateSale.Year == DateTime.Now.Year && x.DateSale.Month == DateTime.Now.Month).Sum(x => x.SaleTotal);
+
+        var salesByProduct = sales
+            .Where(x => x.DateSale.Year == DateTime.Now.Year && x.DateSale.Month == DateTime.Now.Month)
+            .GroupBy(x => x.ProductName)
+            .Select(g => new
             {
-                Month = monthGroup.Key,
-                TopProducts = monthGroup
-                    .GroupBy(s => s.ProductName)
-                    .Select(g => new
-                    {
-                        ProductName = g.Key,
-                        TotalSales = g.Sum(x => x.SaleTotal)
-                    })
-                    .OrderByDescending(x => x.TotalSales)
-                    .Take(5)
-                    .ToList()
+                Product = g.Key,
+                Total = g.Sum(x => x.SaleTotal)
             })
-            .OrderBy(x => x.Month)
+            .OrderByDescending(x => x.Total)
             .ToList();
 
-        bestSellingXAxis = bestSellersPerMonth
-            .Select(m => new DateTime(DateTime.Now.Year, m.Month, 1).ToString("MMMM"))
-            .ToArray();
+        var top5Saled = salesByProduct.Take(5).ToList();
 
-        var productNames = bestSellersPerMonth
-            .SelectMany(m => m.TopProducts.Select(p => p.ProductName))
-            .Distinct()
+        top5TotalSaled = top5Saled
+            .Select(x => Math.Round((double)((x.Total / totalSaled) * 100), 2))
             .ToList();
 
-        bestSellingSeries = productNames
-            .Select(product => new ChartSeries
-            {
-                Name = product ?? "",
-                Data = bestSellersPerMonth
-                    .Select(m => (double)(m.TopProducts.FirstOrDefault(p => p.ProductName == product)?.TotalSales ?? 0))
-                    .ToArray()
-            })
+        top5Labels = top5Saled
+            .Select(x => x.Product)
             .ToList();
+
+        var othersTotal = salesByProduct
+            .Skip(5)
+            .Sum(x => (double)x.Total);
+
+        if (othersTotal > 0)
+        {
+            var total = Math.Round((othersTotal / (double)totalSaled) * 100, 2);
+
+            top5TotalSaled.Add(othersTotal);
+            top5Labels.Add("Outros");
+        }
 
         chatMessages.Add(new ChatMessage { Text = "Olá, como posso ajudar?", IsUser = false });
 
