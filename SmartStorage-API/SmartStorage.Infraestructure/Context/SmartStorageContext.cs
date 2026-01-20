@@ -57,15 +57,9 @@ public partial class SmartStorageContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.ToTable("User");
+            entity.HasIndex(e => e.Username).IsUnique().HasDatabaseName("UQ_users_user_name");
 
-            entity.Property(e => e.Address).HasColumnName("address");
-            entity.Property(e => e.Cpf).HasColumnName("cpf");
-            entity.Property(e => e.Email).HasColumnName("email");
-            entity.Property(e => e.Name).HasColumnName("name");
-            entity.Property(e => e.Password).HasColumnName("password");
-            entity.Property(e => e.Phone).HasColumnName("phone");
-            entity.Property(e => e.Rg).HasColumnName("rg");
+            entity.Property(e => e.RefreshTokenExpiryTime).HasColumnName("refresh_token_expiry_time").HasColumnType("datetime2(6)").IsRequired(false);
         });
 
         OnModelCreatingPartial(modelBuilder);

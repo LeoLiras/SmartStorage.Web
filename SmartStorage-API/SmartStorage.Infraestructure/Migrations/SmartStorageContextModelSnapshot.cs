@@ -17,12 +17,12 @@ namespace SmartStorage_API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "9.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SmartStorage_API.Model.Employee", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Employee", b =>
                 {
                     b.Property<int>("EmpId")
                         .ValueGeneratedOnAdd()
@@ -53,7 +53,7 @@ namespace SmartStorage_API.Migrations
                     b.ToTable("Employee", "dbo");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Enter", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Enter", b =>
                 {
                     b.Property<int>("EntId")
                         .ValueGeneratedOnAdd()
@@ -86,7 +86,7 @@ namespace SmartStorage_API.Migrations
                     b.ToTable("Enter", "dbo");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Product", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Product", b =>
                 {
                     b.Property<int>("ProId")
                         .ValueGeneratedOnAdd()
@@ -123,7 +123,7 @@ namespace SmartStorage_API.Migrations
                     b.ToTable("Product", "dbo");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Sale", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Sale", b =>
                 {
                     b.Property<int>("SalId")
                         .ValueGeneratedOnAdd()
@@ -147,7 +147,7 @@ namespace SmartStorage_API.Migrations
                     b.ToTable("Sale", "dbo");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Shelf", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Shelf", b =>
                 {
                     b.Property<int>("SheId")
                         .ValueGeneratedOnAdd()
@@ -168,56 +168,60 @@ namespace SmartStorage_API.Migrations
                     b.ToTable("Shelf", "dbo");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.User", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("address");
-
-                    b.Property<string>("Cpf")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("cpf");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("email");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("name");
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)")
+                        .HasColumnName("full_name");
 
                     b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)")
+                        .IsRequired()
+                        .HasMaxLength(130)
+                        .HasColumnType("nvarchar(130)")
                         .HasColumnName("password");
 
-                    b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("phone");
+                    b.Property<string>("RefreshToken")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("refresh_token");
 
-                    b.Property<string>("Rg")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("rg");
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2(6)")
+                        .HasColumnName("refresh_token_expiry_time");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("user_name");
 
                     b.HasKey("Id");
 
-                    b.ToTable("User", (string)null);
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_users_user_name");
+
+                    b.ToTable("users", "dbo");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Enter", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Enter", b =>
                 {
-                    b.HasOne("SmartStorage_API.Model.Product", "Product")
+                    b.HasOne("SmartStorage_Shared.Model.Product", "Product")
                         .WithMany("Enters")
                         .HasForeignKey("EntProId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SmartStorage_API.Model.Shelf", "Shelf")
+                    b.HasOne("SmartStorage_Shared.Model.Shelf", "Shelf")
                         .WithMany("Enters")
                         .HasForeignKey("EntSheId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -228,18 +232,18 @@ namespace SmartStorage_API.Migrations
                     b.Navigation("Shelf");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Product", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Product", b =>
                 {
-                    b.HasOne("SmartStorage_API.Model.Employee", "Employee")
+                    b.HasOne("SmartStorage_Shared.Model.Employee", "Employee")
                         .WithMany("Products")
                         .HasForeignKey("ProEmpId");
 
                     b.Navigation("Employee");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Sale", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Sale", b =>
                 {
-                    b.HasOne("SmartStorage_API.Model.Enter", "Enter")
+                    b.HasOne("SmartStorage_Shared.Model.Enter", "Enter")
                         .WithMany("Sales")
                         .HasForeignKey("SalEntId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -248,22 +252,22 @@ namespace SmartStorage_API.Migrations
                     b.Navigation("Enter");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Employee", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Employee", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Enter", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Enter", b =>
                 {
                     b.Navigation("Sales");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Product", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Product", b =>
                 {
                     b.Navigation("Enters");
                 });
 
-            modelBuilder.Entity("SmartStorage_API.Model.Shelf", b =>
+            modelBuilder.Entity("SmartStorage_Shared.Model.Shelf", b =>
                 {
                     b.Navigation("Enters");
                 });

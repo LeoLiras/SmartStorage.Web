@@ -1,23 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartStorage_Shared.Model;
 
-public partial class User
+[Table("users", Schema = "dbo")]
+public class User
 {
-    public int Id { get; set; }
+    [Column("id")]
+    [Key]
+    public long Id { get; set; }
 
-    public string? Name { get; set; }
+    [Column("user_name")]
+    [Required]
+    [StringLength(50)]
+    public string Username { get; set; } = string.Empty;
 
-    public string? Cpf { get; set; }
+    [Column("full_name")]
+    [Required]
+    [StringLength(120)]
+    public string FullName { get; set; } = string.Empty;
 
-    public string? Rg { get; set; }
+    [Column("password")]
+    [Required]
+    [StringLength(130)]
+    public string Password { get; set; } = string.Empty;
 
-    public string? Address { get; set; }
+    [Column("refresh_token")]
+    [StringLength(500)]
+    public string? RefreshToken { get; set; }
 
-    public string? Email { get; set; }
-
-    public string? Password { get; set; }
-
-    public string? Phone { get; set; }
+    [Column("refresh_token_expiry_time")]
+    public DateTime? RefreshTokenExpiryTime { get; set; }
 }

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using QuestPDF.Infrastructure;
 using SmartStorage_API;
 using SmartStorage_API.Hypermedia.Enricher;
@@ -40,7 +40,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddDbContext<SmartStorageContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"), b => b.MigrationsAssembly("SmartStorage.Infrastructure")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"), b => b.MigrationsAssembly(typeof(SmartStorageContext).Assembly.GetName().Name)));
 
 var filterOptions = new HyperMediaFilterOptions();
 filterOptions.ContentResponseEnricherList.Add(new EmployeeEnricher());
