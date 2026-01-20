@@ -1,4 +1,4 @@
-﻿namespace SmartStorage_API.Authentication.Contract.Tools
+﻿namespace SmartStorage_API.Authentication.Contract
 {
     public interface IPasswordHasher
     {
