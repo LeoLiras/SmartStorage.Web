@@ -3,6 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using QuestPDF.Infrastructure;
 using SmartStorage_API;
+using SmartStorage_API.Authentication.Config;
+using SmartStorage_API.Authentication.Contract;
+using SmartStorage_API.Authentication.Contract.Tools;
+using SmartStorage_API.Authentication.Repositories;
+using SmartStorage_API.Authentication.Repositories.Implementations;
 using SmartStorage_API.Hypermedia.Enricher;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Model.Context;
@@ -42,6 +47,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<SmartStorageContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"), b => b.MigrationsAssembly(typeof(SmartStorageContext).Assembly.GetName().Name)));
 
+builder.Services.AddAuthConfiguration(builder.Configuration);
+
 var filterOptions = new HyperMediaFilterOptions();
 filterOptions.ContentResponseEnricherList.Add(new EmployeeEnricher());
 filterOptions.ContentResponseEnricherList.Add(new ProductEnricher());
@@ -57,6 +64,12 @@ builder.Services.AddScoped<IEmployeeBusiness, EmployeeBusinessImplementation>();
 builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();
 builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPasswordHasher, Sha256PasswordHasher>();
+//builder.Services.AddScoped<IUserAuthService, UserAuthServiceImpl>();
+//builder.Services.AddScoped<ILoginService, LoginServiceImpl>();
+//builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 
 builder.Configuration.AddEnvironmentVariables();
 
@@ -82,6 +95,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseSwagger();
 
