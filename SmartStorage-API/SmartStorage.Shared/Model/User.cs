@@ -4,12 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace SmartStorage_Shared.Model;
 
 [Table("users", Schema = "dbo")]
-public class User
+public class User : BaseEntity
 {
-    [Column("id")]
-    [Key]
-    public long Id { get; set; }
-
     [Column("user_name")]
     [Required]
     [StringLength(50)]

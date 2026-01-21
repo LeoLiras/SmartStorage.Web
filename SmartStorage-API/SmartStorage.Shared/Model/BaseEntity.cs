@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SmartStorage_API.Authentication.Repositories.GenericRepository
+namespace SmartStorage_Shared.Model
 {
     public class BaseEntity
     {

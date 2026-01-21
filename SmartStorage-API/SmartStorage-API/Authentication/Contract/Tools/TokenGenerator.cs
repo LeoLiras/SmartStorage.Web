@@ -40,11 +40,9 @@ namespace SmartStorage_API.Authentication.Contract.Tools
             }
         }
 
-        public ClaimsPrincipal GetPrincipalFromExpiredToken(
-            string token)
+        public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
-            var tokenValidationParameters = new
-                TokenValidationParameters
+            var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateAudience = false,
                 ValidateIssuer = false,

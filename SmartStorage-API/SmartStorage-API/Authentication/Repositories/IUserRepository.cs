@@ -3,7 +3,7 @@ using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Authentication.Repositories
 {
-    public interface IUserRepository
+    public interface IUserRepository : IRepository<User>
 
     {
         User? FindByUsername(string username);

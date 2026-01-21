@@ -1,4 +1,6 @@
-﻿namespace SmartStorage_API.Authentication.Repositories.GenericRepository
+﻿using SmartStorage_Shared.Model;
+
+namespace SmartStorage_API.Authentication.Repositories.GenericRepository
 {
     public interface IRepository<T> where T : BaseEntity
 
