@@ -1,16 +1,12 @@
-﻿using SmartStorage_API.Model.Context;
+﻿using SmartStorage_API.Authentication.Repositories.GenericRepository;
+using SmartStorage_API.Model.Context;
 using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Authentication.Repositories.Implementations
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository(SmartStorageContext context) : GenericRepository<User>(context), IUserRepository
     {
         private readonly SmartStorageContext _context;
-
-        public UserRepository(SmartStorageContext context)
-        {
-            _context = context;
-        }
 
         public User? FindByUsername(string username)
         {

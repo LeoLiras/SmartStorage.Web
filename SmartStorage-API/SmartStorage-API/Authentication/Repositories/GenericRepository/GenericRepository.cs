@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartStorage_API.Model.Context;
+using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Authentication.Repositories.GenericRepository
 {

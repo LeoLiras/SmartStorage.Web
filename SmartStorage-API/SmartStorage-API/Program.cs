@@ -8,6 +8,8 @@ using SmartStorage_API.Authentication.Contract;
 using SmartStorage_API.Authentication.Contract.Tools;
 using SmartStorage_API.Authentication.Repositories;
 using SmartStorage_API.Authentication.Repositories.Implementations;
+using SmartStorage_API.Authentication.Services;
+using SmartStorage_API.Authentication.Services.Implementations;
 using SmartStorage_API.Hypermedia.Enricher;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Model.Context;
@@ -67,9 +69,9 @@ builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, Sha256PasswordHasher>();
-//builder.Services.AddScoped<IUserAuthService, UserAuthServiceImpl>();
-//builder.Services.AddScoped<ILoginService, LoginServiceImpl>();
-//builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
+builder.Services.AddScoped<IUserAuthService, UserAuthServiceImplementation>();
+builder.Services.AddScoped<ILoginService, LoginServiceImplementation>();
+builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 
 builder.Configuration.AddEnvironmentVariables();
 
@@ -95,9 +97,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseAuthentication();
-
+app.UseAuthorization();
 app.UseSwagger();
 
 app.UseSwaggerUI(c =>
