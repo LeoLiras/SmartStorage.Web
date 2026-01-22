@@ -56,10 +56,12 @@ namespace SmartStorage_API.Controllers
         public IActionResult Refresh(
             [FromBody] TokenDTO tokenDto)
         {
-            if (tokenDto == null)
-                return BadRequest("Invalid client request!");
+            if (tokenDto == null) return BadRequest("Invalid client request!");
+
             var token = _loginService.ValidateCredentials(tokenDto);
+
             if (token == null) return Unauthorized();
+
             return Ok(token);
         }
 
@@ -68,12 +70,14 @@ namespace SmartStorage_API.Controllers
         public IActionResult Revoke()
         {
             var username = User.Identity?.Name;
+
             if (string.IsNullOrWhiteSpace(username))
                 return BadRequest("Invalid Client Request!");
 
             var result = _loginService.RevokeToken(username);
 
             if (!result) return BadRequest("Invalid Client Request!");
+
             return NoContent();
         }
 
@@ -86,6 +90,7 @@ namespace SmartStorage_API.Controllers
                 return BadRequest("Invalid client request!");
 
             var result = _loginService.Create(user);
+
             return Ok(result);
         }
 

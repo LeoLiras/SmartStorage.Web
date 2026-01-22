@@ -42,23 +42,23 @@ namespace SmartStorage_API.Authentication.Services.Implementations
 
         public TokenDTO ValidateCredentials(TokenDTO token)
         {
-            var principal = _tokenService
-                .GetPrincipalFromExpiredToken(token.AccessToken);
+            var principal = _tokenService.GetPrincipalFromExpiredToken(token.AccessToken);
             var username = principal.Identity?.Name;
 
             var user = _userAuthService.FindByUsername(username);
+
             if (user == null ||
                 user.RefreshToken != token.RefreshToken ||
                 user.RefreshTokenExpiryTime <= DateTime.Now
                 )
                 return null;
+
             return GenerateToken(user, principal.Claims);
         }
 
         public AccountCredentialsDTO Create(AccountCredentialsDTO dto)
         {
-            var user = _userAuthService
-                .Create(dto);
+            var user = _userAuthService.Create(dto);
 
             return new AccountCredentialsDTO
             {
@@ -70,8 +70,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
 
         public bool RevokeToken(string username)
         {
-            return _userAuthService
-                .RevokeToken(username);
+            return _userAuthService.RevokeToken(username);
         }
 
         private TokenDTO GenerateToken(User user, IEnumerable<Claim>? existingClaims = null)
