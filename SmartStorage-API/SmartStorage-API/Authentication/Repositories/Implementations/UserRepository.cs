@@ -6,8 +6,6 @@ namespace SmartStorage_API.Authentication.Repositories.Implementations
 {
     public class UserRepository(SmartStorageContext context) : GenericRepository<User>(context), IUserRepository
     {
-        private readonly SmartStorageContext _context;
-
         public User? FindByUsername(string username)
         {
             return _context.Users.SingleOrDefault(u => u.Username == username);
