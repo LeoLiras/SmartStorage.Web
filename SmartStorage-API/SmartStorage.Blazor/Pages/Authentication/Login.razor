@@ -1,0 +1,39 @@
+﻿@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+
+<MudGrid Class="mt-3">
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-4">
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+                <MudTextField T="string" Label="Login" Required="true" RequiredError="Insira o Login" />
+                <MudTextField T="string" Label="Senha" @ref="pwField1" InputType="InputType.Password" RequiredError="Insira a Senha" Required ="true"/>
+                <div class="d-flex justify-start gap-2 mt-3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" Disabled="@(!success)" >Login</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Disabled="@(!success)" >Cadastro</MudButton>
+                </div>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+
+@code {
+
+    #region Properties
+
+    bool success;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudForm form;
+
+    #endregion
+
+    #region Methods
+
+   
+
+    #endregion
+
+
+
+}

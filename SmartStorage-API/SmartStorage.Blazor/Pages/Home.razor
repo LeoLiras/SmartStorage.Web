@@ -3,14 +3,16 @@
 @inject ApiExtensions api
 @inject VariablesExtensions app
 
-@if (app.Employees is null)
+@if (app.Employees is null || app.Shelves is null || app.ProductEntries is null || app.Sales is null)
 {
     <Loading Message="Carregando dados..."></Loading>
 }
 else
 {
-    <MudText Typo="Typo.h2" GutterBottom="true">SmartStorage</MudText>
-    <MudText>Gestão de vendas.</MudText>
+    @* <MudText Typo="Typo.h2" GutterBottom="true">SmartStorage</MudText>
+    <MudText>Gestão de vendas.</MudText> *@
+
+    <Login></Login>
 }
 
 @code{
