@@ -1,0 +1,94 @@
+﻿@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-4">
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+                <MudTextField T="string" Label="Nome Completo" Required="true" RequiredError="O Nome é obrigatório!" />
+                <MudTextField T="string" Label="Login" Required="true" RequiredError="O Login é obrigatório!" />         
+                <MudTextField T="string" Label="E-mail" Required="true" RequiredError="O E-mail é obrigatório!"
+                              Validation="@(new EmailAddressAttribute() {ErrorMessage = "Endereço de e-mail inválido."})" />
+                <MudTextField T="string" Label="Senha" HelperText="Escolha uma senha forte." @ref="pwField1"
+                              InputType="InputType.Password"
+                              Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                              RequiredError="A Senha é obrigatória!" />
+                <MudTextField T="string"
+                              Label="Password" HelperText="Confirmar Senha" InputType="InputType.Password"
+                              Validation="@(new Func<string, string>(PasswordMatch))" />
+                <div class="d-flex">
+                    <MudRadioGroup T="string" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
+                        <MudRadio Value="@("Usuário")">Usuário</MudRadio>
+                        <MudRadio Value="@("Administrador")">Administrador</MudRadio>
+                    </MudRadioGroup>
+                </div>
+                <div class="d-flex align-center justify-space-between">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto">Register</MudButton>
+                </div>
+            </MudForm>
+        </MudPaper>
+        <MudPaper Class="pa-4 mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" DropShadow="false" OnClick="@(() => form.Validate())">Validate</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" DropShadow="false" OnClick="@(() => form.ResetAsync())" Class="mx-2">Reset</MudButton>
+            <MudButton Variant="Variant.Filled" DropShadow="false" OnClick="@(() => form.ResetValidation())">Reset Validation</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="5">
+        <MudPaper Class="pa-4 mud-height-full">
+            <MudText Typo="Typo.subtitle2">@($"Errors ({errors.Length})")</MudText>
+            @foreach (var error in errors)
+            {
+                <MudText Color="@Color.Error">@error</MudText>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+
+@code {
+
+    #region Properties
+
+    bool success;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudForm form;
+
+    #endregion
+
+    #region Methods
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "A Senha é obrigatória!";
+            yield break;
+        }
+
+        if (pw.Length < 8)
+            yield return "A senha deve ter ao menos 8 caracteres";
+
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "A senha deve ter ao menos uma letra maiúscula";
+
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "A senha deve ter ao menos uma letra minúscula";
+
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "A senha deve ter ao menos um dígito numérico";
+    }
+
+    private string PasswordMatch(string arg)
+    {
+        if (pwField1.Value != arg)
+            return "As senhas não conferem";
+
+        return null;
+    }
+
+    #endregion
+    
+
+    
+}
