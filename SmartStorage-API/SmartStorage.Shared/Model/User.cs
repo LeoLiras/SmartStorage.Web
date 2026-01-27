@@ -4,29 +4,29 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartStorage_Shared.Model;
 
-[Table("users", Schema = "dbo")]
+[Table("User", Schema = "dbo")]
 public class User : BaseEntity
 {
-    [Column("user_name")]
+    [Column("UseUsername")]
     [Required]
     [StringLength(50)]
     public string Username { get; set; } = string.Empty;
 
-    [Column("full_name")]
+    [Column("UseFullName")]
     [Required]
     [StringLength(120)]
     public string FullName { get; set; } = string.Empty;
 
-    [Column("password")]
+    [Column("UsePassword")]
     [Required]
     [StringLength(130)]
     public string Password { get; set; } = string.Empty;
 
-    [Column("refresh_token")]
+    [Column("UseRefreshToken")]
     [StringLength(500)]
     public string? RefreshToken { get; set; }
 
-    [Column("refresh_token_expiry_time")]
+    [Column("UseRefreshTokenExpiryTime")]
     public DateTime? RefreshTokenExpiryTime { get; set; }
 
     [Column("UseType")]
