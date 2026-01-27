@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SmartStorage.Shared.Enum;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartStorage_Shared.Model;
@@ -27,4 +28,8 @@ public class User : BaseEntity
 
     [Column("refresh_token_expiry_time")]
     public DateTime? RefreshTokenExpiryTime { get; set; }
+
+    [Column("UseType")]
+    [Required]
+    public TipoUsuario UseType { get; set; }
 }
