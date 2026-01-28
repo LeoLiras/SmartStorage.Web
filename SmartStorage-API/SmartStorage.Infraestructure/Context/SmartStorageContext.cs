@@ -59,7 +59,7 @@ public partial class SmartStorageContext : DbContext
         {
             entity.HasIndex(e => e.Username).IsUnique().HasDatabaseName("UQ_users_user_name");
 
-            entity.Property(e => e.RefreshTokenExpiryTime).HasColumnName("refresh_token_expiry_time").HasColumnType("datetime2(6)").IsRequired(false);
+            entity.Property(e => e.RefreshTokenExpiryTime).HasColumnName("UseRefreshTokenExpiryTime").HasColumnType("datetime2(6)").IsRequired(false);
 
             entity.Property(x => x.UseType).HasConversion<byte>().IsRequired();
             entity.ToTable(t => t.HasCheckConstraint("CK_User_Tipo", "[UseType] IN (0, 1)"));

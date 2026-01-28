@@ -1,8 +1,8 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartStorage_API.Authentication.DTO_s;
 using SmartStorage_API.Authentication.Services;
+using SmartStorage_Shared.DTO;
 
 namespace SmartStorage_API.Controllers
 {
@@ -35,19 +35,16 @@ namespace SmartStorage_API.Controllers
                 string.IsNullOrWhiteSpace(user.Username) ||
                 string.IsNullOrWhiteSpace(user.Password))
             {
-                _logger.LogWarning(
-                    "Sign in failed: Missing username or password");
-                return BadRequest(
-                    "Username and password are required.");
+                _logger.LogWarning("Sign in failed: Missing username or password");
+
+                return BadRequest("Username and password are required.");
             }
-            var token = _loginService
-                .ValidateCredentials(user);
+            var token = _loginService.ValidateCredentials(user);
 
             if (token == null) return Unauthorized();
 
-            _logger.LogInformation(
-                "User {username} signed in successfully",
-                user.Username);
+            _logger.LogInformation("User {username} signed in successfully", user.Username);
+
             return Ok(token);
         }
 

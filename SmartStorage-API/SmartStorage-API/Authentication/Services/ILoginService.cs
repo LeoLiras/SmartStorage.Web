@@ -1,4 +1,4 @@
-﻿using SmartStorage_API.Authentication.DTO_s;
+﻿using SmartStorage_Shared.DTO;
 
 namespace SmartStorage_API.Authentication.Services
 {

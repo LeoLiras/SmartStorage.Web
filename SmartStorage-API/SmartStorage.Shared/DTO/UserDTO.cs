@@ -1,4 +1,4 @@
-﻿namespace SmartStorage_API.Authentication.DTO_s
+﻿namespace SmartStorage_Shared.DTO
 {
     public class UserDTO
     {

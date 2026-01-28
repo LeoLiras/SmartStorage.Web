@@ -1,4 +1,5 @@
 ﻿using SmartStorage.Blazor.Enums;
+using SmartStorage_Shared.DTO;
 using SmartStorage_Shared.VO;
 using System.Net.Http.Json;
 
@@ -35,6 +36,8 @@ namespace SmartStorage.Blazor.Utils
         private string salesEndpoint = "api/storage/sales/v1";
 
         private string employeesEndpoint = "api/storage/employees/v1";
+
+        private string loginEndpoint = "api/storage/auth/signin";
 
         #endregion
 
@@ -177,37 +180,6 @@ namespace SmartStorage.Blazor.Utils
         }
 
         /// <summary>
-        /// Requisição POST para chamar a API do Gemini
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ApiException"></exception>
-        public async Task<string?> PostAnalyseAI(string text)
-        {
-            var url = $"{salesEndpoint}/analyse/ai";
-
-            if (text == null)
-                throw new ArgumentNullException(nameof(text), message: "O parâmetro Texto é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.PostAsJsonAsync(url, text);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        /// <summary>
         /// Requisição GET para gerar o relatório excel de vendas do mês corrente
         /// </summary>
         /// <returns></returns>
@@ -262,6 +234,37 @@ namespace SmartStorage.Blazor.Utils
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<TVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
+        /// Requisição POST para chamar a API do Gemini
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ApiException"></exception>
+        public async Task<string?> PostAnalyseAI(string text)
+        {
+            var url = $"{salesEndpoint}/analyse/ai";
+
+            if (text == null)
+                throw new ArgumentNullException(nameof(text), message: "O parâmetro Texto é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.PostAsJsonAsync(url, text);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
             }
             else
             {
@@ -340,6 +343,9 @@ namespace SmartStorage.Blazor.Utils
 
             else if (typeof(TVO) == typeof(ShelfVO))
                 return shelvesEndpoint;
+
+            else if (typeof(TVO) == typeof(UserDTO))
+                return loginEndpoint;
 
             else
                 return string.Empty;

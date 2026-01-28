@@ -1,6 +1,6 @@
 ﻿using SmartStorage_API.Authentication.Contract;
-using SmartStorage_API.Authentication.DTO_s;
 using SmartStorage_API.Authentication.Repositories;
+using SmartStorage_Shared.DTO;
 using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Authentication.Services.Implementations

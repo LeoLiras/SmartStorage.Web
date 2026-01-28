@@ -1,15 +1,20 @@
 ﻿@using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
+@using SmartStorage_Shared.DTO
+
+@inject ApiExtensions api
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
 
 <MudGrid Class="mt-3">
     <MudItem xs="12" sm="7">
         <MudPaper Class="pa-4">
-            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-                <MudTextField T="string" Label="Login" Required="true" RequiredError="Insira o Login" />
-                <MudTextField T="string" Label="Senha" @ref="pwField1" InputType="InputType.Password" RequiredError="Insira a Senha" Required ="true"/>
+            <MudForm Model="user" @bind-IsValid="@success">
+                <MudTextField @bind-Value="user.Username" T="string" Label="Login" Required="true" RequiredError="Insira o Login" />
+                <MudTextField @bind-Value="user.Password" T="string" Label="Senha" @ref="pwField1" InputType="InputType.Password" RequiredError="Insira a Senha" Required="true" />
                 <div class="d-flex justify-start gap-2 mt-3">
-                    <MudButton Variant="Variant.Filled" Color="Color.Info" Disabled="@(!success)" >Login</MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Disabled="@(!success)" >Cadastro</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" Disabled="@(!success)" OnClick="Sigin">Login</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary">Cadastro</MudButton>
                 </div>
             </MudForm>
         </MudPaper>
@@ -20,17 +25,39 @@
 @code {
 
     #region Properties
+    UserDTO user = new();
 
     bool success;
-    string[] errors = { };
+    bool loading = false;
+
     MudTextField<string> pwField1;
-    MudForm form;
 
     #endregion
 
     #region Methods
 
-   
+    private async void Sigin()
+    {
+        try
+        {
+            loading = true;
+
+            var result = await api.Post<UserDTO>(user);
+
+            await ShowDialog.ShowDialogAsync("Login realizado com sucesso.", "Sucesso", app.productsInStockPage, EDialogStates.Success);
+
+            StateHasChanged();
+
+            loading = false;
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Falha no login.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+
+        }
+    }
 
     #endregion
 
