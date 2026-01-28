@@ -9,11 +9,11 @@
 <MudGrid Class="mt-3">
     <MudItem xs="12" sm="7">
         <MudPaper Class="pa-4">
-            <MudForm Model="user" @bind-IsValid="@success">
+            <MudForm Model="user">
                 <MudTextField @bind-Value="user.Username" T="string" Label="Login" Required="true" RequiredError="Insira o Login" />
-                <MudTextField @bind-Value="user.Password" T="string" Label="Senha" @ref="pwField1" InputType="InputType.Password" RequiredError="Insira a Senha" Required="true" />
+                <MudTextField @bind-Value="user.Password" T="string" Label="Senha" InputType="InputType.Password" RequiredError="Insira a Senha" Required="true" />
                 <div class="d-flex justify-start gap-2 mt-3">
-                    <MudButton Variant="Variant.Filled" Color="Color.Info" Disabled="@(!success)" OnClick="Sigin">Login</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="Sigin">Login</MudButton>
                     <MudButton Variant="Variant.Filled" Color="Color.Secondary">Cadastro</MudButton>
                 </div>
             </MudForm>
@@ -27,10 +27,7 @@
     #region Properties
     UserDTO user = new();
 
-    bool success;
     bool loading = false;
-
-    MudTextField<string> pwField1;
 
     #endregion
 
@@ -40,6 +37,9 @@
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(user.Username) || string.IsNullOrWhiteSpace(user.Password))
+                return;
+
             loading = true;
 
             var result = await api.Post<UserDTO>(user);
@@ -54,7 +54,12 @@
         {
             loading = false;
 
-            await ShowDialog.ShowDialogAsync($"Falha no login.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+            var mensagem = $"Falha no login.\n";
+
+            if (ex.Message.Contains("Unauthorized"))
+                mensagem += "Usuário ou senha incorreto(s).";
+
+            await ShowDialog.ShowDialogAsync(mensagem, "Erro", state: EDialogStates.Warning);
 
         }
     }

@@ -3,26 +3,16 @@
 @inject ApiExtensions api
 @inject VariablesExtensions app
 
-@if (app.Employees is null || app.Shelves is null || app.ProductEntries is null || app.Sales is null)
-{
-    <Loading Message="Carregando dados..."></Loading>
-}
-else
-{
-    @* <MudText Typo="Typo.h2" GutterBottom="true">SmartStorage</MudText>
-    <MudText>Gestão de vendas.</MudText> *@
-
-    <Login></Login>
-}
+<Login></Login>
 
 @code{
 
     protected override async Task OnInitializedAsync()
     {
-        app.Employees = await api.Get<EmployeeVO>();
-        app.Shelves = await api.Get<ShelfVO>();
-        app.ProductEntries = await api.Get<EnterVO>();
-        app.Sales = await api.Get<SaleVO>();
+        // app.Employees = await api.Get<EmployeeVO>();
+        // app.Shelves = await api.Get<ShelfVO>();
+        // app.ProductEntries = await api.Get<EnterVO>();
+        // app.Sales = await api.Get<SaleVO>();
     }
 }
 
