@@ -3,7 +3,19 @@
 @inject ApiExtensions api
 @inject VariablesExtensions app
 
-<Login></Login>
+<AuthorizeView>
+    <Authorized>
+        Bem vindo, @context.User.Identity.Name!
+        <br />
+        @if (context.User.IsInRole("Admin"))
+        {
+            <textarea>Administrador</textarea>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <Login></Login>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code{
 

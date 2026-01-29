@@ -1,10 +1,14 @@
 ﻿<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="products" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Storage">Produtos em estoque</MudNavLink>
-    <MudNavLink Href="products/shelves" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store">Produtos nas prateleiras</MudNavLink>
-    <MudNavLink Href="products/sales" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AttachMoney">Vendas</MudNavLink>
-    <MudNavLink Href="products/insight" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Lightbulb">Estatísticas</MudNavLink>
-    <br />
-    <br />
-    <MudNavLink Href="user/account" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Conta</MudNavLink>
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+            <MudNavLink Href="products" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Storage">Produtos em estoque</MudNavLink>
+            <MudNavLink Href="products/shelves" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store">Produtos nas prateleiras</MudNavLink>
+            <MudNavLink Href="products/sales" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AttachMoney">Vendas</MudNavLink>
+            <MudNavLink Href="products/insight" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Lightbulb">Estatísticas</MudNavLink>
+            <br />
+            <br />
+            <MudNavLink Href="user/account" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Conta</MudNavLink>
+        </Authorized>
+    </AuthorizeView>
 </MudNavMenu>
