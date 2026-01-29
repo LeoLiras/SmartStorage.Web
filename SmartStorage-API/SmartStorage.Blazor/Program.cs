@@ -20,6 +20,8 @@ builder.Services.AddScoped<ApiExtensions>();
 builder.Services.AddScoped<ShowDialog>();
 builder.Services.AddScoped<VariablesExtensions>();
 
-builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
+builder.Services.AddScoped<AuthStateProvider>();
+builder.Services.AddScoped<IAuthService, AuthStateProvider>(provider => provider.GetRequiredService<AuthStateProvider>());
+builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>(provider => provider.GetRequiredService<AuthStateProvider>());
 
 await builder.Build().RunAsync();
