@@ -244,6 +244,38 @@ namespace SmartStorage.Blazor.Utils
         }
 
         /// <summary>
+        /// Requisição POST para realizar o Login
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="vo"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<TokenDTO?> PostSignin(UserDTO user)
+        {
+            var url = ReturnEndpoint<UserDTO>();
+
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), message: "As credenciais do usuário são obrigatórias.");
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.PostAsJsonAsync(url, user);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<TokenDTO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
         /// Requisição POST para chamar a API do Gemini
         /// </summary>
         /// <param name="text"></param>

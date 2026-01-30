@@ -2,6 +2,8 @@
 @using System.ComponentModel.DataAnnotations
 @using SmartStorage_Shared.DTO
 
+@inject AuthStateProvider auth;
+
 @inject ApiExtensions api
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -20,7 +22,6 @@
         </MudPaper>
     </MudItem>
 </MudGrid>
-
 
 @code {
 
@@ -42,9 +43,11 @@
 
             loading = true;
 
-            var result = await api.Post<UserDTO>(user);
+            var result = await api.PostSignin(user);
 
-            await ShowDialog.ShowDialogAsync("Login realizado com sucesso.", "Sucesso", app.productsInStockPage, EDialogStates.Success);
+            await auth.Login(result.AccessToken);
+
+            await ShowDialog.ShowDialogAsync("Login realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
 
             StateHasChanged();
 
@@ -58,6 +61,8 @@
 
             if (ex.Message.Contains("Unauthorized"))
                 mensagem += "Usuário ou senha incorreto(s).";
+            else
+                mensagem += ex.Message;
 
             await ShowDialog.ShowDialogAsync(mensagem, "Erro", state: EDialogStates.Warning);
 
