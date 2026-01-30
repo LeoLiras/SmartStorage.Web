@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Data.VO;
 using SmartStorage_API.Hypermedia.Filters;
@@ -9,6 +10,7 @@ namespace SmartStorage_API.Controllers
     [ApiVersion($"{Utils.apiVersion}")]
     [Route("api/storage/[controller]/v{version:apiVersion}")]
     [ApiController]
+    [Authorize]
     public class EmployeesController : ControllerBase
     {
         #region Propriedades

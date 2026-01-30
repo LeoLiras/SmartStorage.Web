@@ -1,11 +1,12 @@
 ﻿@page "/"
+@using System.Security.Claims
 
 @inject ApiExtensions api
 @inject VariablesExtensions app
 
 <AuthorizeView>
     <Authorized>
-        Bem vindo, @context.User.Identity.Name!
+        <h1>Bem vindo, @context.User.Identity.Name!</h1>
         <br />
         @if (context.User.IsInRole("Admin"))
         {
@@ -19,12 +20,21 @@
 
 @code{
 
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        // app.Employees = await api.Get<EmployeeVO>();
-        // app.Shelves = await api.Get<ShelfVO>();
-        // app.ProductEntries = await api.Get<EnterVO>();
-        // app.Sales = await api.Get<SaleVO>();
+        var authState = await authenticationState;
+        var user = authState.User;
+
+        if (user.Identity!.IsAuthenticated)
+        {
+         app.Employees = await api.Get<EmployeeVO>();
+         app.Shelves = await api.Get<ShelfVO>();
+         app.ProductEntries = await api.Get<EnterVO>();
+         app.Sales = await api.Get<SaleVO>();
+        }
     }
 }
 

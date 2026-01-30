@@ -79,7 +79,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost("create")]
-        [AllowAnonymous]
+        [Authorize]
         public IActionResult Create(
             [FromBody] AccountCredentialsDTO user)
         {
