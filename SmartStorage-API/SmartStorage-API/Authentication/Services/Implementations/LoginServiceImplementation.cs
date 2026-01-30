@@ -82,6 +82,9 @@ namespace SmartStorage_API.Authentication.Services.Implementations
 
                     new Claim(JwtRegisteredClaimNames.UniqueName,
                         user.Username),
+
+                    new Claim(ClaimTypes.Role,
+                        user.UseType.ToString())
                 ];
 
             var accessToken = _tokenService.GenerateAccessToken(claims);

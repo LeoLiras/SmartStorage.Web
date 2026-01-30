@@ -44,6 +44,8 @@ namespace SmartStorage_API.Authentication.Contract.Tools
         {
             var tokenValidationParameters = new TokenValidationParameters
             {
+                NameClaimType = JwtRegisteredClaimNames.UniqueName,
+                RoleClaimType = ClaimTypes.Role,
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,

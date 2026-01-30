@@ -6,11 +6,16 @@
 
 <AuthorizeView>
     <Authorized>
-        <h1>Bem vindo, @context.User.Identity.Name!</h1>
+        <h1>SmartStorage - Controle Inteligente</h1>
         <br />
-        @if (context.User.IsInRole("Admin"))
+        <h2>Bem vindo, @context.User.FindFirst("unique_name")?.Value</h2>
+        @if (context.User.FindFirst(ClaimTypes.Role)?.Value != "Usuario")
         {
-            <textarea>Administrador</textarea>
+            <h5>Administrador</h5>
+        }
+        else
+        {
+            <h5>Usuário</h5>
         }
     </Authorized>
     <NotAuthorized>
@@ -27,13 +32,13 @@
     {
         var authState = await authenticationState;
         var user = authState.User;
-
+        
         if (user.Identity!.IsAuthenticated)
         {
-         app.Employees = await api.Get<EmployeeVO>();
-         app.Shelves = await api.Get<ShelfVO>();
-         app.ProductEntries = await api.Get<EnterVO>();
-         app.Sales = await api.Get<SaleVO>();
+             app.Employees = await api.Get<EmployeeVO>();
+             app.Shelves = await api.Get<ShelfVO>();
+             app.ProductEntries = await api.Get<EnterVO>();
+             app.Sales = await api.Get<SaleVO>();
         }
     }
 }
