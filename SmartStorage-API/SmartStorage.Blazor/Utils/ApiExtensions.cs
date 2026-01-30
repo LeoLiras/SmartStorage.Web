@@ -39,6 +39,8 @@ namespace SmartStorage.Blazor.Utils
 
         private string loginEndpoint = "api/storage/auth/signin";
 
+        private string registerEndpoint = "api/storage/auth/create";
+
         #endregion
 
         #region Methods
@@ -276,6 +278,38 @@ namespace SmartStorage.Blazor.Utils
         }
 
         /// <summary>
+        /// Requisição POST para realizar cadastro de novo usuário
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="vo"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<AccountCredentialsDTO?> PostRegister(AccountCredentialsDTO credentials)
+        {
+            var url = ReturnEndpoint<AccountCredentialsDTO>();
+
+            if (credentials == null)
+                throw new ArgumentNullException(nameof(credentials), message: "As credenciais do usuário são obrigatórias.");
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.PostAsJsonAsync(url, credentials);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<AccountCredentialsDTO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
         /// Requisição POST para chamar a API do Gemini
         /// </summary>
         /// <param name="text"></param>
@@ -378,6 +412,9 @@ namespace SmartStorage.Blazor.Utils
 
             else if (typeof(TVO) == typeof(UserDTO))
                 return loginEndpoint;
+
+            else if (typeof(TVO) == typeof(AccountCredentialsDTO))
+                return registerEndpoint;
 
             else
                 return string.Empty;

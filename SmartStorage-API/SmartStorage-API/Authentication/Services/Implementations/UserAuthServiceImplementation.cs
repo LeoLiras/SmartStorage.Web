@@ -23,6 +23,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             {
                 Username = dto.Username,
                 FullName = dto.Fullname,
+                UseType = dto.Type,
                 Password = _passwordHasher.Hash(dto.Password),
                 RefreshToken = string.Empty,
                 RefreshTokenExpiryTime = null
