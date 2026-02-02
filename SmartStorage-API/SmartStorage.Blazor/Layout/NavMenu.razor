@@ -1,4 +1,6 @@
-﻿<MudNavMenu>
+﻿@inject VariablesExtensions app
+
+<MudNavMenu>
     <AuthorizeView>
         <Authorized>
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
@@ -8,7 +10,10 @@
             <MudNavLink Href="products/insight" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Lightbulb">Estatísticas</MudNavLink>
             <br />
             <br />
-            <MudNavLink Href="user/account" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Conta</MudNavLink>
+            @if(app.User != null)
+            {
+                <MudNavLink Href="user/account" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Conta</MudNavLink>
+            }
         </Authorized>
     </AuthorizeView>
 </MudNavMenu>
