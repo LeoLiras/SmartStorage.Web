@@ -32,6 +32,15 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return _repository.Create(entity);
         }
 
+        public User UpdateCredentials(User user)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            user.Password = _passwordHasher.Hash(user.Password);
+
+            return _repository.Update(user);
+        }
+
         public bool RevokeToken(string username)
         {
             var user = _repository.FindByUsername(username);

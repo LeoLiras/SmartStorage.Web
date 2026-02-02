@@ -35,10 +35,20 @@
         
         if (user.Identity!.IsAuthenticated)
         {
-             app.Employees = await api.Get<EmployeeVO>();
-             app.Shelves = await api.Get<ShelfVO>();
-             app.ProductEntries = await api.Get<EnterVO>();
-             app.Sales = await api.Get<SaleVO>();
+            if(app.Employees?.Count == 0)
+                app.Employees = await api.Get<EmployeeVO>();
+
+            if (app.Shelves?.Count == 0)
+                app.Shelves = await api.Get<ShelfVO>();
+
+            if (app.ProductEntries?.Count == 0)
+                app.ProductEntries = await api.Get<EnterVO>();
+
+            if (app.Sales?.Count == 0)
+                app.Sales = await api.Get<SaleVO>();
+                
+            if (string.IsNullOrWhiteSpace(app.User?.Username))
+                app.User = await api.GetUser(user.FindFirst("unique_name")?.Value);
         }
     }
 }

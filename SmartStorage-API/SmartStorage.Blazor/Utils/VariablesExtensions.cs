@@ -1,4 +1,6 @@
-﻿using SmartStorage_Shared.VO;
+﻿using SmartStorage_Shared.DTO;
+using SmartStorage_Shared.Model;
+using SmartStorage_Shared.VO;
 
 namespace SmartStorage.Blazor.Utils
 {
@@ -21,6 +23,8 @@ namespace SmartStorage.Blazor.Utils
         public ProductVO? ActualProduct { get; set; } = new();
 
         public EnterVO? ActualEntry { get; set; } = new();
+
+        public User? User { get; set; } = new();
 
         #endregion
 

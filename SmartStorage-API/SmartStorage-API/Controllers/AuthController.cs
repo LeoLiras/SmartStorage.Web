@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Authentication.Services;
 using SmartStorage_Shared.DTO;
+using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Controllers
 {
@@ -23,6 +24,23 @@ namespace SmartStorage_API.Controllers
             _loginService = loginService;
             _userAuthService = userAuthService;
             _logger = logger;
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GetUser([FromQuery] string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                _logger.LogWarning("Get User failed: Missing username");
+
+                return BadRequest("Username is required.");
+            }
+            var user = _userAuthService.FindByUsername(userName);
+
+            if (user == null) return BadRequest("Usuário não existe.");
+
+            return Ok(user);
         }
 
         [HttpPost("signin")]
@@ -46,6 +64,28 @@ namespace SmartStorage_API.Controllers
             _logger.LogInformation("User {username} signed in successfully", user.Username);
 
             return Ok(token);
+        }
+
+        [HttpPost("update-credentials")]
+        public IActionResult UpdateUserCredentials([FromBody] User user)
+        {
+            _logger.LogInformation("Attempting to update user: {username}", user.Username);
+
+            if (user == null ||
+                string.IsNullOrWhiteSpace(user.Username) ||
+                string.IsNullOrWhiteSpace(user.Password) ||
+                string.IsNullOrWhiteSpace(user.FullName))
+            {
+                _logger.LogWarning("Update failed: Missing username, password or full name");
+
+                return BadRequest("Username, password and full name are required.");
+            }
+
+            _loginService.UpdateCredentials(user);
+
+            _logger.LogInformation("User {username} updated successfully", user.Username);
+
+            return Ok(user);
         }
 
         [HttpPost("refresh")]
@@ -79,8 +119,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult Create(
-            [FromBody] AccountCredentialsDTO user)
+        public IActionResult Create([FromBody] AccountCredentialsDTO user)
         {
             if (user == null)
                 return BadRequest("Invalid client request!");

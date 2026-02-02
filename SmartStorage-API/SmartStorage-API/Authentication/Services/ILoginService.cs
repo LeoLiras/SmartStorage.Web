@@ -1,4 +1,5 @@
 ﻿using SmartStorage_Shared.DTO;
+using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Authentication.Services
 {
@@ -8,5 +9,6 @@ namespace SmartStorage_API.Authentication.Services
         TokenDTO? ValidateCredentials(TokenDTO token);
         bool RevokeToken(string username);
         AccountCredentialsDTO Create(AccountCredentialsDTO user);
+        User UpdateCredentials(User user);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using SmartStorage.Blazor.Enums;
 using SmartStorage_Shared.DTO;
+using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 using System.Net.Http.Json;
 
@@ -37,9 +38,13 @@ namespace SmartStorage.Blazor.Utils
 
         private string employeesEndpoint = "api/storage/employees/v1";
 
+        private string authEndpoint = "api/storage/auth";
+
         private string loginEndpoint = "api/storage/auth/signin";
 
         private string registerEndpoint = "api/storage/auth/create";
+
+        private string updateCredentialsEndpoint = "api/storage/auth/update-credentials";
 
         #endregion
 
@@ -172,6 +177,36 @@ namespace SmartStorage.Blazor.Utils
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<TVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
+        /// Requisição GET que retorna um modelo com base na url e id fornecidos.
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<User> GetUser(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+                throw new ArgumentNullException(nameof(userName), message: "O campo Nome de Usuário é obrigatório.");
+
+            var url = $"{authEndpoint}?userName={Uri.EscapeDataString(userName)}";
+
+            var response = await _http.GetAsync($"{url}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<User>();
             }
             else
             {
@@ -415,6 +450,9 @@ namespace SmartStorage.Blazor.Utils
 
             else if (typeof(TVO) == typeof(AccountCredentialsDTO))
                 return registerEndpoint;
+
+            else if (typeof(TVO) == typeof(User))
+                return updateCredentialsEndpoint;
 
             else
                 return string.Empty;

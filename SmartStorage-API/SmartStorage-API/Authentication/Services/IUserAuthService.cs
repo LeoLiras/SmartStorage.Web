@@ -9,5 +9,6 @@ namespace SmartStorage_API.Authentication.Services
         User Create(AccountCredentialsDTO dto);
         bool RevokeToken(string username);
         User Update(User user);
+        User UpdateCredentials(User user);
     }
 }
