@@ -7,7 +7,7 @@
 @inject ApiExtensions api
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
-@inject AuthStateProvider auth;
+@inject AuthStateProvider auth
 
 @if(app.User is null || loading)
 {
@@ -69,7 +69,8 @@ else
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(user.Username) 
+            if (user is null 
+                    || string.IsNullOrWhiteSpace(user.Username) 
                     || string.IsNullOrWhiteSpace(user.Password) 
                     || string.IsNullOrWhiteSpace(user.FullName))
                 return;

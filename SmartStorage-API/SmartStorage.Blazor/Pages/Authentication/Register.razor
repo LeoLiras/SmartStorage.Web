@@ -2,6 +2,7 @@
 
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
+@using SmartStorage.Shared.Enum
 @using SmartStorage_Shared.DTO
 
 @inject ApiExtensions api
@@ -23,9 +24,9 @@
                               Label="Confirmar Senha" HelperText="Confirmar Senha" InputType="InputType.Password"
                               Validation="@(new Func<string, string>(PasswordMatch))" />
                 <div class="d-flex">
-                    <MudRadioGroup T="string" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
-                        <MudRadio Value="@("Usuário")">Usuário</MudRadio>
-                        <MudRadio Value="@("Administrador")">Administrador</MudRadio>
+                    <MudRadioGroup @bind-Value="accountCredentials.Type" T="TipoUsuario" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
+                        <MudRadio Value=TipoUsuario.Usuario>Usuário</MudRadio>
+                        <MudRadio Value=TipoUsuario.Administrador>Administrador</MudRadio>
                     </MudRadioGroup>
                 </div>
                 <div class="d-flex align-center justify-space-between">
