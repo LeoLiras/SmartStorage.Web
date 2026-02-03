@@ -40,6 +40,8 @@ namespace SmartStorage.Blazor.Utils
 
         private string authEndpoint = "api/storage/auth";
 
+        private string authUserEndpoint = "api/storage/auth/user-by-username";
+
         private string loginEndpoint = "api/storage/auth/signin";
 
         private string registerEndpoint = "api/storage/auth/create";
@@ -187,7 +189,7 @@ namespace SmartStorage.Blazor.Utils
         }
 
         /// <summary>
-        /// Requisição GET que retorna um modelo com base na url e id fornecidos.
+        /// Requisição GET que retorna o usuário pelo username.
         /// </summary>
         /// <typeparam name="TVO"></typeparam>
         /// <typeparam name="T"></typeparam>
@@ -195,18 +197,45 @@ namespace SmartStorage.Blazor.Utils
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<User> GetUser(string userName)
+        public async Task<User> GetUserByUsername(string userName)
         {
             if (string.IsNullOrWhiteSpace(userName))
                 throw new ArgumentNullException(nameof(userName), message: "O campo Nome de Usuário é obrigatório.");
 
-            var url = $"{authEndpoint}?userName={Uri.EscapeDataString(userName)}";
+            var url = $"{authUserEndpoint}?userName={Uri.EscapeDataString(userName)}";
 
             var response = await _http.GetAsync($"{url}");
 
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<User>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
+        /// Requisição GET que retorna todos os usuários.
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<List<User>> GetAllUsers()
+        {
+            var url = authEndpoint;
+
+            var response = await _http.GetAsync($"{url}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<User>>();
             }
             else
             {
@@ -453,6 +482,9 @@ namespace SmartStorage.Blazor.Utils
 
             else if (typeof(TVO) == typeof(User))
                 return updateCredentialsEndpoint;
+
+            else if (typeof(TVO) == typeof(List<User>))
+                return authEndpoint;
 
             else
                 return string.Empty;

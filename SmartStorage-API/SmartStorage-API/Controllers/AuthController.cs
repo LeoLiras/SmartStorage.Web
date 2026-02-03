@@ -26,7 +26,7 @@ namespace SmartStorage_API.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("user-by-username")]
         [AllowAnonymous]
         public IActionResult GetUser([FromQuery] string userName)
         {
@@ -41,6 +41,13 @@ namespace SmartStorage_API.Controllers
             if (user == null) return BadRequest("Usuário não existe.");
 
             return Ok(user);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GetAllUser()
+        {
+            return Ok(_userAuthService.FindAllUsers());
         }
 
         [HttpPost("signin")]

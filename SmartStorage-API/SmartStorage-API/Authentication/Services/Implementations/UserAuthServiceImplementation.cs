@@ -16,6 +16,12 @@ namespace SmartStorage_API.Authentication.Services.Implementations
         {
             return _repository.FindByUsername(username);
         }
+
+        public List<User> FindAllUsers()
+        {
+            return _repository.FindAll();
+        }
+
         public User Create(AccountCredentialsDTO dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
@@ -54,6 +60,5 @@ namespace SmartStorage_API.Authentication.Services.Implementations
         {
             return _repository.Update(user);
         }
-
     }
 }

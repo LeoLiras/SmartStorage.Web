@@ -3,6 +3,8 @@
 @attribute [Authorize]
 
 @using System.Text.RegularExpressions
+@using System.Security.Claims
+@using SmartStorage.Shared.Enum
 
 @inject ApiExtensions api
 @inject ShowDialog ShowDialog
@@ -28,6 +30,15 @@ else
                     <MudTextField T="string"
                                   Label="Confirmar Senha" HelperText="Confirmar Senha" InputType="InputType.Password"
                                   Validation="@(new Func<string, string>(PasswordMatch))" />
+                    @if (isAdm)
+                    {
+                    <div class="d-flex">
+                        <MudRadioGroup @bind-Value="user.UseType" T="TipoUsuario" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
+                            <MudRadio Value=TipoUsuario.Usuario>Usuário</MudRadio>
+                            <MudRadio Value=TipoUsuario.Administrador>Administrador</MudRadio>
+                        </MudRadioGroup>
+                    </div>
+                    }
                     <div class="d-flex justify-content-start gap-2 mt-2">
                         <MudButton OnClick="UpdateUser" Variant="Variant.Filled" Color="Color.Info">Atualizar</MudButton>
                         <MudButton OnClick="Logout" Variant="Variant.Filled" Color="Color.Secondary">Logout</MudButton>
@@ -36,17 +47,60 @@ else
             </MudPaper>
         </MudItem>
     </MudGrid>
+
+    @if (isAdm)
+    {
+        <MudGrid Justify="Justify.Center">
+            <MudItem xs="12" sm="12" xl="12">
+                <div style="display: flex; flex-wrap: wrap;">
+                    @if (PagedUsers is not null)
+                    {
+                        foreach (var user in PagedUsers)
+                        {
+                            <div style="margin: 10px;">
+                                <MudCard Class="card-hover" Style="width: 300px; height: 430px;">
+                                    <MudCardContent>
+                                        <MudText Typo="Typo.h5">@user.FullName</MudText>
+                                        <MudText Typo="Typo.body2">@user.Username</MudText>
+                                        <MudText Typo="Typo.body2">Tipo: @(user.UseType == 0 ? "Usuário" : "Administrador")</MudText>
+                                    </MudCardContent>
+                                    <MudCardActions>
+                                        <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(user.Id)">Editar</MudButton>
+                                        <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(user.Id)">Excluír</MudButton>
+                                    </MudCardActions>
+                                </MudCard>
+                            </div>
+                        }
+                    }
+                </div>
+            </MudItem>
+            <MudItem>
+                <MudPagination Color="Color.Info" Count="(int)Math.Ceiling((double)usersList.Count / (double)pageSize)" SelectedChanged="ChangePage" Class="mt-4" />
+            </MudItem>
+        </MudGrid>
+    } 
 }
 
 
 @code {
 
     #region Propreties
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    ClaimsPrincipal? userAuth { get; set; }
 
     private User? user = new();
+    private List<User> usersList = new();
     MudTextField<string> pwField1;
 
     bool loading = false;
+    bool isAdm = false;
+
+    private int currentPage = 1;
+    private int pageSize = 10;
+
+    private IEnumerable<User>? PagedUsers => usersList == null ? Enumerable.Empty<User>() : usersList.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
     #endregion
 
@@ -54,12 +108,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authenticationState;
+        userAuth = authState.User;
+
         user = app.User;
 
         if (user is null)
             return;
 
         user.Password = string.Empty;
+
+        usersList = await api.GetAllUsers();
+
+        isAdm = userAuth?.FindFirst(ClaimTypes.Role)?.Value == "Administrador" ? true : false;
     }
     #endregion
 
@@ -93,6 +154,18 @@ else
 
             await ShowDialog.ShowDialogAsync($"Falha atualizando o usuáriozn{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
+    }
+
+    private void Edit(long userId)
+    {
+        
+    }
+
+    private async Task Delete(long userId)
+    {
+        
+        
+        
     }
 
     private async void Logout()
@@ -129,6 +202,11 @@ else
             return "As senhas não conferem";
 
         return null;
+    }
+
+    private void ChangePage(int page)
+    {
+        currentPage = page;
     }
 
     #endregion

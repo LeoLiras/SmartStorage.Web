@@ -50,7 +50,7 @@
                 app.Sales = await api.Get<SaleVO>();
                 
             if (string.IsNullOrWhiteSpace(app.User?.Username))
-                app.User = await api.GetUser(user.FindFirst("unique_name")?.Value);
+                app.User = await api.GetUserByUsername(user.FindFirst("unique_name")?.Value);
         }
     }
 }

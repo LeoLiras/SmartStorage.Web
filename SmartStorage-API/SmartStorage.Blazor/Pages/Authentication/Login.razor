@@ -46,7 +46,7 @@
 
             await auth.Login(result.AccessToken);
             
-            app.User = await api.GetUser(user.Username);
+            app.User = await api.GetUserByUsername(user.Username);
 
             await ShowDialog.ShowDialogAsync("Login realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
 

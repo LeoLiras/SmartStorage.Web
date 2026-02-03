@@ -6,6 +6,7 @@ namespace SmartStorage_API.Authentication.Services
     public interface IUserAuthService
     {
         User? FindByUsername(string username);
+        List<User> FindAllUsers();
         User Create(AccountCredentialsDTO dto);
         bool RevokeToken(string username);
         User Update(User user);
