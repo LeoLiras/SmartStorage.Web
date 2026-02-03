@@ -4,12 +4,12 @@
 @inject ApiExtensions api
 @inject VariablesExtensions app
 
-<AuthorizeView>
+<AuthorizeView Context="auth">
     <Authorized>
         <h1>SmartStorage - Controle Inteligente</h1>
         <br />
-        <h2>Bem vindo, @context.User.FindFirst("unique_name")?.Value</h2>
-        @if (context.User.FindFirst(ClaimTypes.Role)?.Value != "Usuario")
+        <h2>Bem vindo, @(user.FindFirst("unique_name")?.Value).</h2>
+        @if (auth.User.IsInRole("Administrador"))
         {
             <h5>Administrador</h5>
         }
@@ -28,10 +28,12 @@
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
+    ClaimsPrincipal? user { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationState;
-        var user = authState.User;
+        user = authState.User;
         
         if (user.Identity!.IsAuthenticated)
         {

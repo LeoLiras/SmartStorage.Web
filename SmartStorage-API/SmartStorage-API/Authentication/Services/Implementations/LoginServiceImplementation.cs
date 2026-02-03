@@ -91,7 +91,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
                         user.Username),
 
                     new Claim(ClaimTypes.Role,
-                        user.UseType.ToString())
+                        user.UseType == 0 ? "Usuario" : "Administrador")
                 ];
 
             var accessToken = _tokenService.GenerateAccessToken(claims);
