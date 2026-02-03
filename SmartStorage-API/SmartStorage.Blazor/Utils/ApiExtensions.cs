@@ -189,95 +189,6 @@ namespace SmartStorage.Blazor.Utils
         }
 
         /// <summary>
-        /// Requisição GET que retorna o usuário pelo username.
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public async Task<User> GetUserByUsername(string userName)
-        {
-            if (string.IsNullOrWhiteSpace(userName))
-                throw new ArgumentNullException(nameof(userName), message: "O campo Nome de Usuário é obrigatório.");
-
-            var url = $"{authUserEndpoint}?userName={Uri.EscapeDataString(userName)}";
-
-            var response = await _http.GetAsync($"{url}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<User>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        /// <summary>
-        /// Requisição GET que retorna todos os usuários.
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public async Task<List<User>> GetAllUsers()
-        {
-            var url = authEndpoint;
-
-            var response = await _http.GetAsync($"{url}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<List<User>>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        /// <summary>
-        /// Requisição GET para gerar o relatório excel de vendas do mês corrente
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ApiException"></exception>
-        public async Task<byte[]> GetSalesReport(FileTypes fileType)
-        {
-            var url = "";
-
-            if(fileType == FileTypes.Excel)
-                url = $"{salesEndpoint}/export-excel";
-            else
-                url = $"{salesEndpoint}/export-pdf";
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsByteArrayAsync();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        /// <summary>
         /// Requisição POST para criação de novos registros
         /// </summary>
         /// <typeparam name="TVO"></typeparam>
@@ -300,101 +211,6 @@ namespace SmartStorage.Blazor.Utils
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<TVO>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        /// <summary>
-        /// Requisição POST para realizar o Login
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="vo"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public async Task<TokenDTO?> PostSignin(UserDTO user)
-        {
-            var url = ReturnEndpoint<UserDTO>();
-
-            if (user == null)
-                throw new ArgumentNullException(nameof(user), message: "As credenciais do usuário são obrigatórias.");
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.PostAsJsonAsync(url, user);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<TokenDTO>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        /// <summary>
-        /// Requisição POST para realizar cadastro de novo usuário
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="vo"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public async Task<AccountCredentialsDTO?> PostRegister(AccountCredentialsDTO credentials)
-        {
-            var url = ReturnEndpoint<AccountCredentialsDTO>();
-
-            if (credentials == null)
-                throw new ArgumentNullException(nameof(credentials), message: "As credenciais do usuário são obrigatórias.");
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.PostAsJsonAsync(url, credentials);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<AccountCredentialsDTO>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        /// <summary>
-        /// Requisição POST para chamar a API do Gemini
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ApiException"></exception>
-        public async Task<string?> PostAnalyseAI(string text)
-        {
-            var url = $"{salesEndpoint}/analyse/ai";
-
-            if (text == null)
-                throw new ArgumentNullException(nameof(text), message: "O parâmetro Texto é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.PostAsJsonAsync(url, text);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsStringAsync();
             }
             else
             {
@@ -457,6 +273,226 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
+        /// <summary>
+        /// Requisição POST para chamar a API do Gemini
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ApiException"></exception>
+        public async Task<string?> PostAnalyseAI(string text)
+        {
+            var url = $"{salesEndpoint}/analyse/ai";
+
+            if (text == null)
+                throw new ArgumentNullException(nameof(text), message: "O parâmetro Texto é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.PostAsJsonAsync(url, text);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
+        /// Requisição GET para gerar o relatório excel de vendas do mês corrente
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ApiException"></exception>
+        public async Task<byte[]> GetSalesReport(FileTypes fileType)
+        {
+            var url = "";
+
+            if (fileType == FileTypes.Excel)
+                url = $"{salesEndpoint}/export-excel";
+            else
+                url = $"{salesEndpoint}/export-pdf";
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        //=========================== Metódos relativos a autenticação ===========================
+
+        /// <summary>
+        /// Requisição GET que retorna o usuário pelo username.
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<User> GetUserByUsername(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+                throw new ArgumentNullException(nameof(userName), message: "O campo Nome de Usuário é obrigatório.");
+
+            var url = $"{authUserEndpoint}?userName={Uri.EscapeDataString(userName)}";
+
+            var response = await _http.GetAsync($"{url}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<User>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
+        /// Requisição GET que retorna todos os usuários.
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<List<User>> GetAllUsers()
+        {
+            var url = authEndpoint;
+
+            var response = await _http.GetAsync($"{url}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<User>>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
+        /// Requisição POST para realizar o Login
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="vo"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<TokenDTO?> PostSigninUser(UserDTO user)
+        {
+            var url = loginEndpoint;
+
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), message: "As credenciais do usuário são obrigatórias.");
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.PostAsJsonAsync(url, user);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<TokenDTO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
+        /// Requisição POST para realizar cadastro de novo usuário
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="vo"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<AccountCredentialsDTO?> PostRegisterUser(AccountCredentialsDTO credentials)
+        {
+            var url = registerEndpoint;
+
+            if (credentials == null)
+                throw new ArgumentNullException(nameof(credentials), message: "As credenciais do usuário são obrigatórias.");
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.PostAsJsonAsync(url, credentials);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<AccountCredentialsDTO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        /// <summary>
+        /// Requisição POST para criação de novos registros
+        /// </summary>
+        /// <typeparam name="TVO"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="vo"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<User?> PostEditUser(User user)
+        {
+            var url = updateCredentialsEndpoint;
+
+            if (user == null)
+                throw new ArgumentNullException(nameof(user), message: "O parâmetro User é obrigatório.");
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            var response = await _http.PostAsJsonAsync(url, user);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<User>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        //=========================== Metódos relativos a autenticação ===========================
+
         private string ReturnEndpoint<TVO>() where TVO : class
         {
             if (typeof(TVO) == typeof(EmployeeVO))
@@ -473,18 +509,6 @@ namespace SmartStorage.Blazor.Utils
 
             else if (typeof(TVO) == typeof(ShelfVO))
                 return shelvesEndpoint;
-
-            else if (typeof(TVO) == typeof(UserDTO))
-                return loginEndpoint;
-
-            else if (typeof(TVO) == typeof(AccountCredentialsDTO))
-                return registerEndpoint;
-
-            else if (typeof(TVO) == typeof(User))
-                return updateCredentialsEndpoint;
-
-            else if (typeof(TVO) == typeof(List<User>))
-                return authEndpoint;
 
             else
                 return string.Empty;

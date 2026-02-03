@@ -60,7 +60,7 @@
 
             loading = true;
 
-            var result = await api.PostRegister(accountCredentials);
+            var result = await api.PostRegisterUser(accountCredentials);
 
             await auth.Logout();
 

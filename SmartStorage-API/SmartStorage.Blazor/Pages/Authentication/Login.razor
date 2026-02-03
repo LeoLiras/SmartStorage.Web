@@ -42,7 +42,7 @@
 
             loading = true;
 
-            var result = await api.PostSignin(user);
+            var result = await api.PostSigninUser(user);
 
             await auth.Login(result.AccessToken);
             
