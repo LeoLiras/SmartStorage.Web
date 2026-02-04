@@ -18,6 +18,16 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return _repository.FindByUsername(username);
         }
 
+        public User? FindUserById(int userId)
+        {
+            var user = _repository.FindById(userId);
+
+            if (user is null)
+                throw new Exception("Usuário não encontrado com o ID informado");
+
+            return user;
+        }
+
         public List<User> FindAllUsers()
         {
             return _repository.FindAll();
@@ -48,6 +58,11 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return _repository.Update(user);
         }
 
+        public User Update(User user)
+        {
+            return _repository.Update(user);
+        }
+
         public bool RevokeToken(string username)
         {
             var user = _repository.FindByUsername(username);
@@ -57,19 +72,9 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return true;
         }
 
-        public User Update(User user)
+        public void DeleteUser(int userId)
         {
-            return _repository.Update(user);
-        }
-
-        public User? FindUserById(int userId)
-        {
-            var user = _repository.FindById(userId);
-
-            if (user is null)
-                throw new Exception("Usuário não encontrado com o ID informado");
-
-            return user;
+            _repository.Delete(userId);
         }
     }
 }

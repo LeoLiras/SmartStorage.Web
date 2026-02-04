@@ -12,5 +12,7 @@ namespace SmartStorage_API.Authentication.Services
         bool RevokeToken(string username);
         User Update(User user);
         User UpdateCredentials(User user);
+
+        void DeleteUser(int userId);
     }
 }
