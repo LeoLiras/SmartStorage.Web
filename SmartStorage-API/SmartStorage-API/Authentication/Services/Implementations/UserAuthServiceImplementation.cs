@@ -2,6 +2,7 @@
 using SmartStorage_API.Authentication.Repositories;
 using SmartStorage_Shared.DTO;
 using SmartStorage_Shared.Model;
+using System;
 
 namespace SmartStorage_API.Authentication.Services.Implementations
 {
@@ -59,6 +60,16 @@ namespace SmartStorage_API.Authentication.Services.Implementations
         public User Update(User user)
         {
             return _repository.Update(user);
+        }
+
+        public User? FindUserById(int userId)
+        {
+            var user = _repository.FindById(userId);
+
+            if (user is null)
+                throw new Exception("Usuário não encontrado com o ID informado");
+
+            return user;
         }
     }
 }

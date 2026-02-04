@@ -27,7 +27,6 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpGet("user-by-username")]
-        [AllowAnonymous]
         public IActionResult GetUser([FromQuery] string userName)
         {
             if (string.IsNullOrWhiteSpace(userName))
@@ -44,10 +43,25 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult GetAllUser()
         {
             return Ok(_userAuthService.FindAllUsers());
+        }
+
+        [HttpGet("{userId}")]
+        public IActionResult GetUserById(int userId)
+        {
+            try
+            {
+                if (userId.Equals(0))
+                    throw new Exception("O campo ID do Usuário é obrigatório.");
+
+                return Ok(_userAuthService.FindUserById(userId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("signin")]
@@ -110,7 +124,6 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost("revoke")]
-        [Authorize]
         public IActionResult Revoke()
         {
             var username = User.Identity?.Name;
