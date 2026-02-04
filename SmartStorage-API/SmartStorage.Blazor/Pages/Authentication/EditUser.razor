@@ -1,9 +1,10 @@
-﻿@page "/user/edit/{userId:int}"
+﻿@page "/user/edit/{userId:long}"
 
 @attribute [Authorize]
 
 @using SmartStorage.Shared.Enum
 @using System.Text.RegularExpressions
+@using System.Security.Claims
 
 @inject ApiExtensions api
 @inject ShowDialog ShowDialog
@@ -40,7 +41,6 @@ else
                     }
                     <div class="d-flex justify-content-start gap-2 mt-2">
                         <MudButton OnClick="UpdateUser" Variant="Variant.Filled" Color="Color.Info">Atualizar</MudButton>
-                        <MudButton OnClick="Logout" Variant="Variant.Filled" Color="Color.Secondary">Logout</MudButton>
                     </div>
                 </MudForm>
             </MudPaper>
@@ -55,12 +55,14 @@ else
     [Parameter]
     public long UserId { get; set; }
 
-    [Parameter]
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    ClaimsPrincipal? userAuth { get; set; }
+
     public bool isAdm { get; set; }
 
     public User? user { get; set; } = new();
-
-    
 
     MudTextField<string> pwField1;
     bool loading = false;
@@ -71,15 +73,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        user = await api.GetUserById((int)UserId);
+        var authState = await authenticationState;
+        userAuth = authState.User;
 
-        user = app.User;
+        isAdm = userAuth?.FindFirst(ClaimTypes.Role)?.Value == "Administrador" ? true : false;
+
+        user = await api.GetUserById((int)UserId);
 
         if (user is null)
             return;
 
         user.Password = string.Empty;
     }
+
     #endregion
 
     #region Methods
@@ -98,9 +104,7 @@ else
 
             var result = await api.PostEditUser(user);
 
-            app.User = user;
-
-            await ShowDialog.ShowDialogAsync("Usuário atualizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Usuário atualizado com sucesso.", "Sucesso", "user/account", EDialogStates.Success);
 
             StateHasChanged();
 
@@ -112,13 +116,6 @@ else
 
             await ShowDialog.ShowDialogAsync($"Falha atualizando o usuáriozn{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
-    }
-
-    private async void Logout()
-    {
-        await auth.Logout();
-
-        await ShowDialog.ShowDialogAsync("Logout realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
     }
 
     private IEnumerable<string> PasswordStrength(string pw)

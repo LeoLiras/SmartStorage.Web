@@ -34,7 +34,7 @@
     {
         var authState = await authenticationState;
         user = authState.User;
-        
+
         if (user.Identity!.IsAuthenticated)
         {
             if(app.Employees?.Count == 0)
@@ -48,9 +48,11 @@
 
             if (app.Sales?.Count == 0)
                 app.Sales = await api.Get<SaleVO>();
-                
+
             if (app.User.Id == 0)
                 app.User = await api.GetUserByUsername(user.FindFirst("unique_name")?.Value);
+
+            StateHasChanged();
         }
     }
 }

@@ -10,6 +10,7 @@
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 @inject AuthStateProvider auth
+@inject NavigationManager nav
 
 @if(app.User is null || loading)
 {
@@ -17,10 +18,9 @@
 }
 else
 {
+    <MudButton OnClick="Logout" Variant="Variant.Filled" Color="Color.Secondary" Class="mt-3">Logout</MudButton>
+    <EditUser UserId="app.User.Id"></EditUser>
     
-    <EditUser UserId="app.User.Id" isAdm="isAdm"></EditUser>
-    
-
     @if (isAdm)
     {
         <MudGrid Justify="Justify.Center">
@@ -84,17 +84,16 @@ else
 
         isAdm = userAuth?.FindFirst(ClaimTypes.Role)?.Value == "Administrador" ? true : false;
 
-        usersList = await api.GetAllUsers(); 
+        if (isAdm)
+            usersList = await api.GetAllUsers(); 
     }
     #endregion
 
     #region Methods
 
-    
-
     private void Edit(long userId)
     {
-        
+        nav.NavigateTo($"user/edit/{userId}");
     }
 
     private async Task Delete(long userId)
@@ -104,7 +103,12 @@ else
         
     }
 
-    
+    private async void Logout()
+    {
+        await auth.Logout();
+
+        await ShowDialog.ShowDialogAsync("Logout realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
+    }
 
     
 
