@@ -12,7 +12,7 @@
 @inject AuthStateProvider auth
 @inject NavigationManager nav
 
-@if(app.User is null || loading)
+@if(loading)
 {
     <Loading Message="Carregando..."></Loading>
 }
@@ -85,7 +85,7 @@ else
         isAdm = userAuth?.FindFirst(ClaimTypes.Role)?.Value == "Administrador" ? true : false;
 
         if (isAdm)
-            usersList = await api.GetAllUsers(); 
+            usersList = await GetUsers();
     }
     #endregion
 
@@ -96,11 +96,33 @@ else
         nav.NavigateTo($"user/edit/{userId}");
     }
 
-    private async Task Delete(long userId)
+    private async void Delete(long userId)
     {
-        
-        
-        
+        try
+        {
+            var confirmation = await ShowDialog.ShowDialogAsync("Tem certeza que deseja deletar esse usuário?.", "Confirmação", state:EDialogStates.Warning, showCancel: true, showYes: true);
+
+            if (!confirmation)
+                return;
+
+            loading = true;
+
+            api.DeleteUser(userId);
+
+            await ShowDialog.ShowDialogAsync("Usuário deletado com sucesso.", title:"Sucesso", state:EDialogStates.Success);
+
+            usersList = await GetUsers();
+
+            StateHasChanged();
+
+            loading = false;
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Falha atualizando o usuáriozn{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
     }
 
     private async void Logout()
@@ -110,11 +132,18 @@ else
         await ShowDialog.ShowDialogAsync("Logout realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
     }
 
-    
-
     private void ChangePage(int page)
     {
         currentPage = page;
+    }
+
+    private async Task<List<User>> GetUsers()
+    {
+        var users = await api.GetAllUsers();
+
+        users.RemoveAll(user => user.Id == app.User.Id);
+
+        return users;
     }
 
     #endregion

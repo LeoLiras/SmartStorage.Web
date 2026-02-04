@@ -473,6 +473,26 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
+        public async void DeleteUser(long id)
+        {
+            var url = authEndpoint;
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
+
+            if (id == 0)
+                throw new ArgumentNullException(nameof(id), message: "O ID do usuário é obrigatório.");
+
+            var response = await _http.DeleteAsync($"{url}/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
         //=========================== Metódos relativos a autenticação ===========================
 
         private string ReturnEndpoint<TVO>() where TVO : class
