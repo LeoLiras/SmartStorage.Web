@@ -10,7 +10,7 @@
             <MudNavLink Href="products/insight" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Lightbulb">Estatísticas</MudNavLink>
             <br />
             <br />
-            @if(app.User != null)
+            @if(app.User.Id != 0)
             {
                 <MudNavLink Href="user/account" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Conta</MudNavLink>
             }

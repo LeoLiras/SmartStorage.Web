@@ -338,15 +338,6 @@ namespace SmartStorage.Blazor.Utils
 
         //=========================== Metódos relativos a autenticação ===========================
 
-        /// <summary>
-        /// Requisição GET que retorna o usuário pelo username.
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         public async Task<User> GetUserByUsername(string userName)
         {
             if (string.IsNullOrWhiteSpace(userName))
@@ -368,15 +359,6 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
-        /// <summary>
-        /// Requisição GET que retorna todos os usuários.
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         public async Task<List<User>> GetAllUsers()
         {
             var url = authEndpoint;
@@ -395,14 +377,30 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
-        /// <summary>
-        /// Requisição POST para realizar o Login
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="vo"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<User> GetUserById(int id)
+        {
+            var url = authEndpoint;
+
+            if (string.IsNullOrWhiteSpace(url))
+                throw new ArgumentNullException(nameof(url), message: "O campo URL é obrigatório.");
+
+            if (id == 0)
+                throw new ArgumentNullException(nameof(url), message: "O campo ID é obrigatório.");
+
+            var response = await _http.GetAsync($"{url}/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<User>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
         public async Task<TokenDTO?> PostSigninUser(UserDTO user)
         {
             var url = loginEndpoint;
@@ -427,14 +425,6 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
-        /// <summary>
-        /// Requisição POST para realizar cadastro de novo usuário
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="vo"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
         public async Task<AccountCredentialsDTO?> PostRegisterUser(AccountCredentialsDTO credentials)
         {
             var url = registerEndpoint;
@@ -459,14 +449,6 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
-        /// <summary>
-        /// Requisição POST para criação de novos registros
-        /// </summary>
-        /// <typeparam name="TVO"></typeparam>
-        /// <param name="url"></param>
-        /// <param name="vo"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
         public async Task<User?> PostEditUser(User user)
         {
             var url = updateCredentialsEndpoint;

@@ -1,0 +1,154 @@
+﻿@page "/user/edit/{userId:int}"
+
+@attribute [Authorize]
+
+@using SmartStorage.Shared.Enum
+@using System.Text.RegularExpressions
+
+@inject ApiExtensions api
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+@inject AuthStateProvider auth
+
+@if (loading)
+{
+    <Loading Message="Carregando..."></Loading>
+}
+else
+{
+    <MudGrid Class="mt-3">
+        <MudItem xs="12" sm="7">
+            <MudPaper Class="pa-4">
+                <MudForm Model="user">
+                    <MudTextField @bind-Value="user.FullName" T="string" Label="Nome Completo" Required="true" RequiredError="O Nome é obrigatório!" />
+                    <MudTextField @bind-Value="user.Username" T="string" Label="Login" Required="true" RequiredError="O Login é obrigatório!" />
+                    <MudTextField @bind-Value="user.Password" T="string" Label="Senha" HelperText="Escolha uma senha forte." @ref="pwField1"
+                                  InputType="InputType.Password"
+                                  Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                                  RequiredError="A senha é obrigatória!" />
+                    <MudTextField T="string"
+                                  Label="Confirmar Senha" HelperText="Confirmar Senha" InputType="InputType.Password"
+                                  Validation="@(new Func<string, string>(PasswordMatch))" />
+                    @if (isAdm)
+                    {
+                        <div class="d-flex">
+                            <MudRadioGroup @bind-Value="user.UseType" T="TipoUsuario" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
+                                <MudRadio Value=TipoUsuario.Usuario>Usuário</MudRadio>
+                                <MudRadio Value=TipoUsuario.Administrador>Administrador</MudRadio>
+                            </MudRadioGroup>
+                        </div>
+                    }
+                    <div class="d-flex justify-content-start gap-2 mt-2">
+                        <MudButton OnClick="UpdateUser" Variant="Variant.Filled" Color="Color.Info">Atualizar</MudButton>
+                        <MudButton OnClick="Logout" Variant="Variant.Filled" Color="Color.Secondary">Logout</MudButton>
+                    </div>
+                </MudForm>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+
+    #region Properties
+
+    [Parameter]
+    public long UserId { get; set; }
+
+    [Parameter]
+    public bool isAdm { get; set; }
+
+    public User? user { get; set; } = new();
+
+    
+
+    MudTextField<string> pwField1;
+    bool loading = false;
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await api.GetUserById((int)UserId);
+
+        user = app.User;
+
+        if (user is null)
+            return;
+
+        user.Password = string.Empty;
+    }
+    #endregion
+
+    #region Methods
+
+    private async void UpdateUser()
+    {
+        try
+        {
+            if (user is null
+                    || string.IsNullOrWhiteSpace(user.Username)
+                    || string.IsNullOrWhiteSpace(user.Password)
+                    || string.IsNullOrWhiteSpace(user.FullName))
+                return;
+
+            loading = true;
+
+            var result = await api.PostEditUser(user);
+
+            app.User = user;
+
+            await ShowDialog.ShowDialogAsync("Usuário atualizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
+
+            StateHasChanged();
+
+            loading = false;
+        }
+        catch (ApiException ex)
+        {
+            loading = false;
+
+            await ShowDialog.ShowDialogAsync($"Falha atualizando o usuáriozn{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+    }
+
+    private async void Logout()
+    {
+        await auth.Logout();
+
+        await ShowDialog.ShowDialogAsync("Logout realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
+    }
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "A Senha é obrigatória!";
+            yield break;
+        }
+
+        if (pw.Length < 8)
+            yield return "A senha deve ter ao menos 8 caracteres";
+
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "A senha deve ter ao menos uma letra maiúscula";
+
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "A senha deve ter ao menos uma letra minúscula";
+
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "A senha deve ter ao menos um dígito numérico";
+    }
+
+    private string PasswordMatch(string arg)
+    {
+        if (pwField1.Value != arg)
+            return "As senhas não conferem";
+
+        return null;
+    }
+
+    #endregion  
+}
