@@ -4,6 +4,7 @@
 @inject ApiExtensions api
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
+@inject AuthStateProvider auth
 
 @if (loading)
 {
@@ -15,7 +16,7 @@ else
         <Authorized>
             <h1>SmartStorage - Controle Inteligente</h1>
             <br />
-            <h2>Bem vindo, @(user.FindFirst("unique_name")?.Value).</h2>
+            <h2>Bem vindo, @(auth.User.FindFirst("unique_name")?.Value).</h2>
             @if (auth.User.IsInRole("Administrador"))
             {
                 <h5>Administrador</h5>
@@ -74,7 +75,7 @@ else
         }
         catch (ApiException ex)
         {
-            await ShowDialog.ShowDialogAsync($"Erro carregando dados.\n{ex.Message}", "Erro", navigate:"/", state: EDialogStates.Warning);
+            auth.Logout();
         }
         finally
         {
