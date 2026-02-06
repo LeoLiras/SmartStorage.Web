@@ -12,7 +12,7 @@
 @inject AuthStateProvider auth
 @inject NavigationManager nav
 
-@if(loading)
+@if(loading || app.User.Id == 0)
 {
     <Loading Message="Carregando..."></Loading>
 }
@@ -81,6 +81,9 @@ else
     {
         var authState = await authenticationState;
         userAuth = authState.User;
+
+        if (app.User.Id == 0)
+            app.User = await api.GetUserByUsername(userAuth.FindFirst("unique_name")?.Value);
 
         isAdm = userAuth?.FindFirst(ClaimTypes.Role)?.Value == "Administrador" ? true : false;
 
