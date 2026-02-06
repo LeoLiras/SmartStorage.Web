@@ -10,6 +10,8 @@ namespace SmartStorage.Blazor.Utils
 
         public List<EmployeeVO>? Employees { get; set; } = new();
 
+        public List<ProductVO>? ProductInStock { get; set; } = new();
+
         public List<EnterVO>? ProductEntries { get; set; } = new();
 
         public List<ShelfVO>? Shelves { get; set; } = new();

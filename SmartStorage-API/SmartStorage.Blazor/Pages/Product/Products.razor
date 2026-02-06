@@ -131,7 +131,10 @@ else
 
     private async Task GetProducts()
     {
-        products = await api.Get<ProductVO>();
+        if(app.ProductInStock.Count == 0)
+            app.ProductInStock = await api.Get<ProductVO>();
+
+        products = app.ProductInStock;
     }
 
     private string ProcessImage(ProductVO product)

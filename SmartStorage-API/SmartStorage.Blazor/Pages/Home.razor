@@ -3,25 +3,33 @@
 
 @inject ApiExtensions api
 @inject VariablesExtensions app
+@inject ShowDialog ShowDialog
 
-<AuthorizeView Context="auth">
-    <Authorized>
-        <h1>SmartStorage - Controle Inteligente</h1>
-        <br />
-        <h2>Bem vindo, @(user.FindFirst("unique_name")?.Value).</h2>
-        @if (auth.User.IsInRole("Administrador"))
-        {
-            <h5>Administrador</h5>
-        }
-        else
-        {
-            <h5>Usuário</h5>
-        }
-    </Authorized>
-    <NotAuthorized>
-        <Login></Login>
-    </NotAuthorized>
-</AuthorizeView>
+@if (loading)
+{
+    <Loading Message="Carregando dados..."></Loading>
+}
+else
+{
+    <AuthorizeView Context="auth">
+        <Authorized>
+            <h1>SmartStorage - Controle Inteligente</h1>
+            <br />
+            <h2>Bem vindo, @(user.FindFirst("unique_name")?.Value).</h2>
+            @if (auth.User.IsInRole("Administrador"))
+            {
+                <h5>Administrador</h5>
+            }
+            else
+            {
+                <h5>Usuário</h5>
+            }
+        </Authorized>
+        <NotAuthorized>
+            <Login></Login>
+        </NotAuthorized>
+    </AuthorizeView>
+}
 
 @code{
 
@@ -30,29 +38,47 @@
 
     ClaimsPrincipal? user { get; set; }
 
+    bool loading = false;
+
     protected override async Task OnInitializedAsync()
     {
-        var authState = await authenticationState;
-        user = authState.User;
-
-        if (user.Identity!.IsAuthenticated)
+        try
         {
-            if(app.Employees?.Count == 0)
-                app.Employees = await api.Get<EmployeeVO>();
+            loading = true;
 
-            if (app.Shelves?.Count == 0)
-                app.Shelves = await api.Get<ShelfVO>();
+            var authState = await authenticationState;
+            user = authState.User;
 
-            if (app.ProductEntries?.Count == 0)
-                app.ProductEntries = await api.Get<EnterVO>();
+            if (user.Identity!.IsAuthenticated)
+            {
+                if (app.ProductInStock?.Count == 0)
+                    app.ProductInStock = await api.Get<ProductVO>();
 
-            if (app.Sales?.Count == 0)
-                app.Sales = await api.Get<SaleVO>();
+                if (app.Employees?.Count == 0)
+                    app.Employees = await api.Get<EmployeeVO>();
 
-            if (app.User.Id == 0)
-                app.User = await api.GetUserByUsername(user.FindFirst("unique_name")?.Value);
+                if (app.Shelves?.Count == 0)
+                    app.Shelves = await api.Get<ShelfVO>();
 
-            StateHasChanged();
+                if (app.ProductEntries?.Count == 0)
+                    app.ProductEntries = await api.Get<EnterVO>();
+
+                if (app.Sales?.Count == 0)
+                    app.Sales = await api.Get<SaleVO>();
+
+                if (app.User.Id == 0)
+                    app.User = await api.GetUserByUsername(user.FindFirst("unique_name")?.Value);
+
+                StateHasChanged();
+            }
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro carregando dados.\n{ex.Message}", "Erro", navigate:"/", state: EDialogStates.Warning);
+        }
+        finally
+        {
+            loading = false;
         }
     }
 }
