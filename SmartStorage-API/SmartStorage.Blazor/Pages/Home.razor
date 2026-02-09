@@ -16,7 +16,7 @@ else
         <Authorized>
             <h1>SmartStorage - Controle Inteligente</h1>
             <br />
-            <h2>Bem vindo, @(auth.User.FindFirst("unique_name")?.Value).</h2>
+            <h2>Bem vindo!</h2>
             @if (auth.User.IsInRole("Administrador"))
             {
                 <h5>Administrador</h5>
