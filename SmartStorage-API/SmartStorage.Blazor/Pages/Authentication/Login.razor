@@ -9,7 +9,7 @@
 
 @if (loading)
 {
-    <Loading Message="Carregando..."></Loading>
+    <Loading Message="Carregando login..."></Loading>
 }
 else
 {
@@ -61,6 +61,8 @@ else
         }
         catch (ApiException ex)
         {
+            loading = false;
+
             var mensagem = $"Falha no login.\n";
 
             if (ex.Message.Contains("Unauthorized"))
@@ -68,7 +70,9 @@ else
             else
                 mensagem += ex.Message;
 
-            await ShowDialog.ShowDialogAsync(mensagem, "Erro", state: EDialogStates.Warning);
+            StateHasChanged();
+
+            await ShowDialog.ShowDialogAsync(mensagem, title:"Erro", navigate:"/", state: EDialogStates.Warning);
         }
         finally
         {
