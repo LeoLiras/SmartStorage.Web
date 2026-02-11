@@ -210,7 +210,7 @@ else
         {
             loadingReport = true;
 
-            var aiResponse = await api.PostAnalyseAI($"Apenas texto, não utilize tabelas e separe em tópicos somente se necessário. {currentInput}");
+            var aiResponse = await api.PostAnalyseAI($"Apenas texto, não utilize tabelas e separe em tópicos somente se necessário. Não cite os nomes dos campos e nem lucro bruto total. {currentInput}");
 
             chatMessages.Add(new ChatMessage { Text = aiResponse ?? "", IsUser = false });
 
