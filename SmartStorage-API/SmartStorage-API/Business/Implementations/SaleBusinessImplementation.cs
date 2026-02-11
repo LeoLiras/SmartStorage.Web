@@ -210,7 +210,7 @@ namespace SmartStorage_API.Service.Implementations
                 .BorderColor(QuestPDF.Helpers.Colors.Grey.Lighten2)
                 .Padding(5);
 
-            var reportAi = await AnalyseAI("Faça um resumo das minhas vendas em texto corrente (somente um texto normal, sem tópicos ou tabelas), para que eu coloque no meu relatório. Apenas me dê o resumo, sem saudações. Não cite lucro bruto total.");
+            var reportAi = await AnalyseAI("Faça um resumo das minhas vendas em texto corrente (somente um texto normal, sem tópicos ou tabelas), para que eu coloque no meu relatório. Apenas me dê o resumo, sem saudações. Não cite lucro bruto total ou qualquer valor que seja igual a R$ 0.0.");
 
             //============================= Chart: Most saled in the month =============================
 
