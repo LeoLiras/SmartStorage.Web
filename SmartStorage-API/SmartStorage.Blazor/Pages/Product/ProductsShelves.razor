@@ -102,7 +102,7 @@ else
         {
             app.ActualEntry = productsInShelves.FirstOrDefault(e => e.Id.Equals(entryId));
 
-            if (app.ActualEntry is not null)
+            if (app.ActualEntry is null)
                 app.ActualProduct = await api.GetById<ProductVO>(app.ActualEntry.ProductId);
 
             nav.NavigateTo($"product/sale/{entryId}");
