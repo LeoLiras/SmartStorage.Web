@@ -58,12 +58,12 @@ else
 
     #region Properties
 
-    List<ProductVO>? products = new();
+    List<ProductVO> products = new();
 
     private int currentPage = 1;
     private int pageSize = 10;
 
-    private IEnumerable<ProductVO>? PagedProducts => products == null ? Enumerable.Empty<ProductVO>() : products.Skip((currentPage - 1) * pageSize).Take(pageSize);
+    private IEnumerable<ProductVO> PagedProducts => products == null ? Enumerable.Empty<ProductVO>() : products.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
     bool loading = false;
 

@@ -9,11 +9,11 @@ namespace SmartStorage_Shared.VO
 
         [Required(ErrorMessage = "O nome do produto é obrigatório.")]
         [StringLength(100, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         [Required(ErrorMessage = "A descrição do produto é obrigatória.")]
         [StringLength(300, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
-        public string? Descricao { get; set; }
+        public string Descricao { get; set; }
 
         [Required(ErrorMessage = "A data de registro do produto é obrigatória.")]
         public DateTime DateRegister { get; set; }
@@ -23,9 +23,9 @@ namespace SmartStorage_Shared.VO
 
         public int EmployeeId { get; set; }
 
-        public byte[]? ProImage { get; set; }
+        public byte[] ProImage { get; set; }
 
-        public static Product? Parse(ProductVO origin)
+        public static Product Parse(ProductVO origin)
         {
             if (origin == null)
                 return null;
@@ -41,7 +41,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Product?>? ParseList(List<ProductVO> origin)
+        public static List<Product> ParseList(List<ProductVO> origin)
         {
             if (origin == null)
                 return null;

@@ -56,13 +56,13 @@ else
     public long UserId { get; set; }
 
     [CascadingParameter]
-    private Task<AuthenticationState>? authenticationState { get; set; }
+    private Task<AuthenticationState> authenticationState { get; set; }
 
-    ClaimsPrincipal? userAuth { get; set; }
+    ClaimsPrincipal userAuth { get; set; }
 
     public bool isAdm { get; set; }
 
-    public User? user { get; set; } = new();
+    public User user { get; set; } = new();
 
     MudTextField<string> pwField1;
     bool loading = false;

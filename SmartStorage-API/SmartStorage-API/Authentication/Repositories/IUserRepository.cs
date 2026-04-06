@@ -6,6 +6,6 @@ namespace SmartStorage_API.Authentication.Repositories
     public interface IUserRepository : IRepository<User>
 
     {
-        User? FindByUsername(string username);
+        User FindByUsername(string username);
     }
 }

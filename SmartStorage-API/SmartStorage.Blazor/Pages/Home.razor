@@ -43,9 +43,9 @@ else
 @code{
 
     [CascadingParameter]
-    private Task<AuthenticationState>? authenticationState { get; set; }
+    private Task<AuthenticationState> authenticationState { get; set; }
 
-    ClaimsPrincipal? user { get; set; }
+    ClaimsPrincipal user { get; set; }
 
     bool loading = false;
 
@@ -81,9 +81,9 @@ else
                 StateHasChanged();
             }
         }
-        catch (ApiException ex)
+        catch (ApiException)
         {
-            auth.Logout();
+            await auth.Logout();
         }
         finally
         {

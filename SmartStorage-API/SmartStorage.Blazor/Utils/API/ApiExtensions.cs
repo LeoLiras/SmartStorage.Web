@@ -60,7 +60,7 @@ namespace SmartStorage.Blazor.Utils.API
         /// <param name="url"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<List<T>?> Get<TVO, T>() where TVO : class
+        public async Task<List<T>> Get<TVO, T>() where TVO : class
         {
             var url = ReturnEndpoint<TVO>();
 
@@ -94,7 +94,7 @@ namespace SmartStorage.Blazor.Utils.API
         /// <typeparam name="TVO"></typeparam>
         /// <param name="url"></param>
         /// <returns></returns>
-        public async Task<List<TVO>?> Get<TVO>() where TVO : class
+        public async Task<List<TVO>> Get<TVO>() where TVO : class
         {
             var url = ReturnEndpoint<TVO>();
 
@@ -124,7 +124,7 @@ namespace SmartStorage.Blazor.Utils.API
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<T?> GetById<TVO, T>(int id) where TVO : class
+        public async Task<T> GetById<TVO, T>(int id) where TVO : class
         {
             var url = ReturnEndpoint<TVO>();
 
@@ -164,7 +164,7 @@ namespace SmartStorage.Blazor.Utils.API
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<TVO?> GetById<TVO>(int id) where TVO : class
+        public async Task<TVO> GetById<TVO>(int id) where TVO : class
         {
             var url = ReturnEndpoint<TVO>();
 
@@ -196,7 +196,7 @@ namespace SmartStorage.Blazor.Utils.API
         /// <param name="vo"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<TVO?> Post<TVO>(TVO vo) where TVO : class
+        public async Task<TVO> Post<TVO>(TVO vo) where TVO : class
         {
             var url = ReturnEndpoint<TVO>();
 
@@ -228,7 +228,7 @@ namespace SmartStorage.Blazor.Utils.API
         /// <param name="vo"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<TVO?> Put<TVO>(TVO vo, int id) where TVO : class
+        public async Task<TVO> Put<TVO>(TVO vo, int id) where TVO : class
         {
             var url = ReturnEndpoint<TVO>();
 
@@ -252,7 +252,7 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
-        public async Task<TVO?> Delete<TVO>(int id) where TVO : class
+        public async Task<TVO> Delete<TVO>(int id) where TVO : class
         {
             var url = ReturnEndpoint<TVO>();
 
@@ -280,7 +280,7 @@ namespace SmartStorage.Blazor.Utils.API
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ApiException"></exception>
-        public async Task<string?> PostAnalyseAI(string text)
+        public async Task<string> PostAnalyseAI(string text)
         {
             var url = $"{salesEndpoint}/analyse/ai";
 
@@ -401,7 +401,7 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
-        public async Task<TokenVO?> PostSigninUser(UserVO user)
+        public async Task<TokenVO> PostSigninUser(UserVO user)
         {
             var url = loginEndpoint;
 
@@ -425,7 +425,7 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
-        public async Task<AccountCredentialsVO?> PostRegisterUser(AccountCredentialsVO credentials)
+        public async Task<AccountCredentialsVO> PostRegisterUser(AccountCredentialsVO credentials)
         {
             var url = registerEndpoint;
 
@@ -449,7 +449,7 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
-        public async Task<User?> PostEditUser(User user)
+        public async Task<User> PostEditUser(User user)
         {
             var url = updateCredentialsEndpoint;
 

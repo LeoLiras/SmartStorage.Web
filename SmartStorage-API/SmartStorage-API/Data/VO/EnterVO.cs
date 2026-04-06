@@ -9,7 +9,7 @@ namespace SmartStorage_API.Data.VO
 
         public int ProductId { get; set; }
 
-        public string? ProductName { get; set; }
+        public string ProductName { get; set; }
 
         public int ProductQuantity { get; set; }
 
@@ -17,7 +17,7 @@ namespace SmartStorage_API.Data.VO
 
         public int ShelfId { get; set; }
 
-        public string? ShelfName { get; set; }
+        public string ShelfName { get; set; }
 
         public DateTime DateEnter { get; set; }
 

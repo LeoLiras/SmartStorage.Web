@@ -13,12 +13,12 @@ namespace SmartStorage_API.Authentication.Services.Implementations
 
         private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
-        public User? FindByUsername(string username)
+        public User FindByUsername(string username)
         {
             return _repository.FindByUsername(username);
         }
 
-        public User? FindUserById(int userId)
+        public User FindUserById(int userId)
         {
             var user = _repository.FindById(userId);
 

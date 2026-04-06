@@ -10,32 +10,39 @@
 @inject VariablesExtensions app
 @inject AuthStateProvider auth;
 
-<MudGrid Class="mt-3">
-    <MudItem xs="12" sm="7">
-        <MudPaper Class="pa-4">
-            <MudForm Model="accountCredentials">
-                <MudTextField @bind-Value="accountCredentials.Fullname" T="string" Label="Nome Completo" Required="true" RequiredError="O Nome é obrigatório!" />
-                <MudTextField @bind-Value="accountCredentials.Username" T="string" Label="Login" Required="true" RequiredError="O Login é obrigatório!" />
-                <MudTextField @bind-Value="accountCredentials.Password" T="string" Label="Senha" HelperText="Escolha uma senha forte." @ref="pwField1"
-                              InputType="InputType.Password"
-                              Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
-                              RequiredError="A senha é obrigatória!" />
-                <MudTextField T="string"
-                              Label="Confirmar Senha" HelperText="Confirmar Senha" InputType="InputType.Password"
-                              Validation="@(new Func<string, string>(PasswordMatch))" />
-                <div class="d-flex">
-                    <MudRadioGroup @bind-Value="accountCredentials.Type" T="TipoUsuario" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
-                        <MudRadio Value=TipoUsuario.Usuario>Usuário</MudRadio>
-                        <MudRadio Value=TipoUsuario.Administrador>Administrador</MudRadio>
-                    </MudRadioGroup>
-                </div>
-                <div class="d-flex align-center justify-space-between">
-                    <MudButton OnClick="RegisterNewUser" Variant="Variant.Filled" Color="Color.Info" Class="ml-auto">Register</MudButton>
-                </div>
-            </MudForm>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
+@if (loading)
+{
+    <Loading Message="Carregando..."></Loading>
+}
+else
+{
+    <MudGrid Class="mt-3">
+        <MudItem xs="12" sm="7">
+            <MudPaper Class="pa-4">
+                <MudForm Model="accountCredentials">
+                    <MudTextField @bind-Value="accountCredentials.Fullname" T="string" Label="Nome Completo" Required="true" RequiredError="O Nome é obrigatório!" />
+                    <MudTextField @bind-Value="accountCredentials.Username" T="string" Label="Login" Required="true" RequiredError="O Login é obrigatório!" />
+                    <MudTextField @bind-Value="accountCredentials.Password" T="string" Label="Senha" HelperText="Escolha uma senha forte." @ref="pwField1"
+                                  InputType="InputType.Password"
+                                  Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                                  RequiredError="A senha é obrigatória!" />
+                    <MudTextField T="string"
+                                  Label="Confirmar Senha" HelperText="Confirmar Senha" InputType="InputType.Password"
+                                  Validation="@(new Func<string, string>(PasswordMatch))" />
+                    <div class="d-flex">
+                        <MudRadioGroup @bind-Value="accountCredentials.Type" T="TipoUsuario" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
+                            <MudRadio Value=TipoUsuario.Usuario>Usuário</MudRadio>
+                            <MudRadio Value=TipoUsuario.Administrador>Administrador</MudRadio>
+                        </MudRadioGroup>
+                    </div>
+                    <div class="d-flex align-center justify-space-between">
+                        <MudButton OnClick="RegisterNewUser" Variant="Variant.Filled" Color="Color.Info" Class="ml-auto">Register</MudButton>
+                    </div>
+                </MudForm>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
 
 @code {
 

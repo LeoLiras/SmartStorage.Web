@@ -28,11 +28,11 @@ public partial class Enter
     public decimal EntPrice { get; set; }
 
     [JsonIgnore]
-    public virtual Product? Product { get; set; }
+    public virtual Product Product { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<Sale>? Sales { get; set; }
+    public virtual ICollection<Sale> Sales { get; set; }
 
     [JsonIgnore]
-    public virtual Shelf? Shelf { get; set; }
+    public virtual Shelf Shelf { get; set; }
 }

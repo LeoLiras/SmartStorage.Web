@@ -59,9 +59,9 @@ else
     #region Propreties
 
     [CascadingParameter]
-    private Task<AuthenticationState>? authenticationState { get; set; }
+    private Task<AuthenticationState> authenticationState { get; set; }
 
-    ClaimsPrincipal? userAuth { get; set; }
+    ClaimsPrincipal userAuth { get; set; }
 
     private List<User> usersList = new();
 
@@ -71,7 +71,7 @@ else
     private int currentPage = 1;
     private int pageSize = 10;
 
-    private IEnumerable<User>? PagedUsers => usersList == null ? Enumerable.Empty<User>() : usersList.Skip((currentPage - 1) * pageSize).Take(pageSize);
+    private IEnumerable<User> PagedUsers => usersList == null ? Enumerable.Empty<User>() : usersList.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
     #endregion
 

@@ -24,7 +24,7 @@ public class User : BaseEntity
 
     [Column("UseRefreshToken")]
     [StringLength(500)]
-    public string? RefreshToken { get; set; }
+    public string RefreshToken { get; set; }
 
     [Column("UseRefreshTokenExpiryTime")]
     public DateTime? RefreshTokenExpiryTime { get; set; }

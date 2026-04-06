@@ -5,8 +5,8 @@ namespace SmartStorage_API.Authentication.Services
 {
     public interface IUserAuthService
     {
-        User? FindByUsername(string username);
-        User? FindUserById(int userId);
+        User FindByUsername(string username);
+        User FindUserById(int userId);
         List<User> FindAllUsers();
         User Create(AccountCredentialsVO dto);
         bool RevokeToken(string username);

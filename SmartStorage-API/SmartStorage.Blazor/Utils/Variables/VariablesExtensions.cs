@@ -7,25 +7,25 @@ namespace SmartStorage.Blazor.Utils.Variables
     {
         #region Collections
 
-        public List<EmployeeVO>? Employees { get; set; } = new();
+        public List<EmployeeVO> Employees { get; set; } = new();
 
-        public List<ProductVO>? ProductInStock { get; set; } = new();
+        public List<ProductVO> ProductInStock { get; set; } = new();
 
-        public List<EnterVO>? ProductEntries { get; set; } = new();
+        public List<EnterVO> ProductEntries { get; set; } = new();
 
-        public List<ShelfVO>? Shelves { get; set; } = new();
+        public List<ShelfVO> Shelves { get; set; } = new();
 
-        public List<SaleVO>? Sales { get; set; } = new();
+        public List<SaleVO> Sales { get; set; } = new();
 
         #endregion
 
         #region Objects
 
-        public ProductVO? ActualProduct { get; set; } = new();
+        public ProductVO ActualProduct { get; set; } = new();
 
-        public EnterVO? ActualEntry { get; set; } = new();
+        public EnterVO ActualEntry { get; set; } = new();
 
-        public User? User { get; set; } = new();
+        public User User { get; set; } = new();
 
         #endregion
 

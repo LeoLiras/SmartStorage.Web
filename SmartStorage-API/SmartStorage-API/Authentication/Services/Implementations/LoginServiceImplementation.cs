@@ -80,7 +80,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return _userAuthService.RevokeToken(username);
         }
 
-        private TokenVO GenerateToken(User user, IEnumerable<Claim>? existingClaims = null)
+        private TokenVO GenerateToken(User user, IEnumerable<Claim> existingClaims = null)
         {
             var claims = existingClaims?.ToList() ??
                 [

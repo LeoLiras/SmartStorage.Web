@@ -9,12 +9,12 @@ namespace SmartStorage_Shared.VO
 
         [Required(ErrorMessage = "O nome da prateleira é obrigatório.")]
         [StringLength(100, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         [Required(ErrorMessage = "A data de registro da prateleira é obrigatória.")]
         public DateTime DataRegister { get; set; }
 
-        public static Shelf? Parse(ShelfVO origin)
+        public static Shelf Parse(ShelfVO origin)
         {
             if (origin == null)
                 return null;
@@ -27,7 +27,7 @@ namespace SmartStorage_Shared.VO
             };
         }
 
-        public static List<Shelf?>? ParseList(List<ShelfVO> origin)
+        public static List<Shelf> ParseList(List<ShelfVO> origin)
         {
             if (origin == null)
                 return null;
