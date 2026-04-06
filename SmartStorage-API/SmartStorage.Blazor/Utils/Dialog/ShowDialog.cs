@@ -2,7 +2,7 @@
 using SmartStorage.Blazor.Enums;
 using SmartStorage.Blazor.Pages.Dialog;
 
-namespace SmartStorage.Blazor.Utils
+namespace SmartStorage.Blazor.Utils.ShowDialog
 {
     public class ShowDialog
     {

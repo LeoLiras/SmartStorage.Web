@@ -1,4 +1,4 @@
-﻿namespace SmartStorage.Blazor.Utils
+﻿namespace SmartStorage.Blazor.Utils.API
 {
     public class ApiException : Exception
     {

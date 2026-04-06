@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 
-namespace SmartStorage.Blazor.Utils
+namespace SmartStorage.Blazor.Utils.Chat
 {
     public class ChatMessage
     {

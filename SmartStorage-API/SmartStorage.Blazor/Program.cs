@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using SmartStorage.Blazor;
 using SmartStorage.Blazor.Auth;
-using SmartStorage.Blazor.Utils;
+using SmartStorage.Blazor.Utils.API;
+using SmartStorage.Blazor.Utils.ShowDialog;
+using SmartStorage.Blazor.Utils.Variables;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");

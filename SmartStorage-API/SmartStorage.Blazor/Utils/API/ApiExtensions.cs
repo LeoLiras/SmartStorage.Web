@@ -4,7 +4,7 @@ using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 using System.Net.Http.Json;
 
-namespace SmartStorage.Blazor.Utils
+namespace SmartStorage.Blazor.Utils.API
 {
     
     public class ApiExtensions

@@ -1,7 +1,7 @@
 ﻿using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 
-namespace SmartStorage.Blazor.Utils
+namespace SmartStorage.Blazor.Utils.Variables
 {
     public class VariablesExtensions
     {
