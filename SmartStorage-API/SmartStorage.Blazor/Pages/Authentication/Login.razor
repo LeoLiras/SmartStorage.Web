@@ -1,6 +1,6 @@
 ﻿@using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
-@using SmartStorage_Shared.DTO
+@using SmartStorage.Shared.VO
 
 @inject ApiExtensions api
 @inject ShowDialog ShowDialog
@@ -32,7 +32,7 @@ else
 @code {
 
     #region Properties
-    UserDTO user = new();
+    UserVO user = new();
 
     bool loading = false;
 

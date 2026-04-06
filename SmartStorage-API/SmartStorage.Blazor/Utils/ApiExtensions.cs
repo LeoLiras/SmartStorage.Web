@@ -1,5 +1,5 @@
 ﻿using SmartStorage.Blazor.Enums;
-using SmartStorage_Shared.DTO;
+using SmartStorage.Shared.VO;
 using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 using System.Net.Http.Json;
@@ -401,7 +401,7 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
-        public async Task<TokenDTO?> PostSigninUser(UserDTO user)
+        public async Task<TokenVO?> PostSigninUser(UserVO user)
         {
             var url = loginEndpoint;
 
@@ -415,7 +415,7 @@ namespace SmartStorage.Blazor.Utils
 
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<TokenDTO>();
+                return await response.Content.ReadFromJsonAsync<TokenVO>();
             }
             else
             {
@@ -425,7 +425,7 @@ namespace SmartStorage.Blazor.Utils
             }
         }
 
-        public async Task<AccountCredentialsDTO?> PostRegisterUser(AccountCredentialsDTO credentials)
+        public async Task<AccountCredentialsVO?> PostRegisterUser(AccountCredentialsVO credentials)
         {
             var url = registerEndpoint;
 
@@ -439,7 +439,7 @@ namespace SmartStorage.Blazor.Utils
 
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<AccountCredentialsDTO>();
+                return await response.Content.ReadFromJsonAsync<AccountCredentialsVO>();
             }
             else
             {

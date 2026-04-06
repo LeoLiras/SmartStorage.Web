@@ -1,8 +1,8 @@
-﻿namespace SmartStorage_Shared.DTO
+﻿namespace SmartStorage.Shared.VO
 {
-    public class UserDTO
+    public class UserVO
     {
-        public UserDTO() { }
+        public UserVO() { }
 
         public string Username { get; set; }
         public string Password { get; set; }

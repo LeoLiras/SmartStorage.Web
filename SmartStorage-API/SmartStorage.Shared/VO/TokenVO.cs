@@ -1,10 +1,10 @@
-﻿namespace SmartStorage_Shared.DTO
+﻿namespace SmartStorage.Shared.VO
 {
-    public class TokenDTO
+    public class TokenVO
     {
-        public TokenDTO() { }
+        public TokenVO() { }
 
-        public TokenDTO(
+        public TokenVO(
             bool authenticated,
             string created,
             string expiration,

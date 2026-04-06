@@ -1,4 +1,4 @@
-﻿using SmartStorage_Shared.DTO;
+﻿using SmartStorage.Shared.VO;
 using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Authentication.Services
@@ -8,7 +8,7 @@ namespace SmartStorage_API.Authentication.Services
         User? FindByUsername(string username);
         User? FindUserById(int userId);
         List<User> FindAllUsers();
-        User Create(AccountCredentialsDTO dto);
+        User Create(AccountCredentialsVO dto);
         bool RevokeToken(string username);
         User Update(User user);
         User UpdateCredentials(User user);

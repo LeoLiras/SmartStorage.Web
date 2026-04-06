@@ -1,6 +1,6 @@
-﻿using SmartStorage_API.Authentication.Contract;
+﻿using SmartStorage.Shared.VO;
+using SmartStorage_API.Authentication.Contract;
 using SmartStorage_API.Authentication.Repositories;
-using SmartStorage_Shared.DTO;
 using SmartStorage_Shared.Model;
 using System;
 
@@ -33,7 +33,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return _repository.FindAll();
         }
 
-        public User Create(AccountCredentialsDTO dto)
+        public User Create(AccountCredentialsVO dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
             var entity = new User

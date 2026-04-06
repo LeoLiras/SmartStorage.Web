@@ -1,10 +1,10 @@
 ﻿using SmartStorage.Shared.Enum;
 
-namespace SmartStorage_Shared.DTO
+namespace SmartStorage.Shared.VO
 {
-    public class AccountCredentialsDTO
+    public class AccountCredentialsVO
     {
-        public AccountCredentialsDTO() { }
+        public AccountCredentialsVO() { }
 
         public string Username { get; set; }
         public string Password { get; set; }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.JsonWebTokens;
+using SmartStorage.Shared.VO;
 using SmartStorage_API.Authentication.Config;
 using SmartStorage_API.Authentication.Contract;
-using SmartStorage_Shared.DTO;
 using SmartStorage_Shared.Model;
 using System.Security.Claims;
 
@@ -28,7 +28,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             _configurations = configurations;
         }
 
-        public TokenDTO ValidateCredentials(UserDTO userDto)
+        public TokenVO ValidateCredentials(UserVO userDto)
         {
             var user = _userAuthService.FindByUsername(userDto.Username);
 
@@ -40,7 +40,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return GenerateToken(user);
         }
 
-        public TokenDTO ValidateCredentials(TokenDTO token)
+        public TokenVO ValidateCredentials(TokenVO token)
         {
             var principal = _tokenService.GetPrincipalFromExpiredToken(token.AccessToken);
             var username = principal.Identity?.Name;
@@ -56,11 +56,11 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return GenerateToken(user, principal.Claims);
         }
 
-        public AccountCredentialsDTO Create(AccountCredentialsDTO dto)
+        public AccountCredentialsVO Create(AccountCredentialsVO dto)
         {
             var user = _userAuthService.Create(dto);
 
-            return new AccountCredentialsDTO
+            return new AccountCredentialsVO
             {
                 Username = user.Username,
                 Fullname = user.FullName,
@@ -80,7 +80,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             return _userAuthService.RevokeToken(username);
         }
 
-        private TokenDTO GenerateToken(User user, IEnumerable<Claim>? existingClaims = null)
+        private TokenVO GenerateToken(User user, IEnumerable<Claim>? existingClaims = null)
         {
             var claims = existingClaims?.ToList() ??
                 [
@@ -106,7 +106,7 @@ namespace SmartStorage_API.Authentication.Services.Implementations
             var createdDate = DateTime.Now;
             var expirationDate = createdDate.AddMinutes(_configurations.Minutes);
 
-            return new TokenDTO
+            return new TokenVO
             {
                 Authenticated = true,
                 Created = createdDate.ToString(DATE_FORMAT),

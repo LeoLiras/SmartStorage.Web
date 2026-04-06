@@ -1,5 +1,4 @@
-﻿using SmartStorage_Shared.DTO;
-using SmartStorage_Shared.Model;
+﻿using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 
 namespace SmartStorage.Blazor.Utils

@@ -1,8 +1,8 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage.Shared.VO;
 using SmartStorage_API.Authentication.Services;
-using SmartStorage_Shared.DTO;
 using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Controllers
@@ -84,7 +84,7 @@ namespace SmartStorage_API.Controllers
 
         [HttpPost("signin")]
         [AllowAnonymous]
-        public IActionResult SignIn([FromBody] UserDTO user)
+        public IActionResult SignIn([FromBody] UserVO user)
         {
             _logger.LogInformation("Attempting to sign in user: {username}", user.Username);
 
@@ -130,7 +130,7 @@ namespace SmartStorage_API.Controllers
         [HttpPost("refresh")]
         [AllowAnonymous]
         public IActionResult Refresh(
-            [FromBody] TokenDTO tokenDto)
+            [FromBody] TokenVO tokenDto)
         {
             if (tokenDto == null) return BadRequest("Invalid client request!");
 
@@ -157,7 +157,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult Create([FromBody] AccountCredentialsDTO user)
+        public IActionResult Create([FromBody] AccountCredentialsVO user)
         {
             if (user == null)
                 return BadRequest("Invalid client request!");

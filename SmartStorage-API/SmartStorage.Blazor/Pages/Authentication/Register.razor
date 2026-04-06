@@ -3,7 +3,7 @@
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
 @using SmartStorage.Shared.Enum
-@using SmartStorage_Shared.DTO
+@using SmartStorage.Shared.VO
 
 @inject ApiExtensions api
 @inject ShowDialog ShowDialog
@@ -43,7 +43,7 @@
 
     bool loading = false;
     MudTextField<string> pwField1;
-    AccountCredentialsDTO accountCredentials = new();
+    AccountCredentialsVO accountCredentials = new();
 
     #endregion
 
