@@ -35,7 +35,7 @@ else if(product is not null)
                     </MudCard>
                     <MudCard>
                         <MudCardContent>
-                            <MudDatePicker Label="Date de Registro" @bind-bind-Date="productDate" Color="Color.Info" />
+                            <MudDatePicker Label="Date de Registro" @bind-Date="productDate" Color="Color.Info" />
                         </MudCardContent>
                     </MudCard>
                 </div>
@@ -110,7 +110,7 @@ else if(product is not null)
     private ProductVO product = new();
     private List<EmployeeVO> employees = new();
 
-    private DateTime productDate = DateTime.Today;
+    private DateTime? productDate = DateTime.Today;
 
     IBrowserFile file;
     private string fileName;
