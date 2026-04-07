@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace SmartStorage_API.Hypermedia
+namespace SmartStorage_Shared.HypermediaSupport
 {
     public class HyperMediaLink
     {

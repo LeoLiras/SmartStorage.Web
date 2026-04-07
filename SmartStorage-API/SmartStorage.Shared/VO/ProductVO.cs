@@ -1,9 +1,10 @@
-﻿using SmartStorage_Shared.Model;
+﻿using SmartStorage_Shared.HypermediaSupport;
+using SmartStorage_Shared.Model;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartStorage_Shared.VO
 {
-    public partial class ProductVO
+    public partial class ProductVO : ISupportHyperMedia
     {
         public int Id { get; set; }
 
@@ -24,6 +25,8 @@ namespace SmartStorage_Shared.VO
         public int EmployeeId { get; set; }
 
         public byte[] ProImage { get; set; }
+
+        public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
 
         public static Product Parse(ProductVO origin)
         {

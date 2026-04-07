@@ -1,9 +1,10 @@
-﻿using SmartStorage_Shared.Model;
+﻿using SmartStorage_Shared.HypermediaSupport;
+using SmartStorage_Shared.Model;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartStorage_Shared.VO
 {
-    public partial class EmployeeVO
+    public partial class EmployeeVO : ISupportHyperMedia
     {
         public int Id { get; set; }
 
@@ -20,6 +21,8 @@ namespace SmartStorage_Shared.VO
         public string Cpf { get; set; }
 
         public DateTime DateRegister { get; set; }
+
+        public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
 
         public static Employee Parse(EmployeeVO origin)
         {

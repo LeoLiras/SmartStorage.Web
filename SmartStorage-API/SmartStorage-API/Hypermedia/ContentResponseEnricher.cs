@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
 using SmartStorage_API.Hypermedia.Abstract;
+using SmartStorage_Shared.HypermediaSupport;
 using System.Collections.Concurrent;
 
 namespace SmartStorage_API.Hypermedia

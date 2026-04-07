@@ -1,9 +1,10 @@
-﻿using SmartStorage_Shared.Model;
+﻿using SmartStorage_Shared.HypermediaSupport;
+using SmartStorage_Shared.Model;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartStorage_Shared.VO
 {
-    public partial class SaleVO
+    public partial class SaleVO : ISupportHyperMedia
     {
         public string ProductName { get; set; }
 
@@ -25,6 +26,8 @@ namespace SmartStorage_Shared.VO
 
         [Required(ErrorMessage = "A data da venda é obrigatória.")]
         public DateTime DateSale { get; set; }
+
+        public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
 
         public static Sale Parse(SaleVO origin)
         {

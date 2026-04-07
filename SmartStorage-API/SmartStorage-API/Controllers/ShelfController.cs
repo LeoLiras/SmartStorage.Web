@@ -1,9 +1,9 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartStorage_API.Data.VO;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Service;
+using SmartStorage_Shared.VO;
 
 namespace SmartStorage_API.Controllers
 {

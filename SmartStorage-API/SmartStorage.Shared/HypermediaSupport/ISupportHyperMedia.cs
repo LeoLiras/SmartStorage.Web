@@ -1,4 +1,4 @@
-﻿namespace SmartStorage_API.Hypermedia.Abstract
+﻿namespace SmartStorage_Shared.HypermediaSupport
 {
     public interface ISupportHyperMedia
     {

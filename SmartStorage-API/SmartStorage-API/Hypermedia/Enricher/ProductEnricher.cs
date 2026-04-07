@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SmartStorage_API.Data.VO;
 using SmartStorage_API.Hypermedia.Constants;
+using SmartStorage_Shared.HypermediaSupport;
+using SmartStorage_Shared.VO;
 using System.Text;
 
 namespace SmartStorage_API.Hypermedia.Enricher

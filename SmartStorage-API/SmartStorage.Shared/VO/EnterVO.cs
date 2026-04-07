@@ -1,10 +1,11 @@
-﻿using SmartStorage_Shared.Model;
+﻿using SmartStorage_Shared.HypermediaSupport;
+using SmartStorage_Shared.Model;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartStorage_Shared.VO
 {
-    public partial class EnterVO
+    public partial class EnterVO : ISupportHyperMedia
     {
         public int Id { get; set; }
 
@@ -27,6 +28,8 @@ namespace SmartStorage_Shared.VO
 
         [Required(ErrorMessage = "A data da entrada é obrigatória.")]
         public DateTime DateEnter { get; set; }
+
+        public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
 
         public static Enter Parse(EnterVO origin)
         {

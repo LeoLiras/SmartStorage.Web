@@ -5,11 +5,10 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using ScottPlot;
 using SmartStorage_API.Data.Converter.Implementations;
-using SmartStorage_API.Data.VO;
 using SmartStorage_API.Model.Context;
 using SmartStorage_Shared.Model;
+using SmartStorage_Shared.VO;
 using System.Globalization;
-using System.Linq;
 using System.Text.Json;
 
 namespace SmartStorage_API.Service.Implementations
@@ -270,9 +269,9 @@ namespace SmartStorage_API.Service.Implementations
                 .ToList();
 
             double[] totals = yearSales.Select(x => (double)x.Total).ToArray();
-            double[] months = yearSales.Select(x => (double) (x.Month - 1)).ToArray();
+            double[] months = yearSales.Select(x => (double)(x.Month - 1)).ToArray();
 
-            string[] monthNames = { "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"};
+            string[] monthNames = { "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez" };
 
             Tick[] totalSaledTicks = yearSales.Select(x => new Tick(x.Month - 1, monthNames[x.Month - 1])).ToArray();
 
@@ -347,7 +346,7 @@ namespace SmartStorage_API.Service.Implementations
                                     h.Cell().Background(QuestPDF.Helpers.Colors.Grey.Lighten1).Element(cellStyle).Text("Total da Venda").Bold();
                                 });
 
-                                foreach(var sale in sales)
+                                foreach (var sale in sales)
                                 {
                                     t.Cell().Element(cellStyle).Text(sale.ProductName);
                                     t.Cell().Element(cellStyle).Text(sale.ShelfName);
@@ -359,7 +358,7 @@ namespace SmartStorage_API.Service.Implementations
                             });
                         });
 
-                    
+
                 });
             })
             .GeneratePdf();

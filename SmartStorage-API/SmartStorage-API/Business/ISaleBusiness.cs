@@ -1,5 +1,4 @@
-﻿using SmartStorage_API.Data.VO;
-using SmartStorage_API.Model;
+﻿using SmartStorage_Shared.VO;
 
 namespace SmartStorage_API.Service
 {
