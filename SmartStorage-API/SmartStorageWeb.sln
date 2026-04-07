@@ -11,6 +11,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.Shared", "Smar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.Infraestructure", "SmartStorage.Infraestructure\SmartStorage.Infraestructure.csproj", "{810D2A8E-C3AF-4C0F-B739-7B09ABB7B3E5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontend", "Frontend", "{AFF5FFE9-F85D-4AC2-B204-843B3E349B3E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{A340E83E-0591-44A5-808D-1D33753EB07B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infra", "Infra", "{7B0798BF-F514-4F65-B8F0-78EE6095F654}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{4A87884A-03E4-41F0-8815-36EE739170A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +44,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EDF395F8-172B-4B49-9D23-20ED880AD579} = {A340E83E-0591-44A5-808D-1D33753EB07B}
+		{DA13B2F1-78A2-4E58-BD75-BF4B0E9F40F0} = {AFF5FFE9-F85D-4AC2-B204-843B3E349B3E}
+		{164F8B26-EA30-41B1-86D1-E569A845D23D} = {4A87884A-03E4-41F0-8815-36EE739170A8}
+		{810D2A8E-C3AF-4C0F-B739-7B09ABB7B3E5} = {7B0798BF-F514-4F65-B8F0-78EE6095F654}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E231896D-75C9-4080-8EA5-26E3B0047A80}
