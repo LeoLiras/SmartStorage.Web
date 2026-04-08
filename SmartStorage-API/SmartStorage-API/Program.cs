@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using QuestPDF.Infrastructure;
+using SmartStorage.Shared.Config;
 using SmartStorage_API;
 using SmartStorage_API.Authentication.Config;
 using SmartStorage_API.Authentication.Contract;
@@ -27,24 +28,6 @@ builder.Services.AddOpenApi();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc(Utils.apiVersion,
-        new OpenApiInfo
-        {
-            Title = "SmartStorage - API",
-            Version = Utils.apiVersion,
-            Description = "SmartStorage - API",
-            Contact = new OpenApiContact
-            {
-                Name = "Leonardo de Lira Siqueira",
-                Url = new Uri("https://github.com/LeoLiras")
-            }
-        });
-});
 
 builder.Services.AddDbContext<SmartStorageContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"), b => b.MigrationsAssembly(typeof(SmartStorageContext).Assembly.GetName().Name)));
@@ -75,6 +58,8 @@ builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 
 builder.Configuration.AddEnvironmentVariables();
 
+builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
+
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 
 builder.Services.AddCors(options =>
@@ -97,21 +82,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
-app.UseAuthentication();
+
+app.UseApiDefaults(Utils.apiName, Utils.apiVersion);
+
 app.UseAuthorization();
-app.UseSwagger();
-
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint($"/swagger/{Utils.apiVersion}/swagger.json",
-        $"SmartStorage - API - {Utils.apiVersion}");
-});
-
-var options = new RewriteOptions();
-options.AddRedirect("^$", "swagger");
-
-app.UseRewriter(options);
 
 app.MapControllers();
 

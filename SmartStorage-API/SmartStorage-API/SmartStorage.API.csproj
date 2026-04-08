@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SmartStorage.Configurations\SmartStorage.Configurations.csproj" />
     <ProjectReference Include="..\SmartStorage.Infraestructure\SmartStorage.Infraestructure.csproj" />
     <ProjectReference Include="..\SmartStorage.Shared\SmartStorage.Shared.csproj" />
   </ItemGroup>
