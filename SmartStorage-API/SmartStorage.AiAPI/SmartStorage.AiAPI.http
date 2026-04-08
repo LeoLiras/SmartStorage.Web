@@ -1,6 +1,6 @@
-@SmartStorage.AiAPI_HostAddress = http://localhost:5236
+@SmartStorage.AIAPI_HostAddress = http://localhost:5279
 
-GET {{SmartStorage.AiAPI_HostAddress}}/weatherforecast/
+GET {{SmartStorage.AIAPI_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
