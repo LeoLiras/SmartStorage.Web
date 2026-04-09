@@ -1,4 +1,5 @@
 using SmartStorage.AIAPI.Utils;
+using SmartStorage.Configurations.Config;
 using SmartStorage.Shared.Config;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
+
+builder.Services.AddDatabase(builder.Configuration);
 
 var app = builder.Build();
 
