@@ -16,4 +16,8 @@
     <ProjectReference Include="..\SmartStorage.Shared\SmartStorage.Shared.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Google.GenAI" Version="0.12.0" />
+	</ItemGroup>
+
 </Project>
