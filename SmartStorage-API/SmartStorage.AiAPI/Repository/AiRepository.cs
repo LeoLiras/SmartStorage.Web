@@ -35,7 +35,7 @@ namespace SmartStorage.AIAPI.Repository
               model: "gemini-2.5-flash", contents: $"{text}: {json}"
             );
 
-            return response?.Candidates?[0]?.Content?.Parts?[0]?.Text ?? "";
+            return response.Candidates?[0].Content?.Parts?[0].Text ?? "";
         }
 
         #endregion
