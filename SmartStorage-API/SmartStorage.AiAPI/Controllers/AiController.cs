@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SmartStorage.AIAPI.Data.VOs;
 using SmartStorage.AIAPI.Repository.Interfaces;
 
 namespace SmartStorage.AIAPI.Controllers
@@ -26,14 +27,14 @@ namespace SmartStorage.AIAPI.Controllers
 
         [HttpPost("analyse-sales")]
         //[TypeFilter(typeof(HyperMediaFilter))]
-        public async Task<IActionResult> AnalyseSalesWithAI([FromBody] string text)
+        public async Task<IActionResult> AnalyseSalesWithAI([FromBody] AiRequest request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(text))
+                if (string.IsNullOrWhiteSpace(request.aiQuestion))
                     throw new Exception("O texto da requisição é obrigatório.");
 
-                var result = await _aiRepository.CallAISales(text);
+                var result = await _aiRepository.CallAISales(request.aiQuestion);
 
                 return Ok(result);
             }
