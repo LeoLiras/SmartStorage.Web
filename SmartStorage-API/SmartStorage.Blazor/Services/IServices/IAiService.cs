@@ -1,7 +1,9 @@
-﻿namespace SmartStorage.Blazor.Services.IServices
+﻿using SmartStorage.Shared.VO.AiService;
+
+namespace SmartStorage.Blazor.Services.IServices
 {
     public interface IAiService
     {
-        Task<string> CallAI(string message, string token);
+        Task<string> CallAI(string text);
     }
 }
