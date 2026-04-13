@@ -11,6 +11,11 @@
         "Path": "SmartStorage.Blazor\\SmartStorage.Blazor.csproj",
         "Action": "Start",
         "DebugTarget": "http"
+      },
+      {
+        "Path": "SmartStorage.AIAPI\\SmartStorage.AIAPI.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
       }
     ]
   }
