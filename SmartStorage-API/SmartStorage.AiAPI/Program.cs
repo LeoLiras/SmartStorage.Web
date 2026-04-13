@@ -12,11 +12,24 @@ builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersio
 
 builder.Services.AddDatabase(builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Blazor", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5001")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
+
+app.UseCors("Blazor");
 
 app.UseApiDefaults(Utils.apiName, Utils.apiVersion);
 
