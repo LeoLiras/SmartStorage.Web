@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using SmartStorage.Blazor;
 using SmartStorage.Blazor.Auth;
+using SmartStorage.Blazor.Services;
+using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.API;
 using SmartStorage.Blazor.Utils.ShowDialog;
 using SmartStorage.Blazor.Utils.Variables;
@@ -14,6 +16,10 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5101/") });
 
+//builder.Services.AddHttpClient<IAiService, AiService>(c =>
+//                c.BaseAddress = new Uri("http://localhost:5003")
+//            );
+
 builder.Services.AddAuthorizationCore();
 
 builder.Services.AddMudServices();
@@ -21,6 +27,7 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<ApiExtensions>();
 builder.Services.AddScoped<ShowDialog>();
 builder.Services.AddScoped<VariablesExtensions>();
+builder.Services.AddScoped<AiService>();
 
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<IAuthService, AuthStateProvider>(provider => provider.GetRequiredService<AuthStateProvider>());
