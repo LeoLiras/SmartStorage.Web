@@ -30,9 +30,6 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<SmartStorageContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection"), b => b.MigrationsAssembly(typeof(SmartStorageContext).Assembly.GetName().Name)));
-
 builder.Services.AddAuthConfiguration(builder.Configuration);
 
 var filterOptions = new HyperMediaFilterOptions();
@@ -60,6 +57,7 @@ builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
+builder.Services.AddDatabase(builder.Configuration);
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 builder.Services.AddPolicyConfig("Blazor", allowedOrigins);
