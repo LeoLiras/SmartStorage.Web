@@ -28,7 +28,6 @@ namespace SmartStorage.AIAPI.Controllers
         #region Methods
 
         [HttpPost("analyse-sales")]
-        //[TypeFilter(typeof(HyperMediaFilter))]
         public async Task<IActionResult> AnalyseSalesWithAI([FromBody] AiRequest request)
         {
             try
