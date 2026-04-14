@@ -31,13 +31,11 @@ builder.Services.AddScoped<IAiRepository, AiRepository>();
 
 var app = builder.Build();
 
+app.UseApiDefaults(Utils.apiName, Utils.apiVersion, "Blazor");
+
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
-
-app.UseCors("Blazor");
-
-app.UseApiDefaults(Utils.apiName, Utils.apiVersion);
 
 app.UseAuthorization();
 

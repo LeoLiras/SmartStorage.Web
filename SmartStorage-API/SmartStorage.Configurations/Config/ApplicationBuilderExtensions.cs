@@ -5,9 +5,13 @@ namespace SmartStorage.Shared.Config
 {
     public static class ApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseApiDefaults(this IApplicationBuilder app, string apiName, string apiVersion)
+        public static IApplicationBuilder UseApiDefaults(this IApplicationBuilder app, string apiName, string apiVersion, string apiCors = "")
         {
             app.UseRouting();
+
+            if (!string.IsNullOrWhiteSpace(apiCors))
+                app.UseCors(apiCors);
+
             app.UseAuthentication();
             app.UseSwagger();
 
