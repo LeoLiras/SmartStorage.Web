@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using QuestPDF.Infrastructure;
+using SmartStorage.Configurations.Config;
 using SmartStorage.Shared.Config;
 using SmartStorage_API;
 using SmartStorage_API.Authentication.Config;
@@ -61,15 +62,7 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Blazor",
-        policy => policy
-            .WithOrigins(allowedOrigins ?? Array.Empty<string>())
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
+builder.Services.AddPolicyConfig("Blazor", allowedOrigins);
 
 var app = builder.Build();
 

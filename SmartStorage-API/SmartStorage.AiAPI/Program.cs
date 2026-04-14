@@ -10,22 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
-
-builder.Services.AddDatabase(builder.Configuration);
-
 builder.Services.AddApiVersioning();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Blazor", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:5001")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
+builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
+builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddPolicyConfig("Blazor", ["http://localhost:5001"]);
 
 builder.Services.AddScoped<IAiRepository, AiRepository>();
 
