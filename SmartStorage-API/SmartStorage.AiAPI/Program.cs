@@ -1,3 +1,5 @@
+using SmartStorage.AIAPI.Repository;
+using SmartStorage.AIAPI.Repository.Interfaces;
 using SmartStorage.AIAPI.Utils;
 using SmartStorage.Configurations.Config;
 using SmartStorage.Shared.Config;
@@ -12,6 +14,8 @@ builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersio
 
 builder.Services.AddDatabase(builder.Configuration);
 
+builder.Services.AddApiVersioning();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Blazor", policy =>
@@ -22,6 +26,8 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+builder.Services.AddScoped<IAiRepository, AiRepository>();
 
 var app = builder.Build();
 

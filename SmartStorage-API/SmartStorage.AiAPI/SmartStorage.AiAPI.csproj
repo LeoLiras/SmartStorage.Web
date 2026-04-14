@@ -10,10 +10,15 @@
     <ProjectReference Include="..\SmartStorage.Configurations\SmartStorage.Configurations.csproj" />
     <ProjectReference Include="..\SmartStorage.Infraestructure\SmartStorage.Infraestructure.csproj" />
     <ProjectReference Include="..\SmartStorage.Shared\SmartStorage.Shared.csproj" />
+	<PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
   </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Google.GenAI" Version="0.12.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Data\" />
 	</ItemGroup>
 
 </Project>

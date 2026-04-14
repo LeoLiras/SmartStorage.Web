@@ -22,7 +22,7 @@ namespace SmartStorage.Blazor.Services
             };
 
             //_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _client.PostAsJsonAsync($"{BasePath}", request);
+            var response = await _client.PostAsJsonAsync($"{BasePath}/analyse-sales", request);
             return await response.Content.ReadAsStringAsync();
         }
     }

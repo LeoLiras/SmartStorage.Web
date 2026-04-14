@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SmartStorage.AIAPI.Data.VOs;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using SmartStorage.AIAPI.Repository.Interfaces;
+using SmartStorage.Shared.VO.AiService;
 
 namespace SmartStorage.AIAPI.Controllers
 {
     [Route("api/storage/[controller]/v{version:apiVersion}")]
+    [ApiVersion($"{Utils.Utils.apiVersion}")]
     [ApiController]
     public class AiController : ControllerBase
     {
