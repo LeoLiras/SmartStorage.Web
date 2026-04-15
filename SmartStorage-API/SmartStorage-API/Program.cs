@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Rewrite;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
 using QuestPDF.Infrastructure;
 using SmartStorage.Configurations.Config;
 using SmartStorage.Shared.Config;
@@ -14,7 +11,6 @@ using SmartStorage_API.Authentication.Services;
 using SmartStorage_API.Authentication.Services.Implementations;
 using SmartStorage_API.Hypermedia.Enricher;
 using SmartStorage_API.Hypermedia.Filters;
-using SmartStorage_API.Model.Context;
 using SmartStorage_API.Service;
 using SmartStorage_API.Service.Implementations;
 
