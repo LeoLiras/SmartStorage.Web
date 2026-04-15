@@ -10,4 +10,14 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SmartStorage.Configurations\SmartStorage.Configurations.csproj" />
+    <ProjectReference Include="..\SmartStorage.Infraestructure\SmartStorage.Infraestructure.csproj" />
+    <ProjectReference Include="..\SmartStorage.Shared\SmartStorage.Shared.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
+	</ItemGroup>
+
 </Project>

@@ -16,6 +16,11 @@
         "Path": "SmartStorage.AIAPI\\SmartStorage.AIAPI.csproj",
         "Action": "Start",
         "DebugTarget": "http"
+      },
+      {
+        "Path": "SmartStorage.ReportsAPI\\SmartStorage.ReportsAPI.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
       }
     ]
   }
