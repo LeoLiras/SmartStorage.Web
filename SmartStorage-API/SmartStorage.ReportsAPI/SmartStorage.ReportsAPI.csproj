@@ -20,6 +20,7 @@
 		<PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="QuestPDF" Version="2025.12.3.1-alpha2" />
+		<PackageReference Include="ScottPlot" Version="5.1.57" />
 	</ItemGroup>
 
 </Project>

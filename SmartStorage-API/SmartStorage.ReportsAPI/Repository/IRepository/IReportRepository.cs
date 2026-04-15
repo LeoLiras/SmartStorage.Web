@@ -2,7 +2,7 @@
 {
     public interface IReportRepository
     {
-        byte[] GenerateExcel();
+        Task<byte[]> GenerateExcel();
         Task<byte[]> GeneratePdf();
     }
 }
