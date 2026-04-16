@@ -8,6 +8,7 @@
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 @inject AiService aiService
+@inject ReportsService reportService
 @inject IJSRuntime js
 
 
@@ -233,7 +234,7 @@ else
         {
             loadingReport = true;
 
-            var report = await api.GetSalesReport(FileTypes.Excel);
+            var report = await reportService.GenerateExcel();
 
             await js.InvokeVoidAsync(
                 "downloadFile",
@@ -256,7 +257,7 @@ else
         {
             loadingReport = true;
 
-            var report = await api.GetSalesReport(FileTypes.PDF);
+            var report = await reportService.GeneratePdf();
 
             await js.InvokeVoidAsync(
                 "downloadFile",

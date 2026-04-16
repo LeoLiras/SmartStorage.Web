@@ -27,6 +27,7 @@ builder.Services.AddScoped<ApiExtensions>();
 builder.Services.AddScoped<ShowDialog>();
 builder.Services.AddScoped<VariablesExtensions>();
 builder.Services.AddScoped<AiService>();
+builder.Services.AddScoped<ReportsService>();
 
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<IAuthService, AuthStateProvider>(provider => provider.GetRequiredService<AuthStateProvider>());
