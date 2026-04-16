@@ -111,44 +111,6 @@ namespace SmartStorage_API.Controllers
             }
         }
 
-        [HttpGet("export-excel")]
-        [TypeFilter(typeof(HyperMediaFilter))]
-        public ActionResult GenerateExcel()
-        {
-            try
-            {
-                var report = _saleService.GenerateExcel();
-
-                return File(
-                    report,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
-                );
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("export-pdf")]
-        [TypeFilter(typeof(HyperMediaFilter))]
-        public async Task<ActionResult> GeneratePdf()
-        {
-            try
-            {
-                return File(
-                    await _saleService.GeneratePdf(),
-                    "application/pdf",
-                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
-                );
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         #endregion
     }
 }
