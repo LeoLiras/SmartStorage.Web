@@ -1,6 +1,4 @@
 ﻿using SmartStorage.Blazor.Services.IServices;
-using SmartStorage.Shared.VO.AiService;
-using System.Net.Http.Json;
 
 namespace SmartStorage.Blazor.Services
 {
