@@ -1,4 +1,6 @@
 using SmartStorage.Configurations.Config;
+using SmartStorage.ReportsAPI.Repository;
+using SmartStorage.ReportsAPI.Repository.IRepository;
 using SmartStorage.ReportsAPI.Utils;
 using SmartStorage.Shared.Config;
 
@@ -13,6 +15,8 @@ builder.Services.AddApiVersioning();
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddPolicyConfig("Blazor", ["http://localhost:5001"]);
+
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
 var app = builder.Build();
 
