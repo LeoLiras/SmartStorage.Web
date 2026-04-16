@@ -1,8 +1,11 @@
+using QuestPDF.Infrastructure;
 using SmartStorage.Configurations.Config;
 using SmartStorage.ReportsAPI.Repository;
 using SmartStorage.ReportsAPI.Repository.IRepository;
 using SmartStorage.ReportsAPI.Utils;
 using SmartStorage.Shared.Config;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
