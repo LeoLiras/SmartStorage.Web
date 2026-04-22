@@ -32,7 +32,16 @@ namespace SmartStorage.EmailAPI.Repository
 
         public async Task NewProductEmail(ProductVO product)
         {
-            throw new NotImplementedException();
+            var subject = $"Novo Produto Cadastrado";
+
+            var body = "Prezado, um novo produto foi cadastrado no estoque, seguem os dados:\n" +
+                $"Produto: {product.Name}\n" +
+                $"Descrição: {product.Descricao}\n" +
+                $"Quantidade: {product.Qntd}\n" +
+                $"Por favor, realize a conferência.\n" +
+                $"Atenciosamente.";
+
+            SendEmail(["leonardo018.siqueira@hotmail.com"], subject, body);
         }
 
         public void SendEmail(List<string> emailsTo, string subject, string body, List<string> attachments = null)
