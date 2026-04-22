@@ -1,0 +1,6 @@
+@SmartStorage.EmailAPI_HostAddress = http://localhost:5034
+
+GET {{SmartStorage.EmailAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
