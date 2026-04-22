@@ -35,7 +35,7 @@ namespace SmartStorage.EmailAPI.Repository
             throw new NotImplementedException();
         }
 
-        public void SendEmail(List<string> emailsTo, string subject, string body, List<string> attachments)
+        public void SendEmail(List<string> emailsTo, string subject, string body, List<string> attachments = null)
         {
             var message = PrepareteMessage(emailsTo, subject, body, attachments);
 
@@ -57,15 +57,18 @@ namespace SmartStorage.EmailAPI.Repository
             mail.Body = body;
             mail.IsBodyHtml = true;
 
-            foreach (var file in attachments)
+            if (attachments != null)
             {
-                var data = new Attachment(file, MediaTypeNames.Application.Octet);
-                ContentDisposition disposition = data.ContentDisposition;
-                disposition.CreationDate = System.IO.File.GetCreationTime(file);
-                disposition.ModificationDate = System.IO.File.GetLastWriteTime(file);
-                disposition.ReadDate = System.IO.File.GetLastAccessTime(file);
+                foreach (var file in attachments)
+                {
+                    var data = new Attachment(file, MediaTypeNames.Application.Octet);
+                    ContentDisposition disposition = data.ContentDisposition;
+                    disposition.CreationDate = File.GetCreationTime(file);
+                    disposition.ModificationDate = File.GetLastWriteTime(file);
+                    disposition.ReadDate = File.GetLastAccessTime(file);
 
-                mail.Attachments.Add(data);
+                    mail.Attachments.Add(data);
+                }
             }
 
             return mail;
