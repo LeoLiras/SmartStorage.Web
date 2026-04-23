@@ -1,4 +1,7 @@
 using SmartStorage.Configurations.Config;
+using SmartStorage.EmailAPI.Config;
+using SmartStorage.EmailAPI.Repository;
+using SmartStorage.EmailAPI.Repository.Interfaces;
 using SmartStorage.EmailAPI.Utils;
 using SmartStorage.Shared.Config;
 
@@ -12,6 +15,10 @@ builder.Services.AddApiVersioning();
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddPolicyConfig("Blazor", ["http://localhost:5001"]);
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+
+builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 
 var app = builder.Build();
 
