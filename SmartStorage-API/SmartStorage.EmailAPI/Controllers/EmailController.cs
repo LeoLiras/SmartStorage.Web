@@ -1,5 +1,4 @@
 ﻿using Asp.Versioning;
-using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage.EmailAPI.Repository.Interfaces;
 using SmartStorage_Shared.VO;
