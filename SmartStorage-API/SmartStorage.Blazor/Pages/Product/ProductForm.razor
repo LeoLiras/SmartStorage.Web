@@ -127,7 +127,7 @@ else if(product is not null)
         {
             loading = true;
 
-            if (app.Employees is null)
+            if (app.Employees.Count == 0)
                 employees = await api.Get<EmployeeVO>();
             else
                 employees = app.Employees;
