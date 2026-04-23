@@ -15,17 +15,6 @@ namespace SmartStorage.Blazor.Services
             _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        public async Task<string> CallAI(string text)
-        {
-            var request = new AiRequest
-            {
-                aiQuestion = text
-            };
-
-            var response = await _client.PostAsJsonAsync($"{BasePath}/analyse-sales", request);
-            return await response.Content.ReadAsStringAsync();
-        }
-
         public async Task<bool> NewProductEmail(ProductVO product)
         {
             var response = await _client.PostAsJsonAsync($"{BasePath}/new-product", product);
