@@ -1,9 +1,9 @@
-﻿using SmartStorage.EmailAPI.Repository.Interfaces;
+﻿using MailKit.Net.Smtp;
+using Microsoft.Extensions.Options;
+using MimeKit;
+using SmartStorage.EmailAPI.Config;
+using SmartStorage.EmailAPI.Repository.Interfaces;
 using SmartStorage_Shared.VO;
-using System.Net;
-using System.Net.Mail;
-using System.Net.Mime;
-using System.Text.RegularExpressions;
 
 namespace SmartStorage.EmailAPI.Repository
 {
@@ -14,16 +14,16 @@ namespace SmartStorage.EmailAPI.Repository
         public string Provedor { get; private set; }
         public string Username { get; private set; }
         public string Password { get; private set; }
-
+        
         #endregion
 
         #region Constructros
 
-        public EmailRepository(string provedor, string username, string password)
+        public EmailRepository(IOptions<EmailSettings> options)
         {
-            Provedor = provedor;
-            Username = username;
-            Password = password;
+            Provedor = options.Value.Provedor;
+            Username = options.Value.Username;
+            Password = options.Value.Password;
         }
 
         #endregion
@@ -34,75 +34,33 @@ namespace SmartStorage.EmailAPI.Repository
         {
             var subject = $"Novo Produto Cadastrado";
 
-            var body = "Prezado, um novo produto foi cadastrado no estoque, seguem os dados:\n" +
+            var body = "Prezado, um novo produto foi cadastrado no estoque, seguem os dados:\n\n" +
                 $"Produto: {product.Name}\n" +
                 $"Descrição: {product.Descricao}\n" +
-                $"Quantidade: {product.Qntd}\n" +
-                $"Por favor, realize a conferência.\n" +
+                $"Quantidade: {product.Qntd}\n\n" +
+                $"Por favor, realize a conferência.\n\n" +
                 $"Atenciosamente.";
 
-            SendEmail(["leonardo018.siqueira@hotmail.com"], subject, body);
-        }
+            var message = new MimeMessage();
 
-        public void SendEmail(List<string> emailsTo, string subject, string body, List<string> attachments = null)
-        {
-            var message = PrepareteMessage(emailsTo, subject, body, attachments);
+            message.From.Add(new MailboxAddress("Leonardo", "testessm1@outlook.com"));
+            message.To.Add(new MailboxAddress("Destino", "leonardo018.siqueira@hotmail.com"));
+            message.Subject = "Teste MailKit";
 
-            SendEmailBySmtp(message);
-        }
-
-        private MailMessage PrepareteMessage(List<string> emailsTo, string subject, string body, List<string> attachments)
-        {
-            var mail = new MailMessage();
-            mail.From = new MailAddress(Username);
-
-            foreach (var email in emailsTo)
+            message.Body = new TextPart("plain")
             {
-                if (ValidateEmail(email))
-                    mail.To.Add(email);
-            }
+                Text = body
+            };
 
-            mail.Subject = subject;
-            mail.Body = body;
-            mail.IsBodyHtml = true;
-
-            if (attachments != null)
+            using (var client = new SmtpClient())
             {
-                foreach (var file in attachments)
-                {
-                    var data = new Attachment(file, MediaTypeNames.Application.Octet);
-                    ContentDisposition disposition = data.ContentDisposition;
-                    disposition.CreationDate = File.GetCreationTime(file);
-                    disposition.ModificationDate = File.GetLastWriteTime(file);
-                    disposition.ReadDate = File.GetLastAccessTime(file);
+                await client.ConnectAsync(Provedor, 587, MailKit.Security.SecureSocketOptions.StartTls);
 
-                    mail.Attachments.Add(data);
-                }
+                await client.AuthenticateAsync(Username, Password);
+
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
             }
-
-            return mail;
-        }
-
-        private bool ValidateEmail(string email)
-        {
-            Regex expression = new Regex(@"\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}");
-            if (expression.IsMatch(email))
-                return true;
-
-            return false;
-        }
-
-        private void SendEmailBySmtp(MailMessage message)
-        {
-            SmtpClient smtpClient = new SmtpClient("smtp.office365.com");
-            smtpClient.Host = Provedor;
-            smtpClient.Port = 587;
-            smtpClient.EnableSsl = true;
-            smtpClient.Timeout = 50000;
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential(Username, Password);
-            smtpClient.Send(message);
-            smtpClient.Dispose();
         }
 
         #endregion
