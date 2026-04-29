@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using SmartStorage.Configurations.Config.RabbitMQ;
 using SmartStorage.EmailAPI.Repository;
 using SmartStorage.EmailAPI.Repository.Interfaces;
 using SmartStorage_Shared.VO;
@@ -11,21 +12,25 @@ namespace SmartStorage.EmailAPI.MessageConsumer
     public class RabbitMQEmailConsumer : BackgroundService
     {
         private readonly IEmailRepository _repository;
+        private readonly RabbitMQSettings _settings;
         private IConnection _connection;
         private IModel _channel;
 
-        public RabbitMQEmailConsumer(IEmailRepository repository)
+        public RabbitMQEmailConsumer(IEmailRepository repository, RabbitMQSettings settings)
         {
             _repository = repository;
+            _settings = settings;
+
             var factory = new ConnectionFactory
             {
-                HostName = "localhost",
-                UserName = "guest",
-                Password = "guest"
+                HostName = _settings.HostName,
+                UserName = _settings.UserName,
+                Password = _settings.Password
             };
+
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "newproductemailqueue", false, false, false, arguments: null);
+            _channel.QueueDeclare(queue: "sendemailqueue", false, false, false, arguments: null);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -39,7 +44,7 @@ namespace SmartStorage.EmailAPI.MessageConsumer
                 ProcessOrder(vo).GetAwaiter().GetResult();
                 _channel.BasicAck(evt.DeliveryTag, false);
             };
-            _channel.BasicConsume("newproductemailqueue", false, consumer);
+            _channel.BasicConsume("sendemailqueue", false, consumer);
             return Task.CompletedTask;
         }
 

@@ -1,4 +1,5 @@
 using SmartStorage.Configurations.Config;
+using SmartStorage.Configurations.Config.RabbitMQ;
 using SmartStorage.EmailAPI.Config;
 using SmartStorage.EmailAPI.MessageConsumer;
 using SmartStorage.EmailAPI.Repository;
@@ -21,6 +22,7 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 
 builder.Services.AddSingleton<IEmailRepository, EmailRepository>();
 
+builder.Services.AddRabbitMQ(builder.Configuration);
 builder.Services.AddHostedService<RabbitMQEmailConsumer>();
 
 var app = builder.Build();

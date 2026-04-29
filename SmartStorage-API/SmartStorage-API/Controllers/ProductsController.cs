@@ -65,7 +65,7 @@ namespace SmartStorage_API.Controllers
 
                 _productService.CreateNewProduct(newProduct);
 
-                _rabbitMQMessageSender.SendMessage(newProduct, "newproductemailqueue");
+                _rabbitMQMessageSender.SendMessage(newProduct, "sendemailqueue");
 
                 return Ok(newProduct);
             }

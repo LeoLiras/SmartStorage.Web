@@ -1,4 +1,5 @@
 ﻿using RabbitMQ.Client;
+using SmartStorage.Configurations.Config.RabbitMQ;
 using SmartStorage.MessageBus;
 using SmartStorage_Shared.VO;
 using System.Text;
@@ -11,13 +12,16 @@ namespace SmartStorage_API.RabbitMQSender
         private readonly string _hostName;
         private readonly string _password;
         private readonly string _userName;
+        private readonly RabbitMQSettings _settings;
         private IConnection _connection;
 
-        public RabbitMQMessageSender()
+        public RabbitMQMessageSender(RabbitMQSettings settings)
         {
-            _hostName = "localhost";
-            _password = "guest";
-            _userName = "guest";
+            _settings = settings;
+
+            _hostName = _settings.HostName;
+            _password = _settings.Password;
+            _userName = _settings.UserName;
         }
 
         public void SendMessage(BaseMessage message, string queueName)

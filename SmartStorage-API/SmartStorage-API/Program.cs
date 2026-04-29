@@ -1,5 +1,6 @@
 using QuestPDF.Infrastructure;
 using SmartStorage.Configurations.Config;
+using SmartStorage.Configurations.Config.RabbitMQ;
 using SmartStorage.Shared.Config;
 using SmartStorage_API;
 using SmartStorage_API.Authentication.Config;
@@ -57,6 +58,7 @@ builder.Services.AddDatabase(builder.Configuration);
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 builder.Services.AddPolicyConfig("Blazor", allowedOrigins);
 
+builder.Services.AddRabbitMQ(builder.Configuration);
 builder.Services.AddSingleton<IRabbitMQMessageSender, RabbitMQMessageSender>();
 
 var app = builder.Build();
