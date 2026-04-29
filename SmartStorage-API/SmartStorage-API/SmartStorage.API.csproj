@@ -23,6 +23,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="QuestPDF" Version="2025.12.3.1-alpha2" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />
     <PackageReference Include="ScottPlot" Version="5.1.57" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
   </ItemGroup>
@@ -30,6 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SmartStorage.Configurations\SmartStorage.Configurations.csproj" />
     <ProjectReference Include="..\SmartStorage.Infraestructure\SmartStorage.Infraestructure.csproj" />
+    <ProjectReference Include="..\SmartStorage.MessageBus\SmartStorage.MessageBus.csproj" />
     <ProjectReference Include="..\SmartStorage.Shared\SmartStorage.Shared.csproj" />
   </ItemGroup>
 

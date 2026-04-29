@@ -11,6 +11,7 @@ using SmartStorage_API.Authentication.Services;
 using SmartStorage_API.Authentication.Services.Implementations;
 using SmartStorage_API.Hypermedia.Enricher;
 using SmartStorage_API.Hypermedia.Filters;
+using SmartStorage_API.RabbitMQSender;
 using SmartStorage_API.Service;
 using SmartStorage_API.Service.Implementations;
 
@@ -55,6 +56,8 @@ builder.Services.AddDatabase(builder.Configuration);
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 builder.Services.AddPolicyConfig("Blazor", allowedOrigins);
+
+builder.Services.AddSingleton<IRabbitMQMessageSender, RabbitMQMessageSender>();
 
 var app = builder.Build();
 

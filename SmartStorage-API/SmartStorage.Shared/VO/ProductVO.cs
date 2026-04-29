@@ -1,13 +1,12 @@
-﻿using SmartStorage_Shared.HypermediaSupport;
+﻿using SmartStorage.MessageBus;
+using SmartStorage_Shared.HypermediaSupport;
 using SmartStorage_Shared.Model;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartStorage_Shared.VO
 {
-    public partial class ProductVO : ISupportHyperMedia
+    public partial class ProductVO : BaseMessage, ISupportHyperMedia
     {
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "O nome do produto é obrigatório.")]
         [StringLength(100, MinimumLength = 5, ErrorMessage = "Insira no mínimo 5 caracteres.")]
         public string Name { get; set; }

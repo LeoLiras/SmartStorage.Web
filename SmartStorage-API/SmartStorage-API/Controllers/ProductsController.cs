@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage_API.Hypermedia.Filters;
+using SmartStorage_API.RabbitMQSender;
 using SmartStorage_API.Service;
 using SmartStorage_Shared.VO;
 
@@ -16,14 +17,16 @@ namespace SmartStorage_API.Controllers
         #region Propriedades
 
         private IProductBusiness _productService;
+        private IRabbitMQMessageSender _rabbitMQMessageSender;
 
         #endregion
 
         #region Construtores
 
-        public ProductsController(IProductBusiness productService)
+        public ProductsController(IProductBusiness productService, IRabbitMQMessageSender rabbitMQMessageSender)
         {
             _productService = productService;
+            _rabbitMQMessageSender = rabbitMQMessageSender;
         }
 
         #endregion
@@ -60,7 +63,11 @@ namespace SmartStorage_API.Controllers
                 if (string.IsNullOrWhiteSpace(newProduct.Name))
                     throw new Exception("O Nome do Produto é obrigatório.");
 
-                return Ok(_productService.CreateNewProduct(newProduct));
+                _productService.CreateNewProduct(newProduct);
+
+                _rabbitMQMessageSender.SendMessage(newProduct, "newproductemailqueue");
+
+                return Ok(newProduct);
             }
             catch (Exception ex)
             {
