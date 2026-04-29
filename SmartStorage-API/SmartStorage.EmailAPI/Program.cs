@@ -1,5 +1,6 @@
 using SmartStorage.Configurations.Config;
 using SmartStorage.EmailAPI.Config;
+using SmartStorage.EmailAPI.MessageConsumer;
 using SmartStorage.EmailAPI.Repository;
 using SmartStorage.EmailAPI.Repository.Interfaces;
 using SmartStorage.EmailAPI.Utils;
@@ -18,7 +19,9 @@ builder.Services.AddPolicyConfig("Blazor", ["http://localhost:5001"]);
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 
-builder.Services.AddScoped<IEmailRepository, EmailRepository>();
+builder.Services.AddSingleton<IEmailRepository, EmailRepository>();
+
+builder.Services.AddHostedService<RabbitMQEmailConsumer>();
 
 var app = builder.Build();
 
