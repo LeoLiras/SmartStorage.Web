@@ -1,19 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />
 	  <PackageReference Include="IdentityModel" Version="6.0.0-preview.2" />
 	  <PackageReference Include="Ocelot" Version="17.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartStorage.Configurations\SmartStorage.Configurations.csproj" />
+    <ProjectReference Include="..\SmartStorage.Shared\SmartStorage.Shared.csproj" />
   </ItemGroup>
 
 </Project>

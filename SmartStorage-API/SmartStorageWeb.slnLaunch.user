@@ -26,6 +26,10 @@
         "Path": "SmartStorage.EmailAPI\\SmartStorage.EmailAPI.csproj",
         "Action": "Start",
         "DebugTarget": "http"
+      },
+      {
+        "Path": "SmartStorage.APIGateway\\SmartStorage.APIGateway.csproj",
+        "Action": "Start"
       }
     ]
   }
