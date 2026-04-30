@@ -7,7 +7,7 @@ namespace SmartStorage.Blazor.Services
     public class AiService : IAiService
     {
         private readonly HttpClient _client;
-        public const string BasePath = $"http://localhost:5003/api/storage/ai/v1";
+        public const string BasePath = $"api/storage/ai/v1";
 
         public AiService(HttpClient client)
         {

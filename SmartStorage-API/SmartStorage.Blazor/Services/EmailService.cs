@@ -7,7 +7,7 @@ namespace SmartStorage.Blazor.Services
     public class EmailService : IEmailService
     {
         private readonly HttpClient _client;
-        public const string BasePath = $"http://localhost:5007/api/storage/email/v1";
+        public const string BasePath = $"api/storage/email/v1";
 
         public EmailService(HttpClient client)
         {

@@ -7,7 +7,7 @@ namespace SmartStorage.Blazor.Services
         #region Properties
 
         private readonly HttpClient _client;
-        public const string BasePath = $"http://localhost:5005/api/storage/reports/v1";
+        public const string BasePath = $"api/storage/reports/v1";
 
         #endregion
 
