@@ -3,14 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SmartStorage.IdentityServer.Model.Context
 {
-    public class MySQLContext : IdentityDbContext<ApplicationUser>
+    public class SQLServerContext : IdentityDbContext<ApplicationUser>
     {
-        public MySQLContext()
-        {
-
-        }
-
-        public MySQLContext(DbContextOptions<MySQLContext> options)
+        public SQLServerContext(DbContextOptions<SQLServerContext> options)
             : base(options) { }
     }
 }

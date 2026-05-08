@@ -10,13 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 var connection = builder.Configuration["ConnectionStrings:SqlServerConnection"];
-builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(
-    connection,
-    new MySqlServerVersion(new Version(8, 0, 29)))
-);
+builder.Services.AddDbContext<SQLServerContext>(options =>
+                options.UseSqlServer(connection, b => b.MigrationsAssembly(typeof(SQLServerContext).Assembly.GetName().Name)));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<MySQLContext>()
+    .AddEntityFrameworkStores<SQLServerContext>()
     .AddDefaultTokenProviders();
 
 var builderServices = builder.Services.AddIdentityServer(options =>
