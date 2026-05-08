@@ -1,6 +1,9 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage.EmailAPI.Repository.Interfaces;
+using SmartStorage.Shared.Auth;
 using SmartStorage_Shared.VO;
 
 namespace SmartStorage.EmailAPI.Controllers
@@ -28,6 +31,7 @@ namespace SmartStorage.EmailAPI.Controllers
         #region Methods
 
         [HttpPost("new-product")]
+        [Authorize(Roles = Role.Admin)]
         public async Task<IActionResult> SendNewProjectEmail([FromBody] ProductVO product)
         {
             try

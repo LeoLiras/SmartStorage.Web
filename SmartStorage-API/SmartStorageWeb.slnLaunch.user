@@ -30,6 +30,10 @@
       {
         "Path": "SmartStorage.APIGateway\\SmartStorage.APIGateway.csproj",
         "Action": "Start"
+      },
+      {
+        "Path": "SmartStorage.IdentityServer\\SmartStorage.IdentityServer.csproj",
+        "Action": "Start"
       }
     ]
   }
