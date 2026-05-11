@@ -32,6 +32,21 @@ builder.Services.AddAuthorizationCore();
 
 builder.Services.AddMudServices();
 
+builder.Services.AddOidcAuthentication(options =>
+{
+    options.ProviderOptions.Authority =
+        builder.Configuration["ServiceUrls:IdentityServer"];
+
+    options.ProviderOptions.ClientId = "smart_storage";
+
+    options.ProviderOptions.ResponseType = "code";
+
+    options.ProviderOptions.DefaultScopes.Add("smart_storage");
+
+    options.UserOptions.RoleClaim = "role";
+    options.UserOptions.NameClaim = "name";
+});
+
 builder.Services.AddScoped<ApiExtensions>();
 builder.Services.AddScoped<ShowDialog>();
 builder.Services.AddScoped<VariablesExtensions>();
