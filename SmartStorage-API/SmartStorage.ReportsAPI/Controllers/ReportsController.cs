@@ -1,6 +1,8 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage.ReportsAPI.Repository.IRepository;
+using SmartStorage.Shared.Auth;
 
 namespace SmartStorage.ReportsAPI.Controllers
 {
@@ -27,6 +29,7 @@ namespace SmartStorage.ReportsAPI.Controllers
         #region Methods
 
         [HttpGet("export-excel")]
+        [Authorize]
         public async Task<ActionResult> GenerateExcel()
         {
             try
@@ -46,6 +49,7 @@ namespace SmartStorage.ReportsAPI.Controllers
         }
 
         [HttpGet("export-pdf")]
+        [Authorize(Roles = Role.Admin)]
         public async Task<ActionResult> GeneratePdf()
         {
             try
