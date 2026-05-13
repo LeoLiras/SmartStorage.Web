@@ -1,0 +1,14 @@
+﻿using SmartStorage.Shared.VO;
+using SmartStorage_Shared.Model;
+
+namespace SmartStorage.AuthenticationAPI.Services
+{
+    public interface ILoginService
+    {
+        TokenVO ValidateCredentials(UserVO user);
+        TokenVO ValidateCredentials(TokenVO token);
+        bool RevokeToken(string username);
+        AccountCredentialsVO Create(AccountCredentialsVO user);
+        User UpdateCredentials(User user);
+    }
+}
