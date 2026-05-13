@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.IdentityServer", "SmartStorage.IdentityServer\SmartStorage.IdentityServer.csproj", "{0EE70648-97B1-4C21-93FD-F8B69D8FC4F3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.AuthenticationAPI", "SmartStorage.AuthenticationAPI\SmartStorage.AuthenticationAPI.csproj", "{CC94CE5B-17D6-4F77-9DF0-CE077A136201}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,10 @@ Global
 		{0EE70648-97B1-4C21-93FD-F8B69D8FC4F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EE70648-97B1-4C21-93FD-F8B69D8FC4F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EE70648-97B1-4C21-93FD-F8B69D8FC4F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC94CE5B-17D6-4F77-9DF0-CE077A136201}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC94CE5B-17D6-4F77-9DF0-CE077A136201}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC94CE5B-17D6-4F77-9DF0-CE077A136201}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC94CE5B-17D6-4F77-9DF0-CE077A136201}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +111,7 @@ Global
 		{A1F5B00D-1A9B-4526-A242-B6C078BED7B9} = {A340E83E-0591-44A5-808D-1D33753EB07B}
 		{D7F58EF3-16D3-4833-B1AE-A1F6B1BAE2DE} = {C3CF53C2-9986-4988-83E1-3BC940816D9F}
 		{0EE70648-97B1-4C21-93FD-F8B69D8FC4F3} = {9E4BBF16-6F18-46CC-8666-E0B4ECB855A1}
+		{CC94CE5B-17D6-4F77-9DF0-CE077A136201} = {A340E83E-0591-44A5-808D-1D33753EB07B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E231896D-75C9-4080-8EA5-26E3B0047A80}
