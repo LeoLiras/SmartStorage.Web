@@ -1,15 +1,7 @@
-using QuestPDF.Infrastructure;
 using SmartStorage.Configurations.Config;
 using SmartStorage.Configurations.Config.RabbitMQ;
 using SmartStorage.Shared.Config;
 using SmartStorage_API;
-using SmartStorage_API.Authentication.Config;
-using SmartStorage_API.Authentication.Contract;
-using SmartStorage_API.Authentication.Contract.Tools;
-using SmartStorage_API.Authentication.Repositories;
-using SmartStorage_API.Authentication.Repositories.Implementations;
-using SmartStorage_API.Authentication.Services;
-using SmartStorage_API.Authentication.Services.Implementations;
 using SmartStorage_API.Hypermedia.Enricher;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.RabbitMQSender;
@@ -26,8 +18,6 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddControllers();
 
-builder.Services.AddAuthConfiguration(builder.Configuration);
-
 var filterOptions = new HyperMediaFilterOptions();
 filterOptions.ContentResponseEnricherList.Add(new EmployeeEnricher());
 filterOptions.ContentResponseEnricherList.Add(new ProductEnricher());
@@ -43,12 +33,6 @@ builder.Services.AddScoped<IEmployeeBusiness, EmployeeBusinessImplementation>();
 builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();
 builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPasswordHasher, Sha256PasswordHasher>();
-builder.Services.AddScoped<IUserAuthService, UserAuthServiceImplementation>();
-builder.Services.AddScoped<ILoginService, LoginServiceImplementation>();
-builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 
 builder.Configuration.AddEnvironmentVariables();
 
