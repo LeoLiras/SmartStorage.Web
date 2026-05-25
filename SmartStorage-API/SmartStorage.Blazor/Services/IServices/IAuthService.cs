@@ -1,4 +1,4 @@
-﻿namespace SmartStorage.Blazor.Auth
+﻿namespace SmartStorage.Blazor.Services.IServices
 {
     public interface IAuthService
     {

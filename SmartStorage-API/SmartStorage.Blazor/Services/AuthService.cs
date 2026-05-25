@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
+using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.Local_Storage;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace SmartStorage.Blazor.Auth
+namespace SmartStorage.Blazor.Services
 {
     public class AuthService : AuthenticationStateProvider, IAuthService
     {
