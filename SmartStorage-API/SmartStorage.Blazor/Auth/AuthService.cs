@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace SmartStorage.Blazor.Auth
 {
-    public class AuthStateProvider : AuthenticationStateProvider, IAuthService
+    public class AuthService : AuthenticationStateProvider, IAuthService
     {
         //public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         //{
@@ -23,7 +23,7 @@ namespace SmartStorage.Blazor.Auth
         private readonly HttpClient http;
         public static readonly string tokenKey = "tokenKey";
 
-        public AuthStateProvider(IJSRuntime ijsRuntime, HttpClient httpClient)
+        public AuthService(IJSRuntime ijsRuntime, HttpClient httpClient)
         {
             js = ijsRuntime;
             http = httpClient;
