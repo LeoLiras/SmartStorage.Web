@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using SmartStorage.Blazor;
+using SmartStorage.Blazor.Authentication;
+using SmartStorage.Blazor.Provider;
 using SmartStorage.Blazor.Services;
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.API;
@@ -17,41 +19,32 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://
 
 builder.Services.AddHttpClient<IReportsService, ReportsService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ReportsAPI"])
-            );
+            ).AddHttpMessageHandler<AuthHandler>();
 
 builder.Services.AddHttpClient<IEmailService, EmailService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:EmailAPI"])
-            );
+            ).AddHttpMessageHandler<AuthHandler>();
 
 builder.Services.AddHttpClient<IAiService, AiService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AIAPI"])
-            );
+            ).AddHttpMessageHandler<AuthHandler>();
+
+builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
+                c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"])
+            ).AddHttpMessageHandler<AuthHandler>();
 
 builder.Services.AddAuthorizationCore();
 
 builder.Services.AddMudServices();
 
-builder.Services.AddOidcAuthentication(options =>
-{
-    options.ProviderOptions.Authority =
-        builder.Configuration["ServiceUrls:IdentityServer"];
-
-    options.ProviderOptions.ClientId = "smart_storage";
-
-    options.ProviderOptions.ResponseType = "code";
-
-    options.ProviderOptions.DefaultScopes.Add("smart_storage");
-
-    options.UserOptions.RoleClaim = "role";
-    options.UserOptions.NameClaim = "name";
-});
-
 builder.Services.AddScoped<ApiExtensions>();
 builder.Services.AddScoped<ShowDialog>();
 builder.Services.AddScoped<VariablesExtensions>();
 
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<IAuthService, AuthService>(provider => provider.GetRequiredService<AuthService>());
-builder.Services.AddScoped<AuthenticationStateProvider, AuthService>(provider => provider.GetRequiredService<AuthService>());
+builder.Services.AddScoped<AuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(
+    provider => provider.GetRequiredService<AuthStateProvider>());
+
+builder.Services.AddScoped<AuthHandler>();
 
 await builder.Build().RunAsync();

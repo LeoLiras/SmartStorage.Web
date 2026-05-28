@@ -1,111 +1,48 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
+﻿using SmartStorage.Blazor.Provider;
 using SmartStorage.Blazor.Services.IServices;
-using SmartStorage.Blazor.Utils.Local_Storage;
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Text.Json;
+using SmartStorage.Blazor.Utils.API;
+using SmartStorage.Shared.VO;
+using System.Net.Http.Json;
 
 namespace SmartStorage.Blazor.Services
 {
-    public class AuthService : AuthenticationStateProvider, IAuthService
+    public class AuthService : IAuthService
     {
-        //public async override Task<AuthenticationState> GetAuthenticationStateAsync()
-        //{
-        //    await Task.Delay(4000);
+        public const string BasePath = $"api/auth/v1";
 
-        //    var usuario = new ClaimsIdentity("demo");
-
-        //    return await Task.FromResult(new AuthenticationState(
-        //        new ClaimsPrincipal(usuario)));
-
-        //}
-        private readonly IJSRuntime js;
         private readonly HttpClient http;
-        public static readonly string tokenKey = "tokenKey";
+        private readonly AuthStateProvider authProvider;
 
-        public AuthService(IJSRuntime ijsRuntime, HttpClient httpClient)
+        public AuthService(HttpClient http, AuthStateProvider authProvider)
         {
-            js = ijsRuntime;
-            http = httpClient;
+            this.http = http;
+            this.authProvider = authProvider;
         }
 
-        private AuthenticationState notAuthenticate =>
-            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-
-        public async override Task<AuthenticationState> GetAuthenticationStateAsync()
-        {
-            var token = await js.GetFromLocalStorage(tokenKey);
-
-            if (string.IsNullOrEmpty(token))
-            {
-                return notAuthenticate;
-            }
-            return CreateAuthenticationState(token);
-        }
-
-        public AuthenticationState CreateAuthenticationState(string token)
-        {
-            // colocar o token obtido do localstorage no header do request 
-            // na seção Authorization assim poderemos estar autenticando 
-            // cada requisição HTTP enviada ao servidor por este cliente
-            http.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
-            //extrair as claims
-            return new AuthenticationState(new ClaimsPrincipal
-                (new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
-        }
-
-        private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
-        {
-            var claims = new List<Claim>();
-            var payload = jwt.Split('.')[1];
-            var jsonBytes = ParseBase64WithoutPadding(payload);
-            var keyValuePairs = JsonSerializer
-                .Deserialize<Dictionary<string, object>>(jsonBytes);
-
-            keyValuePairs.TryGetValue(ClaimTypes.Role, out object roles);
-
-            if (roles != null)
-            {
-                if (roles.ToString().Trim().StartsWith("["))
-                {
-                    var parsedRoles = JsonSerializer.Deserialize<string[]>(roles.ToString());
-                    foreach (var parsedRole in parsedRoles)
-                    {
-                        claims.Add(new Claim(ClaimTypes.Role, parsedRole));
-                    }
-                }
-                else
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, roles.ToString()));
-                }
-                keyValuePairs.Remove(ClaimTypes.Role);
-            }
-
-            claims.AddRange(keyValuePairs.Select(kvp =>
-            new Claim(kvp.Key, kvp.Value.ToString())));
-            return claims;
-        }
-
-        private byte[] ParseBase64WithoutPadding(string base64)
-        {
-            switch (base64.Length % 4)
-            {
-                case 2: base64 += "=="; break;
-                case 3: base64 += "="; break;
-            }
-            return Convert.FromBase64String(base64);
-        }
-
-        public async Task Login(string token)
+        public async Task Login(UserVO user)
         {
             try
             {
-                await js.SetInLocalStorage(tokenKey, token);
-                var authState = CreateAuthenticationState(token);
-                NotifyAuthenticationStateChanged(Task.FromResult(authState));
+                if (user == null)
+                    throw new ArgumentNullException(nameof(user), message: "As credenciais do usuário são obrigatórias.");
+
+                if (string.IsNullOrWhiteSpace(BasePath))
+                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+
+                var responseSignIn = await http.PostAsJsonAsync($"{BasePath}/signin", user);
+
+                if (responseSignIn.IsSuccessStatusCode)
+                {
+                    var token = await responseSignIn.Content.ReadFromJsonAsync<TokenVO>();
+
+                    await authProvider.Login(token.AccessToken);
+                }
+                else
+                {
+                    var error = await responseSignIn.Content.ReadAsStringAsync();
+
+                    throw new ApiException((int)responseSignIn.StatusCode, error);
+                }
             }
             catch (Exception)
             {
@@ -117,9 +54,7 @@ namespace SmartStorage.Blazor.Services
         {
             try
             {
-                await js.RemoveItem(tokenKey);
-                http.DefaultRequestHeaders.Authorization = null;
-                NotifyAuthenticationStateChanged(Task.FromResult(notAuthenticate));
+                await authProvider.Logout();
             }
             catch (Exception)
             {

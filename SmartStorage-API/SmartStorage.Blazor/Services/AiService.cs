@@ -20,7 +20,7 @@ namespace SmartStorage.Blazor.Services
             {
                 aiQuestion = text
             };
-
+            
             var response = await _client.PostAsJsonAsync($"{BasePath}/analyse-sales", request);
             return await response.Content.ReadAsStringAsync();
         }

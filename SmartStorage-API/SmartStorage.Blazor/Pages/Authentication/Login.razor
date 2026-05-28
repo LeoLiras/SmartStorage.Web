@@ -5,7 +5,7 @@
 @inject ApiExtensions api
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
-@inject AuthService auth;
+@inject IAuthService auth;
 
 @if (loading)
 {
@@ -49,11 +49,9 @@ else
 
             loading = true;
 
-            var result = await api.PostSigninUser(user);
+            await auth.Login(user);
 
-            await auth.Login(result.AccessToken);
-
-            app.User = await api.GetUserByUsername(user.Username);
+            //app.User = await api.GetUserByUsername(user.Username);
 
             await ShowDialog.ShowDialogAsync("Login realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
 
@@ -73,6 +71,10 @@ else
             StateHasChanged();
 
             await ShowDialog.ShowDialogAsync(mensagem, title:"Erro", navigate:"/", state: EDialogStates.Warning);
+        }
+        catch(Exception ex)
+        {
+            await ShowDialog.ShowDialogAsync(ex.Message, title: "Erro", navigate: "/", state: EDialogStates.Warning);
         }
         finally
         {

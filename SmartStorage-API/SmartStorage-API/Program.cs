@@ -29,6 +29,8 @@ builder.Services.AddSingleton(filterOptions);
 
 builder.Services.AddApiVersioning();
 
+builder.Services.AddAuthConfiguration(builder.Configuration);
+
 builder.Services.AddScoped<IEmployeeBusiness, EmployeeBusinessImplementation>();
 builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();

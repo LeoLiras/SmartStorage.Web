@@ -1,8 +1,10 @@
-﻿namespace SmartStorage.Blazor.Services.IServices
+﻿using SmartStorage.Shared.VO;
+
+namespace SmartStorage.Blazor.Services.IServices
 {
     public interface IAuthService
     {
-        Task Login(string token);
+        Task Login(UserVO user);
         Task Logout();
     }
 }

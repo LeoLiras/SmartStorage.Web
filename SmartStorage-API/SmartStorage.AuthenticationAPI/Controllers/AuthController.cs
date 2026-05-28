@@ -8,7 +8,7 @@ using SmartStorage_Shared.Model;
 namespace SmartStorage.AuthenticationAPI.Controllers
 {
     [ApiVersion($"{Utils.Utils.apiVersion}")]
-    [Route("api/storage/[controller]")]
+    [Route("api/[controller]/v{version:apiVersion}")]
     [ApiController]
     public class AuthController : ControllerBase
     {

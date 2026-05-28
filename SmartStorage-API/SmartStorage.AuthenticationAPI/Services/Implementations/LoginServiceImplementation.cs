@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.JsonWebTokens;
-using SmartStorage.AuthenticationAPI.Config;
 using SmartStorage.AuthenticationAPI.Contract;
+using SmartStorage.Shared.Auth;
 using SmartStorage.Shared.VO;
 using SmartStorage_Shared.Model;
 using System.Security.Claims;

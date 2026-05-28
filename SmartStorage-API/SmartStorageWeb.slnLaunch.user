@@ -32,7 +32,7 @@
         "Action": "Start"
       },
       {
-        "Path": "SmartStorage.IdentityServer\\SmartStorage.IdentityServer.csproj",
+        "Path": "SmartStorage.AuthenticationAPI\\SmartStorage.AuthenticationAPI.csproj",
         "Action": "Start"
       }
     ]
