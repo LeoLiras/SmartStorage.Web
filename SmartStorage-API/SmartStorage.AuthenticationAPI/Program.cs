@@ -23,17 +23,17 @@ builder.Services.AddScoped<IUserAuthService, UserAuthServiceImplementation>();
 builder.Services.AddScoped<ILoginService, LoginServiceImplementation>();
 builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 
-//builder.Services.AddPolicyConfig("Blazor", ["https://localhost:4480"]);
+builder.Services.AddPolicyConfig("Blazor", ["https://localhost:4480"]);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", policy =>
+//    {
+//        policy.AllowAnyOrigin()
+//              .AllowAnyHeader()
+//              .AllowAnyMethod();
+//    });
+//});
 
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
