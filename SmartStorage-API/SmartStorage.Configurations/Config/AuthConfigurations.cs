@@ -37,10 +37,10 @@ namespace SmartStorage.Configurations.Config
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = tokenConfigurations.Issuer,
-                        ValidAudience = tokenConfigurations.Audience,
+                        ValidIssuer = "ExampleIssuer",
+                        ValidAudience = "ExampleAudience",
                         IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(tokenConfigurations.Secret))
+                        Encoding.UTF8.GetBytes("THIS_IS_LEONARDO_SUPER_SUPER_SECRET_KEY"))
                     };
             });
 

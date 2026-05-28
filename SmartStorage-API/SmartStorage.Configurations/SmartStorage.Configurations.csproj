@@ -16,4 +16,11 @@
 	  <ProjectReference Include="..\SmartStorage.Infraestructure\SmartStorage.Infraestructure.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Content Include="Json\appsettings.Shared.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>appsettings.Shared.json</Link>
+		</Content>
+	</ItemGroup>
+
 </Project>
