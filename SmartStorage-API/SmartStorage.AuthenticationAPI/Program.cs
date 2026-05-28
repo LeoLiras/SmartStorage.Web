@@ -14,7 +14,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddAuthConfiguration(builder.Configuration);
 builder.Services.AddApiVersioning();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -24,17 +23,7 @@ builder.Services.AddScoped<ILoginService, LoginServiceImplementation>();
 builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 
 builder.Services.AddPolicyConfig("Blazor", ["https://localhost:4480"]);
-
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", policy =>
-//    {
-//        policy.AllowAnyOrigin()
-//              .AllowAnyHeader()
-//              .AllowAnyMethod();
-//    });
-//});
-
+builder.Services.AddAuthConfiguration(builder.Configuration);
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
 
@@ -42,11 +31,11 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-//app.UseApiDefaults(Utils.apiName, Utils.apiVersion, "Blazor");
+app.UseApiDefaults(Utils.apiName, Utils.apiVersion, "Blazor");
 
 //app.UseHttpsRedirection();
 
-app.UseCors("AllowAll");
+app.UseCors("Blazor");
 
 app.UseAuthentication();
 
