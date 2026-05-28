@@ -24,6 +24,7 @@ namespace SmartStorage.Blazor.Services
 
         public async Task<byte[]> GenerateExcel()
         {
+            Console.WriteLine(_client.BaseAddress);
             var response = await _client.GetAsync($"{BasePath}/export-excel");
 
             if (!response.IsSuccessStatusCode)

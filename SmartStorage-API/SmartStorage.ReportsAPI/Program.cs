@@ -19,28 +19,9 @@ builder.Services.AddApiVersioning();
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddPolicyConfig("Blazor", ["https://localhost:4480"]);
+builder.Services.AddAuthConfiguration(builder.Configuration);
 
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
-
-builder.Services.AddAuthentication("Bearer")
-                .AddJwtBearer("Bearer", options =>
-                {
-                    options.Authority = "https://localhost:5200/";
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateAudience = false
-                    };
-                });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("ApiScope", policy =>
-    {
-        policy.RequireAuthenticatedUser();
-        policy.RequireClaim("scope", "smart_storage");
-    });
-});
-
 
 var app = builder.Build();
 

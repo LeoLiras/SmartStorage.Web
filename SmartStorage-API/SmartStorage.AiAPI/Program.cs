@@ -15,6 +15,7 @@ builder.Services.AddApiVersioning();
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddPolicyConfig("Blazor", ["https://localhost:4480"]);
+builder.Services.AddAuthConfiguration(builder.Configuration);
 
 builder.Services.AddScoped<IAiRepository, AiRepository>();
 

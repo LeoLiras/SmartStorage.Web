@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage.AIAPI.Repository.Interfaces;
 using SmartStorage.Shared.VO.AiService;
@@ -26,7 +27,7 @@ namespace SmartStorage.AIAPI.Controllers
         #endregion
 
         #region Methods
-
+        [Authorize]
         [HttpPost("analyse-sales")]
         public async Task<IActionResult> AnalyseSalesWithAI([FromBody] AiRequest request)
         {

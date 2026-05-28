@@ -27,9 +27,8 @@ namespace SmartStorage.ReportsAPI.Controllers
         #endregion
 
         #region Methods
-
-        [HttpGet("export-excel")]
         [Authorize]
+        [HttpGet("export-excel")]
         public async Task<ActionResult> GenerateExcel()
         {
             try
@@ -48,8 +47,8 @@ namespace SmartStorage.ReportsAPI.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("export-pdf")]
-        [Authorize(Roles = Role.Admin)]
         public async Task<ActionResult> GeneratePdf()
         {
             try
