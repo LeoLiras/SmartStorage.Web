@@ -338,69 +338,6 @@ namespace SmartStorage.Blazor.Utils.API
 
         //=========================== Metódos relativos a autenticação ===========================
 
-        public async Task<User> GetUserByUsername(string userName)
-        {
-            if (string.IsNullOrWhiteSpace(userName))
-                throw new ArgumentNullException(nameof(userName), message: "O campo Nome de Usuário é obrigatório.");
-
-            var url = $"{authUserEndpoint}?userName={Uri.EscapeDataString(userName)}";
-
-            var response = await _http.GetAsync($"{url}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<User>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        public async Task<List<User>> GetAllUsers()
-        {
-            var url = authEndpoint;
-
-            var response = await _http.GetAsync($"{url}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<List<User>>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        public async Task<User> GetUserById(int id)
-        {
-            var url = authEndpoint;
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O campo URL é obrigatório.");
-
-            if (id == 0)
-                throw new ArgumentNullException(nameof(url), message: "O campo ID é obrigatório.");
-
-            var response = await _http.GetAsync($"{url}/{id}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<User>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
         public async Task<AccountCredentialsVO> PostRegisterUser(AccountCredentialsVO credentials)
         {
             var url = registerEndpoint;

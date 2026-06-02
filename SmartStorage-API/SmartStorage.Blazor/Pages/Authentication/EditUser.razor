@@ -78,7 +78,7 @@ else
 
         isAdm = userAuth?.FindFirst(ClaimTypes.Role)?.Value == "Administrador" ? true : false;
 
-        user = await api.GetUserById((int)UserId);
+        user = await auth.GetUser((int)UserId);
 
         if (user is null)
             return;

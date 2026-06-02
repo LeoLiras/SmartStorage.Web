@@ -104,5 +104,32 @@ namespace SmartStorage.Blazor.Services
                 throw;
             }
         }
+
+        public async Task<User> GetUser(int userId)
+        {
+            try
+            {
+                if (userId == 0)
+                    throw new ArgumentNullException(nameof(userId), message: "O ID do usuário são obrigatórias.");
+
+                if (string.IsNullOrWhiteSpace(BasePath))
+                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+
+                var response = await http.GetFromJsonAsync<User>($"{BasePath}/{userId}");
+
+                if (response is not null)
+                {
+                    return response;
+                }
+                else
+                {
+                    throw new ApiException(404, $"Usuário não encontrado com o ID:{userId}");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
