@@ -1,4 +1,5 @@
 ﻿using SmartStorage.Shared.VO;
+using SmartStorage_Shared.Model;
 
 namespace SmartStorage.Blazor.Services.IServices
 {
@@ -6,5 +7,6 @@ namespace SmartStorage.Blazor.Services.IServices
     {
         Task Login(UserVO user);
         Task Logout();
+        Task<User> GetUser(string userName);
     }
 }

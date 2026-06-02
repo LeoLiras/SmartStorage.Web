@@ -40,7 +40,7 @@ namespace SmartStorage.Blazor.Utils.API
 
         private string authEndpoint = "api/storage/auth";
 
-        private string authUserEndpoint = "api/storage/auth/user-by-username";
+        private string authUserEndpoint = "api/auth/user-by-username";
 
         private string loginEndpoint = "api/storage/auth/signin";
 
@@ -392,30 +392,6 @@ namespace SmartStorage.Blazor.Utils.API
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<User>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        public async Task<TokenVO> PostSigninUser(UserVO user)
-        {
-            var url = loginEndpoint;
-
-            if (user == null)
-                throw new ArgumentNullException(nameof(user), message: "As credenciais do usuário são obrigatórias.");
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.PostAsJsonAsync(url, user);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<TokenVO>();
             }
             else
             {

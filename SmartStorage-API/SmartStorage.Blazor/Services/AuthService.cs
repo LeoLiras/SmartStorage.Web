@@ -2,6 +2,7 @@
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.API;
 using SmartStorage.Shared.VO;
+using SmartStorage_Shared.Model;
 using System.Net.Http.Json;
 
 namespace SmartStorage.Blazor.Services
@@ -55,6 +56,33 @@ namespace SmartStorage.Blazor.Services
             try
             {
                 await authProvider.Logout();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<User> GetUser(string userName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userName))
+                    throw new ArgumentNullException(nameof(userName), message: "As credenciais do usuário são obrigatórias.");
+
+                if (string.IsNullOrWhiteSpace(BasePath))
+                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+
+                var response = await http.GetFromJsonAsync<User>($"{BasePath}/user-by-username?userName={Uri.EscapeDataString(userName)}");
+
+                if (response is not null)
+                {
+                    return response;
+                }
+                else
+                {
+                    throw new ApiException(404, $"Usuário não encontrado com o user-name:{userName}");
+                }
             }
             catch (Exception)
             {

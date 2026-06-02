@@ -1,10 +1,9 @@
 ﻿@page "/"
-@using System.Security.Claims
 
 @inject ApiExtensions api
 @inject VariablesExtensions app
-@inject ShowDialog ShowDialog
 @inject IAuthService auth
+@inject AuthenticationStateProvider authProvider
 
 @if (loading)
 {
@@ -40,12 +39,7 @@ else
     </AuthorizeView>
 }
 
-@code{
-
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; }
-
-    ClaimsPrincipal user { get; set; }
+@code {
 
     bool loading = false;
 
@@ -53,10 +47,10 @@ else
     {
         try
         {
-            loading = true;
+            var authState = await authProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
 
-            var authState = await authenticationState;
-            user = authState.User;
+            loading = true;
 
             if (user.Identity!.IsAuthenticated)
             {
@@ -76,7 +70,7 @@ else
                     app.Sales = await api.Get<SaleVO>();
 
                 if (app.User.Id == 0)
-                    app.User = await api.GetUserByUsername(user.FindFirst("unique_name")?.Value);
+                    app.User = await auth.GetUser(user.FindFirst("unique_name")?.Value);
 
                 StateHasChanged();
             }
