@@ -97,7 +97,7 @@ else
     {
         try
         {
-            var confirmation = await ShowDialog.ShowDialogAsync("Tem certeza que deseja deletar esse usuário?.", "Confirmação", state:EDialogStates.Warning, showCancel: true, showYes: true);
+            var confirmation = await ShowDialog.ShowDialogAsync("Tem certeza que deseja deletar esse usuário?", "Confirmação", state:EDialogStates.Warning, showCancel: true, showYes: true);
 
             if (!confirmation)
                 return;
@@ -118,7 +118,7 @@ else
         {
             loading = false;
 
-            await ShowDialog.ShowDialogAsync($"Falha atualizando o usuáriozn{ex.Message}", "Erro", state: EDialogStates.Warning);
+            await ShowDialog.ShowDialogAsync($"Falha atualizando o usuário\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
     }
 
@@ -136,7 +136,7 @@ else
 
     private async Task<List<User>> GetUsers()
     {
-        var users = await api.GetAllUsers();
+        var users = await auth.GetUser();
 
         users.RemoveAll(user => user.Id == app.User.Id);
 

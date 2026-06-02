@@ -89,5 +89,20 @@ namespace SmartStorage.Blazor.Services
                 throw;
             }
         }
+
+        public async Task<List<User>> GetUser()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(BasePath))
+                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+
+                return await http.GetFromJsonAsync<List<User>>($"{BasePath}");  
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

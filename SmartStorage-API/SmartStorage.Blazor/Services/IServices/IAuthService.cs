@@ -8,5 +8,6 @@ namespace SmartStorage.Blazor.Services.IServices
         Task Login(UserVO user);
         Task Logout();
         Task<User> GetUser(string userName);
+        Task<List<User>> GetUser();
     }
 }
