@@ -11,5 +11,6 @@ namespace SmartStorage.Blazor.Services.IServices
         Task<List<User>> GetUser();
         Task<User> GetUser(int userId);
         Task<AccountCredentialsVO> RegisterUser(AccountCredentialsVO account);
+        Task<User> EditUser(User user);
     }
 }

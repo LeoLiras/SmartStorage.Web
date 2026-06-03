@@ -40,10 +40,6 @@ namespace SmartStorage.Blazor.Utils.API
 
         private string authEndpoint = "api/storage/auth";
 
-        private string registerEndpoint = "api/storage/auth/create";
-
-        private string updateCredentialsEndpoint = "api/storage/auth/update-credentials";
-
         #endregion
 
         #region Methods
@@ -302,30 +298,6 @@ namespace SmartStorage.Blazor.Utils.API
         }
 
         //=========================== Metódos relativos a autenticação ===========================
-
-        public async Task<User> PostEditUser(User user)
-        {
-            var url = updateCredentialsEndpoint;
-
-            if (user == null)
-                throw new ArgumentNullException(nameof(user), message: "O parâmetro User é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.PostAsJsonAsync(url, user);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<User>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
 
         public async void DeleteUser(long id)
         {

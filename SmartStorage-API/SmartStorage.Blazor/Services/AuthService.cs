@@ -158,5 +158,32 @@ namespace SmartStorage.Blazor.Services
                 throw;
             }
         }
+
+        public async Task<User> EditUser(User user)
+        {
+            try
+            {
+                if (user is null)
+                    throw new ArgumentNullException(nameof(user), message: "Os dados do usuário são obrigatórios.");
+
+                if (string.IsNullOrWhiteSpace(BasePath))
+                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+
+                var response = await http.PostAsJsonAsync($"{BasePath}/update-credentials", user);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<User>();
+                }
+                else
+                {
+                    throw new ApiException(400, $"Erro ao editar dados do usuário {user.Username}.");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -6,7 +6,6 @@
 @using System.Text.RegularExpressions
 @using System.Security.Claims
 
-@inject ApiExtensions api
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 @inject IAuthService auth
@@ -102,7 +101,7 @@ else
 
             loading = true;
 
-            var result = await api.PostEditUser(user);
+            var result = await auth.EditUser(user);
 
             await ShowDialog.ShowDialogAsync("Usuário atualizado com sucesso.", "Sucesso", "user/account", EDialogStates.Success);
 

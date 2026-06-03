@@ -124,6 +124,8 @@ else
 
     private async void Logout()
     {
+        app.User = new();
+
         await auth.Logout();
 
         await ShowDialog.ShowDialogAsync("Logout realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
