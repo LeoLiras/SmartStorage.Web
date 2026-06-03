@@ -185,5 +185,23 @@ namespace SmartStorage.Blazor.Services
                 throw;
             }
         }
+
+        public async Task DeleteUser(int userId)
+        {
+            try
+            {
+                if (userId == 0)
+                    throw new ArgumentNullException(nameof(userId), message: "O ID do usuário é obrigatório.");
+
+                if (string.IsNullOrWhiteSpace(BasePath))
+                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+
+                var response = await http.DeleteAsync($"{BasePath}/{userId}");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

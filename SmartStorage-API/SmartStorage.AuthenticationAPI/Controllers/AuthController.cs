@@ -67,19 +67,12 @@ namespace SmartStorage.AuthenticationAPI.Controllers
         [HttpDelete("{userId}")]
         public IActionResult DeleteUser(int userId)
         {
-            try
-            {
-                if (userId.Equals(0))
-                    throw new Exception("O campo ID do Usuário é obrigatório.");
+            if (userId.Equals(0))
+                return BadRequest("O campo ID do Usuário é obrigatório.");
 
-                _userAuthService.DeleteUser(userId);
+            _userAuthService.DeleteUser(userId);
 
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok();
         }
 
         [HttpPost("signin")]

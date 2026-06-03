@@ -4,7 +4,6 @@
 
 @using System.Security.Claims
 
-@inject ApiExtensions api
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 @inject IAuthService auth
@@ -104,7 +103,7 @@ else
 
             loading = true;
 
-            api.DeleteUser(userId);
+            await auth.DeleteUser((int)userId);
 
             await ShowDialog.ShowDialogAsync("Usuário deletado com sucesso.", title:"Sucesso", state:EDialogStates.Success);
 
