@@ -1,12 +1,9 @@
-﻿using SmartStorage.Blazor.Enums;
-using SmartStorage.Shared.VO;
-using SmartStorage_Shared.Model;
-using SmartStorage_Shared.VO;
+﻿using SmartStorage_Shared.VO;
 using System.Net.Http.Json;
 
 namespace SmartStorage.Blazor.Utils.API
 {
-    
+
     public class ApiExtensions
     {
         #region Properties
@@ -75,7 +72,7 @@ namespace SmartStorage.Blazor.Utils.API
                 var error = await response.Content.ReadAsStringAsync();
 
                 throw new ApiException((int)response.StatusCode, error);
-            }  
+            }
         }
 
         /// <summary>
@@ -254,38 +251,6 @@ namespace SmartStorage.Blazor.Utils.API
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<TVO>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        /// <summary>
-        /// Requisição GET para gerar o relatório excel de vendas do mês corrente
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ApiException"></exception>
-        public async Task<byte[]> GetSalesReport(FileTypes fileType)
-        {
-            var url = "";
-
-            if (fileType == FileTypes.Excel)
-                url = $"{salesEndpoint}/export-excel";
-            else
-                url = $"{salesEndpoint}/export-pdf";
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadAsByteArrayAsync();
             }
             else
             {
