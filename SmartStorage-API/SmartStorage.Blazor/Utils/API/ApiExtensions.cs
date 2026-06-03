@@ -303,30 +303,6 @@ namespace SmartStorage.Blazor.Utils.API
 
         //=========================== Metódos relativos a autenticação ===========================
 
-        public async Task<AccountCredentialsVO> PostRegisterUser(AccountCredentialsVO credentials)
-        {
-            var url = registerEndpoint;
-
-            if (credentials == null)
-                throw new ArgumentNullException(nameof(credentials), message: "As credenciais do usuário são obrigatórias.");
-
-            if (string.IsNullOrWhiteSpace(url))
-                throw new ArgumentNullException(nameof(url), message: "O parâmetro URL é obrigatório.");
-
-            var response = await _http.PostAsJsonAsync(url, credentials);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<AccountCredentialsVO>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
         public async Task<User> PostEditUser(User user)
         {
             var url = updateCredentialsEndpoint;

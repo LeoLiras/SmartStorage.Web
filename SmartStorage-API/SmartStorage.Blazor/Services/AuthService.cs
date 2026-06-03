@@ -110,7 +110,7 @@ namespace SmartStorage.Blazor.Services
             try
             {
                 if (userId == 0)
-                    throw new ArgumentNullException(nameof(userId), message: "O ID do usuário são obrigatórias.");
+                    throw new ArgumentNullException(nameof(userId), message: "O ID do usuário é obrigatório.");
 
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
@@ -124,6 +124,33 @@ namespace SmartStorage.Blazor.Services
                 else
                 {
                     throw new ApiException(404, $"Usuário não encontrado com o ID:{userId}");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<AccountCredentialsVO> RegisterUser(AccountCredentialsVO account)
+        {
+            try
+            {
+                if (account is null)
+                    throw new ArgumentNullException(nameof(account), message: "Os dados do usuário são obrigatórios.");
+
+                if (string.IsNullOrWhiteSpace(BasePath))
+                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+
+                var response = await http.PostAsJsonAsync($"{BasePath}/create", account);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<AccountCredentialsVO>();
+                }
+                else
+                {
+                    throw new ApiException(400, $"Erro ao criar usuário {account.Username}.");
                 }
             }
             catch (Exception)
