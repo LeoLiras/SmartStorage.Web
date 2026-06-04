@@ -5,27 +5,27 @@
       {
         "Path": "SmartStorage-API\\SmartStorage.API.csproj",
         "Action": "Start",
-        "DebugTarget": "http"
+        "DebugTarget": "https"
       },
       {
         "Path": "SmartStorage.Blazor\\SmartStorage.Blazor.csproj",
         "Action": "Start",
-        "DebugTarget": "http"
+        "DebugTarget": "https"
       },
       {
         "Path": "SmartStorage.AIAPI\\SmartStorage.AIAPI.csproj",
         "Action": "Start",
-        "DebugTarget": "http"
+        "DebugTarget": "https"
       },
       {
         "Path": "SmartStorage.ReportsAPI\\SmartStorage.ReportsAPI.csproj",
         "Action": "Start",
-        "DebugTarget": "http"
+        "DebugTarget": "https"
       },
       {
         "Path": "SmartStorage.EmailAPI\\SmartStorage.EmailAPI.csproj",
         "Action": "Start",
-        "DebugTarget": "http"
+        "DebugTarget": "https"
       },
       {
         "Path": "SmartStorage.APIGateway\\SmartStorage.APIGateway.csproj",

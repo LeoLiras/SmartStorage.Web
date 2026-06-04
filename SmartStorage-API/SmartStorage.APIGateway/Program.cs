@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddPolicyConfig("Blazor", ["http://localhost:5001"]);
+builder.Services.AddPolicyConfig("Blazor", ["https://localhost:5000"]);
 
 builder.Services.AddOcelot();
 
