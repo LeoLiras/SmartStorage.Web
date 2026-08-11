@@ -16,7 +16,7 @@ services:
       start_period: 30s
 
   rabbitmq:
-    image: rabbitmq:4-management
+    image: rabbitmq:3.13-management
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
@@ -55,6 +55,26 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+
+  emailapi:
+    build:
+      context: ./SmartStorage-API
+      dockerfile: SmartStorage.EmailAPI/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__SqlServerConnection: "Server=sqlserver,1433;Database=SmartStorageWeb.db;User Id=sa;Password=${SQLSERVER_SA_PASSWORD};TrustServerCertificate=True;"
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__UserName: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      Email__Username: ${EMAIL_USERNAME}
+      Email__Password: ${EMAIL_PASSWORD}
+    ports:
+      - "5107:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
 
 volumes:
   sqlserver-data:
