@@ -42,5 +42,19 @@ services:
       rabbitmq:
         condition: service_started
 
+  authenticationapi:
+    build:
+      context: ./SmartStorage-API
+      dockerfile: SmartStorage.AuthenticationAPI/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__SqlServerConnection: "Server=sqlserver,1433;Database=SmartStorageWeb.db;User Id=sa;Password=${SQLSERVER_SA_PASSWORD};TrustServerCertificate=True;"
+      TokenConfigurations__Secret: ${JWT_SECRET}
+    ports:
+      - "5202:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
 volumes:
   sqlserver-data:
