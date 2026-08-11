@@ -57,3 +57,6 @@ nunit-*.xml
 # Ignora apenas os arquivos .csproj.user
 *.csproj.user
 
+# Docker env (contém segredos locais)
+.env
+
