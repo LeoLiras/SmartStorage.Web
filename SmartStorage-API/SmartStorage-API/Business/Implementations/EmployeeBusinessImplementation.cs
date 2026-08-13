@@ -104,7 +104,7 @@ namespace SmartStorage_API.Service.Implementations
             {
                 foreach (var product in products)
                 {
-                    product.ProEmpId = 0;
+                    product.ProEmpId = null;
                 }
             }
 
