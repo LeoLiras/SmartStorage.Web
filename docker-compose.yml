@@ -23,6 +23,12 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   smartstorage-api:
     build:
@@ -41,7 +47,7 @@ services:
       sqlserver:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
 
   authenticationapi:
     build:
@@ -76,7 +82,7 @@ services:
       sqlserver:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
 
   aiapi:
     build:
@@ -106,6 +112,24 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+
+  apigateway:
+    build:
+      context: ./SmartStorage-API
+      dockerfile: SmartStorage.APIGateway/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+    ports:
+      - "4480:8080"
+    depends_on:
+      authenticationapi:
+        condition: service_started
+      emailapi:
+        condition: service_started
+      aiapi:
+        condition: service_started
+      reportsapi:
+        condition: service_started
 
 volumes:
   sqlserver-data:
