@@ -10,6 +10,8 @@ QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddSharedConfiguration();
+
 // Add services to the container.
 
 builder.Services.AddControllers();

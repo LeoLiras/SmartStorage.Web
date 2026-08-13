@@ -19,6 +19,11 @@ namespace SmartStorage.Configurations.Config
             configuration.GetSection("TokenConfigurations")
                 .Bind(tokenConfigurations);
 
+            if (string.IsNullOrWhiteSpace(tokenConfigurations.Secret))
+                throw new InvalidOperationException(
+                    "TokenConfigurations:Secret não configurado. Defina a chave na configuração " +
+                    "ou pela variável de ambiente TokenConfigurations__Secret.");
+
             services.AddSingleton(tokenConfigurations);
 
             services.AddAuthentication(options =>
@@ -37,10 +42,10 @@ namespace SmartStorage.Configurations.Config
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = "ExampleIssuer",
-                        ValidAudience = "ExampleAudience",
+                        ValidIssuer = tokenConfigurations.Issuer,
+                        ValidAudience = tokenConfigurations.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes("THIS_IS_LEONARDO_SUPER_SUPER_SECRET_KEY"))
+                            Encoding.UTF8.GetBytes(tokenConfigurations.Secret))
                     };
             });
 

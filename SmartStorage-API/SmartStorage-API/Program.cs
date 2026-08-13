@@ -10,6 +10,8 @@ using SmartStorage_API.Service.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddSharedConfiguration();
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

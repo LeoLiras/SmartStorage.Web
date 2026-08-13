@@ -6,6 +6,8 @@ using SmartStorage.Shared.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddSharedConfiguration();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
