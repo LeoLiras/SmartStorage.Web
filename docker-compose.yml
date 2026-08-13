@@ -30,6 +30,17 @@ services:
       retries: 10
       start_period: 30s
 
+  migrator:
+    build:
+      context: ./SmartStorage-API
+      dockerfile: SmartStorage.Infraestructure/Dockerfile
+    environment:
+      ConnectionStrings__SqlServerConnection: "Server=sqlserver,1433;Database=SmartStorageWeb.db;User Id=sa;Password=${SQLSERVER_SA_PASSWORD};TrustServerCertificate=True;"
+    restart: "no"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
   smartstorage-api:
     build:
       context: ./SmartStorage-API
@@ -49,6 +60,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
 
   authenticationapi:
     build:
@@ -63,6 +76,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
 
   emailapi:
     build:
@@ -84,6 +99,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
 
   aiapi:
     build:
@@ -99,6 +116,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
 
   reportsapi:
     build:
@@ -113,6 +132,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
 
   apigateway:
     build:
