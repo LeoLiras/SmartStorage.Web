@@ -10,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddPolicyConfig("Blazor", ["https://localhost:5000"]);
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+builder.Services.AddPolicyConfig("Blazor", allowedOrigins);
 
 builder.Services.AddOcelot();
 
