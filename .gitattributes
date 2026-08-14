@@ -1,0 +1,30 @@
+# Sem este arquivo o final de linha depende do core.autocrlf de cada maquina que
+# clona o repositorio. Com ele a regra passa a morar no proprio repositorio e o
+# resultado fica igual em qualquer clone, no Windows ou no Linux.
+
+# Normaliza todo arquivo de texto para LF no historico. O working copy continua
+# recebendo o final de linha nativo do sistema, entao no Windows os fontes seguem
+# em CRLF na sua pasta - isso e esperado e nao vira diff.
+* text=auto
+
+# Excecoes: arquivos lidos de dentro dos containers Linux precisam de LF tambem
+# no disco, nao so no historico. Um CRLF aqui aparece como caractere invisivel no
+# fim de cada linha e vira erro de sintaxe ou "command not found" dentro da imagem.
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.sh            text eol=lf
+*.conf          text eol=lf
+Dockerfile      text eol=lf
+.dockerignore   text eol=lf
+.env.example    text eol=lf
+.gitattributes  text eol=lf
+.gitignore      text eol=lf
+
+# Binarios: nunca converter, sob risco de corromper o arquivo.
+*.png   binary
+*.gif   binary
+*.ico   binary
+*.ttf   binary
+*.eot   binary
+*.woff  binary
+*.woff2 binary
