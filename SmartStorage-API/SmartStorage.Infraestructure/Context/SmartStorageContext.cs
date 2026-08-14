@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartStorage_API.Model.Context.Seed;
 using SmartStorage_Shared.Model;
 
 namespace SmartStorage_API.Model.Context;
@@ -64,6 +65,8 @@ public partial class SmartStorageContext : DbContext
             entity.Property(x => x.UseType).HasConversion<byte>().IsRequired();
             entity.ToTable(t => t.HasCheckConstraint("CK_User_Tipo", "[UseType] IN (0, 1)"));
         });
+
+        modelBuilder.Seed();
 
         OnModelCreatingPartial(modelBuilder);
     }
