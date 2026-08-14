@@ -9,7 +9,16 @@ services:
     volumes:
       - sqlserver-data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      # Responder no master nao significa que o banco da aplicacao esta usavel:
+      # num restart com o volume ja populado o SQL Server aceita conexao antes
+      # de terminar a recuperacao do SmartStorageWeb.db, e o migrator, achando
+      # que o banco nao existe, tenta um CREATE DATABASE e falha. Por isso o
+      # check exige tambem que nenhum banco de usuario (database_id > 4) esteja
+      # fora do estado ONLINE. Na primeira subida nao ha banco de usuario algum,
+      # a condicao passa direto e o migrator cria o banco normalmente.
+      # O -b e obrigatorio: sem ele o sqlcmd sai com codigo 0 mesmo em erro de
+      # T-SQL, e o RAISERROR passaria despercebido.
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -b -Q \"SET NOCOUNT ON; IF EXISTS (SELECT 1 FROM sys.databases WHERE database_id > 4 AND state_desc <> 'ONLINE') RAISERROR('banco de usuario ainda em recuperacao', 16, 1); SELECT 1\" || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
