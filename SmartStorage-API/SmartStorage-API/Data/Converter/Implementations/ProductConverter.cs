@@ -34,7 +34,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 Descricao = origin.ProDescription,
                 DateRegister = origin.ProDateRegister,
                 Qntd = origin.ProQntd,
-                EmployeeId = origin.ProEmpId ?? 0,
+                EmployeeId = origin.ProEmpId,
                 ProImage = origin.ProImage,
             };
         }

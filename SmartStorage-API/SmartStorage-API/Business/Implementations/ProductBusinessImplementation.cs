@@ -88,14 +88,12 @@ namespace SmartStorage_API.Service.Implementations
             if (employee == null)
                 throw new Exception("Colaborador com o ID informado não encontrado.");
 
-            if (!product.EmployeeId.Equals(0))
-                searchProduct.ProEmpId = product.EmployeeId;
+            searchProduct.ProEmpId = product.EmployeeId;
 
             if (!string.IsNullOrWhiteSpace(product.Name))
                 searchProduct.ProName = product.Name;
 
-            if (!product.EmployeeId.Equals(0))
-                searchProduct.ProQntd = product.Qntd;
+            searchProduct.ProQntd = product.Qntd;
 
             if (!string.IsNullOrWhiteSpace(product.Descricao))
                 searchProduct.ProDescription = product.Descricao;

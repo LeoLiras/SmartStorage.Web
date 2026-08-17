@@ -43,12 +43,12 @@ else if(product is not null)
             <MudItem xs="12" sm="12" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudSelect T="int" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
+                        <MudSelect T="int?" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
                             @if(employees is not null)
                             {
                                 foreach (var emp in employees)
                                 {
-                                    <MudSelectItem Value="@emp.Id">@emp.Name</MudSelectItem>
+                                    <MudSelectItem T="int?" Value="@((int?)emp.Id)">@emp.Name</MudSelectItem>
                                 }
                             }
                         </MudSelect>
