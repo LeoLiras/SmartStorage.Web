@@ -20,6 +20,8 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddControllers();
 
+builder.Services.AddHealthChecks();
+
 var filterOptions = new HyperMediaFilterOptions();
 filterOptions.ContentResponseEnricherList.Add(new EmployeeEnricher());
 filterOptions.ContentResponseEnricherList.Add(new ProductEnricher());

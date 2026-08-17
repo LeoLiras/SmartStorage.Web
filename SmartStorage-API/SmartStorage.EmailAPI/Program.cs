@@ -14,6 +14,8 @@ builder.Configuration.AddSharedConfiguration();
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddHealthChecks();
 builder.Services.AddApiVersioning();
 
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);

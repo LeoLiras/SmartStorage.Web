@@ -16,6 +16,8 @@ builder.Configuration.AddSharedConfiguration();
 
 builder.Services.AddControllers();
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddApiVersioning();
 
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);

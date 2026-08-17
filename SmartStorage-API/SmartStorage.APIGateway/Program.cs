@@ -10,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+builder.Services.AddHealthChecks();
+
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 builder.Services.AddPolicyConfig("Blazor", allowedOrigins);
 
@@ -18,6 +20,8 @@ builder.Services.AddOcelot();
 var app = builder.Build();
 
 app.UseCors("Blazor");
+
+app.UseHealthChecks("/health");
 
 // Configure the HTTP request pipeline.
 

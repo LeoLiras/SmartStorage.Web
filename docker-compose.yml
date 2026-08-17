@@ -1,3 +1,17 @@
+# As imagens dotnet/aspnet nao trazem curl nem wget, mas trazem bash, que abre
+# conexao TCP pelo /dev/tcp. O printf monta um GET no /health na mao e o grep
+# exige o 200 na status line: sem ele o check passaria com um 404, ja que o
+# servidor teria respondido do mesmo jeito.
+x-dotnet-healthcheck: &dotnet-healthcheck
+  test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3"]
+  interval: 30s
+  timeout: 5s
+  retries: 3
+  # Sem o start_interval o primeiro check so aconteceria 30s depois de subir, e
+  # cada nivel do depends_on pagaria essa espera antes de liberar o proximo.
+  start_period: 20s
+  start_interval: 2s
+
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -64,6 +78,7 @@ services:
       AllowedOrigins__0: http://localhost:5000
     ports:
       - "5100:8080"
+    healthcheck: *dotnet-healthcheck
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -82,6 +97,7 @@ services:
       TokenConfigurations__Secret: ${JWT_SECRET}
     ports:
       - "5202:8080"
+    healthcheck: *dotnet-healthcheck
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -103,6 +119,7 @@ services:
       TokenConfigurations__Secret: ${JWT_SECRET}
     ports:
       - "5107:8080"
+    healthcheck: *dotnet-healthcheck
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -122,6 +139,7 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
     ports:
       - "5103:8080"
+    healthcheck: *dotnet-healthcheck
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -138,6 +156,7 @@ services:
       TokenConfigurations__Secret: ${JWT_SECRET}
     ports:
       - "5105:8080"
+    healthcheck: *dotnet-healthcheck
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -152,15 +171,16 @@ services:
       ASPNETCORE_ENVIRONMENT: Docker
     ports:
       - "4480:8080"
+    healthcheck: *dotnet-healthcheck
     depends_on:
       authenticationapi:
-        condition: service_started
+        condition: service_healthy
       emailapi:
-        condition: service_started
+        condition: service_healthy
       aiapi:
-        condition: service_started
+        condition: service_healthy
       reportsapi:
-        condition: service_started
+        condition: service_healthy
 
   blazor:
     build:
@@ -168,9 +188,17 @@ services:
       dockerfile: SmartStorage.Blazor/Dockerfile
     ports:
       - "5000:8080"
+    # A imagem alpine do nginx, ao contrario das de dotnet, ja tem wget.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+      start_interval: 2s
     depends_on:
       apigateway:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
   sqlserver-data:

@@ -7,6 +7,8 @@ namespace SmartStorage.Shared.Config
     {
         public static IApplicationBuilder UseApiDefaults(this IApplicationBuilder app, string apiName, string apiVersion, string apiCors = "")
         {
+            app.UseHealthChecks("/health");
+
             app.UseRouting();
 
             if (!string.IsNullOrWhiteSpace(apiCors))
