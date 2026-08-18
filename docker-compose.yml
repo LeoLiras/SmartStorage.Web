@@ -75,7 +75,6 @@ services:
       RabbitMQ__UserName: ${RABBITMQ_USER}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
       TokenConfigurations__Secret: ${JWT_SECRET}
-      AllowedOrigins__0: http://localhost:5000
     ports:
       - "5100:8080"
     healthcheck: *dotnet-healthcheck
