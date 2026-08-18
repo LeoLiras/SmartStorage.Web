@@ -20,8 +20,8 @@ O foco do projeto não é o domínio em si — é a **arquitetura**. Cada respon
 | | |
 |---|---|
 | **7 serviços** de aplicação | **10 containers** orquestrados |
-| **~16.000 linhas** de C# e Razor | **11 rotas** roteadas pelo gateway |
-| **345 commits** desde abril de 2025 | **1 comando** para subir tudo |
+| **~16.000 linhas** de C# e Razor | **35 rotas** roteadas pelo gateway |
+| **353 commits** desde abril de 2025 | **1 comando** para subir tudo |
 
 ---
 
@@ -49,8 +49,7 @@ flowchart TB
         MIG["migrator<br/>EF bundle"]
     end
 
-    UI --> GW
-    UI -- "acesso direto" --> CORE
+    UI -- "todo o tráfego" --> GW
     GW --> AUTH
     GW --> CORE
     GW --> REP
@@ -66,7 +65,7 @@ flowchart TB
     MIG == "migrations + seed" ==> DB
 ```
 
-O **gateway** concentra roteamento e CORS para os serviços de autenticação, relatórios, IA e e-mail, enquanto a API core é acessada diretamente pelo front.
+O **gateway** é a única porta de entrada: o front não conhece o endereço de nenhum serviço, só o dele. São 35 rotas mapeadas no Ocelot — o CRUD completo do domínio mais autenticação, relatórios, IA e e-mail —, o que deixa CORS, roteamento e a superfície exposta ao navegador em um lugar só.
 
 A comunicação entre serviços é assíncrona onde faz sentido: criar um produto publica um evento no **RabbitMQ**, e o envio de e-mail acontece fora do ciclo da requisição — o usuário não espera pelo SMTP.
 
@@ -119,7 +118,7 @@ Em vez de rodar migrations pela aplicação — o que daria a cinco serviços pe
 Todo serviço usa *multi-stage build* (`sdk` → `aspnet`), roda como usuário **não-root** e expõe 8080. O Blazor, por ser WebAssembly, termina em `nginx-unprivileged` servindo arquivos estáticos, com `try_files` para as rotas do SPA sobreviverem a um F5.
 
 **Configuração por ambiente.**
-As rotas do Ocelot e as origens de CORS trocam de valor via `appsettings.Docker.json`, ativado por `ASPNETCORE_ENVIRONMENT` — sem precisar sobrescrever dezenas de chaves aninhadas por variável de ambiente. Senhas, chave JWT e credenciais entram por variável de ambiente a partir de um `.env` fora do versionamento, com a precedência montada para que o ambiente sempre vença o arquivo.
+As rotas do Ocelot e as origens de CORS trocam de valor via `appsettings.Docker.json`, ativado por `ASPNETCORE_ENVIRONMENT` — sem precisar sobrescrever dezenas de chaves aninhadas por variável de ambiente. Nenhuma credencial mora em `appsettings`: no Docker elas entram por variável de ambiente a partir de um `.env` fora do versionamento, e fora dele vêm dos *user secrets* de cada projeto — com a precedência montada para que o ambiente sempre vença o arquivo.
 
 **Banco que nasce utilizável.**
 O seed é declarado por `HasData` no `OnModelCreating`, então viaja junto com as migrations e é aplicado pelo mesmo `migrator` — sem passo manual e sem serviço extra. Um `docker compose up` em máquina limpa entrega um banco com usuário administrador e estoque de exemplo pronto para navegar.
