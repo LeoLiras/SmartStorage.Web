@@ -149,6 +149,23 @@ Cerca de 20 segundos depois, o sistema está no ar em **http://localhost:5000**.
 O banco já sobe com colaboradores, prateleiras, produtos e suas alocações — dá para navegar por tudo sem cadastrar nada antes.
 
 <details>
+<summary><b>Rodando fora do Docker (Visual Studio / <code>dotnet run</code>)</b></summary>
+
+Os `appsettings.json` não guardam credenciais. A connection string, o segredo do JWT e as credenciais de e-mail ficam em [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets), fora do repositório, e cada projeto executável precisa dos seus:
+
+```bash
+cd SmartStorage-API
+dotnet user-secrets set "ConnectionStrings:SqlServerConnection" "<sua connection string>" -p SmartStorage-API/SmartStorage.API.csproj
+dotnet user-secrets set "TokenConfigurations:Secret" "<segredo do JWT>" -p SmartStorage-API/SmartStorage.API.csproj
+```
+
+O mesmo para `SmartStorage.AIAPI`, `SmartStorage.AuthenticationAPI` e `SmartStorage.ReportsAPI`. O `SmartStorage.EmailAPI` usa `TokenConfigurations:Secret`, `Email:Username` e `Email:Password`. O segredo do JWT precisa ser **o mesmo em todos** — é ele que assina e valida os tokens.
+
+No Docker nada disso é necessário: o compose injeta tudo por variável de ambiente a partir do `.env`.
+
+</details>
+
+<details>
 <summary><b>Portas expostas</b></summary>
 
 | Serviço | Porta |
