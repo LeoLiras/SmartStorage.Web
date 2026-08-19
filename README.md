@@ -158,7 +158,7 @@ dotnet user-secrets set "ConnectionStrings:SqlServerConnection" "<sua connection
 dotnet user-secrets set "TokenConfigurations:Secret" "<segredo do JWT>" -p SmartStorage-API/SmartStorage.API.csproj
 ```
 
-O mesmo para `SmartStorage.AIAPI`, `SmartStorage.AuthenticationAPI` e `SmartStorage.ReportsAPI`. O `SmartStorage.EmailAPI` usa `TokenConfigurations:Secret`, `Email:Username` e `Email:Password`. O segredo do JWT precisa ser **o mesmo em todos** — é ele que assina e valida os tokens.
+O mesmo para `SmartStorage.AIAPI`, `SmartStorage.AuthenticationAPI` e `SmartStorage.ReportsAPI`. O `SmartStorage.EmailAPI` usa `TokenConfigurations:Secret`, `Email:Username`, `Email:Password` e `Email:Destinatario` (o endereço que recebe a notificação de novo produto). O segredo do JWT precisa ser **o mesmo em todos** — é ele que assina e valida os tokens.
 
 No Docker nada disso é necessário: o compose injeta tudo por variável de ambiente a partir do `.env`.
 

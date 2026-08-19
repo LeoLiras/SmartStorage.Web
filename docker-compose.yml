@@ -115,6 +115,7 @@ services:
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
       Email__Username: ${EMAIL_USERNAME}
       Email__Password: ${EMAIL_PASSWORD}
+      Email__Destinatario: ${EMAIL_DESTINATARIO}
       TokenConfigurations__Secret: ${JWT_SECRET}
     ports:
       - "5107:8080"

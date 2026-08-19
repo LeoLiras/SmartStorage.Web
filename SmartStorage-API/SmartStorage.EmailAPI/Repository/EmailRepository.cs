@@ -14,6 +14,7 @@ namespace SmartStorage.EmailAPI.Repository
         public string Provedor { get; private set; }
         public string Username { get; private set; }
         public string Password { get; private set; }
+        public string Destinatario { get; private set; }
         
         #endregion
 
@@ -24,6 +25,7 @@ namespace SmartStorage.EmailAPI.Repository
             Provedor = options.Value.Provedor;
             Username = options.Value.Username;
             Password = options.Value.Password;
+            Destinatario = options.Value.Destinatario;
         }
 
         #endregion
@@ -43,9 +45,9 @@ namespace SmartStorage.EmailAPI.Repository
 
             var message = new MimeMessage();
 
-            message.From.Add(new MailboxAddress("Leonardo", "testessm1@outlook.com"));
-            message.To.Add(new MailboxAddress("Destino", "leonardo018.siqueira@hotmail.com"));
-            message.Subject = "Teste MailKit";
+            message.From.Add(new MailboxAddress("SmartStorage", Username));
+            message.To.Add(new MailboxAddress("Destino", Destinatario));
+            message.Subject = subject;
 
             message.Body = new TextPart("plain")
             {
