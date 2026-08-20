@@ -140,6 +140,8 @@ docker compose up -d
 
 Cerca de 20 segundos depois, o sistema está no ar em **http://localhost:5000**.
 
+As imagens de todos os serviços estão publicadas em [hub.docker.com/u/lelep0](https://hub.docker.com/u/lelep0), então o `up` acima baixa em vez de buildar. Cada imagem tem a tag `latest` e uma tag com o hash do commit que a gerou — para fixar uma versão, basta apontar `IMAGE_TAG` no `.env` para esse hash. Para buildar localmente em vez de baixar, use `docker compose up -d --build`.
+
 | Acesso | |
 |---|---|
 | **Usuário** | `admin` |
@@ -161,6 +163,20 @@ dotnet user-secrets set "TokenConfigurations:Secret" "<segredo do JWT>" -p Smart
 O mesmo para `SmartStorage.AIAPI`, `SmartStorage.AuthenticationAPI` e `SmartStorage.ReportsAPI`. O `SmartStorage.EmailAPI` usa `TokenConfigurations:Secret`, `Email:Username`, `Email:Password` e `Email:Destinatario` (o endereço que recebe a notificação de novo produto). O segredo do JWT precisa ser **o mesmo em todos** — é ele que assina e valida os tokens.
 
 No Docker nada disso é necessário: o compose injeta tudo por variável de ambiente a partir do `.env`.
+
+</details>
+
+<details>
+<summary><b>Publicando novas imagens no Docker Hub</b></summary>
+
+```bash
+docker login
+IMAGE_TAG=$(git rev-parse --short HEAD) docker compose build
+IMAGE_TAG=$(git rev-parse --short HEAD) docker compose push
+IMAGE_TAG=latest docker compose build && IMAGE_TAG=latest docker compose push
+```
+
+O `build` e o `push` do compose usam o nome declarado em `image:` de cada serviço, então não é preciso taguear as oito imagens à mão. O `sqlserver` e o `rabbitmq` são ignorados no push por não terem `build`.
 
 </details>
 

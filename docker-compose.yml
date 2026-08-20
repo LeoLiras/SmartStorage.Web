@@ -54,6 +54,7 @@ services:
       start_period: 30s
 
   migrator:
+    image: lelep0/smartstorage-migrator:${IMAGE_TAG:-latest}
     build:
       context: ./SmartStorage-API
       dockerfile: SmartStorage.Infraestructure/Dockerfile
@@ -65,6 +66,7 @@ services:
         condition: service_healthy
 
   smartstorage-api:
+    image: lelep0/smartstorage-api:${IMAGE_TAG:-latest}
     build:
       context: ./SmartStorage-API
       dockerfile: SmartStorage-API/Dockerfile
@@ -87,6 +89,7 @@ services:
         condition: service_completed_successfully
 
   authenticationapi:
+    image: lelep0/smartstorage-authapi:${IMAGE_TAG:-latest}
     build:
       context: ./SmartStorage-API
       dockerfile: SmartStorage.AuthenticationAPI/Dockerfile
@@ -104,6 +107,7 @@ services:
         condition: service_completed_successfully
 
   emailapi:
+    image: lelep0/smartstorage-emailapi:${IMAGE_TAG:-latest}
     build:
       context: ./SmartStorage-API
       dockerfile: SmartStorage.EmailAPI/Dockerfile
@@ -129,6 +133,7 @@ services:
         condition: service_completed_successfully
 
   aiapi:
+    image: lelep0/smartstorage-aiapi:${IMAGE_TAG:-latest}
     build:
       context: ./SmartStorage-API
       dockerfile: SmartStorage.AIAPI/Dockerfile
@@ -147,6 +152,7 @@ services:
         condition: service_completed_successfully
 
   reportsapi:
+    image: lelep0/smartstorage-reportsapi:${IMAGE_TAG:-latest}
     build:
       context: ./SmartStorage-API
       dockerfile: SmartStorage.ReportsAPI/Dockerfile
@@ -164,6 +170,7 @@ services:
         condition: service_completed_successfully
 
   apigateway:
+    image: lelep0/smartstorage-gateway:${IMAGE_TAG:-latest}
     build:
       context: ./SmartStorage-API
       dockerfile: SmartStorage.APIGateway/Dockerfile
@@ -183,6 +190,7 @@ services:
         condition: service_healthy
 
   blazor:
+    image: lelep0/smartstorage-blazor:${IMAGE_TAG:-latest}
     build:
       context: ./SmartStorage-API
       dockerfile: SmartStorage.Blazor/Dockerfile
