@@ -84,13 +84,13 @@ namespace SmartStorage_API.Service.Implementations
                 throw new Exception("Entrada não encontrada com o ID de Venda informado");
 
             if (saleQntd < sale.SalQntd)
-                enter.EntQntd += saleQntd;
+                enter.EntQntd += (sale.SalQntd - saleQntd);
             else
             {
-                var rest = (saleQntd - sale.SalQntd);
+                var additionalQntd = (saleQntd - sale.SalQntd);
 
-                if (enter.EntQntd > rest)
-                    enter.EntQntd -= rest;
+                if (enter.EntQntd >= additionalQntd)
+                    enter.EntQntd -= additionalQntd;
                 else
                     throw new Exception("Não há quantidade suficiente na entrada do Produto para realizar essa atualização");
             }
