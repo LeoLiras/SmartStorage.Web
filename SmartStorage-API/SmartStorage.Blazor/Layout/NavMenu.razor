@@ -11,6 +11,10 @@
             <br />
             <br /> 
             <MudNavLink Href="user/account" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Conta</MudNavLink>
+            @if (context.User.IsInRole("Administrador"))
+            {
+                <MudNavLink Href="user/register" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.PersonAdd">Cadastrar usuário</MudNavLink>
+            }
         </Authorized>
     </AuthorizeView>
 </MudNavMenu>

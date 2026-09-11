@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage.AuthenticationAPI.Services;
+using SmartStorage.Shared.Auth;
 using SmartStorage.Shared.VO;
 using SmartStorage_Shared.Model;
 
@@ -10,6 +11,7 @@ namespace SmartStorage.AuthenticationAPI.Controllers
     [ApiVersion($"{Utils.Utils.apiVersion}")]
     [Route("api/[controller]/v{version:apiVersion}")]
     [ApiController]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly ILoginService _loginService;
@@ -65,6 +67,7 @@ namespace SmartStorage.AuthenticationAPI.Controllers
         }
 
         [HttpDelete("{userId}")]
+        [Authorize(Roles = Role.Admin)]
         public IActionResult DeleteUser(int userId)
         {
             if (userId.Equals(0))
@@ -99,6 +102,7 @@ namespace SmartStorage.AuthenticationAPI.Controllers
         }
 
         [HttpPost("update-credentials")]
+        [Authorize(Roles = Role.Admin)]
         public IActionResult UpdateUserCredentials([FromBody] User user)
         {
             _logger.LogInformation("Attempting to update user: {username}", user.Username);
@@ -150,6 +154,7 @@ namespace SmartStorage.AuthenticationAPI.Controllers
         }
 
         [HttpPost("create")]
+        [Authorize(Roles = Role.Admin)]
         public IActionResult Create([FromBody] AccountCredentialsVO user)
         {
             if (user == null)
