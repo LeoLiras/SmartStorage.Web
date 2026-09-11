@@ -91,16 +91,16 @@ internal static class SeedData
     private static void SeedProducts(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>().HasData(
-            Produto(1, "Furadeira de Impacto 750W", "Furadeira de impacto com mandril de 13mm, velocidade variável e reversão.", 24, 1),
-            Produto(2, "Parafusadeira sem Fio 12V", "Parafusadeira a bateria com duas velocidades, maleta e duas baterias de lítio.", 18, 1),
-            Produto(3, "Serra Circular 1400W", "Serra circular com disco de 184mm e guia paralela para cortes retos.", 9, 2),
-            Produto(4, "Martelo Unha 27mm", "Martelo com cabeça de aço forjado e cabo de fibra de vidro antiderrapante.", 40, 2),
-            Produto(5, "Jogo de Chaves de Fenda", "Conjunto com seis chaves de fenda e philips com cabo emborrachado.", 35, 3),
-            Produto(6, "Trena a Laser 40 Metros", "Medidor de distância a laser com precisão de 2mm e cálculo de área.", 12, 3),
-            Produto(7, "Capacete de Segurança Branco", "Capacete de proteção classe B com carneira ajustável e certificado pelo CA.", 60, 4),
-            Produto(8, "Luva de Proteção Nitrílica", "Par de luvas revestidas em nitrilo para manuseio de peças e ferramentas.", 150, 4),
-            Produto(9, "Óculos de Proteção Incolor", "Óculos de segurança com lente antirrisco e proteção contra impactos.", 90, 5),
-            Produto(10, "Fita Isolante 20 Metros", "Fita isolante antichama de 19mm por 20 metros para emendas elétricas.", 200, 5));
+            Produto(1, "Furadeira de Impacto 750W", "Furadeira de impacto com mandril de 13mm, velocidade variável e reversão.", 14, 1),
+            Produto(2, "Parafusadeira sem Fio 12V", "Parafusadeira a bateria com duas velocidades, maleta e duas baterias de lítio.", 0, 1),
+            Produto(3, "Serra Circular 1400W", "Serra circular com disco de 184mm e guia paralela para cortes retos.", 5, 2),
+            Produto(4, "Martelo Unha 27mm", "Martelo com cabeça de aço forjado e cabo de fibra de vidro antiderrapante.", 0, 2),
+            Produto(5, "Jogo de Chaves de Fenda", "Conjunto com seis chaves de fenda e philips com cabo emborrachado.", 15, 3),
+            Produto(6, "Trena a Laser 40 Metros", "Medidor de distância a laser com precisão de 2mm e cálculo de área.", 0, 3),
+            Produto(7, "Capacete de Segurança Branco", "Capacete de proteção classe B com carneira ajustável e certificado pelo CA.", 35, 4),
+            Produto(8, "Luva de Proteção Nitrílica", "Par de luvas revestidas em nitrilo para manuseio de peças e ferramentas.", 50, 4),
+            Produto(9, "Óculos de Proteção Incolor", "Óculos de segurança com lente antirrisco e proteção contra impactos.", 0, 5),
+            Produto(10, "Fita Isolante 20 Metros", "Fita isolante antichama de 19mm por 20 metros para emendas elétricas.", 80, 5));
     }
 
     private static Product Produto(int id, string nome, string descricao, int quantidade, int funcionarioId) => new()
@@ -122,16 +122,16 @@ internal static class SeedData
     private static void SeedEnters(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Enter>().HasData(
-            Entrada(1, produto: 1, prateleira: 1, quantidade: 24, preco: 289.90m),
+            Entrada(1, produto: 1, prateleira: 1, quantidade: 10, preco: 289.90m),
             Entrada(2, produto: 2, prateleira: 1, quantidade: 18, preco: 349.00m),
-            Entrada(3, produto: 3, prateleira: 1, quantidade: 9, preco: 529.90m),
+            Entrada(3, produto: 3, prateleira: 1, quantidade: 4, preco: 529.90m),
             Entrada(4, produto: 4, prateleira: 2, quantidade: 40, preco: 45.50m),
-            Entrada(5, produto: 5, prateleira: 2, quantidade: 35, preco: 79.90m),
+            Entrada(5, produto: 5, prateleira: 2, quantidade: 20, preco: 79.90m),
             Entrada(6, produto: 6, prateleira: 6, quantidade: 12, preco: 219.00m),
-            Entrada(7, produto: 7, prateleira: 3, quantidade: 60, preco: 32.90m),
-            Entrada(8, produto: 8, prateleira: 3, quantidade: 150, preco: 12.40m),
+            Entrada(7, produto: 7, prateleira: 3, quantidade: 25, preco: 32.90m),
+            Entrada(8, produto: 8, prateleira: 3, quantidade: 100, preco: 12.40m),
             Entrada(9, produto: 9, prateleira: 3, quantidade: 90, preco: 18.75m),
-            Entrada(10, produto: 10, prateleira: 4, quantidade: 200, preco: 8.90m));
+            Entrada(10, produto: 10, prateleira: 4, quantidade: 120, preco: 8.90m));
     }
 
     private static Enter Entrada(int id, int produto, int prateleira, int quantidade, decimal preco) => new()
