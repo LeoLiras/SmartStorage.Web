@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SmartStorage.Shared.Enum;
 using SmartStorage_Shared.Model;
 
@@ -31,21 +31,32 @@ internal static class SeedData
     }
 
     /// <summary>
-    /// Administrador inicial: admin / admin123. A senha vai gravada ja com o
-    /// hash produzido pelo Sha256PasswordHasher da AuthenticationAPI, que e um
-    /// SHA-256 puro em hexadecimal - sem salt, portanto deterministico, o que e
-    /// justamente o que permite fixar o valor aqui.
+    /// Usuarios iniciais: admin / admin123 (Administrador) e usuario / usuario123
+    /// (Usuario), este ultimo para exercitar o que e barrado fora do papel de
+    /// admin. As senhas vao gravadas ja com o hash produzido pelo
+    /// Sha256PasswordHasher da AuthenticationAPI, que e um SHA-256 puro em
+    /// hexadecimal - sem salt, portanto deterministico, o que e justamente o que
+    /// permite fixar os valores aqui.
     /// </summary>
     private static void SeedUsers(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().HasData(new User
-        {
-            Id = 1,
-            Username = "admin",
-            FullName = "Administrador do Sistema",
-            Password = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
-            UseType = TipoUsuario.Administrador
-        });
+        modelBuilder.Entity<User>().HasData(
+            new User
+            {
+                Id = 1,
+                Username = "admin",
+                FullName = "Administrador do Sistema",
+                Password = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+                UseType = TipoUsuario.Administrador
+            },
+            new User
+            {
+                Id = 2,
+                Username = "usuario",
+                FullName = "Usuario de Teste",
+                Password = "dfa7a2273567dcd1efffb9a46308e91c20fa13c44c3441bc69cd6a7869b3f7fd",
+                UseType = TipoUsuario.Usuario
+            });
     }
 
     private static void SeedEmployees(this ModelBuilder modelBuilder)
