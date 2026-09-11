@@ -1,8 +1,10 @@
-using SmartStorage.Configurations.Config;
+﻿using SmartStorage.Configurations.Config;
 using SmartStorage.Configurations.Config.RabbitMQ;
 using SmartStorage.Shared.Config;
 using SmartStorage_API;
 using SmartStorage_API.Hypermedia.Enricher;
+using SmartStorage_API.Repository;
+using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.RabbitMQSender;
 using SmartStorage_API.Service;
@@ -39,6 +41,7 @@ builder.Services.AddScoped<IEmployeeBusiness, EmployeeBusinessImplementation>();
 builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();
 builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
+builder.Services.AddScoped<IProductStockMovementRepository, ProductStockMovementRepository>();
 
 builder.Configuration.AddEnvironmentVariables();
 
