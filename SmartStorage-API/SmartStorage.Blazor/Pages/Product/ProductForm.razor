@@ -30,7 +30,14 @@ else if(product is not null)
                 <div style="display: flex; gap: 8px;">
                     <MudCard>
                         <MudCardContent>
-                            <MudNumericField Label="Quantidade" @bind-Value="product.Qntd" For="(() => product.Qntd)" />
+                            @if (ProductId == 0)
+                            {
+                                <MudNumericField Label="Quantidade" @bind-Value="product.Qntd" For="(() => product.Qntd)" />
+                            }
+                            else
+                            {
+                                <MudNumericField T="int" Label="Quantidade no depósito" Value="product.Qntd" ReadOnly="true" />
+                            }
                         </MudCardContent>
                     </MudCard>
                     <MudCard>
@@ -55,6 +62,23 @@ else if(product is not null)
                     </MudCardContent>
                 </MudCard>
             </MudItem>
+            @if (ProductId != 0)
+            {
+                <MudItem xs="12" sm="12" xl="12">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle1" Class="mb-2">Ajustar estoque do depósito</MudText>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <MudNumericField T="int" Label="Saldo real conferido" @bind-Value="adjustQuantity" Min="0" />
+                                <MudTextField T="string" Label="Motivo" @bind-Value="adjustReason" />
+                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Balance" OnClick="AdjustStock">
+                                    Ajustar
+                                </MudButton>
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
             <MudItem xs="12" sm="12" xl="12">
                 <MudCard>
                     <MudCardContent>
@@ -115,6 +139,9 @@ else if(product is not null)
     IBrowserFile file;
     private string fileName;
 
+    private int adjustQuantity;
+    private string adjustReason;
+
     bool loading = false;
 
     #endregion
@@ -139,6 +166,8 @@ else if(product is not null)
                     product = await api.GetById<ProductVO>(ProductId);
                 else
                     product = app.ActualProduct;
+
+                adjustQuantity = product.Qntd;
             }
 
             loading = false;
@@ -156,6 +185,31 @@ else if(product is not null)
     private async Task OnValidSubmit()
     {
         await OnSave.InvokeAsync(product);
+    }
+
+    private async Task AdjustStock()
+    {
+        try
+        {
+            var adjusted = await api.AdjustProductStock(ProductId, new StockAdjustmentVO
+            {
+                Quantity = adjustQuantity,
+                Reason = adjustReason
+            });
+
+            product.Qntd = adjusted.Qntd;
+            app.ActualProduct = product;
+
+            adjustReason = string.Empty;
+
+            await ShowDialog.ShowDialogAsync($"Estoque ajustado para {adjusted.Qntd}.", "Sucesso", state: EDialogStates.Success);
+
+            StateHasChanged();
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao ajustar o estoque.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
     }
 
     #endregion
