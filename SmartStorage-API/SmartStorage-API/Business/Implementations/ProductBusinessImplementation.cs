@@ -1,5 +1,7 @@
-﻿using SmartStorage_API.Data.Converter.Implementations;
+﻿using SmartStorage.Shared.Enum;
+using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
+using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 
@@ -13,14 +15,17 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly ProductConverter _converter;
 
+        private readonly IProductStockMovementRepository _movementRepository;
+
         #endregion
 
         #region Construtores
 
-        public ProductBusinessImplementation(SmartStorageContext context)
+        public ProductBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository)
         {
             _context = context;
             _converter = new ProductConverter();
+            _movementRepository = movementRepository;
         }
 
         #endregion
@@ -54,18 +59,29 @@ namespace SmartStorage_API.Service.Implementations
             if (emplyeeSearch == null)
                 throw new Exception("Funcionario não encontrado com o ID informado.");
 
+            if (product.Qntd < 0)
+                throw new Exception("A quantidade do produto não pode ser negativa.");
+
             var newProduct = new Product
             {
                 ProName = product.Name,
                 ProDescription = product.Descricao,
                 ProDateRegister = DateTime.UtcNow,
-                ProQntd = product.Qntd,
+                ProQntd = 0,
                 ProEmpId = product.EmployeeId,
                 ProImage = product.ProImage
             };
 
             _context.Add(newProduct);
             _context.SaveChanges();
+
+            if (product.Qntd > 0)
+                _movementRepository.CreateNewStockMovement(
+                    newProduct.ProId,
+                    shelfId: null,
+                    TipoMovimentacao.Entrada,
+                    product.Qntd,
+                    employeeId: product.EmployeeId);
 
             return _converter.Parse(newProduct);
 
@@ -93,8 +109,6 @@ namespace SmartStorage_API.Service.Implementations
             if (!string.IsNullOrWhiteSpace(product.Name))
                 searchProduct.ProName = product.Name;
 
-            searchProduct.ProQntd = product.Qntd;
-
             if (!string.IsNullOrWhiteSpace(product.Descricao))
                 searchProduct.ProDescription = product.Descricao;
 
@@ -103,6 +117,32 @@ namespace SmartStorage_API.Service.Implementations
             _context.SaveChanges();
 
             return _converter.Parse(searchProduct);
+        }
+
+        public ProductVO AdjustProductStock(int productId, int newQuantity, string reason, int? employeeId = null)
+        {
+            var product = _context.Products.FirstOrDefault(x => x.ProId == productId);
+
+            if (product is null)
+                throw new Exception("Produto não encontrado com o ID informado.");
+
+            if (newQuantity < 0)
+                throw new Exception("A quantidade do ajuste não pode ser negativa.");
+
+            var quantityDelta = newQuantity - product.ProQntd;
+
+            if (quantityDelta == 0)
+                throw new Exception("A quantidade informada é igual ao saldo atual do depósito.");
+
+            _movementRepository.CreateNewStockMovement(
+                productId,
+                shelfId: null,
+                TipoMovimentacao.Ajuste,
+                quantityDelta,
+                employeeId,
+                reason);
+
+            return _converter.Parse(product);
         }
 
         public ProductVO DeleteProduct(int productId)
@@ -126,6 +166,11 @@ namespace SmartStorage_API.Service.Implementations
                     _context.Remove(enter);
                 }
             }
+
+            var movements = _context.ProductStockMovements.Where(m => m.PsmProId.Equals(productId)).ToList();
+
+            if (movements.Count > 0)
+                _context.ProductStockMovements.RemoveRange(movements);
 
             _context.Products.Remove(product);
             _context.SaveChanges();

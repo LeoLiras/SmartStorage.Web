@@ -92,6 +92,26 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpPost("{productId}/adjust-stock")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult AdjustProductStock(int productId, [FromBody] StockAdjustmentVO adjustment)
+        {
+            try
+            {
+                if (productId.Equals(0))
+                    throw new Exception("O campo ID do Produto é obrigatório.");
+
+                if (adjustment is null)
+                    throw new Exception("Os dados do ajuste são obrigatórios.");
+
+                return Ok(_productService.AdjustProductStock(productId, adjustment.Quantity, adjustment.Reason, adjustment.EmployeeId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpDelete("{productId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult DeleteProduct(int productId)
