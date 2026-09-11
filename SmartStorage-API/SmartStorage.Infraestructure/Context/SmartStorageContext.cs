@@ -21,6 +21,8 @@ public partial class SmartStorageContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductStockMovement> ProductStockMovements { get; set; }
+
     public virtual DbSet<Sale> Sales { get; set; }
 
     public virtual DbSet<Shelf> Shelves { get; set; }
@@ -54,6 +56,25 @@ public partial class SmartStorageContext : DbContext
             entity.HasIndex(e => e.SalEntId, "IX_Sale_enterId");
 
             entity.HasOne(d => d.Enter).WithMany(p => p.Sales).HasForeignKey(d => d.SalEntId);
+        });
+
+        modelBuilder.Entity<ProductStockMovement>(entity =>
+        {
+            entity.HasIndex(e => e.PsmProId, "IX_ProductStockMovement_productId");
+
+            entity.HasIndex(e => e.PsmSheId, "IX_ProductStockMovement_shelfId");
+
+            entity.HasIndex(e => e.PsmEmpId, "IX_ProductStockMovement_employeeId");
+
+            entity.Property(x => x.PsmType).HasConversion<byte>().IsRequired();
+
+            entity.ToTable(t => t.HasCheckConstraint("CK_ProductStockMovement_Tipo", "[PsmType] IN (0, 1, 2, 3, 4)"));
+
+            entity.HasOne(d => d.Product).WithMany().HasForeignKey(d => d.PsmProId).OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(d => d.Shelf).WithMany().HasForeignKey(d => d.PsmSheId).OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(d => d.Employee).WithMany().HasForeignKey(d => d.PsmEmpId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<User>(entity =>
