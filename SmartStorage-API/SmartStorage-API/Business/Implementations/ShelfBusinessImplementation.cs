@@ -1,5 +1,6 @@
 ﻿using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
+using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 
@@ -15,15 +16,18 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly EnterConverter _converterEnter;
 
+        private readonly IProductStockMovementRepository _movementRepository;
+
         #endregion
 
         #region Construtores
 
-        public ShelfBusinessImplementation(SmartStorageContext context)
+        public ShelfBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository)
         {
             _context = context;
             _converterShelf = new ShelfConverter();
             _converterEnter = new EnterConverter(_context);
+            _movementRepository = movementRepository;
         }
 
         #endregion
@@ -108,49 +112,17 @@ namespace SmartStorage_API.Service.Implementations
 
         public EnterVO AllocateProductToShelf(EnterVO newAllocation)
         {
-            var product = _context.Products.Where(p => p.ProId == newAllocation.ProductId).FirstOrDefault();
+            _movementRepository.TransferProductBetweenLocations(
+                newAllocation.ProductId,
+                fromShelfId: null,
+                toShelfId: newAllocation.ShelfId,
+                quantity: newAllocation.ProductQuantity,
+                shelfPrice: newAllocation.ProductPrice,
+                date: newAllocation.DateEnter);
 
-            if (product is null)
-                throw new Exception("Produto não encontrado na base de dados");
+            var enter = _context.Enters.First(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId);
 
-            if (product.ProQntd < newAllocation.ProductQuantity)
-                throw new Exception("Quantidade indisponível para alocação e venda.");
-
-            product.ProQntd -= newAllocation.ProductQuantity;
-
-            var enter = _context.Enters.Where(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId).FirstOrDefault();
-
-            if (enter is null)
-            {
-                var shelf = _context.Shelves.Where(s => s.SheId == newAllocation.ShelfId).FirstOrDefault();
-
-                if (shelf is null)
-                    throw new Exception("Prateleira não encontrada na base de dados");
-
-                var newEnterProduct = new Enter
-                {
-                    EntProId = (int)product.ProId,
-                    EntSheId = (int)shelf.SheId,
-                    EntQntd = newAllocation.ProductQuantity,
-                    EntDateEnter = newAllocation.DateEnter,
-                    EntPrice = newAllocation.ProductPrice
-                };
-
-                _context.Enters.Add(newEnterProduct);
-
-                _context.SaveChanges();
-
-                return _converterEnter.Parse(newEnterProduct);
-            }
-            else
-            {
-                enter.EntQntd += newAllocation.ProductQuantity;
-                enter.EntPrice = newAllocation.ProductPrice;
-
-                _context.SaveChanges();
-
-                return _converterEnter.Parse(enter);
-            }
+            return _converterEnter.Parse(enter);
         }
 
         public EnterVO UndoAllocate(int enterId)
@@ -160,15 +132,12 @@ namespace SmartStorage_API.Service.Implementations
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID informado");
 
-            var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(enter.EntProId));
-
-            if (product is null)
-                throw new Exception("Produto não encontrado com o ID da entrada informada");
-
-            product.ProQntd += enter.EntQntd;
-            enter.EntQntd = 0;
-
-            _context.SaveChanges();
+            if (enter.EntQntd > 0)
+                _movementRepository.TransferProductBetweenLocations(
+                    enter.EntProId,
+                    fromShelfId: enter.EntSheId,
+                    toShelfId: null,
+                    quantity: enter.EntQntd);
 
             return _converterEnter.Parse(enter);
         }
