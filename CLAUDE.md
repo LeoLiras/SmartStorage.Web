@@ -87,7 +87,7 @@ Modelos com prefixo de três letras por tabela (`ProId`, `ProName`, `EmpId`, `En
 
 O seed vive em `Context/Seed/SeedData.cs` via `HasData` no `OnModelCreating`, então viaja com as migrations e é aplicado pelo `migrator`. Todas as datas do seed são `static readonly` constantes: qualquer `DateTime.Now` em `HasData` faz o EF detectar mudança de modelo a cada `migrations add`. As imagens dos produtos são PNGs em base64 em `SeedImages.cs`, porque `Product.ProImage` é `varbinary(max)`.
 
-Login do seed: `admin` / `admin123`. A senha é SHA-256 puro sem salt (`Sha256PasswordHasher`).
+Logins do seed: `admin` / `admin123` (Administrador) e `usuario` / `usuario123` (Usuário comum, para exercitar o que é barrado fora do papel de admin). A senha é SHA-256 puro sem salt (`Sha256PasswordHasher`).
 
 ## Docker
 
