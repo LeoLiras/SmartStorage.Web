@@ -1,5 +1,7 @@
-﻿using SmartStorage_API.Data.Converter.Implementations;
+﻿using SmartStorage.Shared.Enum;
+using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
+using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 
@@ -13,14 +15,17 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly SaleConverter _converter;
 
+        private readonly IProductStockMovementRepository _movementRepository;
+
         #endregion
 
         #region Construtores
 
-        public SaleBusinessImplementation(SmartStorageContext context)
+        public SaleBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository)
         {
             _context = context;
             _converter = new SaleConverter(_context);
+            _movementRepository = movementRepository;
         }
 
         #endregion
@@ -49,26 +54,26 @@ namespace SmartStorage_API.Service.Implementations
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID do Produto informado.");
 
-            if (enter.EntQntd >= saleQntd)
+            if (saleQntd <= 0)
+                throw new Exception("A quantidade da venda deve ser maior que zero.");
+
+            var sale = new Sale
             {
-                enter.EntQntd -= saleQntd;
+                SalEntId = enter.EntId,
+                SalQntd = saleQntd,
+                SalDateSale = dateSale,
+            };
 
-                var sale = new Sale
-                {
-                    SalEntId = enter.EntId,
-                    SalQntd = saleQntd,
-                    SalDateSale = dateSale,
-                };
+            _context.Sales.Add(sale);
 
-                _context.Sales.Add(sale);
-                _context.SaveChanges();
+            _movementRepository.CreateNewStockMovement(
+                enter.EntProId,
+                enter.EntSheId,
+                TipoMovimentacao.Venda,
+                -saleQntd,
+                date: dateSale);
 
-                return _converter.Parse(sale);
-            }
-            else
-            {
-                throw new Exception("Quantidade indisponível para venda.");
-            }
+            return _converter.Parse(sale);
         }
 
         public SaleVO UpdateSale(int saleId, int saleQntd)
@@ -83,23 +88,21 @@ namespace SmartStorage_API.Service.Implementations
             if (enter == null)
                 throw new Exception("Entrada não encontrada com o ID de Venda informado");
 
-            if (saleQntd < sale.SalQntd)
-                enter.EntQntd += (sale.SalQntd - saleQntd);
-            else
-            {
-                var additionalQntd = (saleQntd - sale.SalQntd);
+            if (saleQntd <= 0)
+                throw new Exception("A quantidade da venda deve ser maior que zero.");
 
-                if (enter.EntQntd >= additionalQntd)
-                    enter.EntQntd -= additionalQntd;
-                else
-                    throw new Exception("Não há quantidade suficiente na entrada do Produto para realizar essa atualização");
-            }
+            var quantityDelta = sale.SalQntd - saleQntd;
 
             sale.SalQntd = saleQntd;
 
-            _context.SaveChanges();
-
-            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == enter.EntSheId);
+            if (quantityDelta == 0)
+                _context.SaveChanges();
+            else
+                _movementRepository.CreateNewStockMovement(
+                    enter.EntProId,
+                    enter.EntSheId,
+                    TipoMovimentacao.Venda,
+                    quantityDelta);
 
             return _converter.Parse(sale);
         }
@@ -116,10 +119,16 @@ namespace SmartStorage_API.Service.Implementations
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID de Venda informado.");
 
-            enter.EntQntd += sale.SalQntd;
-
             _context.Sales.Remove(sale);
-            _context.SaveChanges();
+
+            if (sale.SalQntd > 0)
+                _movementRepository.CreateNewStockMovement(
+                    enter.EntProId,
+                    enter.EntSheId,
+                    TipoMovimentacao.Venda,
+                    sale.SalQntd);
+            else
+                _context.SaveChanges();
 
             return _converter.Parse(sale);
         }
