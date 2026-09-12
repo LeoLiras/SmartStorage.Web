@@ -23,7 +23,17 @@ dotnet build SmartStorage-API/SmartStorageWeb.sln -c Release
 dotnet run --project SmartStorage-API/SmartStorage.API.csproj
 ```
 
-**Não existe projeto de testes na solution.** Não há `dotnet test` a rodar. A verificação é o build mais o roteiro `tests/ledger_e2e.py`, um script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
+A verificação tem duas camadas, e elas cobrem coisas diferentes de propósito.
+
+### Testes de componente (`dotnet test`)
+
+`SmartStorage.Blazor.Tests` usa bUnit e NSubstitute para renderizar as telas e afirmar sobre o **JSON que o Blazor serializa**, com `ApiExtensions` real sobre um `HttpMessageHandler` falso. É a camada que pega bug de front, que o roteiro de API não vê.
+
+Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests` e que vale copiar ao escrever teste novo: o contexto é `BunitContext` (não `TestContext`) e a autorização é `AddAuthorization()` (não `AddTestAuthorization()`); toda tela com `MudDatePicker` exige um `MudPopoverProvider` na árvore, que **não** pode ser wrapper por não ter `ChildContent` — renderize os dois como irmãos num mesmo fragmento; e a classe de teste precisa de `IAsyncLifetime`, senão o descarte síncrono estoura em `MudBlazor.PointerEventsNoneService`, que só implementa `IAsyncDisposable`.
+
+### Roteiro fim-a-fim (`tests/ledger_e2e.py`)
+
+Script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
 
 ```bash
 python tests/ledger_e2e.py              # os 20 casos, ~5 min
@@ -33,7 +43,7 @@ python tests/ledger_e2e.py --manter     # preserva os produtos criados, para ins
 
 Exige o stack de pé. Cria os próprios produtos (prefixo `ZZ Ensaio Automatizado` mais um identificador por execução, para ser reexecutável) e remove o que criou, varrendo também sobras de execuções anteriores. Depois de cada operação confere três coisas: as linhas que o ledger gravou (local, tipo e quantidade com sinal), a invariante `saldo_depois == saldo_antes + SUM(PsmQntd)` por produto e por local, e que o `PsmDate` esteja no relógio do servidor — este último por causa de uma regressão em que a venda gravava o horário local do navegador, três horas atrás das demais movimentações. No fim procura saldo negativo, movimentação órfã e venda sem entrada. Devolve exit code não-zero em falha, mas **não está no CI**: o workflow só builda e publica imagens.
 
-O roteiro bate na API, não no Blazor — bugs que vivem só no front, no que a tela monta e envia, passam por ele sem serem notados. Dois já aconteceram assim: `ProductId` zero vindo do estado global (os holders de `VariablesExtensions` eram inicializados com `new()`, o que anulava todo `is null`) e a data perdendo o `Kind` no `MudDatePicker`. Para essa classe, só teste manual pelo front ou bUnit.
+O roteiro bate na API, não no Blazor — bugs que vivem só no front, no que a tela monta e envia, passam por ele sem serem notados. Dois já aconteceram assim: `ProductId` zero vindo do estado global (os holders de `VariablesExtensions` eram inicializados com `new()`, o que anulava todo `is null`) e a data perdendo o `Kind` no `MudDatePicker`. Essa classe é coberta pelos testes de componente, não por aqui.
 
 Dois resultados do roteiro não são falha e são esperados: `CT-19` sai como lacuna, porque excluir produto apaga as movimentações em vez de registrar a saída, e `CT-20` sai pulado, porque `TransferProductBetweenLocations` aceita prateleira nos dois lados mas nenhum endpoint ou tela chama assim.
 
