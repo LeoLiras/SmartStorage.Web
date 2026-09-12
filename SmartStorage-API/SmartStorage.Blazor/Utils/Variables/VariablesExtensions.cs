@@ -21,9 +21,9 @@ namespace SmartStorage.Blazor.Utils.Variables
 
         #region Objects
 
-        public ProductVO ActualProduct { get; set; } = new();
+        public ProductVO ActualProduct { get; set; }
 
-        public EnterVO ActualEntry { get; set; } = new();
+        public EnterVO ActualEntry { get; set; }
 
         public User User { get; set; } = new();
 
