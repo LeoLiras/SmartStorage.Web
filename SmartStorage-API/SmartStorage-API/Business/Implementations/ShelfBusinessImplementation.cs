@@ -117,8 +117,7 @@ namespace SmartStorage_API.Service.Implementations
                 fromShelfId: null,
                 toShelfId: newAllocation.ShelfId,
                 quantity: newAllocation.ProductQuantity,
-                shelfPrice: newAllocation.ProductPrice,
-                date: newAllocation.DateEnter);
+                shelfPrice: newAllocation.ProductPrice);
 
             var enter = _context.Enters.First(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId);
 

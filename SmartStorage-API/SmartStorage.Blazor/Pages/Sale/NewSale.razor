@@ -168,7 +168,7 @@ else
             return;
 
         newSale.ProductName = product.Name;
-        newSale.DateSale = Convert.ToDateTime(dateSale.ToString());
+        newSale.DateSale = dateSale ?? DateTime.Now;
         newSale.IdEnter = entry.Id;
         newSale.ProductId = product.Id;  
     }

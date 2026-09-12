@@ -70,8 +70,7 @@ namespace SmartStorage_API.Service.Implementations
                 enter.EntProId,
                 enter.EntSheId,
                 TipoMovimentacao.Venda,
-                -saleQntd,
-                date: dateSale);
+                -saleQntd);
 
             return _converter.Parse(sale);
         }
