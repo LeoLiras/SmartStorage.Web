@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build da solution
+    name: Build e testes da solution
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +23,12 @@ jobs:
 
       - name: Build
         run: dotnet build SmartStorage-API/SmartStorageWeb.sln -c Release --no-restore
+
+      # Só os testes de componente do Blazor (bUnit) rodam aqui: eles não precisam
+      # de nada de pé. O roteiro tests/ledger_e2e.py exige o compose inteiro com
+      # banco e gateway, por isso continua fora do CI e é rodado à mão.
+      - name: Testes de componente
+        run: dotnet test SmartStorage-API/SmartStorageWeb.sln -c Release --no-build
 
   images:
     name: Build e push das imagens
