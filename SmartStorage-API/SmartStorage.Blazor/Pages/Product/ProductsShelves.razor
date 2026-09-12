@@ -110,7 +110,7 @@ else
 
     }
 
-    private async void UndoAllocation(int entryId)
+    private async Task UndoAllocation(int entryId)
     {
         try
         {
@@ -118,14 +118,24 @@ else
 
             if (confimation)
             {
+                loading = true;
+
+                StateHasChanged();
+
                 entry = await api.GetById<EnterVO>(entryId);
 
                 if (entry is null)
+                {
+                    loading = false;
+
                     return;
+                }
 
                 var result = await api.Put<EnterVO>(entry, entryId);
 
                 await ReloadData();
+
+                loading = false;
 
                 StateHasChanged();
 
@@ -134,6 +144,8 @@ else
         }
         catch (ApiException ex)
         {
+            loading = false;
+
             await ShowDialog.ShowDialogAsync($"Erro alocando o produto de volta para o estoque.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
     }
