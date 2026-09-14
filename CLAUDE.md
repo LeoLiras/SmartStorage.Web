@@ -99,6 +99,15 @@ Cada VO implementa `ISupportHyperMedia`, herda `BaseMessage` (do `SmartStorage.M
 
 Criar produto publica o `ProductVO` na fila `sendemailqueue` (`RabbitMQMessageSender` na API core) e retorna imediatamente. `RabbitMQEmailConsumer` na EmailAPI é um `BackgroundService` que consome e só dá `BasicAck` depois do envio SMTP.
 
+### AIAPI e ReportsAPI
+
+Os dois serviços só leem o banco: referenciam `SmartStorage.Infraestructure` e consultam o `SmartStorageContext` direto de um `*Repository`, sem business, converter nem ledger. Ambos exigem token (`[Authorize]`) e são chamados só pela tela de Insights do Blazor (`Services/AiService.cs` e `Services/ReportsService.cs`), sempre pelo gateway.
+
+- **AIAPI** — `POST /api/storage/ai/v1/analyse-sales` com `AiRequest { aiQuestion }`. `AiRepository` serializa as **10 vendas mais recentes** como entidade `Sale` crua (quantidades, datas e `SalPrice`, sem nome de produto nem prateleira, porque `Enter` não é incluído) e manda pergunta e JSON ao Gemini (`gemini-2.5-flash`, pacote `Google.GenAI`), devolvendo só o texto da primeira resposta. A chave vem de `Environment.GetEnvironmentVariable("GOOGLE_API_KEY")`, **não** do `IConfiguration`: user secrets e `appsettings` não funcionam, fora do Docker precisa ser variável de ambiente. No compose ela vem do `.env`.
+- **ReportsAPI** — `GET /api/storage/reports/v1/export-excel` (ClosedXML) e `export-pdf` (QuestPDF, licença Community declarada no `Program.cs`), com gráficos do ScottPlot renderizados em PNG. Valor de cada venda é `SalPrice × SalQntd`. Três limitações do código atual: o filtro do mês corrente compara só `SalDateSale.Month`, **sem o ano**, então junta o mesmo mês de anos anteriores; a quantidade é a bruta, **sem descontar devoluções**, e vendas totalmente devolvidas aparecem; e o nome do arquivo sai sem extensão. O resumo por IA dentro do PDF está comentado — é a issue #5.
+
+Não há teste automatizado para nenhum dos dois: o roteiro e2e não chama esses endpoints e o bUnit não renderiza a tela de Insights.
+
 ### Papéis
 
 `SmartStorage.Shared/Auth/Role.cs` é canônico: `Admin = "Administrador"`, `Client = "Usuario"` — os valores em português, porque três `.razor` (`Home`, `Account`, `EditUser`) comparam contra os literais. Endpoints `[Authorize(Roles = Role.Admin)]` só funcionam se a claim emitida no login usar exatamente essas constantes.
