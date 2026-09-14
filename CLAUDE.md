@@ -36,7 +36,7 @@ Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests`
 Script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
 
 ```bash
-python tests/ledger_e2e.py              # os 29 casos, ~6 min
+python tests/ledger_e2e.py              # os 30 casos, ~6 min
 python tests/ledger_e2e.py --caso CT-08 # um caso só
 python tests/ledger_e2e.py --manter     # preserva os produtos criados, para inspeção
 ```
@@ -110,6 +110,8 @@ Modelos com prefixo de três letras por tabela (`ProId`, `ProName`, `EmpId`, `En
 O autor de cada movimentação (`PsmUseId`, FK para `User`) e o instante (`PsmDate`) são decididos pelo servidor dentro de `ProductStockMovementRepository`: o autor sai do `unique_name` do token via `IHttpContextAccessor`, e nenhum VO carrega esses campos. A FK é `Restrict`, então a AuthenticationAPI recusa excluir usuário que já movimentou estoque. Pelo mesmo motivo **produto não tem exclusão** — nem tela, nem endpoint, nem rota no gateway: excluir apagava as movimentações junto e o histórico sumia.
 
 Devolução de venda (`POST /sales/{id}/return`) soma em `Sale.SalReturnedQntd` e lança `Devolucao` com sinal positivo **no depósito**, não na prateleira, com motivo `Devolução da venda {id}`. A listagem de vendas mostra quantidade e total líquidos e esconde a venda totalmente devolvida, que continua no banco. Venda com devolução não pode ser cancelada nem editada abaixo do devolvido: o estorno do cancelamento voltaria para a prateleira unidades que já voltaram ao depósito.
+
+A venda guarda o preço do momento em `Sale.SalPrice`, copiado do `EntPrice` da prateleira na criação e nunca mais alterado; o total da venda (API, Excel e PDF) sai dele. Como a alocação repreça a prateleira, calcular pelo `EntPrice` fazia o repreço reescrever o faturamento de vendas antigas. Sem FIFO nem custo por lote: um produto tem um preço por prateleira. As vendas anteriores à migration `AddSalePrice` receberam o `EntPrice` vigente na hora da migration.
 
 Transferência entre prateleiras (`POST /shelf/allocation/{enterId}/transfer`) move **todo o saldo** do `Enter` de origem para a prateleira de destino, em dois lançamentos `Transferencia` com o mesmo instante. O destino que já tem o produto mantém o próprio preço; o destino novo herda o preço da origem. O `Enter` de origem fica com saldo zero, porque as vendas apontam para ele.
 
