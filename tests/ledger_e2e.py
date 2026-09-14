@@ -35,8 +35,8 @@ PREFIXO = "ZZ Ensaio Automatizado"
 EXECUCAO = datetime.now().strftime("%m%d%H%M%S")
 DESCRICAO = "Produto criado pelo roteiro de ensaio do ledger. Pode ser removido."
 
-ENTRADA, ALOCACAO, VENDA, PERDA, AJUSTE, DEVOLUCAO = 0, 1, 2, 3, 4, 5
-NOME_TIPO = {0: "Entrada", 1: "Alocacao", 2: "Venda", 3: "Perda", 4: "Ajuste", 5: "Devolucao"}
+ENTRADA, ALOCACAO, VENDA, PERDA, AJUSTE, DEVOLUCAO, TRANSFERENCIA = 0, 1, 2, 3, 4, 5, 6
+NOME_TIPO = {0: "Entrada", 1: "Alocacao", 2: "Venda", 3: "Perda", 4: "Ajuste", 5: "Devolucao", 6: "Transferencia"}
 
 TOLERANCIA_SEGUNDOS = 120
 
@@ -759,10 +759,40 @@ def ct19(ctx):
     R.nota("HTTP %s; produto e %d movimentacoes preservados" % (status, depois))
 
 
-@caso("CT-20", "Transferir entre duas prateleiras")
+def _aloca(ctx, pid, prateleira, quantidade, preco):
+    status, _ = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": prateleira,
+        "productQuantity": quantidade, "productPrice": preco,
+        "dateEnter": datetime.now().isoformat(),
+    })
+    return status
+
+
+def _transfere(ctx, entrada, destino):
+    return ctx.api("POST", "/api/storage/shelf/v1/allocation/%d/transfer" % entrada, {"shelfId": destino})
+
+
+@caso("CT-20", "Transferir saldo inteiro para prateleira sem o produto")
 def ct20(ctx):
-    R.pula("TransferProductBetweenLocations suporta, mas nenhum endpoint ou tela "
-           "chama com prateleira nos dois lados: nao ha o que exercitar")
+    pid = ctx.cria_produto(20, "CT20")
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 8, 19.9) == 200, "pre-condicao falhou: alocacao recusada")
+    origem = entrada_de(pid, ctx.prateleira_a)
+    if not R.exige(origem is not None, "pre-condicao falhou: entrada de origem nao criada"):
+        return
+    R.exige(entrada_de(pid, ctx.prateleira_b) is None, "pre-condicao falhou: destino ja tinha o produto")
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status, _ = _transfere(ctx, origem["id"], ctx.prateleira_b)
+    R.exige(status == 200, "transferencia recusada", "HTTP %s" % status)
+    movs = movimentos_depois(marca, pid)
+    confere_linhas(movs, [(ctx.prateleira_a, TRANSFERENCIA, -8), (ctx.prateleira_b, TRANSFERENCIA, 8)])
+    confere_carimbo(movs)
+    confere_autor(ctx, movs)
+    confere_invariante(pid, antes, {None: 12, ctx.prateleira_a: 0, ctx.prateleira_b: 8}, movs)
+    destino = entrada_de(pid, ctx.prateleira_b)
+    if R.exige(destino is not None, "Enter do destino nao foi criado"):
+        R.exige(abs(destino["preco"] - 19.9) < 0.001,
+                "destino novo nao herdou o preco da origem", "gravado %s" % destino["preco"])
 
 
 def _edita_produto(ctx, pid, sufixo, ajuste):
@@ -947,6 +977,56 @@ def ct27(ctx):
     confere_linhas(movimentos_depois(marca, pid), [])
     R.exige(saldos(pid) == antes, "saldo mudou numa operacao que devia falhar")
     R.nota("cancelar: %s | editar: %s" % (corpo, corpo2))
+
+
+@caso("CT-28", "Transferir para prateleira que ja tem o produto")
+def ct28(ctx):
+    pid = ctx.cria_produto(20, "CT28")
+    _aloca(ctx, pid, ctx.prateleira_a, 5, 10.0)
+    _aloca(ctx, pid, ctx.prateleira_b, 3, 30.0)
+    origem = entrada_de(pid, ctx.prateleira_a)
+    if not R.exige(origem is not None and entrada_de(pid, ctx.prateleira_b) is not None,
+                   "pre-condicao falhou: produto nao ficou nas duas prateleiras"):
+        return
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status, _ = _transfere(ctx, origem["id"], ctx.prateleira_b)
+    R.exige(status == 200, "transferencia recusada", "HTTP %s" % status)
+    movs = movimentos_depois(marca, pid)
+    confere_linhas(movs, [(ctx.prateleira_a, TRANSFERENCIA, -5), (ctx.prateleira_b, TRANSFERENCIA, 5)])
+    confere_carimbo(movs)
+    confere_invariante(pid, antes, {ctx.prateleira_a: 0, ctx.prateleira_b: 8}, movs)
+    destino = entrada_de(pid, ctx.prateleira_b)
+    if destino:
+        R.exige(abs(destino["preco"] - 30.0) < 0.001,
+                "transferencia repreciou o destino", "gravado %s, esperado 30.00" % destino["preco"])
+    enters = int(sql("SELECT COUNT(*) FROM dbo.Enter WHERE EntProId=%d AND EntSheId=%d" % (pid, ctx.prateleira_b))[0][0])
+    R.exige(enters == 1, "transferencia criou outro Enter no destino", "%d linhas" % enters)
+
+
+@caso("CT-29", "Transferencias invalidas nao gravam nada")
+def ct29(ctx):
+    pid = ctx.cria_produto(20, "CT29")
+    _aloca(ctx, pid, ctx.prateleira_a, 6, 10.0)
+    origem = entrada_de(pid, ctx.prateleira_a)
+    if not R.exige(origem is not None, "pre-condicao falhou: entrada nao criada"):
+        return
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    mesma, m1 = _transfere(ctx, origem["id"], ctx.prateleira_a)
+    R.exige(mesma == 400, "transferencia para a mesma prateleira foi aceita", "HTTP %s" % mesma)
+    inexistente, m2 = _transfere(ctx, origem["id"], 999999)
+    R.exige(inexistente == 400, "transferencia para prateleira inexistente foi aceita", "HTTP %s" % inexistente)
+    sem_destino, m3 = _transfere(ctx, origem["id"], 0)
+    R.exige(sem_destino == 400, "transferencia sem destino foi aceita", "HTTP %s" % sem_destino)
+    confere_linhas(movimentos_depois(marca, pid), [])
+    R.exige(saldos(pid) == antes, "saldo mudou numa operacao que devia falhar")
+    ctx.api("PUT", "/api/storage/shelf/v1/allocation/%d" % origem["id"])
+    zerada = ultimo_movimento()
+    vazia, m4 = _transfere(ctx, origem["id"], ctx.prateleira_b)
+    R.exige(vazia == 400, "transferencia de prateleira sem saldo foi aceita", "HTTP %s" % vazia)
+    confere_linhas(movimentos_depois(zerada, pid), [])
+    R.nota("mesma: %s | inexistente: %s | sem saldo: %s" % (m1, m2, m4))
 
 
 # --------------------------------------------------------------------------- #
