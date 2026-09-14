@@ -90,6 +90,9 @@ namespace SmartStorage_API.Service.Implementations
             if (saleQntd <= 0)
                 throw new Exception("A quantidade da venda deve ser maior que zero.");
 
+            if (saleQntd < sale.SalReturnedQntd)
+                throw new Exception($"A quantidade da venda não pode ficar abaixo do que já foi devolvido: {sale.SalReturnedQntd}.");
+
             var quantityDelta = sale.SalQntd - saleQntd;
 
             sale.SalQntd = saleQntd;
@@ -112,6 +115,9 @@ namespace SmartStorage_API.Service.Implementations
 
             if (sale is null)
                 throw new Exception("Venda não encontrada com o ID informado");
+
+            if (sale.SalReturnedQntd > 0)
+                throw new Exception("Não é possível cancelar a venda pois ela já tem devoluções registradas.");
 
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.SalEntId));
 
