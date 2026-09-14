@@ -32,9 +32,23 @@ namespace SmartStorage_API.Controllers
 
         [HttpGet]
         [TypeFilter(typeof(HyperMediaFilter))]
-        public ActionResult<List<SaleVO>> FindAllSales()
+        public ActionResult<List<SaleVO>> FindAllSales([FromQuery] int? page, [FromQuery] int pageSize = 10, [FromQuery] string search = null)
         {
-            return Ok(_saleService.FindAllSales());
+            if (page is null)
+                return Ok(_saleService.FindAllSales());
+
+            try
+            {
+                var (items, total) = _saleService.FindSalesPage(page.Value, pageSize, search);
+
+                Response.Headers[Pagination.TotalCountHeader] = total.ToString();
+
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{saleId}")]
