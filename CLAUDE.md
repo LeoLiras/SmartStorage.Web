@@ -41,7 +41,7 @@ python tests/ledger_e2e.py --caso CT-08 # um caso só
 python tests/ledger_e2e.py --manter     # preserva os produtos criados, para inspeção
 ```
 
-Exige o stack de pé. Cria os próprios produtos (prefixo `ZZ Ensaio Automatizado` mais um identificador por execução, para ser reexecutável) e remove o que criou, varrendo também sobras de execuções anteriores. Depois de cada operação confere três coisas: as linhas que o ledger gravou (local, tipo e quantidade com sinal), a invariante `saldo_depois == saldo_antes + SUM(PsmQntd)` por produto e por local, e que o `PsmDate` esteja no relógio do servidor — este último por causa de uma regressão em que a venda gravava o horário local do navegador, três horas atrás das demais movimentações. No fim procura saldo negativo, movimentação órfã e venda sem entrada. Devolve exit code não-zero em falha, mas **não está no CI**: o workflow só builda e publica imagens.
+Exige o stack de pé. Cria os próprios produtos (prefixo `ZZ Ensaio Automatizado` mais um identificador por execução, para ser reexecutável) e remove o que criou, varrendo também sobras de execuções anteriores. Depois de cada operação confere quatro coisas: as linhas que o ledger gravou (local, tipo e quantidade com sinal), a invariante `saldo_depois == saldo_antes + SUM(PsmQntd)` por produto e por local, que o `PsmDate` esteja no relógio do servidor — por causa de uma regressão em que a venda gravava o horário local do navegador, três horas atrás das demais movimentações — e que o `PsmUseId` seja o usuário que fez login no roteiro. No fim procura saldo negativo, movimentação órfã e venda sem entrada. Devolve exit code não-zero em falha, mas **não está no CI**: o workflow só builda e publica imagens.
 
 O roteiro bate na API, não no Blazor — bugs que vivem só no front, no que a tela monta e envia, passam por ele sem serem notados. Dois já aconteceram assim: `ProductId` zero vindo do estado global (os holders de `VariablesExtensions` eram inicializados com `new()`, o que anulava todo `is null`) e a data perdendo o `Kind` no `MudDatePicker`. Essa classe é coberta pelos testes de componente, não por aqui.
 
@@ -106,6 +106,8 @@ Criar produto publica o `ProductVO` na fila `sendemailqueue` (`RabbitMQMessageSe
 ## Banco
 
 Modelos com prefixo de três letras por tabela (`ProId`, `ProName`, `EmpId`, `EntQntd`, `SalEntId`). **`Product` não tem FK para `Shelf`** — `Enter` é a tabela de junção (produto alocado em prateleira, com quantidade e preço), e `Sale` referencia `Enter`, não `Product`.
+
+O autor de cada movimentação (`PsmUseId`, FK para `User`) e o instante (`PsmDate`) são decididos pelo servidor dentro de `ProductStockMovementRepository`: o autor sai do `unique_name` do token via `IHttpContextAccessor`, e nenhum VO carrega esses campos. A FK é `Restrict`, então a AuthenticationAPI recusa excluir usuário que já movimentou estoque.
 
 O seed vive em `Context/Seed/SeedData.cs` via `HasData` no `OnModelCreating`, então viaja com as migrations e é aplicado pelo `migrator`. Todas as datas do seed são `static readonly` constantes: qualquer `DateTime.Now` em `HasData` faz o EF detectar mudança de modelo a cada `migrations add`. As imagens dos produtos são PNGs em base64 em `SeedImages.cs`, porque `Product.ProImage` é `varbinary(max)`.
 
