@@ -36,7 +36,7 @@ Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests`
 Script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
 
 ```bash
-python tests/ledger_e2e.py              # os 20 casos, ~5 min
+python tests/ledger_e2e.py              # os 22 casos, ~5 min
 python tests/ledger_e2e.py --caso CT-08 # um caso só
 python tests/ledger_e2e.py --manter     # preserva os produtos criados, para inspeção
 ```

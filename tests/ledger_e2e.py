@@ -757,6 +757,59 @@ def ct20(ctx):
            "chama com prateleira nos dois lados: nao ha o que exercitar")
 
 
+def _edita_produto(ctx, pid, sufixo, ajuste):
+    nome = "%s %s %s" % (PREFIXO, EXECUCAO, sufixo)
+    corpo = {
+        "name": nome,
+        "descricao": DESCRICAO,
+        "employeeId": ctx.funcionario,
+        "proImage": None,
+        "stockAdjustment": ajuste,
+    }
+    status, resposta = ctx.api("PUT", "/api/storage/products/v1/%d" % pid, corpo)
+    return nome, status, resposta
+
+
+def _nome_do_produto(pid):
+    return sql("SELECT ProName FROM dbo.Product WHERE ProId=%d" % pid)[0][0]
+
+
+@caso("CT-21", "Editar produto e ajustar estoque no mesmo submit")
+def ct21(ctx):
+    pid = ctx.cria_produto(10, "CT21")
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    nome, status, _ = _edita_produto(ctx, pid, "CT21 editado",
+                                     {"quantity": 14, "reason": "Recontagem na edicao"})
+    R.exige(status == 200, "edicao com ajuste recusada", "HTTP %s" % status)
+    movs = movimentos_depois(marca, pid)
+    confere_linhas(movs, [(None, AJUSTE, 4)])
+    confere_carimbo(movs)
+    confere_autor(ctx, movs)
+    confere_invariante(pid, antes, {None: 14}, movs)
+    R.exige(_nome_do_produto(pid) == nome, "a edicao nao foi gravada junto com o ajuste")
+    if movs:
+        R.exige(movs[0]["motivo"] == "Recontagem na edicao",
+                "motivo nao gravado no ajuste da edicao", "gravado %r" % movs[0]["motivo"])
+
+
+@caso("CT-22", "Ajuste invalido no submit nao grava a edicao")
+def ct22(ctx):
+    pid = ctx.cria_produto(10, "CT22")
+    nome_antes = _nome_do_produto(pid)
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    _, status, corpo = _edita_produto(ctx, pid, "CT22 editado",
+                                      {"quantity": 10, "reason": "Sem mudanca"})
+    R.exige(status == 400, "edicao com ajuste de delta zero foi aceita", "HTTP %s" % status)
+    confere_linhas(movimentos_depois(marca, pid), [])
+    R.exige(saldos(pid) == antes, "saldo mudou numa operacao que devia falhar")
+    R.exige(_nome_do_produto(pid) == nome_antes,
+            "o nome foi gravado mesmo com o ajuste recusado",
+            "antes %r, depois %r" % (nome_antes, _nome_do_produto(pid)))
+    R.nota("mensagem: %s" % corpo)
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
