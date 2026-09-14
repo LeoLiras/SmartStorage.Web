@@ -36,6 +36,7 @@ else
             <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
             <MudTd DataLabel="Data de Entrada">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
             <MudTd DataLabel="Vender"><MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success" OnClick="@(() => SaleProduct(context.Id))"></MudIconButton></MudTooltip></MudTd>
+            <MudTd DataLabel="Transferir"><MudTooltip Text="Transferir para outra prateleira"><MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Info" OnClick="@(() => TransferProduct(context.Id))"></MudIconButton></MudTooltip></MudTd>
             <MudTd DataLabel="Retornar alocacao"><MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning" OnClick="@(() => UndoAllocation(context.Id))"></MudIconButton></MudTooltip></MudTd>
         </RowTemplate>
         <PagerContent>
@@ -108,6 +109,11 @@ else
             nav.NavigateTo($"product/sale/{entryId}");
         }
 
+    }
+
+    private void TransferProduct(int entryId)
+    {
+        nav.NavigateTo($"product/shelf/transfer/{entryId}");
     }
 
     private async Task UndoAllocation(int entryId)

@@ -207,6 +207,25 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
+        public async Task<EnterVO> TransferProductToShelf(int enterId, ShelfTransferVO transfer)
+        {
+            if (transfer == null)
+                throw new ArgumentNullException(nameof(transfer), message: "Os dados da transferência são obrigatórios.");
+
+            var response = await _http.PostAsJsonAsync($"{entersEndpoint}/{enterId}/transfer", transfer);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<EnterVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
         public async Task<SaleVO> ReturnSale(int saleId, SaleReturnVO saleReturn)
         {
             if (saleReturn == null)
