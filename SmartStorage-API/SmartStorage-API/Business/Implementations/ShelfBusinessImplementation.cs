@@ -1,4 +1,5 @@
-﻿using SmartStorage_API.Data.Converter.Implementations;
+﻿using SmartStorage.Shared.Enum;
+using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
 using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_Shared.Model;
@@ -139,6 +140,34 @@ namespace SmartStorage_API.Service.Implementations
                     quantity: enter.EntQntd);
 
             return _converterEnter.Parse(enter);
+        }
+
+        public EnterVO TransferProductToShelf(int enterId, int toShelfId)
+        {
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
+
+            if (enter is null)
+                throw new Exception("Entrada não encontrada com o ID informado");
+
+            if (enter.EntQntd <= 0)
+                throw new Exception("Não há saldo nesta prateleira para transferir.");
+
+            if (!_context.Shelves.Any(s => s.SheId == toShelfId))
+                throw new Exception("Prateleira de destino não encontrada.");
+
+            var destinationExists = _context.Enters.Any(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
+
+            _movementRepository.TransferProductBetweenLocations(
+                enter.EntProId,
+                fromShelfId: enter.EntSheId,
+                toShelfId: toShelfId,
+                quantity: enter.EntQntd,
+                type: TipoMovimentacao.Transferencia,
+                shelfPrice: destinationExists ? null : enter.EntPrice);
+
+            var destination = _context.Enters.First(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
+
+            return _converterEnter.Parse(destination);
         }
 
         #endregion

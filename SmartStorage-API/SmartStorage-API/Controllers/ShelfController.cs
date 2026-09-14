@@ -175,6 +175,26 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpPost("allocation/{enterId}/transfer")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult TransferProductToShelf(int enterId, [FromBody] ShelfTransferVO transfer)
+        {
+            try
+            {
+                if (enterId.Equals(0))
+                    throw new Exception("O campo ID da entrada é obrigatório.");
+
+                if (transfer is null)
+                    throw new Exception("Os dados da transferência são obrigatórios.");
+
+                return Ok(_shelfService.TransferProductToShelf(enterId, transfer.ShelfId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         #endregion
     }
 }
