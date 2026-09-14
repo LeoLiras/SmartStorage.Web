@@ -34,7 +34,7 @@ namespace SmartStorage_API.Service.Implementations
 
         public List<SaleVO> FindAllSales()
         {
-            return _converter.Parse(_context.Sales.OrderBy(s => s.SalId).ToList());
+            return _converter.Parse(_context.Sales.Where(s => s.SalQntd > s.SalReturnedQntd).OrderBy(s => s.SalId).ToList());
         }
 
         public SaleVO FindSaleById(int saleId)
@@ -128,6 +128,38 @@ namespace SmartStorage_API.Service.Implementations
                     sale.SalQntd);
             else
                 _context.SaveChanges();
+
+            return _converter.Parse(sale);
+        }
+
+        public SaleVO ReturnSale(int saleId, int quantity)
+        {
+            var sale = _context.Sales.FirstOrDefault(s => s.SalId == saleId);
+
+            if (sale is null)
+                throw new Exception("Venda não encontrada com o ID informado");
+
+            if (quantity <= 0)
+                throw new Exception("A quantidade a devolver deve ser maior que zero.");
+
+            var remaining = sale.SalQntd - sale.SalReturnedQntd;
+
+            if (quantity > remaining)
+                throw new Exception($"A devolução excede o que resta da venda: restam {remaining} e a devolução pede {quantity}.");
+
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.SalEntId));
+
+            if (enter is null)
+                throw new Exception("Entrada não encontrada com o ID de Venda informado.");
+
+            sale.SalReturnedQntd += quantity;
+
+            _movementRepository.CreateNewStockMovement(
+                enter.EntProId,
+                shelfId: null,
+                TipoMovimentacao.Devolucao,
+                quantity,
+                reason: $"Devolução da venda {sale.SalId}");
 
             return _converter.Parse(sale);
         }

@@ -48,12 +48,13 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 Id = origin.SalId,
                 IdEnter = origin.SalEntId,
                 Qntd = origin.SalQntd,
+                ReturnedQntd = origin.SalReturnedQntd,
                 DateSale = origin.SalDateSale,
                 ProductId = product is null ? 0 : product.ProId,
                 ProductName = product is null ? string.Empty : product.ProName,
                 ShelfName = shelf is null ? string.Empty : shelf.SheName,
                 EnterPrice = enter is null ? 0.0m : enter.EntPrice,
-                SaleTotal = enter is null ? 0.0m : enter.EntPrice * origin.SalQntd
+                SaleTotal = enter is null ? 0.0m : enter.EntPrice * (origin.SalQntd - origin.SalReturnedQntd)
             };
         }
 

@@ -111,6 +111,26 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpPost("{saleId}/return")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult ReturnSale(int saleId, [FromBody] SaleReturnVO saleReturn)
+        {
+            try
+            {
+                if (saleId.Equals(0))
+                    throw new Exception("O campo ID da Venda é obrigatório.");
+
+                if (saleReturn is null)
+                    throw new Exception("Os dados da devolução são obrigatórios.");
+
+                return Ok(_saleService.ReturnSale(saleId, saleReturn.Quantity));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         #endregion
     }
 }
