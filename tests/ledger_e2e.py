@@ -1029,6 +1029,37 @@ def ct29(ctx):
     R.nota("mesma: %s | inexistente: %s | sem saldo: %s" % (m1, m2, m4))
 
 
+def _preco_no_banco(venda):
+    return float(sql("SELECT SalPrice FROM dbo.Sale WHERE SalId=%d" % venda)[0][0])
+
+
+@caso("CT-30", "Venda guarda o preco do momento e nao muda com o repreco")
+def ct30(ctx):
+    pid, ent, venda = _venda_pronta(ctx, "CT30", 20, 4)
+    if not R.exige(venda is not None, "pre-condicao falhou: venda nao criada"):
+        return
+    R.exige(abs(_preco_no_banco(venda) - 50.0) < 0.001, "SalPrice nao gravou o preco da prateleira",
+            "gravado %.2f, esperado 50.00" % _preco_no_banco(venda))
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 1, 80.0) == 200, "pre-condicao falhou: repreco recusado")
+    R.exige(abs(_preco_no_banco(venda) - 50.0) < 0.001, "repreco da prateleira alterou o SalPrice da venda antiga",
+            "gravado %.2f" % _preco_no_banco(venda))
+    item = _venda_na_listagem(ctx, venda)
+    R.exige(item is not None, "venda sumiu da listagem")
+    if item:
+        R.exige(abs(float(item.get("salePrice", 0)) - 50.0) < 0.001,
+                "preco da venda na listagem seguiu a prateleira", "api %s, esperado 50.00" % item.get("salePrice"))
+        R.exige(abs(float(item.get("saleTotal", 0)) - 200.0) < 0.001,
+                "total da venda antiga mudou com o repreco", "api %s, esperado 200.00" % item.get("saleTotal"))
+    status, _ = ctx.api("POST", "/api/storage/sales/v1", {
+        "idEnter": ent["id"], "productId": pid, "qntd": 1,
+        "dateSale": datetime.now().isoformat(),
+    })
+    R.exige(status == 200, "segunda venda recusada", "HTTP %s" % status)
+    nova = int(sql("SELECT MAX(SalId) FROM dbo.Sale WHERE SalEntId=%d" % ent["id"])[0][0])
+    R.exige(nova != venda and abs(_preco_no_banco(nova) - 80.0) < 0.001,
+            "venda nova nao pegou o preco atual da prateleira", "gravado %.2f, esperado 80.00" % _preco_no_banco(nova))
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
