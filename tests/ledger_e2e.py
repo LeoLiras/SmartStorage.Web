@@ -1060,6 +1060,61 @@ def ct30(ctx):
             "venda nova nao pegou o preco atual da prateleira", "gravado %.2f, esperado 80.00" % _preco_no_banco(nova))
 
 
+def _pagina_de_vendas(ctx, consulta):
+    req = urllib.request.Request(GATEWAY + "/api/storage/sales/v1?" + consulta)
+    req.add_header("Authorization", "Bearer " + ctx.token)
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.status, json.loads(r.read().decode("utf-8")), r.headers.get("X-Total-Count")
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode("utf-8", "replace"), None
+
+
+@caso("CT-31", "Listagem de vendas paginada e com pesquisa")
+def ct31(ctx):
+    pid = ctx.cria_produto(15, "CT31")
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 12, 7.0) == 200, "pre-condicao falhou: alocacao recusada")
+    ent = entrada_de(pid, ctx.prateleira_a)
+    if not R.exige(ent is not None, "pre-condicao falhou: entrada nao criada"):
+        return
+    base = datetime.now()
+    for i in range(12):
+        ctx.api("POST", "/api/storage/sales/v1", {
+            "idEnter": ent["id"], "productId": pid, "qntd": 1,
+            "dateSale": (base - timedelta(minutes=i)).isoformat()})
+    ids = [int(l[0]) for l in sql("SELECT SalId FROM dbo.Sale WHERE SalEntId=%d "
+                                  "ORDER BY SalDateSale DESC, SalId DESC" % ent["id"])]
+    R.exige(len(ids) == 12, "pre-condicao falhou: vendas nao criadas", "criadas %d" % len(ids))
+    busca = "CT31"
+    nome = sql("SELECT ProName FROM dbo.Product WHERE ProId=%d" % pid)[0][0]
+    termo = urllib.request.quote(nome)
+
+    status, pagina1, total = _pagina_de_vendas(ctx, "page=1&pageSize=5&search=%s" % termo)
+    R.exige(status == 200, "primeira pagina recusada", "HTTP %s" % status)
+    R.exige(total == "12", "X-Total-Count nao conta as vendas da pesquisa", "cabecalho %r" % total)
+    if isinstance(pagina1, list):
+        R.exige([v["id"] for v in pagina1] == ids[:5], "primeira pagina fora da ordem mais recente primeiro",
+                "api %s, banco %s" % ([v["id"] for v in pagina1], ids[:5]))
+        R.exige(all(v["productName"] == nome for v in pagina1), "pesquisa trouxe venda de outro produto")
+
+    status, pagina3, total = _pagina_de_vendas(ctx, "page=3&pageSize=5&search=%s" % termo)
+    R.exige(status == 200 and isinstance(pagina3, list) and [v["id"] for v in pagina3] == ids[10:],
+            "ultima pagina nao traz as 2 vendas restantes", "HTTP %s, %r" % (status, pagina3))
+
+    status, nada, total = _pagina_de_vendas(ctx, "page=1&pageSize=5&search=%s" % urllib.request.quote(nome + " inexistente"))
+    R.exige(status == 200 and nada == [] and total == "0", "pesquisa sem resultado nao volta vazia",
+            "HTTP %s, total %r" % (status, total))
+
+    status, invalida, _ = _pagina_de_vendas(ctx, "page=1&pageSize=0")
+    R.exige(status == 400, "tamanho de pagina zero foi aceito", "HTTP %s" % status)
+    status, invalida, _ = _pagina_de_vendas(ctx, "page=0&pageSize=5")
+    R.exige(status == 400, "pagina zero foi aceita", "HTTP %s" % status)
+
+    todas = _venda_na_listagem(ctx, ids[-1])
+    R.exige(todas is not None, "listagem sem page deixou de devolver todas as vendas")
+    R.nota("busca por %r: 12 vendas em paginas de 5; %s" % (busca, invalida))
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
