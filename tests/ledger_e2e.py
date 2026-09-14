@@ -35,8 +35,8 @@ PREFIXO = "ZZ Ensaio Automatizado"
 EXECUCAO = datetime.now().strftime("%m%d%H%M%S")
 DESCRICAO = "Produto criado pelo roteiro de ensaio do ledger. Pode ser removido."
 
-ENTRADA, ALOCACAO, VENDA, PERDA, AJUSTE = 0, 1, 2, 3, 4
-NOME_TIPO = {0: "Entrada", 1: "Alocacao", 2: "Venda", 3: "Perda", 4: "Ajuste"}
+ENTRADA, ALOCACAO, VENDA, PERDA, AJUSTE, DEVOLUCAO = 0, 1, 2, 3, 4, 5
+NOME_TIPO = {0: "Entrada", 1: "Alocacao", 2: "Venda", 3: "Perda", 4: "Ajuste", 5: "Devolucao"}
 
 TOLERANCIA_SEGUNDOS = 120
 
@@ -850,6 +850,103 @@ def ct23(ctx):
         R.exige(_saldos_na_api(item) == esperado,
                 "saldos do produto na listagem diferentes do banco",
                 "api (deposito, prateleiras, total) %s, banco %s" % (_saldos_na_api(item), esperado))
+
+
+def _devolve(ctx, venda, quantidade):
+    return ctx.api("POST", "/api/storage/sales/v1/%d/return" % venda, {"quantity": quantidade})
+
+
+def _devolvido_no_banco(venda):
+    return int(sql("SELECT SalReturnedQntd FROM dbo.Sale WHERE SalId=%d" % venda)[0][0])
+
+
+def _venda_na_listagem(ctx, venda):
+    status, lista = ctx.api("GET", "/api/storage/sales/v1")
+    if status != 200 or not isinstance(lista, list):
+        raise Erro("listagem de vendas recusada (HTTP %s)" % status)
+    return next((v for v in lista if v.get("id") == venda), None)
+
+
+@caso("CT-24", "Devolucao parcial de venda")
+def ct24(ctx):
+    pid, ent, venda = _venda_pronta(ctx, "CT24", 20, 7)
+    if not R.exige(venda is not None, "pre-condicao falhou: venda nao criada"):
+        return
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status, _ = _devolve(ctx, venda, 3)
+    R.exige(status == 200, "devolucao parcial recusada", "HTTP %s" % status)
+    movs = movimentos_depois(marca, pid)
+    confere_linhas(movs, [(None, DEVOLUCAO, 3)])
+    confere_carimbo(movs)
+    confere_autor(ctx, movs)
+    confere_invariante(pid, antes, {None: 8, ctx.prateleira_a: 13}, movs)
+    if movs:
+        R.exige(movs[0]["motivo"] == "Devolução da venda %d" % venda,
+                "motivo da devolucao nao aponta para a venda", "gravado %r" % movs[0]["motivo"])
+    R.exige(_devolvido_no_banco(venda) == 3, "SalReturnedQntd nao registrou a devolucao",
+            "gravado %s" % _devolvido_no_banco(venda))
+    item = _venda_na_listagem(ctx, venda)
+    R.exige(item is not None, "venda parcialmente devolvida sumiu da listagem")
+    if item:
+        R.exige((item.get("qntd"), item.get("returnedQntd"), item.get("netQntd")) == (7, 3, 4),
+                "quantidades da venda na listagem erradas",
+                "api (vendida, devolvida, liquida) %s" % ((item.get("qntd"), item.get("returnedQntd"), item.get("netQntd")),))
+        R.exige(abs(float(item.get("saleTotal", 0)) - 200.0) < 0.001,
+                "total da venda nao desconta a devolucao", "api %s, esperado 200.00" % item.get("saleTotal"))
+
+
+@caso("CT-25", "Devolucao total tira a venda da listagem")
+def ct25(ctx):
+    pid, ent, venda = _venda_pronta(ctx, "CT25", 10, 4)
+    if not R.exige(venda is not None, "pre-condicao falhou: venda nao criada"):
+        return
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status, _ = _devolve(ctx, venda, 4)
+    R.exige(status == 200, "devolucao total recusada", "HTTP %s" % status)
+    movs = movimentos_depois(marca, pid)
+    confere_linhas(movs, [(None, DEVOLUCAO, 4)])
+    confere_invariante(pid, antes, {None: 9, ctx.prateleira_a: 6}, movs)
+    R.exige(_venda_na_listagem(ctx, venda) is None, "venda totalmente devolvida ainda aparece na listagem")
+    R.exige(bool(sql("SELECT SalId FROM dbo.Sale WHERE SalId=%d" % venda)),
+            "venda totalmente devolvida foi apagada do banco")
+    status, _ = ctx.api("GET", "/api/storage/sales/v1/%d" % venda)
+    R.exige(status == 200, "venda totalmente devolvida nao pode mais ser consultada por id", "HTTP %s" % status)
+
+
+@caso("CT-26", "Devolucao acima do que resta da venda")
+def ct26(ctx):
+    pid, ent, venda = _venda_pronta(ctx, "CT26", 10, 5)
+    if not R.exige(venda is not None, "pre-condicao falhou: venda nao criada"):
+        return
+    _devolve(ctx, venda, 2)
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status, corpo = _devolve(ctx, venda, 4)
+    R.exige(status == 400, "devolucao acima do restante foi aceita", "HTTP %s" % status)
+    confere_linhas(movimentos_depois(marca, pid), [])
+    R.exige(saldos(pid) == antes, "saldo mudou numa operacao que devia falhar")
+    R.exige(_devolvido_no_banco(venda) == 2, "SalReturnedQntd mudou numa devolucao recusada")
+    R.nota("mensagem: %s" % corpo)
+
+
+@caso("CT-27", "Venda com devolucao nao pode ser cancelada nem reduzida abaixo do devolvido")
+def ct27(ctx):
+    pid, ent, venda = _venda_pronta(ctx, "CT27", 10, 6)
+    if not R.exige(venda is not None, "pre-condicao falhou: venda nao criada"):
+        return
+    _devolve(ctx, venda, 3)
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status, corpo = ctx.api("DELETE", "/api/storage/sales/v1/%d" % venda)
+    R.exige(status == 400, "cancelamento de venda com devolucao foi aceito", "HTTP %s" % status)
+    R.exige(bool(sql("SELECT SalId FROM dbo.Sale WHERE SalId=%d" % venda)), "venda com devolucao foi apagada")
+    status2, corpo2 = ctx.api("PUT", "/api/storage/sales/v1/%d" % venda, {"qntd": 2})
+    R.exige(status2 == 400, "edicao abaixo do devolvido foi aceita", "HTTP %s" % status2)
+    confere_linhas(movimentos_depois(marca, pid), [])
+    R.exige(saldos(pid) == antes, "saldo mudou numa operacao que devia falhar")
+    R.nota("cancelar: %s | editar: %s" % (corpo, corpo2))
 
 
 # --------------------------------------------------------------------------- #
