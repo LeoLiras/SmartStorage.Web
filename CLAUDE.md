@@ -36,7 +36,7 @@ Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests`
 Script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
 
 ```bash
-python tests/ledger_e2e.py              # os 23 casos, ~5 min
+python tests/ledger_e2e.py              # os 27 casos, ~6 min
 python tests/ledger_e2e.py --caso CT-08 # um caso só
 python tests/ledger_e2e.py --manter     # preserva os produtos criados, para inspeção
 ```
@@ -69,7 +69,7 @@ Cada projeto executável tem seu próprio `UserSecretsId`. Os `appsettings.json`
 
 ### O gateway é a única porta de entrada
 
-O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 35 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
+O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 36 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
 
 **Os dois arquivos precisam declarar as rotas na mesma ordem.** A configuração JSON do .NET faz merge de arrays por índice, então `appsettings.Docker.json` só sobrescreve corretamente se cada rota estiver na mesma posição e com todos os campos redeclarados. Ao adicionar um endpoint, edite os dois.
 
@@ -108,6 +108,8 @@ Criar produto publica o `ProductVO` na fila `sendemailqueue` (`RabbitMQMessageSe
 Modelos com prefixo de três letras por tabela (`ProId`, `ProName`, `EmpId`, `EntQntd`, `SalEntId`). **`Product` não tem FK para `Shelf`** — `Enter` é a tabela de junção (produto alocado em prateleira, com quantidade e preço), e `Sale` referencia `Enter`, não `Product`.
 
 O autor de cada movimentação (`PsmUseId`, FK para `User`) e o instante (`PsmDate`) são decididos pelo servidor dentro de `ProductStockMovementRepository`: o autor sai do `unique_name` do token via `IHttpContextAccessor`, e nenhum VO carrega esses campos. A FK é `Restrict`, então a AuthenticationAPI recusa excluir usuário que já movimentou estoque. Pelo mesmo motivo **produto não tem exclusão** — nem tela, nem endpoint, nem rota no gateway: excluir apagava as movimentações junto e o histórico sumia.
+
+Devolução de venda (`POST /sales/{id}/return`) soma em `Sale.SalReturnedQntd` e lança `Devolucao` com sinal positivo **no depósito**, não na prateleira, com motivo `Devolução da venda {id}`. A listagem de vendas mostra quantidade e total líquidos e esconde a venda totalmente devolvida, que continua no banco. Venda com devolução não pode ser cancelada nem editada abaixo do devolvido: o estorno do cancelamento voltaria para a prateleira unidades que já voltaram ao depósito.
 
 O seed vive em `Context/Seed/SeedData.cs` via `HasData` no `OnModelCreating`, então viaja com as migrations e é aplicado pelo `migrator`. Todas as datas do seed são `static readonly` constantes: qualquer `DateTime.Now` em `HasData` faz o EF detectar mudança de modelo a cada `migrations add`. As imagens dos produtos são PNGs em base64 em `SeedImages.cs`, porque `Product.ProImage` é `varbinary(max)`.
 
