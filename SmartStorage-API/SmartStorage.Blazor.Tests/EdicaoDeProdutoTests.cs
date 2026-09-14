@@ -55,7 +55,7 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMudServices();
         Services.AddSingleton(new VariablesExtensions());
-        Services.AddSingleton(new Dialogo(_dialogo));
+        Services.AddSingleton(new Dialogo(_dialogo, new SmartStorage.Blazor.Authentication.SessionExpiration()));
         Services.AddSingleton(new ApiExtensions(new HttpClient(api)
         {
             BaseAddress = new Uri("http://localhost/"),

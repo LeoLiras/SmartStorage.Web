@@ -77,7 +77,7 @@ public class RegistroDeVendaTests : BunitContext, IAsyncLifetime
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMudServices();
         Services.AddSingleton(app);
-        Services.AddSingleton(new Dialogo(dialogo));
+        Services.AddSingleton(new Dialogo(dialogo, new SmartStorage.Blazor.Authentication.SessionExpiration()));
         Services.AddSingleton(new ApiExtensions(new HttpClient(api)
         {
             BaseAddress = new Uri("http://localhost/"),
