@@ -117,7 +117,7 @@ else
         {
             loading = false;
 
-            await ShowDialog.ShowDialogAsync($"Falha atualizando o usuário\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+            await ShowDialog.ShowDialogAsync($"Falha deletando o usuário\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
     }
 

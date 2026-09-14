@@ -197,6 +197,13 @@ namespace SmartStorage.Blazor.Services
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
                 var response = await http.DeleteAsync($"{BasePath}/{userId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+
+                    throw new ApiException((int)response.StatusCode, error);
+                }
             }
             catch (Exception)
             {
