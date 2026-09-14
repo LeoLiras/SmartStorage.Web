@@ -6,6 +6,7 @@
         Alocacao = 1,
         Venda = 2,
         Perda = 3,
-        Ajuste = 4
+        Ajuste = 4,
+        Devolucao = 5
     }
 }
