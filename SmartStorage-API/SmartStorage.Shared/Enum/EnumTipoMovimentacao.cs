@@ -7,6 +7,7 @@
         Venda = 2,
         Perda = 3,
         Ajuste = 4,
-        Devolucao = 5
+        Devolucao = 5,
+        Transferencia = 6
     }
 }

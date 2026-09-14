@@ -68,7 +68,7 @@ public partial class SmartStorageContext : DbContext
 
             entity.Property(x => x.PsmType).HasConversion<byte>().IsRequired();
 
-            entity.ToTable(t => t.HasCheckConstraint("CK_ProductStockMovement_Tipo", "[PsmType] IN (0, 1, 2, 3, 4, 5)"));
+            entity.ToTable(t => t.HasCheckConstraint("CK_ProductStockMovement_Tipo", "[PsmType] IN (0, 1, 2, 3, 4, 5, 6)"));
 
             entity.HasOne(d => d.Product).WithMany().HasForeignKey(d => d.PsmProId).OnDelete(DeleteBehavior.Restrict);
 
