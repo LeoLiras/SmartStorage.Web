@@ -79,6 +79,8 @@ Cuidado com as portas: as rotas de **dev** apontam para as portas **HTTPS** dos 
 
 `Controller → Business → SmartStorageContext`, com `Converter` traduzindo Model ↔ VO. Não há repositório aqui — as `*BusinessImplementation` recebem o `DbContext` direto e instanciam o converter no construtor. A AuthenticationAPI é a exceção: ela tem `Repositories/` com um `GenericRepository`.
 
+Converter que precisa de dados de outra tabela resolve a lista inteira em lote: o `Parse(List<>)` busca os nomes ou quantidades de todos os itens numa consulta (dicionário por id) e monta cada VO num `Parse` privado, como fazem `ProductConverter`, `SaleConverter` e `EnterConverter`. Consultar dentro do `Parse` de um item faz a listagem crescer em consultas por linha — as vendas faziam 61 consultas para 20 itens.
+
 **Pastas e namespaces divergem.** Os arquivos de negócio vivem em `Business/`, mas o namespace é `SmartStorage_API.Service`. Vários projetos usam `_` no lugar do `.` no namespace (`SmartStorage_API`, `SmartStorage_Shared`). Siga o namespace do arquivo vizinho, não o nome da pasta.
 
 ### HATEOAS
