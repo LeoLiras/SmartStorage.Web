@@ -810,6 +810,40 @@ def ct22(ctx):
     R.nota("mensagem: %s" % corpo)
 
 
+def _saldos_na_api(vo):
+    return (vo.get("qntd"), vo.get("shelvesQntd"), vo.get("totalQntd"))
+
+
+@caso("CT-23", "Saldo total do produto exposto na API")
+def ct23(ctx):
+    pid = ctx.cria_produto(10, "CT23")
+    status, _ = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": ctx.prateleira_a,
+        "productQuantity": 4, "productPrice": 12.5,
+        "dateEnter": datetime.now().isoformat(),
+    })
+    R.exige(status == 200, "alocacao recusada", "HTTP %s" % status)
+    banco = saldos(pid)
+    esperado = (banco[None], sum(q for local, q in banco.items() if local is not None))
+    esperado = esperado + (esperado[0] + esperado[1],)
+    R.exige(esperado == (6, 4, 10), "saldos do banco diferentes do preparado", "banco %s" % (esperado,))
+
+    status, vo = ctx.api("GET", "/api/storage/products/v1/%d" % pid)
+    R.exige(status == 200 and isinstance(vo, dict), "busca do produto recusada", "HTTP %s" % status)
+    if isinstance(vo, dict):
+        R.exige(_saldos_na_api(vo) == esperado,
+                "saldos do produto por id diferentes do banco",
+                "api (deposito, prateleiras, total) %s, banco %s" % (_saldos_na_api(vo), esperado))
+
+    status, lista = ctx.api("GET", "/api/storage/products/v1")
+    item = next((p for p in lista if p.get("id") == pid), None) if isinstance(lista, list) else None
+    R.exige(item is not None, "produto ausente na listagem", "HTTP %s" % status)
+    if item:
+        R.exige(_saldos_na_api(item) == esperado,
+                "saldos do produto na listagem diferentes do banco",
+                "api (deposito, prateleiras, total) %s, banco %s" % (_saldos_na_api(item), esperado))
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
