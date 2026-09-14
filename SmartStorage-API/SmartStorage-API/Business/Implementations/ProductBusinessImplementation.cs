@@ -24,7 +24,7 @@ namespace SmartStorage_API.Service.Implementations
         public ProductBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository)
         {
             _context = context;
-            _converter = new ProductConverter();
+            _converter = new ProductConverter(_context);
             _movementRepository = movementRepository;
         }
 

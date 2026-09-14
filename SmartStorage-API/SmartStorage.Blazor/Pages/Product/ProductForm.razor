@@ -40,6 +40,14 @@ else if(product is not null)
                             }
                         </MudCardContent>
                     </MudCard>
+                    @if (ProductId != 0)
+                    {
+                        <MudCard>
+                            <MudCardContent>
+                                <MudNumericField T="int" Label="Total (depósito + prateleiras)" Value="product.TotalQntd" ReadOnly="true" />
+                            </MudCardContent>
+                        </MudCard>
+                    }
                     <MudCard>
                         <MudCardContent>
                             <MudDatePicker Label="Date de Registro" @bind-Date="productDate" Color="Color.Info" />

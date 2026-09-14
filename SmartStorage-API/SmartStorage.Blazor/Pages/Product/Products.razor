@@ -33,7 +33,8 @@ else
                                 <MudCardContent>
                                     <MudText Typo="Typo.h5">@product.Name</MudText>
                                     <MudText Typo="Typo.body2">@product.Descricao</MudText>
-                                    <MudText Typo="Typo.body2">Quantidade em estoque: @product.Qntd</MudText>
+                                    <MudText Typo="Typo.body2">Estoque total: @product.TotalQntd</MudText>
+                                    <MudText Typo="Typo.caption">Depósito: @product.Qntd · Prateleiras: @product.ShelvesQntd</MudText>
                                 </MudCardContent>
                                 <MudCardActions>
                                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Editar</MudButton>
@@ -131,8 +132,7 @@ else
 
     private async Task GetProducts()
     {
-        if(app.ProductInStock.Count == 0)
-            app.ProductInStock = await api.Get<ProductVO>();
+        app.ProductInStock = await api.Get<ProductVO>();
 
         products = app.ProductInStock;
     }

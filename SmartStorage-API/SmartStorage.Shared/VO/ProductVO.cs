@@ -21,6 +21,10 @@ namespace SmartStorage_Shared.VO
         [Required(ErrorMessage = "A quantidade do produto é obrigatória.")]
         public int Qntd { get; set; }
 
+        public int ShelvesQntd { get; set; }
+
+        public int TotalQntd => Qntd + ShelvesQntd;
+
         public int? EmployeeId { get; set; }
 
         public byte[] ProImage { get; set; }
