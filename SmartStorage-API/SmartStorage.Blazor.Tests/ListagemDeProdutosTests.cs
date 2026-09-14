@@ -58,6 +58,15 @@ public class ListagemDeProdutosTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Card_nao_oferece_exclusao_de_produto()
+    {
+        var markup = RenderizaListagem(new VariablesExtensions());
+
+        Assert.Contains("Editar", markup);
+        Assert.DoesNotContain("Excluír", markup);
+    }
+
+    [Fact]
     public void Listagem_busca_os_saldos_na_api_mesmo_com_produtos_ja_carregados()
     {
         var app = new VariablesExtensions

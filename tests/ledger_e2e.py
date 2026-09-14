@@ -165,6 +165,21 @@ def id_do_usuario(username):
     return int(linhas[0][0])
 
 
+def apaga_produtos_de_teste(produtos):
+    """A aplicacao nao exclui produto, de proposito: o historico do ledger precisa
+    sobreviver. Os produtos do roteiro saem direto do banco, e so eles."""
+    if not produtos:
+        return
+    alvo = "SELECT ProId FROM dbo.Product WHERE ProId IN (%s) AND ProName LIKE '%s%%'" % (
+        ",".join(str(int(p)) for p in produtos), PREFIXO.replace("'", "''"))
+    sql("SET XACT_ABORT ON; BEGIN TRAN; "
+        "DELETE s FROM dbo.Sale s JOIN dbo.Enter e ON e.EntId = s.SalEntId WHERE e.EntProId IN (%(alvo)s); "
+        "DELETE FROM dbo.ProductStockMovement WHERE PsmProId IN (%(alvo)s); "
+        "DELETE FROM dbo.Enter WHERE EntProId IN (%(alvo)s); "
+        "DELETE FROM dbo.Product WHERE ProId IN (%(alvo)s); "
+        "COMMIT" % {"alvo": alvo})
+
+
 def entrada_de(produto, prateleira):
     linhas = sql("SELECT EntId, EntQntd, EntPrice FROM dbo.Enter "
                  "WHERE EntProId=%d AND EntSheId=%d" % (produto, prateleira))
@@ -352,11 +367,8 @@ class Contexto:
         return pid
 
     def limpa(self):
-        removidos = []
-        for pid in self.criados:
-            status, _ = self.api("DELETE", "/api/storage/products/v1/%d" % pid)
-            removidos.append((pid, status))
-        return removidos
+        apaga_produtos_de_teste(self.criados)
+        return list(self.criados)
 
 
 # --------------------------------------------------------------------------- #
@@ -721,7 +733,7 @@ def ct18(ctx):
     R.nota("estorno entra como lancamento novo; o -7 original permanece")
 
 
-@caso("CT-19", "Excluir produto com entradas e vendas")
+@caso("CT-19", "Excluir produto nao e permitido")
 def ct19(ctx):
     pid = ctx.cria_produto(20, "CT19")
     ctx.api("POST", "/api/storage/shelf/v1/allocation", {
@@ -738,17 +750,13 @@ def ct19(ctx):
     antes = len(movimentos_depois(0, pid))
     R.exige(antes > 0, "pre-condicao falhou: produto sem movimentacoes")
     status, _ = ctx.api("DELETE", "/api/storage/products/v1/%d" % pid)
-    R.exige(status == 200, "exclusao do produto recusada", "HTTP %s" % status)
-    if pid in ctx.criados:
-        ctx.criados.remove(pid)
-    depois = len(movimentos_depois(0, pid))
+    R.exige(status >= 400, "o DELETE do produto foi aceito", "HTTP %s" % status)
     existe = sql("SELECT ProId FROM dbo.Product WHERE ProId=%d" % pid)
-    R.exige(not existe, "produto continua na base depois do DELETE")
-    if depois == 0 and antes > 0:
-        R.lacuna("as %d movimentacoes do produto foram APAGADAS junto: o ledger "
-                 "perde o historico, nao registra a saida (lacuna conhecida)" % antes)
-    else:
-        R.nota("movimentacoes preservadas: %d antes, %d depois" % (antes, depois))
+    R.exige(bool(existe), "produto sumiu da base depois do DELETE")
+    depois = len(movimentos_depois(0, pid))
+    R.exige(depois == antes, "movimentacoes do produto mudaram depois do DELETE",
+            "%d antes, %d depois" % (antes, depois))
+    R.nota("HTTP %s; produto e %d movimentacoes preservados" % (status, depois))
 
 
 @caso("CT-20", "Transferir entre duas prateleiras")
@@ -888,8 +896,7 @@ def remove_sobras(ctx):
                  % PREFIXO.replace("'", "''"))
     antigos = [int(l[0]) for l in linhas if l[0] not in ("NULL", "")]
     antigos = [p for p in antigos if p not in ctx.criados]
-    for pid in antigos:
-        ctx.api("DELETE", "/api/storage/products/v1/%d" % pid)
+    apaga_produtos_de_teste(antigos)
     return antigos
 
 
@@ -952,11 +959,11 @@ def main():
     if args.manter:
         print("\n--manter: produtos de teste preservados: %s" % ctx.criados)
     else:
-        removidos = ctx.limpa()
-        nok = [p for p, s in removidos if s != 200]
-        print("\nlimpeza: %d produto(s) de teste removido(s)%s"
-              % (len(removidos) - len(nok),
-                 ", falhou em %s" % nok if nok else ""))
+        try:
+            removidos = ctx.limpa()
+            print("\nlimpeza: %d produto(s) de teste removido(s) direto do banco" % len(removidos))
+        except Erro as e:
+            print("\nlimpeza falhou: %s" % e)
 
     falhas = R.imprime()
     print("fim:     %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
