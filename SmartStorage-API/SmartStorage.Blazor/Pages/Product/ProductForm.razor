@@ -15,14 +15,14 @@ else if(product is not null)
             <MudItem xs="12" sm="7" xl="12">
                 <MudCard Class="mt-3">
                     <MudCardContent>
-                        <MudTextField Label="Nome do Produto" @bind-Value="product.Name" For="@(() => product.Name)" />
+                        <MudTextField Label="Nome do Produto" @bind-Value="product.Name" For="@(() => product.Name)" ReadOnly="ReadOnly" />
                     </MudCardContent>
                 </MudCard>
             </MudItem>
             <MudItem xs="12" sm="7" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudTextField Label="Descrição" @bind-Value="product.Descricao" For="@(() => product.Descricao)" />
+                        <MudTextField Label="Descrição" @bind-Value="product.Descricao" For="@(() => product.Descricao)" ReadOnly="ReadOnly" />
                     </MudCardContent>
                 </MudCard>
             </MudItem>
@@ -50,7 +50,7 @@ else if(product is not null)
                     }
                     <MudCard>
                         <MudCardContent>
-                            <MudDatePicker Label="Date de Registro" @bind-Date="productDate" Color="Color.Info" />
+                            <MudDatePicker Label="Date de Registro" @bind-Date="productDate" Color="Color.Info" ReadOnly="ReadOnly" />
                         </MudCardContent>
                     </MudCard>
                 </div>
@@ -58,7 +58,7 @@ else if(product is not null)
             <MudItem xs="12" sm="12" xl="12">
                 <MudCard>
                     <MudCardContent>
-                        <MudSelect T="int?" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
+                        <MudSelect T="int?" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info" ReadOnly="ReadOnly">
                             @if(employees is not null)
                             {
                                 foreach (var emp in employees)
@@ -70,7 +70,7 @@ else if(product is not null)
                     </MudCardContent>
                 </MudCard>
             </MudItem>
-            @if (ProductId != 0)
+            @if (ProductId != 0 && !ReadOnly)
             {
                 <MudItem xs="12" sm="12" xl="12">
                     <MudCard>
@@ -98,29 +98,26 @@ else if(product is not null)
                     </MudCardContent>
                 </MudCard>
             </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <div style="display: flex; gap: 8px;">
-                    <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
-                        <ActivatorContent>
-                            <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Image">
-                                Adicionar Imagem
-                            </MudButton>
-                        </ActivatorContent>
-                    </MudFileUpload>
-                    <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" OnClick="@ClearFileAsync">
-                        Limpar
-                    </MudButton>
-                </div>
-            </MudItem>
+            @if (!ReadOnly)
+            {
+                <MudItem xs="12" sm="12" xl="12">
+                    <div style="display: flex; gap: 8px;">
+                        <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Image">
+                                    Adicionar Imagem
+                                </MudButton>
+                            </ActivatorContent>
+                        </MudFileUpload>
+                        <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" OnClick="@ClearFileAsync">
+                            Limpar
+                        </MudButton>
+                    </div>
+                </MudItem>
+            }
+            @ChildContent
             <MudItem xs="12" sm="12">
-                @if(ProductId != 0)
-                {
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Atualizar</MudButton>
-                }
-                else
-                {
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Criar</MudButton>
-                }
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">@(SubmitText ?? (ProductId != 0 ? "Atualizar" : "Criar"))</MudButton>
             </MudItem>
         </MudGrid>
     </EditForm>
@@ -133,8 +130,17 @@ else if(product is not null)
     [Parameter]
     public int ProductId { get; set; }
 
-    [Parameter] 
+    [Parameter]
     public EventCallback<ProductVO> OnSave { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public string SubmitText { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
 
     private ProductVO product = new();
     private List<EmployeeVO> employees = new();
@@ -149,12 +155,17 @@ else if(product is not null)
 
     bool loading = false;
 
+    private int? loadedProductId;
+
     #endregion
 
     #region Events
 
     protected override async Task OnParametersSetAsync()
     {
+        if (loadedProductId == ProductId)
+            return;
+
         try
         {
             loading = true;
@@ -167,13 +178,15 @@ else if(product is not null)
 
             if(ProductId != 0)
             {
-                if (app.ActualProduct is null)
-                    product = await api.GetById<ProductVO>(ProductId);
-                else
+                if (app.ActualProduct is not null && app.ActualProduct.Id == ProductId)
                     product = app.ActualProduct;
+                else
+                    product = await api.GetById<ProductVO>(ProductId);
 
                 adjustQuantity = product.Qntd;
             }
+
+            loadedProductId = ProductId;
 
             loading = false;
         }
@@ -191,7 +204,7 @@ else if(product is not null)
     {
         product.StockAdjustment = null;
 
-        if (ProductId != 0 && adjustQuantity != product.Qntd)
+        if (ProductId != 0 && !ReadOnly && adjustQuantity != product.Qntd)
         {
             var adjustment = new StockAdjustmentVO
             {
