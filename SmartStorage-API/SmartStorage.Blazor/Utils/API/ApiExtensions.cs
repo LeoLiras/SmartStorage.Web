@@ -103,6 +103,30 @@ namespace SmartStorage.Blazor.Utils.API
         }
 
         /// <summary>
+        /// Requisição GET paginada; o total vem no cabeçalho X-Total-Count.
+        /// </summary>
+        public async Task<(List<TVO> Items, int Total)> GetPage<TVO>(int page, int pageSize, string search = null) where TVO : class
+        {
+            var url = $"{ReturnEndpoint<TVO>()}?page={page}&pageSize={pageSize}";
+
+            if (!string.IsNullOrWhiteSpace(search))
+                url += $"&search={Uri.EscapeDataString(search.Trim())}";
+
+            var response = await _http.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+                throw new ApiException((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+            var items = await response.Content.ReadFromJsonAsync<List<TVO>>() ?? new List<TVO>();
+
+            var total = response.Headers.TryGetValues(Pagination.TotalCountHeader, out var values) && int.TryParse(values.FirstOrDefault(), out var parsed)
+                ? parsed
+                : items.Count;
+
+            return (items, total);
+        }
+
+        /// <summary>
         /// Requisição GET que retorna um modelo com base na url e id fornecidos.
         /// </summary>
         /// <typeparam name="TVO"></typeparam>

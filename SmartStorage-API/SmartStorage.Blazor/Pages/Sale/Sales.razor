@@ -6,93 +6,75 @@
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
 
-@if (sales is null || loading)
-{
-    <Loading Message="Carregando produtos vendidos..."></Loading>
-}
-else if (sales.Count() == 0)
-{
-    <MudAlert Severity="Severity.Warning">Não há produtos vendidos.</MudAlert>
-}
-else
-{
-    <MudTable Class="mt-3" Items="@sales" Dense="false" Hover="true" Bordered="false" Striped="true" Filter="new Func<SaleVO, bool>(FilterFuncAux)" RowsPerPage="10">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Produtos Vendidos</MudText>
-            <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        </ToolBarContent>
-        <HeaderContent>
-            <MudTh>Produto</MudTh>
-            <MudTh>Preço</MudTh>
-            <MudTh>Quantidade</MudTh>
-            <MudTh>Total</MudTh>
-            <MudTh>Prateleira</MudTh>
-            <MudTh>Data de Venda</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Produto">@context.ProductName</MudTd>
-            <MudTd DataLabel="Preco">@context.SalePrice</MudTd>
-            <MudTd DataLabel="Quantidade">@context.NetQntd</MudTd>
-            <MudTd DataLabel="Total">@context.SaleTotal</MudTd>
-            <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
-            <MudTd DataLabel="Data de Entrada">@context.DateSale.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
-            <MudTd DataLabel="Devolver"><MudTooltip Text="Registrar devolução"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Info" OnClick="@(() => ReturnSale(context.Id))"></MudIconButton></MudTooltip></MudTd>
-            <MudTd DataLabel="Cancelar venda"><MudTooltip Text="Cancelar venda"><MudIconButton Icon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="@(() => CancelSale(context.Id))"></MudIconButton></MudTooltip></MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager HideRowsPerPage="true" />
-        </PagerContent>
-    </MudTable>
-}
+<MudTable @ref="table" T="SaleVO" Class="mt-3" ServerData="LoadSales" Dense="false" Hover="true" Bordered="false" Striped="true" RowsPerPage="10">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Produtos Vendidos</MudText>
+        <MudSpacer />
+        <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Produto</MudTh>
+        <MudTh>Preço</MudTh>
+        <MudTh>Quantidade</MudTh>
+        <MudTh>Total</MudTh>
+        <MudTh>Prateleira</MudTh>
+        <MudTh>Data de Venda</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Produto">@context.ProductName</MudTd>
+        <MudTd DataLabel="Preco">@context.SalePrice</MudTd>
+        <MudTd DataLabel="Quantidade">@context.NetQntd</MudTd>
+        <MudTd DataLabel="Total">@context.SaleTotal</MudTd>
+        <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
+        <MudTd DataLabel="Data de Entrada">@context.DateSale.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
+        <MudTd DataLabel="Devolver"><MudTooltip Text="Registrar devolução"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Info" OnClick="@(() => ReturnSale(context.Id))"></MudIconButton></MudTooltip></MudTd>
+        <MudTd DataLabel="Cancelar venda"><MudTooltip Text="Cancelar venda"><MudIconButton Icon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="@(() => CancelSale(context.Id))"></MudIconButton></MudTooltip></MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>@(string.IsNullOrWhiteSpace(searchString) ? "Não há produtos vendidos." : "Nenhuma venda encontrada para a pesquisa.")</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Carregando produtos vendidos...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager HideRowsPerPage="true" />
+    </PagerContent>
+</MudTable>
 
 @code {
 
     #region Properties
 
-    private List<SaleVO> sales = new List<SaleVO>();
-
-    private bool loading = false;
+    private MudTable<SaleVO> table;
 
     string searchString = string.Empty;
 
     #endregion
 
-    #region Events
-
-    protected override async Task OnInitializedAsync()
-    {
-        loading = true;
-
-        app.Sales = await api.Get<SaleVO>();
-        sales = app.Sales;
-
-        if (sales is null)
-            return;
-
-        sales.Sort((a, b) => string.Compare(a.DateSale.ToString(), b.ProductName, StringComparison.OrdinalIgnoreCase));
-
-        loading = false;
-    }
-
-    #endregion
-
     #region Methods
 
-    private bool FilterFuncAux(SaleVO sales) => FilterFunc(sales, searchString);
-
-    private bool FilterFunc(SaleVO sales, string searchString)
+    private async Task<TableData<SaleVO>> LoadSales(TableState state, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
+        try
+        {
+            var (items, total) = await api.GetPage<SaleVO>(state.Page + 1, state.PageSize, searchString);
 
-        if (sales is null || string.IsNullOrWhiteSpace(sales.ProductName))
-            return true;
+            return new TableData<SaleVO> { Items = items, TotalItems = total };
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar as vendas.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
 
-        if (sales.ProductName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+            return new TableData<SaleVO> { Items = new List<SaleVO>(), TotalItems = 0 };
+        }
+    }
 
-        return false;
+    private async Task Search(string text)
+    {
+        if (table.CurrentPage != 0)
+            table.NavigateTo(0);
+        else
+            await table.ReloadServerData();
     }
 
     private void ReturnSale(int saleId)
@@ -108,33 +90,22 @@ else
 
             if (dialogConfirmmation)
             {
-                loading = true;
-
                 await api.Delete<SaleVO>(saleId);
 
-                app.Sales = await api.Get<SaleVO>();
-                sales = app.Sales;
+                app.Sales = new();
 
                 app.ProductEntries = await api.Get<EnterVO>();
 
+                await table.ReloadServerData();
+
                 await ShowDialog.ShowDialogAsync("Venda cancelada com sucesso.", "Sucesso", app.productsSalesPage, EDialogStates.Success);
-
-                StateHasChanged();
-
-                loading = false;
             }
         }
         catch (ApiException ex)
         {
-            loading = false;
-
             await ShowDialog.ShowDialogAsync($"Erro cancelando a venda.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
     }
 
     #endregion
-    
-
-    
-
 }
