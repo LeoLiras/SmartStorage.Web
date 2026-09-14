@@ -1,4 +1,5 @@
-﻿using SmartStorage.Blazor.Provider;
+﻿using SmartStorage.Blazor.Authentication;
+using SmartStorage.Blazor.Provider;
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.API;
 using SmartStorage.Shared.VO;
@@ -13,17 +14,21 @@ namespace SmartStorage.Blazor.Services
 
         private readonly HttpClient http;
         private readonly AuthStateProvider authProvider;
+        private readonly SessionExpiration session;
 
-        public AuthService(HttpClient http, AuthStateProvider authProvider)
+        public AuthService(HttpClient http, AuthStateProvider authProvider, SessionExpiration session)
         {
             this.http = http;
             this.authProvider = authProvider;
+            this.session = session;
         }
 
         public async Task Login(UserVO user)
         {
             try
             {
+                session.Reset();
+
                 if (user == null)
                     throw new ArgumentNullException(nameof(user), message: "As credenciais do usuário são obrigatórias.");
 
