@@ -207,25 +207,6 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
-        public async Task<ProductVO> AdjustProductStock(int productId, StockAdjustmentVO adjustment)
-        {
-            if (adjustment == null)
-                throw new ArgumentNullException(nameof(adjustment), message: "Os dados do ajuste são obrigatórios.");
-
-            var response = await _http.PostAsJsonAsync($"{productsEndpoint}/{productId}/adjust-stock", adjustment);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<ProductVO>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
         /// <summary>
         /// Requisição PUT para atualização de registros existentes
         /// </summary>

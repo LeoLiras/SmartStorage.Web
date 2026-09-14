@@ -113,7 +113,15 @@ namespace SmartStorage_API.Service.Implementations
 
             searchProduct.ProImage = product.ProImage;
 
-            _context.SaveChanges();
+            if (product.StockAdjustment is null)
+                _context.SaveChanges();
+            else
+                _movementRepository.CreateNewStockMovement(
+                    productId,
+                    shelfId: null,
+                    TipoMovimentacao.Ajuste,
+                    CalculateStockAdjustmentDelta(searchProduct, product.StockAdjustment.Quantity),
+                    product.StockAdjustment.Reason);
 
             return _converter.Parse(searchProduct);
         }
@@ -125,19 +133,11 @@ namespace SmartStorage_API.Service.Implementations
             if (product is null)
                 throw new Exception("Produto não encontrado com o ID informado.");
 
-            if (newQuantity < 0)
-                throw new Exception("A quantidade do ajuste não pode ser negativa.");
-
-            var quantityDelta = newQuantity - product.ProQntd;
-
-            if (quantityDelta == 0)
-                throw new Exception("A quantidade informada é igual ao saldo atual do depósito.");
-
             _movementRepository.CreateNewStockMovement(
                 productId,
                 shelfId: null,
                 TipoMovimentacao.Ajuste,
-                quantityDelta,
+                CalculateStockAdjustmentDelta(product, newQuantity),
                 reason);
 
             return _converter.Parse(product);
@@ -175,6 +175,19 @@ namespace SmartStorage_API.Service.Implementations
 
             return _converter.Parse(product);
         }
+        private static int CalculateStockAdjustmentDelta(Product product, int newQuantity)
+        {
+            if (newQuantity < 0)
+                throw new Exception("A quantidade do ajuste não pode ser negativa.");
+
+            var quantityDelta = newQuantity - product.ProQntd;
+
+            if (quantityDelta == 0)
+                throw new Exception("A quantidade informada é igual ao saldo atual do depósito.");
+
+            return quantityDelta;
+        }
+
         #endregion
     }
 }

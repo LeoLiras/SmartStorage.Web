@@ -25,6 +25,8 @@ namespace SmartStorage_Shared.VO
 
         public byte[] ProImage { get; set; }
 
+        public StockAdjustmentVO StockAdjustment { get; set; }
+
         public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
 
         public static Product Parse(ProductVO origin)

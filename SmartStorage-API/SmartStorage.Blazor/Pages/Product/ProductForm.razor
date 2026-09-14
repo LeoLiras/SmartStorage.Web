@@ -71,9 +71,6 @@ else if(product is not null)
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <MudNumericField T="int" Label="Saldo real conferido" @bind-Value="adjustQuantity" Min="0" />
                                 <MudTextField T="string" Label="Motivo" @bind-Value="adjustReason" />
-                                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Balance" OnClick="AdjustStock">
-                                    Ajustar
-                                </MudButton>
                             </div>
                         </MudCardContent>
                     </MudCard>
@@ -184,32 +181,29 @@ else if(product is not null)
 
     private async Task OnValidSubmit()
     {
-        await OnSave.InvokeAsync(product);
-    }
+        product.StockAdjustment = null;
 
-    private async Task AdjustStock()
-    {
-        try
+        if (ProductId != 0 && adjustQuantity != product.Qntd)
         {
-            var adjusted = await api.AdjustProductStock(ProductId, new StockAdjustmentVO
+            var adjustment = new StockAdjustmentVO
             {
                 Quantity = adjustQuantity,
                 Reason = adjustReason
-            });
+            };
 
-            product.Qntd = adjusted.Qntd;
-            app.ActualProduct = product;
+            var errors = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
 
-            adjustReason = string.Empty;
+            if (!System.ComponentModel.DataAnnotations.Validator.TryValidateObject(adjustment, new System.ComponentModel.DataAnnotations.ValidationContext(adjustment), errors, validateAllProperties: true))
+            {
+                await ShowDialog.ShowDialogAsync($"Ajuste de estoque inválido.\n{string.Join("\n", errors.Select(e => e.ErrorMessage))}", "Erro", state: EDialogStates.Warning);
 
-            await ShowDialog.ShowDialogAsync($"Estoque ajustado para {adjusted.Qntd}.", "Sucesso", state: EDialogStates.Success);
+                return;
+            }
 
-            StateHasChanged();
+            product.StockAdjustment = adjustment;
         }
-        catch (ApiException ex)
-        {
-            await ShowDialog.ShowDialogAsync($"Erro ao ajustar o estoque.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
-        }
+
+        await OnSave.InvokeAsync(product);
     }
 
     #endregion
