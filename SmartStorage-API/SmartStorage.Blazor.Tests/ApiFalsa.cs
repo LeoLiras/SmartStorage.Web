@@ -12,16 +12,18 @@ namespace SmartStorage.Blazor.Tests;
 /// </summary>
 public class ApiFalsa : HttpMessageHandler
 {
-    private readonly Dictionary<string, (HttpStatusCode, string)> _respostas = new();
+    private readonly Dictionary<string, (HttpStatusCode, string, int?)> _respostas = new();
 
     public List<(HttpMethod Metodo, string Caminho, string Corpo)> Requisicoes { get; } = new();
 
+    public List<string> Consultas { get; } = new();
+
     public ApiFalsa Responde(HttpMethod metodo, string caminho, object corpo,
-                             HttpStatusCode status = HttpStatusCode.OK)
+                             HttpStatusCode status = HttpStatusCode.OK, int? total = null)
     {
         var json = corpo is string texto ? texto : JsonSerializer.Serialize(corpo, OpcoesJson);
 
-        _respostas[Chave(metodo, caminho)] = (status, json);
+        _respostas[Chave(metodo, caminho)] = (status, json, total);
 
         return this;
     }
@@ -51,6 +53,7 @@ public class ApiFalsa : HttpMessageHandler
             : await request.Content.ReadAsStringAsync(cancellationToken);
 
         Requisicoes.Add((request.Method, caminho, corpo));
+        Consultas.Add(request.RequestUri.Query);
 
         if (!_respostas.TryGetValue(Chave(request.Method, caminho), out var resposta))
             return new HttpResponseMessage(HttpStatusCode.NotFound)
@@ -59,10 +62,15 @@ public class ApiFalsa : HttpMessageHandler
                     $"ApiFalsa nao tem resposta registrada para {request.Method} {caminho}")
             };
 
-        return new HttpResponseMessage(resposta.Item1)
+        var mensagem = new HttpResponseMessage(resposta.Item1)
         {
             Content = new StringContent(resposta.Item2, Encoding.UTF8, "application/json"),
         };
+
+        if (resposta.Item3 is int total)
+            mensagem.Headers.Add("X-Total-Count", total.ToString());
+
+        return mensagem;
     }
 
     private static string Chave(HttpMethod metodo, string caminho)
