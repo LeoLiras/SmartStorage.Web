@@ -10,7 +10,6 @@ namespace SmartStorage_API.Repository.Interfaces
             int? shelfId,
             TipoMovimentacao type,
             int quantity,
-            int? employeeId = null,
             string reason = null,
             decimal? shelfPrice = null,
             DateTime? date = null);
@@ -21,7 +20,6 @@ namespace SmartStorage_API.Repository.Interfaces
             int? toShelfId,
             int quantity,
             TipoMovimentacao type = TipoMovimentacao.Alocacao,
-            int? employeeId = null,
             string reason = null,
             decimal? shelfPrice = null,
             DateTime? date = null);

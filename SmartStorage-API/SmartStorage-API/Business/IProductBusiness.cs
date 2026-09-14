@@ -8,7 +8,7 @@ namespace SmartStorage_API.Service
         ProductVO FindProductById(int id);
         ProductVO CreateNewProduct(ProductVO product);
         ProductVO UpdateProduct(int productId, ProductVO product);
-        ProductVO AdjustProductStock(int productId, int newQuantity, string reason, int? employeeId = null);
+        ProductVO AdjustProductStock(int productId, int newQuantity, string reason);
         ProductVO DeleteProduct(int productId);
     }
 }

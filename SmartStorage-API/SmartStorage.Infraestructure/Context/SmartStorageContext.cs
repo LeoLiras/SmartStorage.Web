@@ -64,7 +64,7 @@ public partial class SmartStorageContext : DbContext
 
             entity.HasIndex(e => e.PsmSheId, "IX_ProductStockMovement_shelfId");
 
-            entity.HasIndex(e => e.PsmEmpId, "IX_ProductStockMovement_employeeId");
+            entity.HasIndex(e => e.PsmUseId, "IX_ProductStockMovement_userId");
 
             entity.Property(x => x.PsmType).HasConversion<byte>().IsRequired();
 
@@ -74,7 +74,7 @@ public partial class SmartStorageContext : DbContext
 
             entity.HasOne(d => d.Shelf).WithMany().HasForeignKey(d => d.PsmSheId).OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(d => d.Employee).WithMany().HasForeignKey(d => d.PsmEmpId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.PsmUseId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<User>(entity =>

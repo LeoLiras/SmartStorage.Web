@@ -104,7 +104,7 @@ namespace SmartStorage_API.Controllers
                 if (adjustment is null)
                     throw new Exception("Os dados do ajuste são obrigatórios.");
 
-                return Ok(_productService.AdjustProductStock(productId, adjustment.Quantity, adjustment.Reason, adjustment.EmployeeId));
+                return Ok(_productService.AdjustProductStock(productId, adjustment.Quantity, adjustment.Reason));
             }
             catch (Exception ex)
             {

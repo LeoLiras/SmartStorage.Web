@@ -11,13 +11,16 @@ namespace SmartStorage_API.Repository
 
         private readonly SmartStorageContext _context;
 
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         #endregion
 
         #region Construtores
 
-        public ProductStockMovementRepository(SmartStorageContext context)
+        public ProductStockMovementRepository(SmartStorageContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         #endregion
@@ -29,12 +32,13 @@ namespace SmartStorage_API.Repository
             int? shelfId,
             TipoMovimentacao type,
             int quantity,
-            int? employeeId = null,
             string reason = null,
             decimal? shelfPrice = null,
             DateTime? date = null)
         {
-            var movement = ApplyMovementToBalance(productId, shelfId, type, quantity, employeeId, reason, shelfPrice, date);
+            var userId = FindAuthenticatedUserId();
+
+            var movement = ApplyMovementToBalance(productId, shelfId, type, quantity, userId, reason, shelfPrice, date);
 
             _context.SaveChanges();
 
@@ -47,7 +51,6 @@ namespace SmartStorage_API.Repository
             int? toShelfId,
             int quantity,
             TipoMovimentacao type = TipoMovimentacao.Alocacao,
-            int? employeeId = null,
             string reason = null,
             decimal? shelfPrice = null,
             DateTime? date = null)
@@ -58,12 +61,14 @@ namespace SmartStorage_API.Repository
             if (fromShelfId == toShelfId)
                 throw new Exception("A origem e o destino da transferência são o mesmo local.");
 
+            var userId = FindAuthenticatedUserId();
+
             var movementDate = date ?? DateTime.Now;
 
             var movements = new List<ProductStockMovement>
             {
-                ApplyMovementToBalance(productId, fromShelfId, type, -quantity, employeeId, reason, shelfPrice, movementDate),
-                ApplyMovementToBalance(productId, toShelfId, type, quantity, employeeId, reason, shelfPrice, movementDate)
+                ApplyMovementToBalance(productId, fromShelfId, type, -quantity, userId, reason, shelfPrice, movementDate),
+                ApplyMovementToBalance(productId, toShelfId, type, quantity, userId, reason, shelfPrice, movementDate)
             };
 
             _context.SaveChanges();
@@ -101,7 +106,7 @@ namespace SmartStorage_API.Repository
             int? shelfId,
             TipoMovimentacao type,
             int quantity,
-            int? employeeId,
+            long userId,
             string reason,
             decimal? shelfPrice,
             DateTime? date)
@@ -163,13 +168,27 @@ namespace SmartStorage_API.Repository
                 PsmType = type,
                 PsmQntd = quantity,
                 PsmDate = movementDate,
-                PsmEmpId = employeeId,
+                PsmUseId = userId,
                 PsmReason = reason
             };
 
             _context.ProductStockMovements.Add(movement);
 
             return movement;
+        }
+
+        private long FindAuthenticatedUserId()
+        {
+            var username = _httpContextAccessor.HttpContext?.User.Identity?.Name;
+
+            if (string.IsNullOrWhiteSpace(username))
+                throw new Exception("Não foi possível identificar o usuário autenticado.");
+
+            return _context.Users
+                .Where(u => u.Username == username)
+                .Select(u => (long?)u.Id)
+                .FirstOrDefault()
+                ?? throw new Exception("Usuário autenticado não encontrado na base de dados");
         }
 
         private Product FindProductById(int productId)

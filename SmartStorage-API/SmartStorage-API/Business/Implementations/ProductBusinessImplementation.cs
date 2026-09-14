@@ -80,8 +80,7 @@ namespace SmartStorage_API.Service.Implementations
                     newProduct.ProId,
                     shelfId: null,
                     TipoMovimentacao.Entrada,
-                    product.Qntd,
-                    employeeId: product.EmployeeId);
+                    product.Qntd);
 
             return _converter.Parse(newProduct);
 
@@ -119,7 +118,7 @@ namespace SmartStorage_API.Service.Implementations
             return _converter.Parse(searchProduct);
         }
 
-        public ProductVO AdjustProductStock(int productId, int newQuantity, string reason, int? employeeId = null)
+        public ProductVO AdjustProductStock(int productId, int newQuantity, string reason)
         {
             var product = _context.Products.FirstOrDefault(x => x.ProId == productId);
 
@@ -139,7 +138,6 @@ namespace SmartStorage_API.Service.Implementations
                 shelfId: null,
                 TipoMovimentacao.Ajuste,
                 quantityDelta,
-                employeeId,
                 reason);
 
             return _converter.Parse(product);

@@ -32,7 +32,7 @@ public partial class ProductStockMovement
     [Required(ErrorMessage = "A data da movimentação é obrigatória.")]
     public DateTime PsmDate { get; set; }
 
-    public int? PsmEmpId { get; set; }
+    public long? PsmUseId { get; set; }
 
     [StringLength(300, ErrorMessage = "Insira no máximo 300 caracteres.")]
     public string PsmReason { get; set; }
@@ -44,5 +44,5 @@ public partial class ProductStockMovement
     public virtual Shelf Shelf { get; set; }
 
     [JsonIgnore]
-    public virtual Employee Employee { get; set; }
+    public virtual User User { get; set; }
 }

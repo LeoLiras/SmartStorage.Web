@@ -10,7 +10,5 @@ namespace SmartStorage_Shared.VO
         [Required(ErrorMessage = "O motivo do ajuste é obrigatório.")]
         [StringLength(300, MinimumLength = 5, ErrorMessage = "Insira entre 5 e 300 caracteres.")]
         public string Reason { get; set; }
-
-        public int? EmployeeId { get; set; }
     }
 }
