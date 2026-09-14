@@ -127,6 +127,8 @@ else if(product is not null)
 
     #region Properties
 
+    private const int MaxImageSide = 800;
+
     [Parameter]
     public int ProductId { get; set; }
 
@@ -236,7 +238,13 @@ else if(product is not null)
         this.file = file;
         fileName = file.Name;
 
-        using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+        var format = file.ContentType == "image/png" ? "image/png" : "image/jpeg";
+
+        var resized = await file.RequestImageFileAsync(format, MaxImageSide, MaxImageSide);
+
+        var stored = resized.Size < file.Size ? resized : file;
+
+        using var stream = stored.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
 
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
