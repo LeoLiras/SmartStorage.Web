@@ -73,9 +73,16 @@ namespace SmartStorage.AuthenticationAPI.Controllers
             if (userId.Equals(0))
                 return BadRequest("O campo ID do Usuário é obrigatório.");
 
-            _userAuthService.DeleteUser(userId);
+            try
+            {
+                _userAuthService.DeleteUser(userId);
 
-            return Ok();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("signin")]
