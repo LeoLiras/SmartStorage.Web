@@ -38,7 +38,7 @@ namespace SmartStorage.ReportsAPI.Repository
                 .ThenInclude(s => s.Product)
                 .Where(s => s.SalDateSale.Year == DateTime.Now.Year && s.SalDateSale.Month == DateTime.Now.Month && s.SalQntd > s.SalReturnedQntd).ToList();
 
-            if (sales is null)
+            if (!sales.Any())
                 throw new Exception("Ainda não há vendas no mês corrente.");
 
             using var wb = new XLWorkbook();
@@ -93,7 +93,7 @@ namespace SmartStorage.ReportsAPI.Repository
                 .ThenInclude(s => s.Product)
                 .Where(s => s.SalDateSale.Year == DateTime.Now.Year && s.SalDateSale.Month == DateTime.Now.Month && s.SalQntd > s.SalReturnedQntd).ToList();
 
-            if (sales is null)
+            if (!sales.Any())
                 throw new Exception("Ainda não há vendas no mês corrente.");
 
             //Table grade
