@@ -140,7 +140,7 @@ def movimentos_depois(psm_id, produto=None):
     linhas = sql(
         "SELECT PsmId, PsmProId, ISNULL(CAST(PsmSheId AS varchar(10)),'NULL'), "
         "PsmType, PsmQntd, ISNULL(PsmReason,''), "
-        "CONVERT(varchar(23), PsmDate, 121), ISNULL(CAST(PsmEmpId AS varchar(10)),'NULL') "
+        "CONVERT(varchar(23), PsmDate, 121), ISNULL(CAST(PsmUseId AS varchar(20)),'NULL') "
         "FROM dbo.ProductStockMovement WHERE %s ORDER BY PsmId" % filtro)
     saida = []
     for l in linhas:
@@ -152,9 +152,17 @@ def movimentos_depois(psm_id, produto=None):
             "qntd": int(l[4]),
             "motivo": l[5],
             "data": datetime.strptime(l[6], "%Y-%m-%d %H:%M:%S.%f"),
-            "funcionario": None if l[7] == "NULL" else int(l[7]),
+            "autor": None if l[7] == "NULL" else int(l[7]),
         })
     return saida
+
+
+def id_do_usuario(username):
+    linhas = sql("SELECT id FROM dbo.[User] WHERE UseUsername = '%s'"
+                 % username.replace("'", "''"))
+    if not linhas:
+        raise Erro("usuario %r nao encontrado no banco" % username)
+    return int(linhas[0][0])
 
 
 def entrada_de(produto, prateleira):
@@ -254,6 +262,14 @@ def confere_carimbo(movs):
                 "%s vs %s" % (movs[0]["data"], movs[1]["data"]))
 
 
+def confere_autor(ctx, movs):
+    """Toda movimentacao grava como autor o usuario do token."""
+    for m in movs:
+        R.exige(m["autor"] == ctx.usuario,
+                "PsmUseId de #%d diferente do usuario logado" % m["id"],
+                "gravado %s, esperado %s (%s)" % (m["autor"], ctx.usuario, USUARIO))
+
+
 def confere_invariante(produto, antes, esperado_por_local, movs):
     """saldo_depois == saldo_antes + soma dos lancamentos daquele local."""
     depois = saldos(produto)
@@ -293,6 +309,7 @@ class Contexto:
     def __init__(self, token):
         self.token = token
         self.criados = []
+        self.usuario = id_do_usuario(USUARIO)
         self.funcionario = self.primeiro_funcionario()
         self.prateleira_a, self.prateleira_b = self.duas_prateleiras()
 
@@ -363,10 +380,8 @@ def ct01(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(None, ENTRADA, 10)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, {None: 0}, {None: 10}, movs)
-    if movs:
-        R.exige(movs[0]["funcionario"] is not None,
-                "PsmEmpId nulo na criacao, que é o unico ponto que informa o funcionario")
 
 
 @caso("CT-02", "Criar produto com quantidade zero")
@@ -389,6 +404,7 @@ def ct03(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(None, AJUSTE, 15)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {None: 25}, movs)
     if movs:
         R.exige(movs[0]["motivo"] == "Recontagem do roteiro",
@@ -406,6 +422,7 @@ def ct04(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(None, AJUSTE, -18)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {None: 12}, movs)
 
 
@@ -462,6 +479,7 @@ def ct08(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(None, ALOCACAO, -8), (ctx.prateleira_a, ALOCACAO, 8)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {None: 12, ctx.prateleira_a: 8}, movs)
     ent = entrada_de(pid, ctx.prateleira_a)
     R.exige(ent is not None, "Enter nao foi criado na alocacao")
@@ -507,6 +525,7 @@ def ct10(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(None, ALOCACAO, -4), (ctx.prateleira_a, ALOCACAO, 4)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {None: 10, ctx.prateleira_a: 10}, movs)
     quantas = len(sql("SELECT EntId FROM dbo.Enter WHERE EntProId=%d AND EntSheId=%d"
                       % (pid, ctx.prateleira_a)))
@@ -536,6 +555,7 @@ def ct11(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(ctx.prateleira_a, ALOCACAO, -15), (None, ALOCACAO, 15)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {None: 20, ctx.prateleira_a: 0}, movs)
     R.nota("devolve o EntQntd inteiro, nao uma parte")
 
@@ -583,6 +603,7 @@ def ct13(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(ctx.prateleira_a, VENDA, -3)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {None: 10, ctx.prateleira_a: 7}, movs)
     R.exige(total_vendas() == vendas + 1, "linha em Sale nao foi criada")
 
@@ -645,6 +666,7 @@ def ct15(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(ctx.prateleira_a, VENDA, -4)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {ctx.prateleira_a: 11}, movs)
 
 
@@ -661,6 +683,7 @@ def ct16(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(ctx.prateleira_a, VENDA, 5)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {ctx.prateleira_a: 16}, movs)
 
 
@@ -692,6 +715,7 @@ def ct18(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(ctx.prateleira_a, VENDA, 7)])
     confere_carimbo(movs)
+    confere_autor(ctx, movs)
     confere_invariante(pid, antes, {ctx.prateleira_a: 20}, movs)
     R.exige(total_vendas() == vendas - 1, "linha em Sale nao foi removida")
     R.nota("estorno entra como lancamento novo; o -7 original permanece")
@@ -813,8 +837,8 @@ def main():
         confere_saude()
         token = entrar()
         ctx = Contexto(token)
-        print("funcionario: %s | prateleiras de teste: %s e %s"
-              % (ctx.funcionario, ctx.prateleira_a, ctx.prateleira_b))
+        print("usuario: %s (id %s) | funcionario: %s | prateleiras de teste: %s e %s"
+              % (USUARIO, ctx.usuario, ctx.funcionario, ctx.prateleira_a, ctx.prateleira_b))
         print("execucao: %s" % EXECUCAO)
         sobras = remove_sobras(ctx)
         if sobras:
