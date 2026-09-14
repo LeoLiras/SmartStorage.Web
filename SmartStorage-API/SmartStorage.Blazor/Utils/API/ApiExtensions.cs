@@ -207,6 +207,25 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
+        public async Task<SaleVO> ReturnSale(int saleId, SaleReturnVO saleReturn)
+        {
+            if (saleReturn == null)
+                throw new ArgumentNullException(nameof(saleReturn), message: "Os dados da devolução são obrigatórios.");
+
+            var response = await _http.PostAsJsonAsync($"{salesEndpoint}/{saleId}/return", saleReturn);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<SaleVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
         /// <summary>
         /// Requisição PUT para atualização de registros existentes
         /// </summary>

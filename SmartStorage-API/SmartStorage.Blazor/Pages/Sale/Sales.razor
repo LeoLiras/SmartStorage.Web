@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @inject ApiExtensions api
+@inject NavigationManager nav
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
 
@@ -32,10 +33,11 @@ else
         <RowTemplate>
             <MudTd DataLabel="Produto">@context.ProductName</MudTd>
             <MudTd DataLabel="Preco">@context.EnterPrice</MudTd>
-            <MudTd DataLabel="Quantidade">@context.Qntd</MudTd>
+            <MudTd DataLabel="Quantidade">@context.NetQntd</MudTd>
             <MudTd DataLabel="Total">@context.SaleTotal</MudTd>
             <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
             <MudTd DataLabel="Data de Entrada">@context.DateSale.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
+            <MudTd DataLabel="Devolver"><MudTooltip Text="Registrar devolução"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Info" OnClick="@(() => ReturnSale(context.Id))"></MudIconButton></MudTooltip></MudTd>
             <MudTd DataLabel="Cancelar venda"><MudTooltip Text="Cancelar venda"><MudIconButton Icon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="@(() => CancelSale(context.Id))"></MudIconButton></MudTooltip></MudTd>
         </RowTemplate>
         <PagerContent>
@@ -62,10 +64,8 @@ else
     {
         loading = true;
 
-        if (app.Sales is null || app.Sales.Count() == 0)
-            sales = await api.Get<SaleVO>();
-        else
-            sales = app.Sales;
+        app.Sales = await api.Get<SaleVO>();
+        sales = app.Sales;
 
         if (sales is null)
             return;
@@ -93,6 +93,11 @@ else
             return true;
 
         return false;
+    }
+
+    private void ReturnSale(int saleId)
+    {
+        nav.NavigateTo($"product/sale/return/{saleId}");
     }
 
     private async Task CancelSale(int saleId)
