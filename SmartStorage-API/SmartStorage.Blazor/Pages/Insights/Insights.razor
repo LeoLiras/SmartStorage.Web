@@ -214,13 +214,22 @@ else
 
             //var aiResponse = await api.PostAnalyseAI($"Apenas texto, não utilize tabelas e separe em tópicos somente se necessário. Não cite os nomes dos campos e nem lucro bruto total. {currentInput}");
 
-            var aiResponse = await aiService.CallAI($"Apenas texto, não utilize tabelas e separe em tópicos somente se necessário. Não cite os nomes dos campos e nem lucro bruto total. {currentInput}");
+            try
+            {
+                var aiResponse = await aiService.CallAI($"Apenas texto, não utilize tabelas e separe em tópicos somente se necessário. Não cite os nomes dos campos e nem lucro bruto total. {currentInput}");
 
-            chatMessages.Add(new ChatMessage { Text = aiResponse ?? "", IsUser = false });
+                chatMessages.Add(new ChatMessage { Text = aiResponse ?? "", IsUser = false });
 
-            currentInput = "";
-
-            loadingReport = false;
+                currentInput = "";
+            }
+            catch (ApiException ex)
+            {
+                await ShowDialog.ShowDialogAsync($"Erro consultando a IA.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+            }
+            finally
+            {
+                loadingReport = false;
+            }
         }
         else
         {
@@ -242,12 +251,14 @@ else
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 report
             );
-
-            loadingReport = false;
         }
         catch (ApiException ex)
         {
             await ShowDialog.ShowDialogAsync($"Erro gerando o Excel.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+        finally
+        {
+            loadingReport = false;
         }
     }
 
@@ -265,13 +276,15 @@ else
                 "application/pdf",
                 report
             );
-
-            loadingReport = false;
         }
         catch (ApiException ex)
         {
             await ShowDialog.ShowDialogAsync($"Erro gerando o PDF.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
-        }  
+        }
+        finally
+        {
+            loadingReport = false;
+        }
     }
 
     #endregion

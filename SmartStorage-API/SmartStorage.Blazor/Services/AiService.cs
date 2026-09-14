@@ -1,4 +1,5 @@
 ﻿using SmartStorage.Blazor.Services.IServices;
+using SmartStorage.Blazor.Utils.API;
 using SmartStorage.Shared.VO.AiService;
 using System.Net.Http.Json;
 
@@ -22,6 +23,10 @@ namespace SmartStorage.Blazor.Services
             };
             
             var response = await _client.PostAsJsonAsync($"{BasePath}/analyse-sales", request);
+
+            if (!response.IsSuccessStatusCode)
+                throw new ApiException((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
             return await response.Content.ReadAsStringAsync();
         }
     }
