@@ -36,7 +36,7 @@ namespace SmartStorage.ReportsAPI.Repository
                 .ThenInclude(s => s.Shelf)
                 .Include(s => s.Enter)
                 .ThenInclude(s => s.Product)
-                .Where(s => s.SalDateSale.Month == DateTime.Now.Month).ToList();
+                .Where(s => s.SalDateSale.Year == DateTime.Now.Year && s.SalDateSale.Month == DateTime.Now.Month).ToList();
 
             if (sales is null)
                 throw new Exception("Ainda não há vendas no mês corrente.");
@@ -91,7 +91,7 @@ namespace SmartStorage.ReportsAPI.Repository
                 .ThenInclude(s => s.Shelf)
                 .Include(s => s.Enter)
                 .ThenInclude(s => s.Product)
-                .Where(s => s.SalDateSale.Month == DateTime.Now.Month).ToList();
+                .Where(s => s.SalDateSale.Year == DateTime.Now.Year && s.SalDateSale.Month == DateTime.Now.Month).ToList();
 
             if (sales is null)
                 throw new Exception("Ainda não há vendas no mês corrente.");
