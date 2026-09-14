@@ -38,7 +38,6 @@ else
                                 </MudCardContent>
                                 <MudCardActions>
                                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Editar</MudButton>
-                                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(product.Id)">Excluír</MudButton>
                                 </MudCardActions>
                                 <MudCardActions>
                                     <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Send" Color="Color.Secondary" OnClick="() => AllocateToShelf(product.Id)">Alocar para prateleira</MudButton>
@@ -89,35 +88,6 @@ else
 
             nav.NavigateTo($"product/edit/{productId}");
         } 
-    }
-
-    private async Task Delete(int productId)
-    {
-        try
-        {
-            var dialogConfirmmation = await ShowDialog.ShowDialogAsync("Tem certeza que deseja deletar o produto?.", "Confirmação", state: EDialogStates.Error, showCancel: true, showYes: true);
-
-            if (dialogConfirmmation)
-            {
-                loading = true;
-
-                StateHasChanged();
-
-                var result = await api.Delete<ProductVO>(productId);
-
-                await GetProducts();
-
-                await ShowDialog.ShowDialogAsync("Produto deletado com sucesso.", "Sucesso", app.productsInStockPage, EDialogStates.Success);
-
-                loading = false;
-            }
-        }
-        catch (ApiException ex)
-        {
-            loading = false;
-
-            await ShowDialog.ShowDialogAsync($"Erro deletando produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
-        }
     }
 
     private void AllocateToShelf(int productId)

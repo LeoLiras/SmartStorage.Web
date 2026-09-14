@@ -143,38 +143,6 @@ namespace SmartStorage_API.Service.Implementations
             return _converter.Parse(product);
         }
 
-        public ProductVO DeleteProduct(int productId)
-        {
-            var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(productId));
-
-            if (product is null)
-                throw new Exception("Produto não encontrado com o ID informado");
-
-            var enters = _context.Enters.Where(e => e.EntProId.Equals(productId)).ToList();
-
-            if (enters.Count > 0)
-            {
-                foreach (var enter in enters)
-                {
-                    var sales = _context.Sales.Where(s => s.SalEntId.Equals(enter.EntId)).ToList();
-
-                    if (sales.Count > 0)
-                        _context.Sales.RemoveRange(sales);
-
-                    _context.Remove(enter);
-                }
-            }
-
-            var movements = _context.ProductStockMovements.Where(m => m.PsmProId.Equals(productId)).ToList();
-
-            if (movements.Count > 0)
-                _context.ProductStockMovements.RemoveRange(movements);
-
-            _context.Products.Remove(product);
-            _context.SaveChanges();
-
-            return _converter.Parse(product);
-        }
         private static int CalculateStockAdjustmentDelta(Product product, int newQuantity)
         {
             if (newQuantity < 0)
