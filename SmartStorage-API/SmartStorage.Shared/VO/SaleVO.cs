@@ -12,7 +12,7 @@ namespace SmartStorage_Shared.VO
 
         public string ShelfName { get; set; }
 
-        public decimal EnterPrice { get; set; }
+        public decimal SalePrice { get; set; }
 
         public decimal SaleTotal { get; set; }
 

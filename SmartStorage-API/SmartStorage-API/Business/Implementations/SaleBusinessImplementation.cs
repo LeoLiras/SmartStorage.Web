@@ -62,6 +62,7 @@ namespace SmartStorage_API.Service.Implementations
                 SalEntId = enter.EntId,
                 SalQntd = saleQntd,
                 SalDateSale = dateSale,
+                SalPrice = enter.EntPrice,
             };
 
             _context.Sales.Add(sale);

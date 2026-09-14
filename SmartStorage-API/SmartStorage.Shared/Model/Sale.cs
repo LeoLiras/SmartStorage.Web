@@ -20,5 +20,7 @@ public partial class Sale
 
     public int SalReturnedQntd { get; set; }
 
+    public decimal SalPrice { get; set; }
+
     public virtual Enter Enter { get; set; }
 }

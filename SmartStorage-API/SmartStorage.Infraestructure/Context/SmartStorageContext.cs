@@ -55,6 +55,8 @@ public partial class SmartStorageContext : DbContext
         {
             entity.HasIndex(e => e.SalEntId, "IX_Sale_enterId");
 
+            entity.Property(p => p.SalPrice).HasPrecision(18, 2);
+
             entity.HasOne(d => d.Enter).WithMany(p => p.Sales).HasForeignKey(d => d.SalEntId);
         });
 

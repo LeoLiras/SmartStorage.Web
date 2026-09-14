@@ -30,7 +30,7 @@ public class DevolucaoDeVendaTests : BunitContext, IAsyncLifetime
         productId = 42,
         productName = "Capacete de Seguranca Branco",
         shelfName = "Prateleira B1",
-        enterPrice = 10.0m,
+        salePrice = 10.0m,
         qntd = vendida,
         returnedQntd = devolvida,
         saleTotal = 10.0m * (vendida - devolvida),
