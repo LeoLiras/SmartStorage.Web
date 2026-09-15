@@ -121,7 +121,7 @@ namespace SmartStorage_API.Controllers
                 if (string.IsNullOrWhiteSpace(shelf.Name))
                     throw new Exception("O campo Nome da Prateleira é obrigatório.");
 
-                return Ok(_shelfService.UpdateShelf(shelfId, shelf.Name));
+                return Ok(_shelfService.UpdateShelf(shelfId, shelf));
             }
             catch (Exception ex)
             {

@@ -9,7 +9,7 @@ namespace SmartStorage_API.Service
         EnterVO FindProductInShelfById(int enterId);
         List<ShelfVO> FindAllShelf();
         ShelfVO FindShelfById(int id);
-        ShelfVO UpdateShelf(int shelfId, string shelfName);
+        ShelfVO UpdateShelf(int shelfId, ShelfVO shelf);
         ShelfVO DeleteShelf(int shelfId);
         ShelfVO CreateNewShelf(ShelfVO newShelf);
         EnterVO AllocateProductToShelf(EnterVO newAllocation);

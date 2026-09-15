@@ -76,39 +76,40 @@ internal static class SeedData
     private static void SeedShelves(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Shelf>().HasData(
-            new Shelf { SheId = 1, SheName = "Prateleira A1 - Ferramentas Elétricas", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 2, SheName = "Prateleira A2 - Ferramentas Manuais", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 3, SheName = "Prateleira B1 - Equipamentos de Proteção", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 4, SheName = "Prateleira B2 - Materiais Elétricos", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 5, SheName = "Prateleira C1 - Fixadores e Parafusos", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 6, SheName = "Prateleira C2 - Medição e Precisão", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 7, SheName = "Prateleira D1 - Pintura e Acabamento", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 8, SheName = "Prateleira D2 - Hidráulica", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 9, SheName = "Prateleira E1 - Jardinagem", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 10, SheName = "Prateleira E2 - Estoque Geral", SheDataRegister = CadastroPrateleiras });
+            new Shelf { SheId = 1, SheName = "Prateleira A1 - Ferramentas Elétricas", SheDataRegister = CadastroPrateleiras, SheVolume = 400m },
+            new Shelf { SheId = 2, SheName = "Prateleira A2 - Ferramentas Manuais", SheDataRegister = CadastroPrateleiras, SheVolume = 400m },
+            new Shelf { SheId = 3, SheName = "Prateleira B1 - Equipamentos de Proteção", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 4, SheName = "Prateleira B2 - Materiais Elétricos", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 5, SheName = "Prateleira C1 - Fixadores e Parafusos", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 6, SheName = "Prateleira C2 - Medição e Precisão", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 7, SheName = "Prateleira D1 - Pintura e Acabamento", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 8, SheName = "Prateleira D2 - Hidráulica", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 9, SheName = "Prateleira E1 - Jardinagem", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 10, SheName = "Prateleira E2 - Estoque Geral", SheDataRegister = CadastroPrateleiras, SheVolume = 800m });
     }
 
     private static void SeedProducts(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>().HasData(
-            Produto(1, "Furadeira de Impacto 750W", "Furadeira de impacto com mandril de 13mm, velocidade variável e reversão.", 14, 1),
-            Produto(2, "Parafusadeira sem Fio 12V", "Parafusadeira a bateria com duas velocidades, maleta e duas baterias de lítio.", 0, 1),
-            Produto(3, "Serra Circular 1400W", "Serra circular com disco de 184mm e guia paralela para cortes retos.", 5, 2),
-            Produto(4, "Martelo Unha 27mm", "Martelo com cabeça de aço forjado e cabo de fibra de vidro antiderrapante.", 0, 2),
-            Produto(5, "Jogo de Chaves de Fenda", "Conjunto com seis chaves de fenda e philips com cabo emborrachado.", 15, 3),
-            Produto(6, "Trena a Laser 40 Metros", "Medidor de distância a laser com precisão de 2mm e cálculo de área.", 0, 3),
-            Produto(7, "Capacete de Segurança Branco", "Capacete de proteção classe B com carneira ajustável e certificado pelo CA.", 35, 4),
-            Produto(8, "Luva de Proteção Nitrílica", "Par de luvas revestidas em nitrilo para manuseio de peças e ferramentas.", 50, 4),
-            Produto(9, "Óculos de Proteção Incolor", "Óculos de segurança com lente antirrisco e proteção contra impactos.", 0, 5),
-            Produto(10, "Fita Isolante 20 Metros", "Fita isolante antichama de 19mm por 20 metros para emendas elétricas.", 80, 5));
+            Produto(1, "Furadeira de Impacto 750W", "Furadeira de impacto com mandril de 13mm, velocidade variável e reversão.", 14, 1, 6.0m),
+            Produto(2, "Parafusadeira sem Fio 12V", "Parafusadeira a bateria com duas velocidades, maleta e duas baterias de lítio.", 0, 1, 4.5m),
+            Produto(3, "Serra Circular 1400W", "Serra circular com disco de 184mm e guia paralela para cortes retos.", 5, 2, 12.0m),
+            Produto(4, "Martelo Unha 27mm", "Martelo com cabeça de aço forjado e cabo de fibra de vidro antiderrapante.", 0, 2, 1.5m),
+            Produto(5, "Jogo de Chaves de Fenda", "Conjunto com seis chaves de fenda e philips com cabo emborrachado.", 15, 3, 1.2m),
+            Produto(6, "Trena a Laser 40 Metros", "Medidor de distância a laser com precisão de 2mm e cálculo de área.", 0, 3, 0.8m),
+            Produto(7, "Capacete de Segurança Branco", "Capacete de proteção classe B com carneira ajustável e certificado pelo CA.", 35, 4, 6.0m),
+            Produto(8, "Luva de Proteção Nitrílica", "Par de luvas revestidas em nitrilo para manuseio de peças e ferramentas.", 50, 4, 0.3m),
+            Produto(9, "Óculos de Proteção Incolor", "Óculos de segurança com lente antirrisco e proteção contra impactos.", 0, 5, 0.4m),
+            Produto(10, "Fita Isolante 20 Metros", "Fita isolante antichama de 19mm por 20 metros para emendas elétricas.", 80, 5, 0.1m));
     }
 
-    private static Product Produto(int id, string nome, string descricao, int quantidade, int funcionarioId) => new()
+    private static Product Produto(int id, string nome, string descricao, int quantidade, int funcionarioId, decimal volume) => new()
     {
         ProId = id,
         ProName = nome,
         ProDescription = descricao,
         ProQntd = quantidade,
+        ProVolume = volume,
         ProEmpId = funcionarioId,
         ProDateRegister = CadastroProdutos,
         ProImage = SeedImages.ForProduct(id)

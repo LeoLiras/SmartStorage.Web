@@ -89,6 +89,8 @@ namespace SmartStorage_API.Service.Implementations
 
             ValidateMinimumStock(product.MinimumStock);
 
+            ValidateVolume(product.Volume);
+
             var newProduct = new Product
             {
                 ProName = product.Name,
@@ -96,6 +98,7 @@ namespace SmartStorage_API.Service.Implementations
                 ProDateRegister = DateTime.UtcNow,
                 ProQntd = 0,
                 ProMinimumStock = product.MinimumStock,
+                ProVolume = product.Volume,
                 ProEmpId = product.EmployeeId,
                 ProImage = product.ProImage
             };
@@ -133,9 +136,13 @@ namespace SmartStorage_API.Service.Implementations
 
             ValidateMinimumStock(product.MinimumStock);
 
+            ValidateVolume(product.Volume);
+
             searchProduct.ProEmpId = product.EmployeeId;
 
             searchProduct.ProMinimumStock = product.MinimumStock;
+
+            searchProduct.ProVolume = product.Volume;
 
             if (!string.IsNullOrWhiteSpace(product.Name))
                 searchProduct.ProName = product.Name;
@@ -179,6 +186,12 @@ namespace SmartStorage_API.Service.Implementations
         {
             if (minimumStock < 0)
                 throw new Exception("O estoque mínimo não pode ser negativo.");
+        }
+
+        private static void ValidateVolume(decimal? volume)
+        {
+            if (volume <= 0)
+                throw new Exception("O volume do produto deve ser maior que zero.");
         }
 
         private static int CalculateStockAdjustmentDelta(Product product, int newQuantity)

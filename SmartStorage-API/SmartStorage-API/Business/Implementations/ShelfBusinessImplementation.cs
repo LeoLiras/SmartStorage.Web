@@ -28,7 +28,7 @@ namespace SmartStorage_API.Service.Implementations
         public ShelfBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository, IStockAlertBusiness stockAlert)
         {
             _context = context;
-            _converterShelf = new ShelfConverter();
+            _converterShelf = new ShelfConverter(_context);
             _converterEnter = new EnterConverter(_context);
             _movementRepository = movementRepository;
             _stockAlert = stockAlert;
@@ -96,10 +96,13 @@ namespace SmartStorage_API.Service.Implementations
 
         public ShelfVO CreateNewShelf(ShelfVO newShelf)
         {
+            ValidateShelfVolume(newShelf.Volume);
+
             var shelf = new Shelf
             {
                 SheName = newShelf.Name,
                 SheDataRegister = DateTime.UtcNow,
+                SheVolume = newShelf.Volume,
             };
 
             _context.Add(shelf);
@@ -108,14 +111,18 @@ namespace SmartStorage_API.Service.Implementations
             return _converterShelf.Parse(shelf);
         }
 
-        public ShelfVO UpdateShelf(int shelfId, string shelfName)
+        public ShelfVO UpdateShelf(int shelfId, ShelfVO updatedShelf)
         {
             var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId);
 
             if (shelf == null)
                 throw new Exception("Prateleira não encontrada com o ID informado");
 
-            shelf.SheName = shelfName;
+            ValidateShelfVolume(updatedShelf.Volume);
+
+            shelf.SheName = updatedShelf.Name;
+
+            shelf.SheVolume = updatedShelf.Volume;
 
             _context.SaveChanges();
 
@@ -142,6 +149,8 @@ namespace SmartStorage_API.Service.Implementations
 
         public EnterVO AllocateProductToShelf(EnterVO newAllocation)
         {
+            EnsureShelfFits(newAllocation.ProductId, newAllocation.ShelfId, newAllocation.ProductQuantity);
+
             var totalBefore = _movementRepository.FindProductTotalBalance(newAllocation.ProductId);
 
             _movementRepository.TransferProductBetweenLocations(
@@ -188,6 +197,9 @@ namespace SmartStorage_API.Service.Implementations
             if (!_context.Shelves.Any(s => s.SheId == toShelfId))
                 throw new Exception("Prateleira de destino não encontrada.");
 
+            if (toShelfId != enter.EntSheId)
+                EnsureShelfFits(enter.EntProId, toShelfId, enter.EntQntd);
+
             var destinationExists = _context.Enters.Any(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
 
             _movementRepository.TransferProductBetweenLocations(
@@ -201,6 +213,41 @@ namespace SmartStorage_API.Service.Implementations
             var destination = _context.Enters.First(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
 
             return _converterEnter.Parse(destination);
+        }
+
+        private void EnsureShelfFits(int productId, int shelfId, int quantity)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.ProId == productId)
+                ?? throw new Exception("Produto não encontrado na base de dados");
+
+            if (product.ProVolume is null)
+                throw new Exception("Cadastre o volume do produto antes de alocá-lo em uma prateleira.");
+
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId)
+                ?? throw new Exception("Prateleira não encontrada na base de dados");
+
+            if (shelf.SheVolume is null)
+                throw new Exception($"Cadastre o volume da {shelf.SheName} antes de alocar produtos nela.");
+
+            var usable = shelf.SheVolume.Value * ShelfVO.UsableFraction;
+
+            var free = usable - _converterShelf.UsedVolumeOf(shelfId);
+
+            var needed = quantity * product.ProVolume.Value;
+
+            if (needed > free)
+                throw new Exception($"A {shelf.SheName} não comporta a alocação: são necessários {Liters(needed)} L e restam {Liters(Math.Max(free, 0))} L dos {Liters(usable)} L úteis (90% do volume).");
+        }
+
+        private static void ValidateShelfVolume(decimal? volume)
+        {
+            if (volume <= 0)
+                throw new Exception("O volume da prateleira deve ser maior que zero.");
+        }
+
+        private static string Liters(decimal value)
+        {
+            return value.ToString("0.###", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
         }
 
         #endregion

@@ -16,5 +16,7 @@ public partial class Shelf
     [Required(ErrorMessage = "A data de registro da prateleira é obrigatória.")]
     public DateTime SheDataRegister { get; set; }
 
+    public decimal? SheVolume { get; set; }
+
     public virtual ICollection<Enter> Enters { get; set; }
 }

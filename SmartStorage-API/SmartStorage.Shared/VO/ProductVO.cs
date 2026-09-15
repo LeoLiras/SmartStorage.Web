@@ -28,6 +28,9 @@ namespace SmartStorage_Shared.VO
         [Range(0, int.MaxValue, ErrorMessage = "O estoque mínimo não pode ser negativo.")]
         public int MinimumStock { get; set; }
 
+        [Range(0.001, double.MaxValue, ErrorMessage = "O volume do produto deve ser maior que zero.")]
+        public decimal? Volume { get; set; }
+
         public int? EmployeeId { get; set; }
 
         public byte[] ProImage { get; set; }
@@ -49,6 +52,7 @@ namespace SmartStorage_Shared.VO
                 ProDateRegister = origin.DateRegister,
                 ProQntd = origin.Qntd,
                 ProMinimumStock = origin.MinimumStock,
+                ProVolume = origin.Volume,
                 ProEmpId = origin.EmployeeId,
             };
         }

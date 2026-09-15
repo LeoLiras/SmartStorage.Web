@@ -26,6 +26,8 @@ public partial class Product
 
     public int ProMinimumStock { get; set; }
 
+    public decimal? ProVolume { get; set; }
+
     public int? ProEmpId { get; set; }
 
     public byte[] ProImage { get; set; }
