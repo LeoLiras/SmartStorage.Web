@@ -353,6 +353,24 @@ code {
 .app-chip-warning { background: rgba(251, 191, 36, .12); color: #FBBF24; }
 .app-chip-error { background: rgba(248, 113, 113, .12); color: #F87171; }
 
+.app-chip-primary { background: rgba(109, 74, 255, .18); color: #A78BFF; }
+.app-chip-neutral { background: rgba(155, 163, 196, .12); color: #9BA3C4; }
+
+.app-auth {
+    max-width: 420px;
+    margin: 8vh auto 0;
+    padding: 28px;
+}
+
+.app-auth-form {
+    display: grid;
+    gap: 16px;
+}
+
+.app-form-narrow {
+    max-width: 720px;
+}
+
 .app-table {
     border: 1px solid #243056;
     border-radius: 12px;

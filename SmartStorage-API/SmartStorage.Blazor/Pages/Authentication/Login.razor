@@ -4,26 +4,26 @@
 @inject VariablesExtensions app
 @inject IAuthService auth;
 
-@if (loading)
-{
-    <Loading Message="Carregando login..."></Loading>
-}
-else
-{
-    <MudGrid Class="mt-3">
-        <MudItem xs="12" sm="7">
-            <MudPaper Class="pa-4">
-                <MudForm Model="user">
-                    <MudTextField @bind-Value="user.Username" T="string" Label="Login" Required="true" RequiredError="Insira o Login" />
-                    <MudTextField @bind-Value="user.Password" T="string" Label="Senha" InputType="InputType.Password" RequiredError="Insira a Senha" Required="true" />
-                    <div class="d-flex justify-start gap-2 mt-3">
-                        <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="Sigin">Login</MudButton>
-                    </div>
-                </MudForm>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
-}
+<section class="app-panel app-auth">
+    <span class="brand"><i class="brand-mark"></i>Smart Storage</span>
+    <div>
+        <MudText Typo="Typo.h5" Class="app-page-title">Entrar</MudText>
+        <MudText Typo="Typo.body2" Class="app-muted">Use seu login e senha para acessar o estoque.</MudText>
+    </div>
+
+    @if (loading)
+    {
+        <Loading Message="Entrando..." Shape="ELoadingShape.Form"></Loading>
+    }
+    else
+    {
+        <form class="app-auth-form" @onsubmit="Sigin">
+            <MudTextField @bind-Value="user.Username" T="string" Label="Login" Required="true" RequiredError="Insira o Login" Immediate="true" Variant="Variant.Outlined" />
+            <MudTextField @bind-Value="user.Password" T="string" Label="Senha" InputType="InputType.Password" RequiredError="Insira a Senha" Required="true" Immediate="true" Variant="Variant.Outlined" />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Size="Size.Large">Entrar</MudButton>
+        </form>
+    }
+</section>
 
 @code {
 
@@ -37,7 +37,7 @@ else
 
     #region Methods
 
-    private async void Sigin()
+    private async Task Sigin()
     {
         try
         {
