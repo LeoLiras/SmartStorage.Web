@@ -55,6 +55,32 @@ namespace SmartStorage_API.Service.Implementations
             return _converterEnter.Parse(_context.Enters.OrderBy(e => e.EntId).ToList());
         }
 
+        public (List<EnterVO> Items, int Total) FindProductsInShelvesPage(int page, int pageSize, string search)
+        {
+            if (page < 1)
+                throw new Exception("A página deve ser maior que zero.");
+
+            if (pageSize < 1 || pageSize > Pagination.MaxPageSize)
+                throw new Exception($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
+
+            var query = _context.Enters.Where(e => e.EntQntd > 0);
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(e => e.Product.ProName.Contains(search.Trim()));
+
+            var total = query.Count();
+
+            var enters = query
+                .OrderBy(e => e.Shelf.SheName)
+                .ThenBy(e => e.Product.ProName)
+                .ThenBy(e => e.EntId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (_converterEnter.Parse(enters), total);
+        }
+
         public EnterVO FindProductInShelfById(int enterId)
         {
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));

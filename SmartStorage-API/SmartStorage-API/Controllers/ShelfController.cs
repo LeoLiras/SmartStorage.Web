@@ -56,9 +56,23 @@ namespace SmartStorage_API.Controllers
 
         [HttpGet("allocation")]
         [TypeFilter(typeof(HyperMediaFilter))]
-        public ActionResult<List<ShelfVO>> GetProductsInShelves()
+        public ActionResult<List<ShelfVO>> GetProductsInShelves([FromQuery] int? page, [FromQuery] int pageSize = 10, [FromQuery] string search = null)
         {
-            return Ok(_shelfService.FindAllProductsInShelves());
+            if (page is null)
+                return Ok(_shelfService.FindAllProductsInShelves());
+
+            try
+            {
+                var (items, total) = _shelfService.FindProductsInShelvesPage(page.Value, pageSize, search);
+
+                Response.Headers[Pagination.TotalCountHeader] = total.ToString();
+
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("allocation/{enterId}")]
