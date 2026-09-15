@@ -393,6 +393,45 @@ code {
     font-weight: 700;
 }
 
+.app-summary {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+}
+
+.app-summary > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.app-summary dt {
+    font-size: .85rem;
+    color: #9BA3C4;
+}
+
+.app-summary dd {
+    margin: 0;
+    text-align: right;
+}
+
+.app-summary .app-summary-total {
+    padding-top: 12px;
+    border-top: 1px solid #243056;
+}
+
+.app-summary .app-summary-total dt {
+    color: #E7E9F5;
+    font-weight: 700;
+}
+
+.app-summary .app-summary-total dd {
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: #A78BFF;
+}
+
 .app-form-image {
     aspect-ratio: 4 / 3;
     max-width: 100%;

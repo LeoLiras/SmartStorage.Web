@@ -8,28 +8,34 @@
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Registrar devolução</MudText>
+
 @if (sale is null)
 {
-    <Loading Message="Carregando..."></Loading>
+    <Loading Message="Carregando venda..." Shape="ELoadingShape.Form"></Loading>
 }
 else if (sale.NetQntd == 0)
 {
-    <MudAlert Class="mt-3" Severity="Severity.Info">Esta venda já foi totalmente devolvida.</MudAlert>
+    <MudAlert Class="mt-4" Severity="Severity.Info" Variant="Variant.Outlined">Esta venda já foi totalmente devolvida.</MudAlert>
 }
 else
 {
     <ProductForm ProductId="sale.ProductId" ReadOnly="true" SubmitText="Devolver" OnSave="ReturnProduct">
-        <MudItem xs="12" sm="12" xl="12">
-            <MudCard>
-                <MudCardContent>
-                    <MudText Typo="Typo.subtitle1" Class="mb-2">Devolução da venda de @sale.DateSale.ToString("dd/MM/yyyy") · @sale.ShelfName</MudText>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        <MudNumericField T="int" Label="Quantidade vendida" Value="sale.Qntd" ReadOnly="true" />
-                        <MudNumericField T="int" Label="Já devolvida" Value="sale.ReturnedQntd" ReadOnly="true" />
-                        <MudNumericField T="int" Label="Quantidade a devolver" @bind-Value="saleReturn.Quantity" Min="1" Max="sale.NetQntd" HelperText="@($"Até {sale.NetQntd}; volta para o depósito")" />
-                    </div>
-                </MudCardContent>
-            </MudCard>
+        <MudItem xs="12">
+            <section class="app-panel">
+                <MudText Typo="Typo.subtitle1" Class="app-panel-title">Devolução da venda de <span class="num">@sale.DateSale.ToString("dd/MM/yyyy")</span> · @sale.ShelfName</MudText>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="int" Label="Quantidade vendida" Value="sale.Qntd" ReadOnly="true" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="int" Label="Já devolvida" Value="sale.ReturnedQntd" ReadOnly="true" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="int" Label="Quantidade a devolver" @bind-Value="saleReturn.Quantity" Min="1" Max="sale.NetQntd" HelperText="@($"Até {sale.NetQntd}; volta para o depósito")" Variant="Variant.Outlined" />
+                    </MudItem>
+                </MudGrid>
+            </section>
         </MudItem>
     </ProductForm>
 }

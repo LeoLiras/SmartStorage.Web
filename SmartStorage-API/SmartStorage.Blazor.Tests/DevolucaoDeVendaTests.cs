@@ -183,7 +183,7 @@ public class DevolucaoDeVendaTests : BunitContext, IAsyncLifetime
         var celulas = cut.FindAll("td").Select(td => td.TextContent.Trim()).ToList();
         Assert.Contains("Capacete de Seguranca Branco", celulas);
         Assert.Contains("3", celulas);
-        Assert.Contains("30.0", celulas);
+        Assert.Contains("30,00", celulas);
         Assert.DoesNotContain("Venda antiga em cache", cut.Markup);
 
         cut.FindAll("td button").First().Click();
