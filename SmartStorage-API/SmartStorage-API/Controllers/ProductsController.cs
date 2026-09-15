@@ -35,9 +35,23 @@ namespace SmartStorage_API.Controllers
 
         [HttpGet]
         [TypeFilter(typeof(HyperMediaFilter))]
-        public IActionResult FindAllProducts()
+        public IActionResult FindAllProducts([FromQuery] int? page, [FromQuery] int pageSize = 10, [FromQuery] string search = null)
         {
-            return Ok(_productService.FindAllProducts());
+            if (page is null)
+                return Ok(_productService.FindAllProducts());
+
+            try
+            {
+                var (items, total) = _productService.FindProductsPage(page.Value, pageSize, search);
+
+                Response.Headers[Pagination.TotalCountHeader] = total.ToString();
+
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]

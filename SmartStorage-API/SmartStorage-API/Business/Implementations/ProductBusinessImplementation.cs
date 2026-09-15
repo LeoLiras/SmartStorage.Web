@@ -37,6 +37,31 @@ namespace SmartStorage_API.Service.Implementations
             return _converter.Parse(_context.Products.OrderBy(q => q.ProName).ToList());
         }
 
+        public (List<ProductVO> Items, int Total) FindProductsPage(int page, int pageSize, string search)
+        {
+            if (page < 1)
+                throw new Exception("A página deve ser maior que zero.");
+
+            if (pageSize < 1 || pageSize > Pagination.MaxPageSize)
+                throw new Exception($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
+
+            var query = _context.Products.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(p => p.ProName.Contains(search.Trim()));
+
+            var total = query.Count();
+
+            var products = query
+                .OrderBy(p => p.ProName)
+                .ThenBy(p => p.ProId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (_converter.Parse(products), total);
+        }
+
         public ProductVO FindProductById(int id)
         {
             var product = _context.Products.SingleOrDefault(x => x.ProId.Equals(id));
