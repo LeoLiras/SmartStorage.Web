@@ -149,6 +149,8 @@ namespace SmartStorage_API.Service.Implementations
 
         public EnterVO AllocateProductToShelf(EnterVO newAllocation)
         {
+            EnsureSingleShelf(newAllocation.ProductId, newAllocation.ShelfId);
+
             EnsureShelfFits(newAllocation.ProductId, newAllocation.ShelfId, newAllocation.ProductQuantity);
 
             var totalBefore = _movementRepository.FindProductTotalBalance(newAllocation.ProductId);
@@ -213,6 +215,17 @@ namespace SmartStorage_API.Service.Implementations
             var destination = _context.Enters.First(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
 
             return _converterEnter.Parse(destination);
+        }
+
+        private void EnsureSingleShelf(int productId, int shelfId)
+        {
+            var otherShelf = _context.Enters
+                .Where(e => e.EntProId == productId && e.EntSheId != shelfId && e.EntQntd > 0)
+                .Select(e => e.Shelf.SheName)
+                .FirstOrDefault();
+
+            if (otherShelf is not null)
+                throw new Exception($"O produto já está alocado na {otherShelf}. Um produto só pode ficar em uma prateleira: aloque nela ou transfira o saldo antes.");
         }
 
         private void EnsureShelfFits(int productId, int shelfId, int quantity)
