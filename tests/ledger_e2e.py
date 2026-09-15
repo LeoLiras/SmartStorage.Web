@@ -1164,6 +1164,48 @@ def ct32(ctx):
     R.nota("busca por %r: 3 entradas com saldo em paginas de 2; a zerada fica fora" % busca)
 
 
+@caso("CT-33", "Listagem de produtos paginada e com pesquisa")
+def ct33(ctx):
+    recurso = "/api/storage/products/v1"
+    criados = [ctx.cria_produto(10, "CT33 %s" % letra) for letra in ("Cedro", "Acacia", "Bambu")]
+    R.exige(all(criados), "pre-condicao falhou: produtos nao criados", "%s" % criados)
+    R.exige(_aloca(ctx, criados[1], ctx.prateleira_a, 4, 2.0) == 200, "pre-condicao falhou: alocacao recusada")
+
+    busca = "%s CT33" % EXECUCAO
+    termo = urllib.request.quote(busca)
+    ids = [int(l[0]) for l in sql("SELECT ProId FROM dbo.Product WHERE ProName LIKE '%%%s%%' "
+                                  "ORDER BY ProName, ProId" % busca)]
+    R.exige(len(ids) == 3, "pre-condicao falhou: esperados 3 produtos", "banco %s" % ids)
+
+    status, pagina1, total = _pagina_da_listagem(ctx, "page=1&pageSize=2&search=%s" % termo, recurso)
+    R.exige(status == 200, "primeira pagina recusada", "HTTP %s" % status)
+    R.exige(total == "3", "X-Total-Count nao conta os produtos da pesquisa", "cabecalho %r" % total)
+    if isinstance(pagina1, list):
+        R.exige([p["id"] for p in pagina1] == ids[:2], "primeira pagina fora da ordem por nome",
+                "api %s, banco %s" % ([p["id"] for p in pagina1], ids[:2]))
+        R.exige(all(busca in p["name"] for p in pagina1), "pesquisa trouxe outro produto")
+        alocado = next((p for p in pagina1 if p["id"] == criados[1]), None)
+        if R.exige(alocado is not None, "produto Acacia devia abrir a primeira pagina"):
+            R.exige(_saldos_na_api(alocado) == (6, 4, 10), "saldos do produto na pagina diferentes do banco",
+                    "api (deposito, prateleiras, total) %s" % (_saldos_na_api(alocado),))
+
+    status, pagina2, _ = _pagina_da_listagem(ctx, "page=2&pageSize=2&search=%s" % termo, recurso)
+    R.exige(status == 200 and isinstance(pagina2, list) and [p["id"] for p in pagina2] == ids[2:],
+            "segunda pagina nao traz o produto restante", "HTTP %s, %r" % (status, pagina2))
+
+    status, nada, total = _pagina_da_listagem(ctx, "page=1&pageSize=2&search=%s" % urllib.request.quote(busca + " inexistente"), recurso)
+    R.exige(status == 200 and nada == [] and total == "0", "pesquisa sem resultado nao volta vazia",
+            "HTTP %s, total %r" % (status, total))
+
+    status, _, _ = _pagina_da_listagem(ctx, "page=-1&pageSize=2", recurso)
+    R.exige(status == 400, "pagina negativa foi aceita", "HTTP %s" % status)
+
+    status, todos = ctx.api("GET", recurso)
+    R.exige(status == 200 and isinstance(todos, list) and all(any(p.get("id") == i for p in todos) for i in ids),
+            "listagem sem page deixou de devolver todos os produtos")
+    R.nota("busca por %r: 3 produtos em paginas de 2, por nome" % busca)
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
