@@ -118,16 +118,18 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void Atualizar_envia_o_estoque_minimo()
+    public void Atualizar_envia_o_estoque_minimo_e_o_volume()
     {
         var api = Monta();
         var cut = Renderiza();
 
         Campo(cut, "Estoque mínimo").Change("12");
+        Campo(cut, "Volume (L)").Change("3");
         cut.Find("form").Submit();
 
         var corpo = api.JsonDe(HttpMethod.Put, Caminho).RootElement;
         Assert.Equal(12, corpo.GetProperty("minimumStock").GetInt32());
+        Assert.Equal(3m, corpo.GetProperty("volume").GetDecimal());
         Assert.Equal(System.Text.Json.JsonValueKind.Null, corpo.GetProperty("stockAdjustment").ValueKind);
     }
 

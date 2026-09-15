@@ -55,6 +55,11 @@ else if(product is not null)
                     </MudCard>
                     <MudCard>
                         <MudCardContent>
+                            <MudNumericField T="decimal?" Label="Volume (L)" @bind-Value="product.Volume" For="(() => product.Volume)" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar em prateleira" ReadOnly="ReadOnly" />
+                        </MudCardContent>
+                    </MudCard>
+                    <MudCard>
+                        <MudCardContent>
                             <MudDatePicker Label="Date de Registro" @bind-Date="productDate" Color="Color.Info" ReadOnly="ReadOnly" />
                         </MudCardContent>
                     </MudCard>

@@ -18,6 +18,12 @@ else if(enter is not null)
     <EditForm Model="enter" OnValidSubmit="AllocateProduct">
         <DataAnnotationsValidator />
         <MudGrid>
+            @if (product.Volume is null)
+            {
+                <MudItem xs="12">
+                    <MudAlert Severity="Severity.Warning" Class="mt-3">Este produto não tem volume cadastrado. Edite o produto e informe o volume antes de alocá-lo.</MudAlert>
+                </MudItem>
+            }
             <MudItem xs="12" sm="12" xl="12">
                 <MudCard Class="mt-3">
                     <MudCardContent>
@@ -44,6 +50,14 @@ else if(enter is not null)
                             <MudNumericField Label="Quantidade" @bind-Value="enter.ProductQuantity" For="(() => enter.ProductQuantity)" />
                         </MudCardContent>
                     </MudCard>
+                    @if (product.Volume is not null)
+                    {
+                        <MudCard>
+                            <MudCardContent>
+                                <MudNumericField T="decimal" Label="Volume necessário (L)" Value="enter.ProductQuantity * product.Volume.Value" Format="0.###" ReadOnly="true" />
+                            </MudCardContent>
+                        </MudCard>
+                    }
                 </div>
             </MudItem>
             <MudItem xs="12" sm="12" xl="12">
@@ -54,7 +68,7 @@ else if(enter is not null)
                             {
                                 foreach (var shelf in shelves)
                                 {
-                                    <MudSelectItem Value="@shelf.Id">@shelf.Name</MudSelectItem>
+                                    <MudSelectItem Value="@shelf.Id">@shelf.Name · @Occupancy(shelf)</MudSelectItem>
                                 }
                             }
                         </MudSelect>
@@ -101,10 +115,9 @@ else if(enter is not null)
                     product = app.ActualProduct;
             }
 
-            if (app.Shelves is null || app.Shelves.Count() == 0)
-                shelves = await api.Get<ShelfVO>();
-            else
-                shelves = app.Shelves;
+            shelves = await api.Get<ShelfVO>();
+
+            app.Shelves = shelves;
 
             AtribuirDados();
 
@@ -149,6 +162,16 @@ else if(enter is not null)
 
             await ShowDialog.ShowDialogAsync($"Erro atualizando o produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
+    }
+
+    private static string Occupancy(ShelfVO shelf)
+    {
+        if (shelf.Volume is null)
+            return "sem volume cadastrado";
+
+        var culture = new System.Globalization.CultureInfo("pt-BR");
+
+        return $"{shelf.Occupancy?.ToString("0", culture)}% ocupada · {Math.Max(shelf.FreeVolume ?? 0, 0).ToString("0.###", culture)} L livres";
     }
 
     private void AtribuirDados()
