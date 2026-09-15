@@ -101,7 +101,9 @@ Cada VO implementa `ISupportHyperMedia`, herda `BaseMessage` (do `SmartStorage.M
 
 ### Mensageria
 
-Criar produto publica o `ProductVO` na fila `sendemailqueue` (`RabbitMQMessageSender` na API core) e retorna imediatamente. `RabbitMQEmailConsumer` na EmailAPI é um `BackgroundService` que consome e só dá `BasicAck` depois do envio SMTP.
+Criar produto publica o `ProductVO` na fila `sendemailqueue` (`RabbitMQMessageSender` na API core) e retorna imediatamente. `RabbitMQEmailConsumer` na EmailAPI é um `BackgroundService` que consome e só dá `BasicAck` depois do envio SMTP. Cada tipo de mensagem tem a sua fila, porque o consumidor desserializa o corpo pelo tipo da fila.
+
+O alerta de estoque mínimo (#8) usa a fila `lowstockemailqueue` com `LowStockAlertVO`. `Product.ProMinimumStock` (0 desativa) é comparado com o **saldo total** (depósito + prateleiras) por `StockAlertBusinessImplementation`, chamado depois da venda, da edição que aumenta a venda e da alocação — esta nunca muda o total, então na prática quem avisa é a venda. O aviso só sai ao **cruzar** o limite (antes no mínimo ou acima, depois abaixo), para não repetir a cada venda com o estoque já baixo. Falha ao publicar é só logada: a venda já foi gravada e não deve voltar erro por causa do e-mail. O CT-34 confere o alerta pelos logs de `smartstorage-api` e `emailapi` e, com o `.env` preenchido, **envia um e-mail real** a cada execução do roteiro.
 
 ### AIAPI e ReportsAPI
 
