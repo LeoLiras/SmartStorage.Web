@@ -250,13 +250,25 @@ code {
 
 .app-toolbar-actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 10px;
 }
 
-.app-search {
-    min-width: min(280px, 100%);
+.app-toolbar-actions > .mud-button-root {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 599.98px) {
+    .app-toolbar-actions {
+        flex-wrap: wrap;
+    }
+}
+
+.mud-input-control.app-search {
+    flex: 0 1 320px;
+    min-width: min(240px, 100%);
     max-width: 400px;
 }
 
