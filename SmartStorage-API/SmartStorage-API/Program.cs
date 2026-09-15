@@ -43,6 +43,7 @@ builder.Services.AddScoped<IEmployeeBusiness, EmployeeBusinessImplementation>();
 builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();
 builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
+builder.Services.AddScoped<IStockAlertBusiness, StockAlertBusinessImplementation>();
 builder.Services.AddScoped<IProductStockMovementRepository, ProductStockMovementRepository>();
 
 builder.Configuration.AddEnvironmentVariables();

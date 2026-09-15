@@ -17,15 +17,18 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly IProductStockMovementRepository _movementRepository;
 
+        private readonly IStockAlertBusiness _stockAlert;
+
         #endregion
 
         #region Construtores
 
-        public SaleBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository)
+        public SaleBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository, IStockAlertBusiness stockAlert)
         {
             _context = context;
             _converter = new SaleConverter(_context);
             _movementRepository = movementRepository;
+            _stockAlert = stockAlert;
         }
 
         #endregion
@@ -90,6 +93,8 @@ namespace SmartStorage_API.Service.Implementations
                 SalPrice = enter.EntPrice,
             };
 
+            var totalBefore = _movementRepository.FindProductTotalBalance(enter.EntProId);
+
             _context.Sales.Add(sale);
 
             _movementRepository.CreateNewStockMovement(
@@ -97,6 +102,8 @@ namespace SmartStorage_API.Service.Implementations
                 enter.EntSheId,
                 TipoMovimentacao.Venda,
                 -saleQntd);
+
+            _stockAlert.NotifyIfBelowMinimum(enter.EntProId, totalBefore, "Venda");
 
             return _converter.Parse(sale);
         }
@@ -121,6 +128,8 @@ namespace SmartStorage_API.Service.Implementations
 
             var quantityDelta = sale.SalQntd - saleQntd;
 
+            var totalBefore = _movementRepository.FindProductTotalBalance(enter.EntProId);
+
             sale.SalQntd = saleQntd;
 
             if (quantityDelta == 0)
@@ -131,6 +140,9 @@ namespace SmartStorage_API.Service.Implementations
                     enter.EntSheId,
                     TipoMovimentacao.Venda,
                     quantityDelta);
+
+            if (quantityDelta < 0)
+                _stockAlert.NotifyIfBelowMinimum(enter.EntProId, totalBefore, "Venda");
 
             return _converter.Parse(sale);
         }

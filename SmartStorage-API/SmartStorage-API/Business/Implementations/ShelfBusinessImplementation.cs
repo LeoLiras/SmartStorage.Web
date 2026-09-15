@@ -19,16 +19,19 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly IProductStockMovementRepository _movementRepository;
 
+        private readonly IStockAlertBusiness _stockAlert;
+
         #endregion
 
         #region Construtores
 
-        public ShelfBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository)
+        public ShelfBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository, IStockAlertBusiness stockAlert)
         {
             _context = context;
             _converterShelf = new ShelfConverter();
             _converterEnter = new EnterConverter(_context);
             _movementRepository = movementRepository;
+            _stockAlert = stockAlert;
         }
 
         #endregion
@@ -139,12 +142,16 @@ namespace SmartStorage_API.Service.Implementations
 
         public EnterVO AllocateProductToShelf(EnterVO newAllocation)
         {
+            var totalBefore = _movementRepository.FindProductTotalBalance(newAllocation.ProductId);
+
             _movementRepository.TransferProductBetweenLocations(
                 newAllocation.ProductId,
                 fromShelfId: null,
                 toShelfId: newAllocation.ShelfId,
                 quantity: newAllocation.ProductQuantity,
                 shelfPrice: newAllocation.ProductPrice);
+
+            _stockAlert.NotifyIfBelowMinimum(newAllocation.ProductId, totalBefore, "Alocação");
 
             var enter = _context.Enters.First(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId);
 
