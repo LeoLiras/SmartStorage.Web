@@ -181,6 +181,14 @@ def apaga_produtos_de_teste(produtos):
         "COMMIT" % {"alvo": alvo})
 
 
+def apaga_prateleiras_de_teste():
+    """Prateleiras do roteiro saem so depois dos produtos, quando nada mais aponta para elas."""
+    sql("DELETE FROM dbo.Shelf WHERE SheName LIKE '%s%%' "
+        "AND NOT EXISTS (SELECT 1 FROM dbo.Enter e WHERE e.EntSheId = SheId) "
+        "AND NOT EXISTS (SELECT 1 FROM dbo.ProductStockMovement m WHERE m.PsmSheId = SheId)"
+        % PREFIXO.replace("'", "''"))
+
+
 def entrada_de(produto, prateleira):
     linhas = sql("SELECT EntId, EntQntd, EntPrice FROM dbo.Enter "
                  "WHERE EntProId=%d AND EntSheId=%d" % (produto, prateleira))
@@ -344,7 +352,7 @@ class Contexto:
             raise Erro("preciso de pelo menos duas prateleiras cadastradas")
         return corpo[0]["id"], corpo[1]["id"]
 
-    def cria_produto(self, qntd, sufixo, minimo=0):
+    def cria_produto(self, qntd, sufixo, minimo=0, volume=0.01):
         nome = "%s %s %s" % (PREFIXO, EXECUCAO, sufixo)
         corpo = {
             "name": nome,
@@ -352,6 +360,7 @@ class Contexto:
             "dateRegister": datetime.now().isoformat(),
             "qntd": qntd,
             "minimumStock": minimo,
+            "volume": volume,
             "employeeId": self.funcionario,
             "proImage": None,
         }
@@ -370,6 +379,7 @@ class Contexto:
 
     def limpa(self):
         apaga_produtos_de_teste(self.criados)
+        apaga_prateleiras_de_teste()
         return list(self.criados)
 
 
@@ -1266,6 +1276,69 @@ def ct34(ctx):
     R.nota("minimo 6: alocacao e venda para 7 sem aviso, venda para 5 avisa, venda para 4 nao repete")
 
 
+def _cria_prateleira(ctx, sufixo, volume):
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1", {
+        "name": "%s %s %s" % (PREFIXO, EXECUCAO, sufixo),
+        "dataRegister": datetime.now().isoformat(), "volume": volume})
+    if status != 200 or not isinstance(corpo, dict):
+        raise Erro("falhou criar prateleira de teste (HTTP %s): %s" % (status, corpo))
+    return corpo["id"]
+
+
+def _mensagem(corpo):
+    return corpo if isinstance(corpo, str) else json.dumps(corpo, ensure_ascii=False)
+
+
+@caso("CT-35", "Capacidade da prateleira por volume com teto de 90%")
+def ct35(ctx):
+    sem_volume = ctx.cria_produto(5, "CT35 Sem Volume", volume=None)
+    marca = ultimo_movimento()
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": sem_volume, "shelfId": ctx.prateleira_a, "productQuantity": 1,
+        "productPrice": 1.0, "dateEnter": datetime.now().isoformat()})
+    R.exige(status == 400 and "volume do produto" in _mensagem(corpo),
+            "produto sem volume foi alocado", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+    pid = ctx.cria_produto(20, "CT35", volume=1.5)
+    prateleira_sem_volume = _cria_prateleira(ctx, "CT35 Sem Volume", None)
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": prateleira_sem_volume, "productQuantity": 1,
+        "productPrice": 1.0, "dateEnter": datetime.now().isoformat()})
+    R.exige(status == 400 and "Cadastre o volume da" in _mensagem(corpo),
+            "prateleira sem volume aceitou alocacao", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+    pequena = _cria_prateleira(ctx, "CT35 Dez Litros", 10)
+    status, vo = ctx.api("GET", "/api/storage/shelf/v1/%d" % pequena)
+    R.exige(status == 200 and isinstance(vo, dict) and abs(vo.get("usableVolume", 0) - 9) < 0.001,
+            "volume util da prateleira nao e 90% do volume", "%r" % vo)
+
+    R.exige(_aloca(ctx, pid, pequena, 6, 3.0) == 200, "alocacao que enche o teto (6 x 1,5 = 9 L) foi recusada")
+    status, vo = ctx.api("GET", "/api/storage/shelf/v1/%d" % pequena)
+    if R.exige(status == 200 and isinstance(vo, dict), "prateleira nao encontrada", "HTTP %s" % status):
+        R.exige(abs(vo.get("usedVolume", 0) - 9) < 0.001 and abs(vo.get("occupancy", 0) - 100) < 0.001,
+                "ocupacao da prateleira cheia diferente de 9 L / 100%", "%r" % {k: vo.get(k) for k in ("usedVolume", "occupancy")})
+
+    antes = saldos(pid)
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": pequena, "productQuantity": 1,
+        "productPrice": 3.0, "dateEnter": datetime.now().isoformat()})
+    R.exige(status == 400 and "não comporta" in _mensagem(corpo),
+            "prateleira no limite aceitou mais uma unidade", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(saldos(pid) == antes, "saldo mudou numa alocacao recusada por capacidade")
+
+    outro = ctx.cria_produto(5, "CT35 Transferencia", volume=1.0)
+    R.exige(_aloca(ctx, outro, ctx.prateleira_a, 1, 2.0) == 200, "pre-condicao falhou: alocacao recusada")
+    origem = entrada_de(outro, ctx.prateleira_a)
+    if R.exige(origem is not None, "pre-condicao falhou: entrada nao criada"):
+        status, corpo = _transfere(ctx, origem["id"], pequena)
+        R.exige(status == 400 and "não comporta" in _mensagem(corpo),
+                "transferencia para prateleira cheia foi aceita", "HTTP %s: %s" % (status, _mensagem(corpo)))
+        R.exige(entrada_de(outro, pequena) is None, "transferencia recusada criou entrada no destino")
+
+    confere_linhas(movimentos_depois(marca, sem_volume), [])
+    R.nota("teto de 9 L em 10 L: 6 x 1,5 L entra, a 7a unidade e a transferencia sao recusadas")
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
@@ -1311,6 +1384,7 @@ def remove_sobras(ctx):
     antigos = [int(l[0]) for l in linhas if l[0] not in ("NULL", "")]
     antigos = [p for p in antigos if p not in ctx.criados]
     apaga_produtos_de_teste(antigos)
+    apaga_prateleiras_de_teste()
     return antigos
 
 
