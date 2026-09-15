@@ -7,76 +7,79 @@
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 
-<MudText Typo="Typo.h3" Class="mt-3" Color="Color.Info">Alocar produto para prateleira</MudText>
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Alocar produto para prateleira</MudText>
 
 @if(product is null || loading)
 {
-    <Loading Message="Carregando..."></Loading>
+    <Loading Message="Carregando..." Shape="ELoadingShape.Form"></Loading>
 }
 else if(enter is not null)
 {
     <EditForm Model="enter" OnValidSubmit="AllocateProduct">
         <DataAnnotationsValidator />
-        <MudGrid>
+        <MudGrid Spacing="4" Class="mt-1">
             @if (product.Volume is null)
             {
                 <MudItem xs="12">
-                    <MudAlert Severity="Severity.Warning" Class="mt-3">Este produto não tem volume cadastrado. Edite o produto e informe o volume antes de alocá-lo.</MudAlert>
+                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">Este produto não tem volume cadastrado. Edite o produto e informe o volume antes de alocá-lo.</MudAlert>
                 </MudItem>
             }
-            <MudItem xs="12" sm="12" xl="12">
-                <MudCard Class="mt-3">
-                    <MudCardContent>
-                        <MudDatePicker Disabled="true" Label="Date de Registro" @bind-Date="entryDate" Color="Color.Info" />
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="7" xl="12">
-                <MudCard>
-                    <MudCardContent>
-                        <MudTextField Label="Produto" @bind-Value="enter.ProductName" For="@(() => enter.ProductName)" Disabled="true" />
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <div style="display: flex; gap: 8px;">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudNumericField Format="F1" Label="Preço" @bind-Value="enter.ProductPrice" For="(() => enter.ProductPrice)" />
-                        </MudCardContent>
-                    </MudCard>
-                    <MudCard>
-                        <MudCardContent>
-                            <MudNumericField Label="Quantidade" @bind-Value="enter.ProductQuantity" For="(() => enter.ProductQuantity)" />
-                        </MudCardContent>
-                    </MudCard>
-                    @if (product.Volume is not null)
-                    {
-                        <MudCard>
-                            <MudCardContent>
-                                <MudNumericField T="decimal" Label="Volume necessário (L)" Value="enter.ProductQuantity * product.Volume.Value" Format="0.###" ReadOnly="true" />
-                            </MudCardContent>
-                        </MudCard>
-                    }
-                </div>
-            </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <MudCard>
-                    <MudCardContent>
-                        <MudSelect T="int" @bind-Value="enter.ShelfId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" AdornmentColor="Color.Info">
-                            @if (shelves is not null)
+            <MudItem xs="12" md="8">
+                <section class="app-panel">
+                    <div>
+                        <MudText Typo="Typo.subtitle1" Class="app-panel-title">@enter.ProductName</MudText>
+                        <MudText Typo="Typo.body2" Class="app-muted">
+                            @if (product.Volume is not null)
                             {
-                                foreach (var shelf in shelves)
-                                {
-                                    <MudSelectItem Value="@shelf.Id">@shelf.Name · @Occupancy(shelf)</MudSelectItem>
-                                }
+                                <span class="num">@product.Volume.Value.ToString("0.###", PtBr) L</span><span> por unidade · </span>
                             }
-                        </MudSelect>
-                    </MudCardContent>
-                </MudCard>
+                            <span>entrada em </span><span class="num">@entryDate?.ToString("dd/MM/yyyy")</span>
+                        </MudText>
+                    </div>
+                    <MudGrid Spacing="3">
+                        <MudItem xs="12" sm="4">
+                            <MudNumericField Label="Quantidade" @bind-Value="enter.ProductQuantity" For="(() => enter.ProductQuantity)" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudNumericField Format="F2" Label="Preço" @bind-Value="enter.ProductPrice" For="(() => enter.ProductPrice)" Variant="Variant.Outlined" />
+                        </MudItem>
+                        @if (product.Volume is not null)
+                        {
+                            <MudItem xs="12" sm="4">
+                                <MudNumericField T="decimal" Label="Volume necessário (L)" Value="RequiredVolume" Format="0.###" ReadOnly="true" Variant="Variant.Outlined" />
+                            </MudItem>
+                        }
+                        <MudItem xs="12">
+                            <MudSelect T="int" @bind-Value="enter.ShelfId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" Variant="Variant.Outlined">
+                                @if (shelves is not null)
+                                {
+                                    foreach (var shelf in shelves)
+                                    {
+                                        <MudSelectItem Value="@shelf.Id">@shelf.Name · @Occupancy(shelf)</MudSelectItem>
+                                    }
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        @if (SelectedShelf?.Volume is not null)
+                        {
+                            <MudItem xs="12">
+                                <div class="app-meter" role="img" aria-label="@($"{SelectedShelf.Name} com {Occupancy(SelectedShelf)}")">
+                                    <i class="@(SelectedShelf.Occupancy >= 100 ? "app-meter-full" : "")" style="width: @(Math.Clamp(SelectedShelf.Occupancy ?? 0, 0, 100).ToString("0", System.Globalization.CultureInfo.InvariantCulture))%"></i>
+                                </div>
+                                <MudText Typo="Typo.caption" Class="app-muted">Teto útil: 90% de <span class="num">@SelectedShelf.Volume.Value.ToString("0.###", PtBr) L</span></MudText>
+                            </MudItem>
+                        }
+                        @if (DoesNotFit)
+                        {
+                            <MudItem xs="12">
+                                <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">A @SelectedShelf.Name não comporta a alocação: são necessários @RequiredVolume.ToString("0.###", PtBr) L e restam @Math.Max(SelectedShelf.FreeVolume ?? 0, 0).ToString("0.###", PtBr) L.</MudAlert>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </section>
             </MudItem>
-            <MudItem xs="12" sm="12">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Alocar para venda</MudButton>
+            <MudItem xs="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send">Alocar para venda</MudButton>
             </MudItem>
         </MudGrid>
     </EditForm>
@@ -89,6 +92,8 @@ else if(enter is not null)
     [Parameter]
     public int productId { get; set; }
 
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
+
     private ProductVO product = new();
     private EnterVO enter = new();
     private List<ShelfVO> shelves = new();
@@ -96,6 +101,12 @@ else if(enter is not null)
     private DateTime? entryDate = DateTime.Today;
 
     bool loading = false;
+
+    private ShelfVO SelectedShelf => shelves?.FirstOrDefault(s => s.Id == enter?.ShelfId);
+
+    private decimal RequiredVolume => (enter?.ProductQuantity ?? 0) * (product?.Volume ?? 0);
+
+    private bool DoesNotFit => product?.Volume is not null && SelectedShelf?.FreeVolume is not null && RequiredVolume > SelectedShelf.FreeVolume;
 
     #endregion
 
@@ -169,9 +180,7 @@ else if(enter is not null)
         if (shelf.Volume is null)
             return "sem volume cadastrado";
 
-        var culture = new System.Globalization.CultureInfo("pt-BR");
-
-        return $"{shelf.Occupancy?.ToString("0", culture)}% ocupada · {Math.Max(shelf.FreeVolume ?? 0, 0).ToString("0.###", culture)} L livres";
+        return $"{shelf.Occupancy?.ToString("0", PtBr)}% ocupada · {Math.Max(shelf.FreeVolume ?? 0, 0).ToString("0.###", PtBr)} L livres";
     }
 
     private void AtribuirDados()

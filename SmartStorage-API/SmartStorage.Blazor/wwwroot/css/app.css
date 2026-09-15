@@ -432,6 +432,25 @@ code {
     color: #A78BFF;
 }
 
+.app-meter {
+    height: 6px;
+    margin-bottom: 6px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #0C1224;
+}
+
+.app-meter i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #6D4AFF, #A78BFF);
+    transition: width var(--app-mid) var(--app-ease);
+}
+
+.app-meter i.app-meter-full {
+    background: #F87171;
+}
+
 .app-form-image {
     aspect-ratio: 4 / 3;
     max-width: 100%;
@@ -589,6 +608,7 @@ code {
     }
 
     .mud-button-root,
+    .app-meter i,
     .app-product-card,
     .app-table .mud-table-body .mud-table-row {
         transition: none;

@@ -115,6 +115,41 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
         Assert.DoesNotContain("não tem volume cadastrado", cut.Markup);
     }
 
+    private static void Escolhe(IRenderedComponent<IComponent> cut, string rotulo, string valor, string prateleira)
+    {
+        cut.FindAll("label").First(l => l.TextContent.Trim() == rotulo)
+            .Closest(".mud-input-control")!.QuerySelector("input")!.Change(valor);
+
+        var select = cut.FindComponent<MudSelect<int>>();
+        cut.InvokeAsync(() => select.Instance.OpenMenu());
+        cut.WaitForAssertion(() => Assert.Contains(cut.FindAll(".mud-list-item"), i => i.TextContent.Contains(prateleira)));
+        cut.FindAll(".mud-list-item").First(i => i.TextContent.Contains(prateleira)).Click();
+    }
+
+    [Fact]
+    public void Prateleira_que_nao_comporta_mostra_o_alerta_e_o_teto_util()
+    {
+        Monta(volumeDoProduto: 2.5m);
+        var cut = Renderiza();
+
+        Escolhe(cut, "Quantidade", "100", "Prateleira A1");
+
+        cut.WaitForAssertion(() => Assert.Contains("A Prateleira A1 não comporta a alocação: são necessários 250 L e restam 180 L.", cut.Markup));
+        Assert.Contains("Teto útil: 90% de", cut.Markup);
+    }
+
+    [Fact]
+    public void Prateleira_que_comporta_nao_mostra_o_alerta()
+    {
+        Monta(volumeDoProduto: 2.5m);
+        var cut = Renderiza();
+
+        Escolhe(cut, "Quantidade", "4", "Prateleira A1");
+
+        cut.WaitForAssertion(() => Assert.Contains("Teto útil: 90% de", cut.Markup));
+        Assert.DoesNotContain("não comporta", cut.Markup);
+    }
+
     [Fact]
     public void Produto_sem_volume_mostra_o_aviso()
     {
