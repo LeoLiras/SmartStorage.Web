@@ -1060,8 +1060,8 @@ def ct30(ctx):
             "venda nova nao pegou o preco atual da prateleira", "gravado %.2f, esperado 80.00" % _preco_no_banco(nova))
 
 
-def _pagina_de_vendas(ctx, consulta):
-    req = urllib.request.Request(GATEWAY + "/api/storage/sales/v1?" + consulta)
+def _pagina_da_listagem(ctx, consulta, recurso="/api/storage/sales/v1"):
+    req = urllib.request.Request(GATEWAY + recurso + "?" + consulta)
     req.add_header("Authorization", "Bearer " + ctx.token)
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
@@ -1089,7 +1089,7 @@ def ct31(ctx):
     nome = sql("SELECT ProName FROM dbo.Product WHERE ProId=%d" % pid)[0][0]
     termo = urllib.request.quote(nome)
 
-    status, pagina1, total = _pagina_de_vendas(ctx, "page=1&pageSize=5&search=%s" % termo)
+    status, pagina1, total = _pagina_da_listagem(ctx, "page=1&pageSize=5&search=%s" % termo)
     R.exige(status == 200, "primeira pagina recusada", "HTTP %s" % status)
     R.exige(total == "12", "X-Total-Count nao conta as vendas da pesquisa", "cabecalho %r" % total)
     if isinstance(pagina1, list):
@@ -1097,22 +1097,71 @@ def ct31(ctx):
                 "api %s, banco %s" % ([v["id"] for v in pagina1], ids[:5]))
         R.exige(all(v["productName"] == nome for v in pagina1), "pesquisa trouxe venda de outro produto")
 
-    status, pagina3, total = _pagina_de_vendas(ctx, "page=3&pageSize=5&search=%s" % termo)
+    status, pagina3, total = _pagina_da_listagem(ctx, "page=3&pageSize=5&search=%s" % termo)
     R.exige(status == 200 and isinstance(pagina3, list) and [v["id"] for v in pagina3] == ids[10:],
             "ultima pagina nao traz as 2 vendas restantes", "HTTP %s, %r" % (status, pagina3))
 
-    status, nada, total = _pagina_de_vendas(ctx, "page=1&pageSize=5&search=%s" % urllib.request.quote(nome + " inexistente"))
+    status, nada, total = _pagina_da_listagem(ctx, "page=1&pageSize=5&search=%s" % urllib.request.quote(nome + " inexistente"))
     R.exige(status == 200 and nada == [] and total == "0", "pesquisa sem resultado nao volta vazia",
             "HTTP %s, total %r" % (status, total))
 
-    status, invalida, _ = _pagina_de_vendas(ctx, "page=1&pageSize=0")
+    status, invalida, _ = _pagina_da_listagem(ctx, "page=1&pageSize=0")
     R.exige(status == 400, "tamanho de pagina zero foi aceito", "HTTP %s" % status)
-    status, invalida, _ = _pagina_de_vendas(ctx, "page=0&pageSize=5")
+    status, invalida, _ = _pagina_da_listagem(ctx, "page=0&pageSize=5")
     R.exige(status == 400, "pagina zero foi aceita", "HTTP %s" % status)
 
     todas = _venda_na_listagem(ctx, ids[-1])
     R.exige(todas is not None, "listagem sem page deixou de devolver todas as vendas")
     R.nota("busca por %r: 12 vendas em paginas de 5; %s" % (busca, invalida))
+
+
+@caso("CT-32", "Listagem de produtos nas prateleiras paginada e com pesquisa")
+def ct32(ctx):
+    alocacoes = "/api/storage/shelf/v1/allocation"
+    um = ctx.cria_produto(20, "CT32 Um")
+    dois = ctx.cria_produto(20, "CT32 Dois")
+    R.exige(_aloca(ctx, um, ctx.prateleira_a, 5, 3.0) == 200, "pre-condicao falhou: alocacao recusada")
+    R.exige(_aloca(ctx, um, ctx.prateleira_b, 5, 3.0) == 200, "pre-condicao falhou: alocacao recusada")
+    R.exige(_aloca(ctx, dois, ctx.prateleira_a, 5, 3.0) == 200, "pre-condicao falhou: alocacao recusada")
+    zerada = entrada_de(dois, ctx.prateleira_a)
+    if not R.exige(zerada is not None, "pre-condicao falhou: entrada nao criada"):
+        return
+    status, _ = _transfere(ctx, zerada["id"], ctx.prateleira_b)
+    R.exige(status == 200 and entrada_de(dois, ctx.prateleira_a)["qntd"] == 0,
+            "pre-condicao falhou: entrada de origem nao ficou zerada", "HTTP %s" % status)
+
+    busca = "%s CT32" % EXECUCAO
+    termo = urllib.request.quote(busca)
+    ids = [int(l[0]) for l in sql(
+        "SELECT e.EntId FROM dbo.Enter e JOIN dbo.Product p ON p.ProId = e.EntProId "
+        "JOIN dbo.Shelf s ON s.SheId = e.EntSheId WHERE p.ProName LIKE '%%%s%%' AND e.EntQntd > 0 "
+        "ORDER BY s.SheName, p.ProName, e.EntId" % busca)]
+    R.exige(len(ids) == 3, "pre-condicao falhou: esperadas 3 entradas com saldo", "banco %s" % ids)
+
+    status, pagina1, total = _pagina_da_listagem(ctx, "page=1&pageSize=2&search=%s" % termo, alocacoes)
+    R.exige(status == 200, "primeira pagina recusada", "HTTP %s" % status)
+    R.exige(total == "3", "X-Total-Count nao conta so as entradas com saldo da pesquisa", "cabecalho %r" % total)
+    if isinstance(pagina1, list):
+        R.exige([e["id"] for e in pagina1] == ids[:2], "primeira pagina fora da ordem por prateleira e produto",
+                "api %s, banco %s" % ([e["id"] for e in pagina1], ids[:2]))
+        R.exige(all(busca in e["productName"] for e in pagina1), "pesquisa trouxe entrada de outro produto")
+
+    status, pagina2, _ = _pagina_da_listagem(ctx, "page=2&pageSize=2&search=%s" % termo, alocacoes)
+    R.exige(status == 200 and isinstance(pagina2, list) and [e["id"] for e in pagina2] == ids[2:],
+            "segunda pagina nao traz a entrada restante", "HTTP %s, %r" % (status, pagina2))
+    R.exige(zerada["id"] not in ids, "entrada zerada contou como produto na prateleira")
+
+    status, nada, total = _pagina_da_listagem(ctx, "page=1&pageSize=2&search=%s" % urllib.request.quote(busca + " inexistente"), alocacoes)
+    R.exige(status == 200 and nada == [] and total == "0", "pesquisa sem resultado nao volta vazia",
+            "HTTP %s, total %r" % (status, total))
+
+    status, _, _ = _pagina_da_listagem(ctx, "page=1&pageSize=101", alocacoes)
+    R.exige(status == 400, "tamanho de pagina acima do maximo foi aceito", "HTTP %s" % status)
+
+    status, todas = ctx.api("GET", alocacoes)
+    R.exige(status == 200 and isinstance(todas, list) and any(e.get("id") == zerada["id"] for e in todas),
+            "listagem sem page deixou de devolver todas as entradas, inclusive as zeradas")
+    R.nota("busca por %r: 3 entradas com saldo em paginas de 2; a zerada fica fora" % busca)
 
 
 # --------------------------------------------------------------------------- #
