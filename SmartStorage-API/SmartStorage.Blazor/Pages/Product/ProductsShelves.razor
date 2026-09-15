@@ -6,34 +6,37 @@
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 
-<MudTable @ref="table" T="EnterVO" Class="mt-3" ServerData="LoadEntries" Dense="false" Hover="true" Bordered="false" Striped="true" RowsPerPage="10">
+<MudTable @ref="table" T="EnterVO" Class="app-table mt-3" Elevation="0" ServerData="LoadEntries" Dense="false" Hover="true" Bordered="false" Striped="false" RowsPerPage="10">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Produtos nas prateleiras para venda</MudText>
+        <MudText Typo="Typo.h6" Class="app-page-title">Produtos nas prateleiras para venda</MudText>
         <MudSpacer />
-        <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Variant="Variant.Outlined" Margin="Margin.Dense" Class="app-search mt-0"></MudTextField>
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Produto</MudTh>
-        <MudTh>Preço</MudTh>
-        <MudTh>Quantidade</MudTh>
+        <MudTh Class="app-cell-number">Preço</MudTh>
+        <MudTh Class="app-cell-number">Quantidade</MudTh>
         <MudTh>Prateleira</MudTh>
-        <MudTh>Data de Entrada</MudTh>
+        <MudTh>Data de entrada</MudTh>
+        <MudTh><span class="app-visually-hidden">Ações</span></MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Produto">@context.ProductName</MudTd>
-        <MudTd DataLabel="Preco">@context.ProductPrice</MudTd>
-        <MudTd DataLabel="Quantidade">@context.ProductQuantity</MudTd>
+        <MudTd DataLabel="Preço" Class="app-cell-number num">@context.ProductPrice.ToString("N2", PtBr)</MudTd>
+        <MudTd DataLabel="Quantidade" Class="app-cell-number num">@context.ProductQuantity</MudTd>
         <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
-        <MudTd DataLabel="Data de Entrada">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
-        <MudTd DataLabel="Vender"><MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success" OnClick="@(() => SaleProduct(context))"></MudIconButton></MudTooltip></MudTd>
-        <MudTd DataLabel="Transferir"><MudTooltip Text="Transferir para outra prateleira"><MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Info" OnClick="@(() => TransferProduct(context.Id))"></MudIconButton></MudTooltip></MudTd>
-        <MudTd DataLabel="Retornar alocacao"><MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning" OnClick="@(() => UndoAllocation(context.Id))"></MudIconButton></MudTooltip></MudTd>
+        <MudTd DataLabel="Data de entrada" Class="num">@context.DateEnter.ToString("dd/MM/yyyy HH:mm")</MudTd>
+        <MudTd DataLabel="Ações" Class="app-cell-actions">
+            <MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success" aria-label="Vender" OnClick="@(() => SaleProduct(context))"></MudIconButton></MudTooltip>
+            <MudTooltip Text="Transferir para outra prateleira"><MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Info" aria-label="Transferir para outra prateleira" OnClick="@(() => TransferProduct(context.Id))"></MudIconButton></MudTooltip>
+            <MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning" aria-label="Enviar de volta para o estoque" OnClick="@(() => UndoAllocation(context.Id))"></MudIconButton></MudTooltip>
+        </MudTd>
     </RowTemplate>
     <NoRecordsContent>
-        <MudText>@(string.IsNullOrWhiteSpace(searchString) ? "Não há produtos alocados para venda nas prateleiras." : "Nenhum produto encontrado nas prateleiras para a pesquisa.")</MudText>
+        <MudText Class="app-muted">@(string.IsNullOrWhiteSpace(searchString) ? "Não há produtos alocados para venda nas prateleiras." : "Nenhum produto encontrado nas prateleiras para a pesquisa.")</MudText>
     </NoRecordsContent>
     <LoadingContent>
-        <MudText>Carregando produtos nas prateleiras...</MudText>
+        <Loading Message="Carregando produtos nas prateleiras..."></Loading>
     </LoadingContent>
     <PagerContent>
         <MudTablePager HideRowsPerPage="true" />
@@ -43,6 +46,8 @@
 @code {
 
     #region Properties
+
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
 
     private MudTable<EnterVO> table;
 

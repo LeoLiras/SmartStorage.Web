@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,9 +74,9 @@ public class ListagemDeProdutosTests : BunitContext, IAsyncLifetime
             builder.CloseComponent();
         });
 
-    private IRenderedComponent<IComponent> RenderizaCapacete(VariablesExtensions? app = null)
+    private IRenderedComponent<IComponent> RenderizaCapacete(VariablesExtensions? app = null, object? produto = null)
     {
-        Monta(new[] { Capacete }, total: 1, app);
+        Monta(new[] { produto ?? Capacete }, total: 1, app);
 
         var cut = RenderizaProdutos();
         cut.WaitForAssertion(() => Assert.Contains("Capacete de Seguranca Branco", cut.Markup));
@@ -83,13 +84,47 @@ public class ListagemDeProdutosTests : BunitContext, IAsyncLifetime
         return cut;
     }
 
+    private static string TextoDoCard(IRenderedComponent<IComponent> cut)
+        => Regex.Replace(cut.Find(".app-product-card").TextContent, @"\s+", " ").Trim();
+
     [Fact]
     public void Card_mostra_o_total_e_a_divisao_entre_deposito_e_prateleiras()
     {
-        var markup = RenderizaCapacete().Markup;
+        var texto = TextoDoCard(RenderizaCapacete());
 
-        Assert.Contains("Estoque total: 10", markup);
-        Assert.Contains("Depósito: 6 · Prateleiras: 4", markup);
+        Assert.Contains("Estoque total 10", texto);
+        Assert.Contains("Depósito 6 · Prateleiras 4", texto);
+    }
+
+    [Fact]
+    public void Card_sem_volume_e_sem_minimo_avisa_so_a_falta_de_volume()
+    {
+        var texto = TextoDoCard(RenderizaCapacete());
+
+        Assert.Contains("sem volume", texto);
+        Assert.DoesNotContain("mínimo", texto);
+    }
+
+    [Fact]
+    public void Card_abaixo_do_minimo_mostra_o_minimo_e_o_volume()
+    {
+        var produto = new
+        {
+            id = 42,
+            name = "Capacete de Seguranca Branco",
+            qntd = 1,
+            shelvesQntd = 4,
+            minimumStock = 6,
+            volume = 6.5m,
+            employeeId = 1,
+            dateRegister = "2026-03-01T00:00:00",
+        };
+
+        var texto = TextoDoCard(RenderizaCapacete(produto: produto));
+
+        Assert.Contains("abaixo do mínimo 6", texto);
+        Assert.Contains("6,5 L", texto);
+        Assert.DoesNotContain("sem volume", texto);
     }
 
     [Fact]
@@ -112,10 +147,10 @@ public class ListagemDeProdutosTests : BunitContext, IAsyncLifetime
             },
         };
 
-        var markup = RenderizaCapacete(app).Markup;
+        var texto = TextoDoCard(RenderizaCapacete(app));
 
-        Assert.Contains("Estoque total: 10", markup);
-        Assert.DoesNotContain("Estoque total: 35", markup);
+        Assert.Contains("Estoque total 10", texto);
+        Assert.DoesNotContain("Estoque total 35", texto);
     }
 
     [Fact]

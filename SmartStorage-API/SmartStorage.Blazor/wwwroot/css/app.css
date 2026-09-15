@@ -205,6 +205,210 @@ code {
     }
 }
 
+.num {
+    font-family: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.app-muted {
+    color: #9BA3C4;
+}
+
+.app-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.app-page-title {
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+
+.mud-button-root {
+    transition: background-color var(--app-fast) var(--app-ease), box-shadow var(--app-fast) var(--app-ease), border-color var(--app-fast) var(--app-ease), transform var(--app-fast) var(--app-ease);
+}
+
+.mud-button-filled-primary:hover {
+    box-shadow: 0 8px 24px -8px rgba(109, 74, 255, .45);
+}
+
+.mud-button-root:active {
+    transform: translateY(1px);
+}
+
+.app-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.app-toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-search {
+    min-width: min(280px, 100%);
+    max-width: 400px;
+}
+
+.app-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.app-product-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #121A33;
+    border: 1px solid #243056;
+    border-radius: 12px;
+    transition: transform var(--app-mid) var(--app-ease), border-color var(--app-mid) var(--app-ease), box-shadow var(--app-mid) var(--app-ease);
+}
+
+.app-product-card:hover,
+.app-product-card:focus-within {
+    transform: translateY(-3px);
+    border-color: #34407A;
+    box-shadow: 0 18px 40px -22px rgba(109, 74, 255, .55);
+}
+
+.app-card-thumb {
+    aspect-ratio: 16 / 9;
+    max-width: 100%;
+    background: radial-gradient(120% 90% at 20% 10%, rgba(109, 74, 255, .35), transparent 60%), linear-gradient(160deg, #16204A, #0C1224);
+}
+
+.app-card-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.app-card-body {
+    display: grid;
+    gap: 8px;
+    padding: 14px 16px;
+    flex: 1;
+    align-content: start;
+}
+
+.app-card-title {
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.app-card-description {
+    color: #9BA3C4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.app-card-stock {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4px 8px;
+    font-size: .8rem;
+    color: #9BA3C4;
+}
+
+.app-card-stock b {
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: #E7E9F5;
+}
+
+.app-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 16px 16px;
+}
+
+.app-chip {
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.app-chip-success { background: rgba(52, 211, 153, .12); color: #34D399; }
+.app-chip-warning { background: rgba(251, 191, 36, .12); color: #FBBF24; }
+.app-chip-error { background: rgba(248, 113, 113, .12); color: #F87171; }
+
+.app-table {
+    border: 1px solid #243056;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.app-table .mud-table-head .mud-table-cell {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #9BA3C4;
+}
+
+.app-table .mud-table-body .mud-table-row {
+    transition: background-color var(--app-fast) var(--app-ease);
+}
+
+.app-table .app-cell-number {
+    text-align: right;
+}
+
+.app-table .app-cell-actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.app-panel {
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+    background: #121A33;
+    border: 1px solid #243056;
+    border-radius: 12px;
+}
+
+.app-panel-title {
+    font-weight: 700;
+}
+
+.app-form-image {
+    aspect-ratio: 4 / 3;
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid #243056;
+    border-radius: 8px;
+    background: #0C1224;
+}
+
+.app-form-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .app-skeleton {
     display: grid;
     gap: 14px;
@@ -343,6 +547,18 @@ code {
 
     .sk {
         animation: none;
+    }
+
+    .mud-button-root,
+    .app-product-card,
+    .app-table .mud-table-body .mud-table-row {
+        transition: none;
+    }
+
+    .mud-button-root:active,
+    .app-product-card:hover,
+    .app-product-card:focus-within {
+        transform: none;
     }
 
     .app-dialog {

@@ -1,63 +1,86 @@
 @page "/products"
 @attribute [Authorize]
 
-@using System.Text
-
 @inject ApiExtensions api
 @inject NavigationManager nav
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
 
-<div class="d-flex flex-wrap align-center gap-4 m-2">
-    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Info" Href="product/insert">Adicionar novo produto</MudButton>
-    <MudSpacer />
-    <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Style="max-width: 400px;"></MudTextField>
+<div class="app-toolbar mt-2">
+    <MudText Typo="Typo.h5" Class="app-page-title">Produtos em estoque</MudText>
+    <div class="app-toolbar-actions">
+        <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Variant="Variant.Outlined" Margin="Margin.Dense" Class="app-search mt-0"></MudTextField>
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Href="product/insert">Adicionar produto</MudButton>
+    </div>
 </div>
 
 @if(loading)
 {
-    <Loading></Loading>
+    <Loading Message="Carregando produtos..." Shape="ELoadingShape.Cards"></Loading>
 }
 else if(products.Count == 0)
 {
-    <MudAlert Severity="Severity.Warning">@(string.IsNullOrWhiteSpace(searchString) ? "Não há produtos registrados no banco de dados." : "Nenhum produto encontrado para a pesquisa.")</MudAlert>
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mt-4">@(string.IsNullOrWhiteSpace(searchString) ? "Não há produtos registrados no banco de dados." : "Nenhum produto encontrado para a pesquisa.")</MudAlert>
 }
 else
 {
-    <MudGrid Justify="Justify.Center">
-        <MudItem xs="12" sm="12" xl="12">
-            <div style="display: flex; flex-wrap: wrap;">
-                @foreach (var product in products)
-                {
-                    <div style="margin: 10px;">
-                        <MudCard Class="card-hover" Style="width: 300px; height: 430px;">
-                            <MudCardMedia Image=@ProcessImage(product) Height="200" />
-                            <MudCardContent>
-                                <MudText Typo="Typo.h5">@product.Name</MudText>
-                                <MudText Typo="Typo.body2">@product.Descricao</MudText>
-                                <MudText Typo="Typo.body2">Estoque total: @product.TotalQntd</MudText>
-                                <MudText Typo="Typo.caption">Depósito: @product.Qntd · Prateleiras: @product.ShelvesQntd</MudText>
-                            </MudCardContent>
-                            <MudCardActions>
-                                <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product)">Editar</MudButton>
-                            </MudCardActions>
-                            <MudCardActions>
-                                <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Send" Color="Color.Secondary" OnClick="() => AllocateToShelf(product)">Alocar para prateleira</MudButton>
-                            </MudCardActions>
-                        </MudCard>
+    <div class="app-card-grid mt-4">
+        @foreach (var product in products)
+        {
+            <article class="app-product-card">
+                <div class="app-card-thumb">
+                    <img src="@ProcessImage(product)" alt="" loading="lazy" />
+                </div>
+                <div class="app-card-body">
+                    <MudText Typo="Typo.subtitle1" Class="app-card-title">@product.Name</MudText>
+                    @if (!string.IsNullOrWhiteSpace(product.Descricao))
+                    {
+                        <MudText Typo="Typo.body2" Class="app-card-description">@product.Descricao</MudText>
+                    }
+                    <div class="app-card-stock">
+                        <span>Estoque total <b class="num">@product.TotalQntd</b></span>
+                        @if (product.MinimumStock > 0)
+                        {
+                            @if (product.TotalQntd < product.MinimumStock)
+                            {
+                                <span class="app-chip app-chip-warning">abaixo do mínimo @product.MinimumStock</span>
+                            }
+                            else
+                            {
+                                <span class="app-chip app-chip-success">acima do mínimo</span>
+                            }
+                        }
                     </div>
-                }
-            </div>
-        </MudItem>
-        <MudItem>
-            <MudPagination Color="Color.Info" Count="PageCount" Selected="currentPage" SelectedChanged="ChangePage" Class="mt-4" />
-        </MudItem>
-    </MudGrid>
+                    <div class="app-card-stock">
+                        <span>Depósito <span class="num">@product.Qntd</span> · Prateleiras <span class="num">@product.ShelvesQntd</span></span>
+                        @if (product.Volume is null)
+                        {
+                            <span class="app-chip app-chip-error">sem volume</span>
+                        }
+                        else
+                        {
+                            <span class="num">@product.Volume.Value.ToString("0.###", PtBr) L</span>
+                        }
+                    </div>
+                </div>
+                <div class="app-card-actions">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Edit" OnClick="() => Edit(product)">Editar</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send" OnClick="() => AllocateToShelf(product)" aria-label="@($"Alocar {product.Name} para prateleira")">Alocar</MudButton>
+                </div>
+            </article>
+        }
+    </div>
+
+    <div class="d-flex justify-center mt-6">
+        <MudPagination Color="Color.Primary" Count="PageCount" Selected="currentPage" SelectedChanged="ChangePage" />
+    </div>
 }
 
 @code {
 
     #region Properties
+
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
 
     List<ProductVO> products = new();
 
