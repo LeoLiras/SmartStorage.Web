@@ -1,5 +1,15 @@
+:root {
+    --app-ease: cubic-bezier(.2, .7, .2, 1);
+    --app-fast: 160ms;
+    --app-mid: 240ms;
+    --app-focus: #A78BFF;
+}
+
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background-color: #07080F;
+    color: #E7E9F5;
+    -webkit-font-smoothing: antialiased;
 }
 
 h1:focus {
@@ -7,7 +17,7 @@ h1:focus {
 }
 
 a, .btn-link {
-    color: #0071c1;
+    color: #A78BFF;
 }
 
 .btn-primary {
@@ -29,11 +39,11 @@ a, .btn-link {
 }
 
 .invalid {
-    outline: 1px solid red;
+    outline: 1px solid #F87171;
 }
 
 .validation-message {
-    color: red;
+    color: #F87171;
 }
 
 #blazor-error-ui {
@@ -75,14 +85,14 @@ a, .btn-link {
 
     .loading-progress circle {
         fill: none;
-        stroke: #e0e0e0;
+        stroke: #1A2446;
         stroke-width: 0.6rem;
         transform-origin: 50% 50%;
         transform: rotate(-90deg);
     }
 
         .loading-progress circle:last-child {
-            stroke: #1b6ec2;
+            stroke: #6D4AFF;
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
             transition: stroke-dasharray 0.05s ease-in-out;
         }
@@ -102,6 +112,111 @@ code {
     color: #c02d76;
 }
 
-.mud-nav-link:hover {
-    color: white;
+:focus-visible {
+    outline: 2px solid var(--app-focus);
+    outline-offset: 2px;
+}
+
+.app-bar {
+    border-bottom: 1px solid #243056;
+    backdrop-filter: blur(8px);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -.01em;
+}
+
+.brand-mark {
+    display: block;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #6D4AFF, #2A3D8F);
+}
+
+.app-user {
+    font-size: .82rem;
+    color: #9BA3C4;
+    white-space: nowrap;
+}
+
+.app-drawer {
+    border-right: 1px solid #243056;
+    overflow-x: hidden;
+}
+
+.app-nav {
+    padding: 14px 10px;
+}
+
+.app-nav .mud-nav-link {
+    position: relative;
+    border-radius: 8px;
+    margin-block: 2px;
+    color: #9BA3C4;
+    font-weight: 600;
+    transition: background-color var(--app-fast) var(--app-ease), color var(--app-fast) var(--app-ease);
+}
+
+.app-nav .mud-nav-link:hover:not(.mud-nav-link-disabled) {
+    background-color: #121A33;
+    color: #E7E9F5;
+}
+
+.app-nav .mud-nav-link.active:not(.mud-nav-link-disabled) {
+    background-color: rgba(109, 74, 255, .16);
+    color: #E7E9F5;
+}
+
+.app-nav .mud-nav-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    bottom: 9px;
+    width: 3px;
+    border-radius: 3px;
+    background: #6D4AFF;
+}
+
+.app-nav .mud-nav-link:focus-visible {
+    outline: 2px solid var(--app-focus);
+    outline-offset: -2px;
+}
+
+.page-enter {
+    animation: page-enter var(--app-mid) var(--app-ease) both;
+}
+
+@keyframes page-enter {
+    from {
+        opacity: .001;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (max-width: 599.98px) {
+    .app-user {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-enter {
+        animation: none;
+    }
+
+    .app-nav .mud-nav-link {
+        transition: none;
+    }
 }
