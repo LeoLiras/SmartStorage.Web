@@ -1,4 +1,4 @@
-﻿@page "/products"
+@page "/products"
 @attribute [Authorize]
 
 @using System.Text
@@ -8,48 +8,49 @@
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
 
-<MudButton Class="m-2" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Info" Href="product/insert">Adicionar novo produto</MudButton>
+<div class="d-flex flex-wrap align-center gap-4 m-2">
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Info" Href="product/insert">Adicionar novo produto</MudButton>
+    <MudSpacer />
+    <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" Style="max-width: 400px;"></MudTextField>
+</div>
 
-@if(products is null || loading)
+@if(loading)
 {
     <Loading></Loading>
 }
 else if(products.Count == 0)
 {
-    <MudAlert Severity="Severity.Warning">Não há produtos registrados no banco de dados.</MudAlert>
+    <MudAlert Severity="Severity.Warning">@(string.IsNullOrWhiteSpace(searchString) ? "Não há produtos registrados no banco de dados." : "Nenhum produto encontrado para a pesquisa.")</MudAlert>
 }
 else
 {
     <MudGrid Justify="Justify.Center">
         <MudItem xs="12" sm="12" xl="12">
             <div style="display: flex; flex-wrap: wrap;">
-                @if(PagedProducts is not null)
+                @foreach (var product in products)
                 {
-                    foreach (var product in PagedProducts)
-                    {
-                        <div style="margin: 10px;">
-                            <MudCard Class="card-hover" Style="width: 300px; height: 430px;">
-                                <MudCardMedia Image=@ProcessImage(product) Height="200" />
-                                <MudCardContent>
-                                    <MudText Typo="Typo.h5">@product.Name</MudText>
-                                    <MudText Typo="Typo.body2">@product.Descricao</MudText>
-                                    <MudText Typo="Typo.body2">Estoque total: @product.TotalQntd</MudText>
-                                    <MudText Typo="Typo.caption">Depósito: @product.Qntd · Prateleiras: @product.ShelvesQntd</MudText>
-                                </MudCardContent>
-                                <MudCardActions>
-                                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product.Id)">Editar</MudButton>
-                                </MudCardActions>
-                                <MudCardActions>
-                                    <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Send" Color="Color.Secondary" OnClick="() => AllocateToShelf(product.Id)">Alocar para prateleira</MudButton>
-                                </MudCardActions>
-                            </MudCard>
-                        </div>
-                    }
+                    <div style="margin: 10px;">
+                        <MudCard Class="card-hover" Style="width: 300px; height: 430px;">
+                            <MudCardMedia Image=@ProcessImage(product) Height="200" />
+                            <MudCardContent>
+                                <MudText Typo="Typo.h5">@product.Name</MudText>
+                                <MudText Typo="Typo.body2">@product.Descricao</MudText>
+                                <MudText Typo="Typo.body2">Estoque total: @product.TotalQntd</MudText>
+                                <MudText Typo="Typo.caption">Depósito: @product.Qntd · Prateleiras: @product.ShelvesQntd</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(product)">Editar</MudButton>
+                            </MudCardActions>
+                            <MudCardActions>
+                                <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Send" Color="Color.Secondary" OnClick="() => AllocateToShelf(product)">Alocar para prateleira</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </div>
                 }
             </div>
         </MudItem>
         <MudItem>
-            <MudPagination Color="Color.Info" Count="(int)Math.Ceiling((double)products.Count / (double)pageSize)" SelectedChanged="ChangePage" Class="mt-4" />
+            <MudPagination Color="Color.Info" Count="PageCount" Selected="currentPage" SelectedChanged="ChangePage" Class="mt-4" />
         </MudItem>
     </MudGrid>
 }
@@ -62,8 +63,12 @@ else
 
     private int currentPage = 1;
     private int pageSize = 10;
+    private int total = 0;
+    private int request = 0;
 
-    private IEnumerable<ProductVO> PagedProducts => products == null ? Enumerable.Empty<ProductVO>() : products.Skip((currentPage - 1) * pageSize).Take(pageSize);
+    private int PageCount => Math.Max(1, (int)Math.Ceiling((double)total / pageSize));
+
+    string searchString = string.Empty;
 
     bool loading = false;
 
@@ -80,31 +85,65 @@ else
 
     #region Methods
 
-    private void Edit(int productId)
+    private void Edit(ProductVO product)
     {
-        if(products is not null)
-        {
-            app.ActualProduct = products.FirstOrDefault(p => p.Id.Equals(productId));
+        app.ActualProduct = product;
 
-            nav.NavigateTo($"product/edit/{productId}");
-        } 
+        nav.NavigateTo($"product/edit/{product.Id}");
     }
 
-    private void AllocateToShelf(int productId)
+    private void AllocateToShelf(ProductVO product)
     {
-        if (products is not null)
-        {
-            app.ActualProduct = products.FirstOrDefault(p => p.Id.Equals(productId));
+        app.ActualProduct = product;
 
-            nav.NavigateTo($"product/allocation/{productId}");
-        }
+        nav.NavigateTo($"product/allocation/{product.Id}");
     }
 
     private async Task GetProducts()
     {
-        app.ProductInStock = await api.Get<ProductVO>();
+        var thisRequest = ++request;
 
-        products = app.ProductInStock;
+        loading = true;
+
+        try
+        {
+            var (items, count) = await api.GetPage<ProductVO>(currentPage, pageSize, searchString);
+
+            if (thisRequest != request)
+                return;
+
+            products = items;
+            total = count;
+        }
+        catch (ApiException ex)
+        {
+            if (thisRequest != request)
+                return;
+
+            products = new();
+            total = 0;
+
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar os produtos.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+        finally
+        {
+            if (thisRequest == request)
+                loading = false;
+        }
+    }
+
+    private async Task Search(string text)
+    {
+        currentPage = 1;
+
+        await GetProducts();
+    }
+
+    private async Task ChangePage(int page)
+    {
+        currentPage = page;
+
+        await GetProducts();
     }
 
     private string ProcessImage(ProductVO product)
@@ -124,11 +163,6 @@ else
         return $"data:image/{contentType};base64,{base64}";
     }
 
-    private void ChangePage(int page)
-    {
-        currentPage = page;
-    }
-
     #endregion
-  
+
 }
