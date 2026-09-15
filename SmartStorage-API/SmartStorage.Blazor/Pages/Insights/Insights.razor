@@ -12,72 +12,74 @@
 @inject IJSRuntime js
 
 
+<div class="app-toolbar mt-2">
+    <MudText Typo="Typo.h5" Class="app-page-title">Estatísticas</MudText>
+    @if (sales is not null && !loading && sales.Count > 0)
+    {
+        <div class="app-toolbar-actions">
+            <MudButton OnClick="ExportPdf" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Secondary" Disabled="loadingReport">PDF</MudButton>
+            <MudButton OnClick="ExportExcel" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Archive" Color="Color.Secondary" Disabled="loadingReport">Excel</MudButton>
+        </div>
+    }
+</div>
+
 @if(sales is null || loading)
 {
-    <Loading Message="Carregando Insights..."></Loading>
+    <Loading Message="Carregando estatísticas..."></Loading>
 }
 else if(sales.Count == 0)
 {
-    <MudAlert Severity="Severity.Warning">Não há insights disponíveis.</MudAlert>
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mt-4">Não há insights disponíveis.</MudAlert>
 }
 else
 {
-    <MudPaper Width="70%" Class="doc-section-component-container; mt-3">
-        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Total Vendido Mensalmente (R$)</MudText>
-        <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" XAxisLabels="@totalSalesXAxis" Width="100%" />
-    </MudPaper>
+    <div class="app-busy-slot mt-3">
+        @if (loadingReport)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Rounded="true" Class="app-busy" aria-label="Processando" />
+        }
+    </div>
 
-    <MudPaper Width="70%" Height="500px" Class="pa-4; mt-3">
-        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Participação das vendas (%)</MudText>
-        <MudChart Width="100%" ChartType="ChartType.Pie" InputData="@topTotalSaled.ToArray()" InputLabels="@topTotalSaledLabels.ToArray()" />
-    </MudPaper>
+    <div class="app-insights-grid mt-2">
+        <section class="app-panel">
+            <MudText Typo="Typo.subtitle1" Class="app-panel-title">Total vendido por mês (R$)</MudText>
+            <MudChart ChartType="ChartType.Line" ChartSeries="@totalSalesSeries" XAxisLabels="@totalSalesXAxis" ChartOptions="@chartOptions" Width="100%" Height="320px" />
+        </section>
 
-    <MudPaper Class="doc-section-component-container; mt-10" Style="width:650px; border:2px solid var(--mud-palette-lines-default); border-radius:8px;">
-        <div style="display:flex; flex-direction:column; gap:12px; max-height:400px; overflow:auto;">
+        <section class="app-panel">
+            <MudText Typo="Typo.subtitle1" Class="app-panel-title">Participação nas vendas do mês (%)</MudText>
+            <MudChart ChartType="ChartType.Pie" InputData="@topTotalSaled.ToArray()" InputLabels="@topTotalSaledLabels.ToArray()" ChartOptions="@chartOptions" Width="100%" Height="300px" />
+        </section>
+    </div>
+
+    <section class="app-panel app-chat mt-4">
+        <MudText Typo="Typo.subtitle1" Class="app-panel-title">Pergunte à IA sobre as vendas</MudText>
+        <div class="app-chat-messages" role="log" aria-live="polite">
             @foreach (var msg in chatMessages)
             {
-                <MudChat ChatPosition="@msg.Position">
-                    <MudAvatar Style="background-color:transparent">
-                        @if (msg.IsUser)
-                        {
-                            <MudIcon Icon="@Icons.Material.Outlined.Person" Color="Color.Info"/>
-                        }
-                        else
-                        {
-                            <MudIcon Icon="@Icons.Material.Outlined.Android" Style="color:green;" />
-                        }
+                <MudChat ChatPosition="@msg.Position" Dense="true">
+                    <MudAvatar Size="Size.Small" Class="@(msg.IsUser ? "app-chat-avatar-user" : "app-chat-avatar-ai")">
+                        <MudIcon Icon="@(msg.IsUser ? Icons.Material.Outlined.Person : Icons.Material.Outlined.AutoAwesome)" Size="Size.Small" />
                     </MudAvatar>
-
-                    <MudChatBubble>
-                        <MudText Style="white-space: pre-line;">
-                            @msg.Text.Replace("* **", "-").Replace("**", "")
-                        </MudText>
+                    <MudChatBubble Class="@(msg.IsUser ? "app-chat-bubble-user" : "app-chat-bubble-ai")">
+                        <MudText Typo="Typo.body2" Class="app-chat-text">@msg.Text.Replace("* **", "-").Replace("**", "")</MudText>
                     </MudChatBubble>
                 </MudChat>
             }
         </div>
-    </MudPaper>
 
-    if (loadingReport)
-    {
-        <MudImage Fluid="true" Width="50" Height="50" Src="images/loading.gif" Alt="Swedish Farm House" Class="rounded-lg" />
-    }
+        <div class="app-chat-input">
+            <MudTextField @bind-Value="currentInput"
+                          Placeholder="Digite sua pergunta..."
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          FullWidth
+                          Lines="1"
+                          OnKeyDown="HandleKeyDown"/>
 
-    <div style="display:flex; align-items:center; gap:8px; width:650px;" class="mt-3">
-        <MudTextField @bind-Value="currentInput"
-                      Placeholder="Digite sua mensagem..."
-                      Variant="Variant.Outlined"
-                      FullWidth
-                      Lines="1"
-                      OnKeyDown="HandleKeyDown"/>
-
-        <MudIconButton OnClick="SendMessage" Icon="@Icons.Material.Filled.Send" Variant="Variant.Filled" Color="Color.Info" Class="mt-2" />
-    </div>
-
-    <div class="mt-2">
-        <MudButton OnClick="ExportPdf" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Error">PDF</MudButton>
-        <MudButton OnClick="ExportExcel" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Archive" Color="Color.Success">Excel</MudButton>
-    </div>
+            <MudIconButton OnClick="SendMessage" Icon="@Icons.Material.Filled.Send" Variant="Variant.Filled" Color="Color.Primary" Disabled="loadingReport" aria-label="Enviar pergunta" />
+        </div>
+    </section>
 }
 
 @code {
@@ -100,10 +102,9 @@ else
     private List<ChatMessage> chatMessages = new();
     private string currentInput = "";
 
-    private AxisChartOptions _axisOptions = new AxisChartOptions
+    private readonly ChartOptions chartOptions = new()
     {
-        XAxisLabelRotation = -100,
-        MatchBoundsToSize = true
+        ChartPalette = ["#6D4AFF", "#A78BFF", "#60A5FA", "#34D399", "#FBBF24", "#F87171"]
     };
     #endregion
 
@@ -179,7 +180,7 @@ else
         {
             var total = Math.Round((othersSaledTotal / (double)totalSaled) * 100, 2);
 
-            topTotalSaled.Add(othersSaledTotal);
+            topTotalSaled.Add(total);
             topTotalSaledLabels.Add("Outros");
         }
         //============================================ Total Saled Chart (R$) ============================================

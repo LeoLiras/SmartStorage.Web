@@ -469,6 +469,76 @@ code {
     background: #F87171;
 }
 
+.app-busy-slot {
+    min-height: 4px;
+}
+
+.app-insights-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.app-insights-grid .mud-chart {
+    max-width: 100%;
+}
+
+.app-insights-grid .mud-charts-xaxis,
+.app-insights-grid .mud-charts-yaxis,
+.app-insights-grid .mud-chart-legend-text {
+    fill: #9BA3C4;
+    color: #9BA3C4;
+}
+
+.app-chat {
+    max-width: 820px;
+}
+
+.app-chat-messages {
+    display: grid;
+    gap: 8px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.app-chat-text {
+    white-space: pre-line;
+}
+
+.app-chat-messages .app-chat-bubble-user {
+    background-color: #6D4AFF;
+    color: #FFFFFF;
+}
+
+.app-chat-messages .app-chat-bubble-ai {
+    background-color: #1A2446;
+    color: #E7E9F5;
+}
+
+.app-chat-messages .app-chat-avatar-user {
+    background-color: rgba(109, 74, 255, .18);
+    color: #A78BFF;
+}
+
+.app-chat-messages .app-chat-avatar-ai {
+    background-color: rgba(52, 211, 153, .12);
+    color: #34D399;
+}
+
+.app-chat-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 959.98px) {
+    .app-insights-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 .app-form-image {
     aspect-ratio: 4 / 3;
     max-width: 100%;

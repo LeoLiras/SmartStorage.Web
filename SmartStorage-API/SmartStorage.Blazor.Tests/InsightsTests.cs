@@ -97,7 +97,7 @@ public class InsightsTests : BunitContext, IAsyncLifetime
         cut.FindAll("button").First(b => b.TextContent.Trim() == botao).Click();
 
         cut.WaitForAssertion(() => Assert.Equal(new[] { "Erro" }, TitulosDosDialogos()));
-        Assert.Empty(cut.FindAll("img[src='images/loading.gif']"));
+        Assert.Empty(cut.FindAll(".app-busy"));
         Assert.DoesNotContain(JSInterop.Invocations, i => i.Identifier == "downloadFile");
     }
 
@@ -111,7 +111,7 @@ public class InsightsTests : BunitContext, IAsyncLifetime
 
         cut.WaitForAssertion(() => Assert.Contains(JSInterop.Invocations, i => i.Identifier == "downloadFile"));
         Assert.Empty(TitulosDosDialogos());
-        Assert.Empty(cut.FindAll("img[src='images/loading.gif']"));
+        Assert.Empty(cut.FindAll(".app-busy"));
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class InsightsTests : BunitContext, IAsyncLifetime
 
         cut.WaitForAssertion(() => Assert.Equal(new[] { "Erro" }, TitulosDosDialogos()));
         Assert.DoesNotContain("Chave do Gemini ausente", cut.Markup);
-        Assert.Empty(cut.FindAll("img[src='images/loading.gif']"));
+        Assert.Empty(cut.FindAll(".app-busy"));
     }
 
     [Fact]
