@@ -20,6 +20,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -343,13 +344,14 @@ class Contexto:
             raise Erro("preciso de pelo menos duas prateleiras cadastradas")
         return corpo[0]["id"], corpo[1]["id"]
 
-    def cria_produto(self, qntd, sufixo):
+    def cria_produto(self, qntd, sufixo, minimo=0):
         nome = "%s %s %s" % (PREFIXO, EXECUCAO, sufixo)
         corpo = {
             "name": nome,
             "descricao": DESCRICAO,
             "dateRegister": datetime.now().isoformat(),
             "qntd": qntd,
+            "minimumStock": minimo,
             "employeeId": self.funcionario,
             "proImage": None,
         }
@@ -1204,6 +1206,64 @@ def ct33(ctx):
     R.exige(status == 200 and isinstance(todos, list) and all(any(p.get("id") == i for p in todos) for i in ids),
             "listagem sem page deixou de devolver todos os produtos")
     R.nota("busca por %r: 3 produtos em paginas de 2, por nome" % busca)
+
+
+def _logs_desde(servico, desde):
+    p = subprocess.run(["docker", "compose", "logs", "--no-log-prefix", "--since", desde, servico],
+                       cwd=REPO, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if p.returncode != 0:
+        raise Erro("docker compose logs falhou: " + (p.stderr or p.stdout).strip())
+    return p.stdout
+
+
+def _vende(ctx, pid, entrada, quantidade):
+    status, _ = ctx.api("POST", "/api/storage/sales/v1", {
+        "idEnter": entrada, "productId": pid, "qntd": quantidade,
+        "dateSale": datetime.now().isoformat()})
+    return status
+
+
+@caso("CT-34", "Alerta de estoque minimo sai uma vez ao cruzar o limite")
+def ct34(ctx):
+    status, corpo = ctx.api("POST", "/api/storage/products/v1", {
+        "name": "%s %s CT34 Negativo" % (PREFIXO, EXECUCAO), "descricao": DESCRICAO,
+        "dateRegister": datetime.now().isoformat(), "qntd": 1, "minimumStock": -1,
+        "employeeId": ctx.funcionario, "proImage": None})
+    R.exige(status == 400, "estoque minimo negativo foi aceito", "HTTP %s" % status)
+
+    desde = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    pid = ctx.cria_produto(10, "CT34", minimo=6)
+    status, vo = ctx.api("GET", "/api/storage/products/v1/%d" % pid)
+    R.exige(status == 200 and isinstance(vo, dict) and vo.get("minimumStock") == 6,
+            "estoque minimo nao voltou na API", "HTTP %s, %r" % (status, vo.get("minimumStock") if isinstance(vo, dict) else vo))
+
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 8, 5.0) == 200, "pre-condicao falhou: alocacao recusada")
+    ent = entrada_de(pid, ctx.prateleira_a)
+    if not R.exige(ent is not None, "pre-condicao falhou: entrada nao criada"):
+        return
+    passos = [(3, 7), (2, 5), (1, 4)]
+    for quantidade, total in passos:
+        R.exige(_vende(ctx, pid, ent["id"], quantidade) == 200, "venda de %d recusada" % quantidade)
+        R.exige(sum(saldos(pid).values()) == total, "saldo total inesperado depois da venda de %d" % quantidade,
+                "banco %s, esperado %d" % (saldos(pid), total))
+
+    publicado = "Alerta de estoque mínimo publicado para o produto %d:" % pid
+    enviado = "E-mail de estoque mínimo enviado para o produto %d." % pid
+    logs_api, logs_email = "", ""
+    for _ in range(30):
+        logs_api = _logs_desde("smartstorage-api", desde)
+        logs_email = _logs_desde("emailapi", desde)
+        if enviado in logs_email:
+            break
+        time.sleep(2)
+
+    alertas = logs_api.count(publicado)
+    R.exige(alertas == 1, "alerta devia sair so na venda que cruzou o minimo (7 -> 5)",
+            "publicados %d" % alertas)
+    R.exige("origem Venda" in next((l for l in logs_api.splitlines() if publicado in l), ""),
+            "alerta nao registrou a venda como origem")
+    R.exige(enviado in logs_email, "EmailAPI nao registrou o envio do e-mail em 60 s")
+    R.nota("minimo 6: alocacao e venda para 7 sem aviso, venda para 5 avisa, venda para 4 nao repete")
 
 
 # --------------------------------------------------------------------------- #
