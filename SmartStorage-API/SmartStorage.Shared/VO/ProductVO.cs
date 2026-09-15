@@ -25,6 +25,9 @@ namespace SmartStorage_Shared.VO
 
         public int TotalQntd => Qntd + ShelvesQntd;
 
+        [Range(0, int.MaxValue, ErrorMessage = "O estoque mínimo não pode ser negativo.")]
+        public int MinimumStock { get; set; }
+
         public int? EmployeeId { get; set; }
 
         public byte[] ProImage { get; set; }
@@ -45,6 +48,7 @@ namespace SmartStorage_Shared.VO
                 ProDescription = origin.Descricao,
                 ProDateRegister = origin.DateRegister,
                 ProQntd = origin.Qntd,
+                ProMinimumStock = origin.MinimumStock,
                 ProEmpId = origin.EmployeeId,
             };
         }

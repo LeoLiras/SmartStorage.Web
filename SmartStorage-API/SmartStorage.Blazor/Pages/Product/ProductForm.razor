@@ -50,6 +50,11 @@ else if(product is not null)
                     }
                     <MudCard>
                         <MudCardContent>
+                            <MudNumericField T="int" Label="Estoque mínimo" @bind-Value="product.MinimumStock" For="(() => product.MinimumStock)" Min="0" HelperText="0 desativa o aviso por e-mail" ReadOnly="ReadOnly" />
+                        </MudCardContent>
+                    </MudCard>
+                    <MudCard>
+                        <MudCardContent>
                             <MudDatePicker Label="Date de Registro" @bind-Date="productDate" Color="Color.Info" ReadOnly="ReadOnly" />
                         </MudCardContent>
                     </MudCard>
