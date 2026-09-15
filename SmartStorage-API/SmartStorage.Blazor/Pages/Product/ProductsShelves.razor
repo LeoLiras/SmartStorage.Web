@@ -1,4 +1,4 @@
-﻿@page "/products/shelves"
+@page "/products/shelves"
 @attribute [Authorize]
 
 @inject ApiExtensions api
@@ -6,109 +6,82 @@
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 
-@if(productsInShelves is null || loading)
-{
-    <Loading Message="Carregando produtos nas prateleiras..."></Loading>
-}
-else if(productsInShelves.Count == 0)
-{
-    <MudAlert Severity="Severity.Warning">Não há produtos alocados para venda nas prateleiras.</MudAlert>
-}
-else
-{
-    <MudTable Class="mt-3" Items="@productsInShelves" Dense="false" Hover="true" Bordered="false" Striped="true" Filter="new Func<EnterVO, bool>(FilterFuncAux)" RowsPerPage="100">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Produtos nas prateleiras para venda</MudText>
-            <MudSpacer />
-            <MudTextField @bind-Value="searchString" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        </ToolBarContent>
-        <HeaderContent>
-            <MudTh>Produto</MudTh>
-            <MudTh>Preço</MudTh>
-            <MudTh>Quantidade</MudTh>
-            <MudTh>Prateleira</MudTh>
-            <MudTh>Data de Entrada</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Produto">@context.ProductName</MudTd>
-            <MudTd DataLabel="Preco">@context.ProductPrice</MudTd>
-            <MudTd DataLabel="Quantidade">@context.ProductQuantity</MudTd>
-            <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
-            <MudTd DataLabel="Data de Entrada">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
-            <MudTd DataLabel="Vender"><MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success" OnClick="@(() => SaleProduct(context.Id))"></MudIconButton></MudTooltip></MudTd>
-            <MudTd DataLabel="Transferir"><MudTooltip Text="Transferir para outra prateleira"><MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Info" OnClick="@(() => TransferProduct(context.Id))"></MudIconButton></MudTooltip></MudTd>
-            <MudTd DataLabel="Retornar alocacao"><MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning" OnClick="@(() => UndoAllocation(context.Id))"></MudIconButton></MudTooltip></MudTd>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager HideRowsPerPage="true"/>
-        </PagerContent>
-    </MudTable>
-}
+<MudTable @ref="table" T="EnterVO" Class="mt-3" ServerData="LoadEntries" Dense="false" Hover="true" Bordered="false" Striped="true" RowsPerPage="10">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Produtos nas prateleiras para venda</MudText>
+        <MudSpacer />
+        <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar Produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Produto</MudTh>
+        <MudTh>Preço</MudTh>
+        <MudTh>Quantidade</MudTh>
+        <MudTh>Prateleira</MudTh>
+        <MudTh>Data de Entrada</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Produto">@context.ProductName</MudTd>
+        <MudTd DataLabel="Preco">@context.ProductPrice</MudTd>
+        <MudTd DataLabel="Quantidade">@context.ProductQuantity</MudTd>
+        <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
+        <MudTd DataLabel="Data de Entrada">@context.DateEnter.ToString("dd/MM/yyyy HH:mm:ss")</MudTd>
+        <MudTd DataLabel="Vender"><MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success" OnClick="@(() => SaleProduct(context))"></MudIconButton></MudTooltip></MudTd>
+        <MudTd DataLabel="Transferir"><MudTooltip Text="Transferir para outra prateleira"><MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Info" OnClick="@(() => TransferProduct(context.Id))"></MudIconButton></MudTooltip></MudTd>
+        <MudTd DataLabel="Retornar alocacao"><MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning" OnClick="@(() => UndoAllocation(context.Id))"></MudIconButton></MudTooltip></MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>@(string.IsNullOrWhiteSpace(searchString) ? "Não há produtos alocados para venda nas prateleiras." : "Nenhum produto encontrado nas prateleiras para a pesquisa.")</MudText>
+    </NoRecordsContent>
+    <LoadingContent>
+        <MudText>Carregando produtos nas prateleiras...</MudText>
+    </LoadingContent>
+    <PagerContent>
+        <MudTablePager HideRowsPerPage="true" />
+    </PagerContent>
+</MudTable>
 
 @code {
 
     #region Properties
 
-    List<EnterVO> productsInShelves = new();
-    EnterVO entry = new();
+    private MudTable<EnterVO> table;
 
     string searchString = string.Empty;
-
-    bool loading = false;
-
-    #endregion
-
-    #region Events
-
-    protected override async Task OnInitializedAsync()
-    {
-        loading = true;
-
-        if (app.ProductEntries is null || app.ProductEntries.Count() == 0)
-            productsInShelves = await api.Get<EnterVO>();
-        else
-            productsInShelves = app.ProductEntries;
-
-        if (productsInShelves is null)
-            return;
-
-        productsInShelves = productsInShelves.OrderBy(p => p.ProductQuantity == 0).ThenBy(p => p.ShelfName, StringComparer.OrdinalIgnoreCase).Where(p => p.ProductQuantity > 0).ToList();
-
-        loading = false;
-    }
 
     #endregion
 
     #region Methods
 
-    private bool FilterFuncAux(EnterVO productsInShelves) => FilterFunc(productsInShelves, searchString);
-
-    private bool FilterFunc(EnterVO productsInShelves, string searchString)
+    private async Task<TableData<EnterVO>> LoadEntries(TableState state, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
+        try
+        {
+            var (items, total) = await api.GetPage<EnterVO>(state.Page + 1, state.PageSize, searchString);
 
-        if (productsInShelves is null || string.IsNullOrWhiteSpace(productsInShelves.ProductName))
-            return true;
+            return new TableData<EnterVO> { Items = items, TotalItems = total };
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar os produtos nas prateleiras.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
 
-        if (productsInShelves.ProductName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
+            return new TableData<EnterVO> { Items = new List<EnterVO>(), TotalItems = 0 };
+        }
     }
 
-    private async void SaleProduct(int entryId)
+    private async Task Search(string text)
     {
-        if(productsInShelves is not null)
-        {
-            app.ActualEntry = productsInShelves.FirstOrDefault(e => e.Id.Equals(entryId));
+        if (table.CurrentPage != 0)
+            table.NavigateTo(0);
+        else
+            await table.ReloadServerData();
+    }
 
-            if (app.ActualEntry is not null)
-                app.ActualProduct = await api.GetById<ProductVO>(app.ActualEntry.ProductId);
+    private async Task SaleProduct(EnterVO entry)
+    {
+        app.ActualEntry = entry;
+        app.ActualProduct = await api.GetById<ProductVO>(entry.ProductId);
 
-            nav.NavigateTo($"product/sale/{entryId}");
-        }
-
+        nav.NavigateTo($"product/sale/{entry.Id}");
     }
 
     private void TransferProduct(int entryId)
@@ -124,45 +97,24 @@ else
 
             if (confimation)
             {
-                loading = true;
-
-                StateHasChanged();
-
-                entry = await api.GetById<EnterVO>(entryId);
+                var entry = await api.GetById<EnterVO>(entryId);
 
                 if (entry is null)
-                {
-                    loading = false;
-
                     return;
-                }
 
-                var result = await api.Put<EnterVO>(entry, entryId);
+                await api.Put<EnterVO>(entry, entryId);
 
-                await ReloadData();
+                app.ProductEntries = new();
 
-                loading = false;
+                await table.ReloadServerData();
 
-                StateHasChanged();
-
-                await ShowDialog.ShowDialogAsync("Alocação desfeita com sucesso.", "Sucesso", state:EDialogStates.Success); 
+                await ShowDialog.ShowDialogAsync("Alocação desfeita com sucesso.", "Sucesso", state: EDialogStates.Success);
             }
         }
         catch (ApiException ex)
         {
-            loading = false;
-
             await ShowDialog.ShowDialogAsync($"Erro alocando o produto de volta para o estoque.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
-    }
-
-    private async Task ReloadData()
-    {
-        app.ProductEntries = new();
-        app.ProductEntries = await api.Get<EnterVO>();
-
-        if (app.ProductEntries is not null)
-            productsInShelves = app.ProductEntries.OrderBy(p => p.ProductQuantity == 0).ThenBy(p => p.ShelfName, StringComparer.OrdinalIgnoreCase).Where(p => p.ProductQuantity > 0).ToList();
     }
 
     #endregion

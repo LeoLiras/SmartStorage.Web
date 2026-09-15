@@ -176,6 +176,7 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
             builder.CloseComponent();
         });
 
+        cut.WaitForElement("td button");
         cut.FindAll("td button")[1].Click();
 
         Assert.EndsWith($"product/shelf/transfer/{Entrada}", Services.GetRequiredService<NavigationManager>().Uri);
