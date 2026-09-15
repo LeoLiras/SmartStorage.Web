@@ -205,6 +205,127 @@ code {
     }
 }
 
+.app-skeleton {
+    display: grid;
+    gap: 14px;
+}
+
+.app-skeleton-label {
+    color: #9BA3C4;
+}
+
+.sk {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #1A2446 0%, #22305C 50%, #1A2446 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+}
+
+.sk-w30 { width: 30%; }
+.sk-w55 { width: 55%; }
+.sk-w60 { width: 60%; }
+.sk-w75 { width: 75%; }
+.sk-w80 { width: 80%; }
+.sk-w90 { width: 90%; }
+
+.sk-title {
+    width: 40%;
+    height: 20px;
+}
+
+.sk-head {
+    height: 14px;
+    opacity: .6;
+}
+
+.sk-thumb {
+    height: 150px;
+    border-radius: 8px;
+}
+
+.sk-input {
+    height: 40px;
+    border-radius: 8px;
+}
+
+.sk-button {
+    width: 120px;
+    height: 36px;
+    border-radius: 8px;
+    justify-self: end;
+}
+
+.app-skeleton-lines,
+.app-skeleton-form,
+.app-skeleton-field,
+.app-skeleton-card {
+    display: grid;
+    gap: 10px;
+}
+
+.app-skeleton-form {
+    gap: 18px;
+    max-width: 640px;
+}
+
+.app-skeleton-table {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #243056;
+    border-radius: 8px;
+    background: #121A33;
+}
+
+.app-skeleton-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+.app-skeleton-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.app-skeleton-card {
+    padding: 12px;
+    border: 1px solid #243056;
+    border-radius: 12px;
+    background: #121A33;
+}
+
+@keyframes shimmer {
+    to {
+        background-position: -200% 0;
+    }
+}
+
+.app-dialog {
+    --app-dialog-accent: #34D399;
+    min-width: min(420px, calc(100vw - 32px));
+    border: 1px solid #243056;
+    border-top: 3px solid var(--app-dialog-accent);
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .9);
+}
+
+.app-dialog-error { --app-dialog-accent: #F87171; }
+.app-dialog-warning { --app-dialog-accent: #FBBF24; }
+.app-dialog-info { --app-dialog-accent: #60A5FA; }
+
+.app-dialog-body {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.app-dialog-icon {
+    flex: none;
+    margin-top: 1px;
+}
+
 @media (max-width: 599.98px) {
     .app-user {
         display: none;
@@ -218,5 +339,13 @@ code {
 
     .app-nav .mud-nav-link {
         transition: none;
+    }
+
+    .sk {
+        animation: none;
+    }
+
+    .app-dialog {
+        animation: none;
     }
 }

@@ -1,13 +1,16 @@
-﻿@inject NavigationManager nav
+@inject NavigationManager nav
 
-<MudDialog Style="@($"background-color: {backgroundColor}; color: white;")">
+<MudDialog Class="@($"app-dialog app-dialog-{State.ToString().ToLowerInvariant()}")">
     <DialogContent>
-        <MudText>@((MarkupString)ContentText.Replace("\n", "<br>"))</MudText>
+        <div class="app-dialog-body">
+            <MudIcon Icon="@icon" Color="@buttonColor" Class="app-dialog-icon" />
+            <MudText>@((MarkupString)ContentText.Replace("\n", "<br>"))</MudText>
+        </div>
     </DialogContent>
     <DialogActions>
         @if (ShowCancel)
         {
-            <MudButton Color="@buttonColor" Variant="Variant.Filled" OnClick="Cancel">Cancelar</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Cancelar</MudButton>
         }
 
         @if (ShowYes)
@@ -40,39 +43,18 @@
     [Parameter]
     public EDialogStates State { get; set; }
 
-    [Parameter]
-    public EDialogStates dialogState { get; set; } = EDialogStates.Success;
-
-
-    private string backgroundColor { get; set; }
+    private string icon { get; set; }
     public Color buttonColor { get; set; }
 
     protected override void OnInitialized()
     {
-        //Default is success
-        switch (State)
+        (icon, buttonColor) = State switch
         {
-            case EDialogStates.Success:
-                backgroundColor = "#34eb4f";
-                buttonColor = Color.Success;
-                break;
-            case EDialogStates.Error:
-                backgroundColor = "#e57373";
-                buttonColor = Color.Error;
-                break;
-            case EDialogStates.Warning:
-                backgroundColor = "#ffcc00";
-                buttonColor = Color.Warning;
-                break;
-            case EDialogStates.Info:
-                backgroundColor = "#2293f0";
-                buttonColor = Color.Info;
-                break;
-            default:
-                backgroundColor = "#34eb4f";
-                buttonColor = Color.Success;
-                break;
-        }
+            EDialogStates.Error => (Icons.Material.Rounded.Error, Color.Error),
+            EDialogStates.Warning => (Icons.Material.Rounded.Warning, Color.Warning),
+            EDialogStates.Info => (Icons.Material.Rounded.Info, Color.Info),
+            _ => (Icons.Material.Rounded.CheckCircle, Color.Success)
+        };
     }
 
     private void Submit()
@@ -82,6 +64,6 @@
         if(!string.IsNullOrWhiteSpace(Navigate))
             nav.NavigateTo(Navigate);
     }
-    
+
     private void Cancel() => MudDialog.Cancel();
 }
