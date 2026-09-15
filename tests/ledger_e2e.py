@@ -991,14 +991,19 @@ def ct27(ctx):
     R.nota("cancelar: %s | editar: %s" % (corpo, corpo2))
 
 
-@caso("CT-28", "Transferir para prateleira que ja tem o produto")
+@caso("CT-28", "Transferir para prateleira que ja teve o produto")
 def ct28(ctx):
     pid = ctx.cria_produto(20, "CT28")
-    _aloca(ctx, pid, ctx.prateleira_a, 5, 10.0)
-    _aloca(ctx, pid, ctx.prateleira_b, 3, 30.0)
+    R.exige(_aloca(ctx, pid, ctx.prateleira_b, 3, 30.0) == 200, "pre-condicao falhou: alocacao recusada")
+    anterior = entrada_de(pid, ctx.prateleira_b)
+    if not R.exige(anterior is not None, "pre-condicao falhou: entrada nao criada"):
+        return
+    ctx.api("PUT", "/api/storage/shelf/v1/allocation/%d" % anterior["id"])
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 5, 10.0) == 200,
+            "pre-condicao falhou: alocacao recusada depois de zerar a outra prateleira")
     origem = entrada_de(pid, ctx.prateleira_a)
-    if not R.exige(origem is not None and entrada_de(pid, ctx.prateleira_b) is not None,
-                   "pre-condicao falhou: produto nao ficou nas duas prateleiras"):
+    if not R.exige(origem is not None and entrada_de(pid, ctx.prateleira_b)["qntd"] == 0,
+                   "pre-condicao falhou: destino devia existir com saldo zero"):
         return
     antes = saldos(pid)
     marca = ultimo_movimento()
@@ -1007,7 +1012,7 @@ def ct28(ctx):
     movs = movimentos_depois(marca, pid)
     confere_linhas(movs, [(ctx.prateleira_a, TRANSFERENCIA, -5), (ctx.prateleira_b, TRANSFERENCIA, 5)])
     confere_carimbo(movs)
-    confere_invariante(pid, antes, {ctx.prateleira_a: 0, ctx.prateleira_b: 8}, movs)
+    confere_invariante(pid, antes, {ctx.prateleira_a: 0, ctx.prateleira_b: 5}, movs)
     destino = entrada_de(pid, ctx.prateleira_b)
     if destino:
         R.exige(abs(destino["preco"] - 30.0) < 0.001,
@@ -1132,8 +1137,9 @@ def ct32(ctx):
     alocacoes = "/api/storage/shelf/v1/allocation"
     um = ctx.cria_produto(20, "CT32 Um")
     dois = ctx.cria_produto(20, "CT32 Dois")
+    tres = ctx.cria_produto(20, "CT32 Tres")
     R.exige(_aloca(ctx, um, ctx.prateleira_a, 5, 3.0) == 200, "pre-condicao falhou: alocacao recusada")
-    R.exige(_aloca(ctx, um, ctx.prateleira_b, 5, 3.0) == 200, "pre-condicao falhou: alocacao recusada")
+    R.exige(_aloca(ctx, tres, ctx.prateleira_b, 5, 3.0) == 200, "pre-condicao falhou: alocacao recusada")
     R.exige(_aloca(ctx, dois, ctx.prateleira_a, 5, 3.0) == 200, "pre-condicao falhou: alocacao recusada")
     zerada = entrada_de(dois, ctx.prateleira_a)
     if not R.exige(zerada is not None, "pre-condicao falhou: entrada nao criada"):
@@ -1337,6 +1343,32 @@ def ct35(ctx):
 
     confere_linhas(movimentos_depois(marca, sem_volume), [])
     R.nota("teto de 9 L em 10 L: 6 x 1,5 L entra, a 7a unidade e a transferencia sao recusadas")
+
+
+@caso("CT-36", "Produto so pode ficar em uma prateleira")
+def ct36(ctx):
+    pid = ctx.cria_produto(20, "CT36")
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 5, 4.0) == 200, "pre-condicao falhou: alocacao recusada")
+
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": ctx.prateleira_b, "productQuantity": 1,
+        "productPrice": 4.0, "dateEnter": datetime.now().isoformat()})
+    R.exige(status == 400 and "já está alocado" in _mensagem(corpo),
+            "produto com saldo numa prateleira foi alocado em outra", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    confere_linhas(movimentos_depois(marca, pid), [])
+    R.exige(saldos(pid) == antes, "saldo mudou numa alocacao recusada")
+    R.exige(entrada_de(pid, ctx.prateleira_b) is None, "alocacao recusada criou entrada na outra prateleira")
+
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 2, 4.0) == 200, "complementar a mesma prateleira foi recusado")
+
+    origem = entrada_de(pid, ctx.prateleira_a)
+    if R.exige(origem is not None, "entrada da prateleira A sumiu"):
+        ctx.api("PUT", "/api/storage/shelf/v1/allocation/%d" % origem["id"])
+        R.exige(_aloca(ctx, pid, ctx.prateleira_b, 2, 4.0) == 200,
+                "alocacao em outra prateleira recusada com a primeira zerada")
+    R.nota(_mensagem(corpo))
 
 
 # --------------------------------------------------------------------------- #
