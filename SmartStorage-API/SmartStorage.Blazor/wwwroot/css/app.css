@@ -539,6 +539,63 @@ code {
     }
 }
 
+.app-welcome {
+    display: grid;
+    gap: 8px;
+}
+
+.app-welcome-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.app-welcome-text {
+    max-width: 62ch;
+}
+
+.app-shortcut-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.app-shortcut {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 18px;
+    color: #E7E9F5;
+    text-decoration: none;
+    background: #121A33;
+    border: 1px solid #243056;
+    border-radius: 12px;
+    transition: transform var(--app-mid) var(--app-ease), border-color var(--app-mid) var(--app-ease), box-shadow var(--app-mid) var(--app-ease);
+}
+
+.app-shortcut:hover,
+.app-shortcut:focus-visible {
+    transform: translateY(-3px);
+    border-color: #34407A;
+    box-shadow: 0 18px 40px -22px rgba(109, 74, 255, .55);
+    color: #E7E9F5;
+}
+
+.app-shortcut-icon {
+    color: #A78BFF;
+    margin-bottom: 4px;
+}
+
+.app-shortcut-title {
+    font-weight: 700;
+}
+
+.app-shortcut-text {
+    font-size: .85rem;
+    color: #9BA3C4;
+}
+
 .app-form-image {
     aspect-ratio: 4 / 3;
     max-width: 100%;
@@ -697,12 +754,15 @@ code {
 
     .mud-button-root,
     .app-meter i,
+    .app-shortcut,
     .app-product-card,
     .app-table .mud-table-body .mud-table-row {
         transition: none;
     }
 
     .mud-button-root:active,
+    .app-shortcut:hover,
+    .app-shortcut:focus-visible,
     .app-product-card:hover,
     .app-product-card:focus-within {
         transform: none;
