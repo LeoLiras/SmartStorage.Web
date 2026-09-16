@@ -37,14 +37,6 @@ namespace SmartStorage_API.Hypermedia.Enricher
                 Type = ResponseTypeFormat.DefaultPut,
             });
 
-            content.Links.Add(new HyperMediaLink()
-            {
-                Action = HttpActionVerb.DELETE,
-                Href = link,
-                Rel = RelationType.self,
-                Type = ResponseTypeFormat.DefaultDelete,
-            });
-
             return Task.CompletedTask;
         }
 

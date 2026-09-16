@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using SmartStorage_Shared.VO;
 
 namespace SmartStorage.Configurations.Config
 {
@@ -13,7 +14,8 @@ namespace SmartStorage.Configurations.Config
                     policy
                         .WithOrigins(allowedOrigins ?? Array.Empty<string>())
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .WithExposedHeaders(Pagination.TotalCountHeader);
                 });
             });
 

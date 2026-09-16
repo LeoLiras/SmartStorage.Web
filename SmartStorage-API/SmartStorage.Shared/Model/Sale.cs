@@ -18,5 +18,9 @@ public partial class Sale
     [Required(ErrorMessage = "A data da venda é obrigatória.")]
     public DateTime SalDateSale { get; set; }
 
+    public int SalReturnedQntd { get; set; }
+
+    public decimal SalPrice { get; set; }
+
     public virtual Enter Enter { get; set; }
 }

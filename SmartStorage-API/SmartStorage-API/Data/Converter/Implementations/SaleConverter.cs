@@ -34,27 +34,9 @@ namespace SmartStorage_API.Data.Converter.Implementations
             if (origin == null)
                 return null;
 
-            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(origin.SalEntId));
+            var enter = EntersOf(new[] { origin.SalEntId }).GetValueOrDefault(origin.SalEntId);
 
-            if (enter is null)
-                return new SaleVO();
-
-            var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(enter.EntProId));
-
-            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId.Equals(enter.EntSheId));
-
-            return new SaleVO
-            {
-                Id = origin.SalId,
-                IdEnter = origin.SalEntId,
-                Qntd = origin.SalQntd,
-                DateSale = origin.SalDateSale,
-                ProductId = product is null ? 0 : product.ProId,
-                ProductName = product is null ? string.Empty : product.ProName,
-                ShelfName = shelf is null ? string.Empty : shelf.SheName,
-                EnterPrice = enter is null ? 0.0m : enter.EntPrice,
-                SaleTotal = enter is null ? 0.0m : enter.EntPrice * origin.SalQntd
-            };
+            return enter is null ? new SaleVO() : Parse(origin, enter);
         }
 
         public List<Sale> Parse(List<SaleVO> origin)
@@ -70,7 +52,38 @@ namespace SmartStorage_API.Data.Converter.Implementations
             if (origin == null)
                 return null;
 
-            return origin.Select(item => Parse(item)).ToList();
+            var enters = EntersOf(origin.Select(s => s.SalEntId).Distinct().ToList());
+
+            return origin
+                .Select(item => enters.TryGetValue(item.SalEntId, out var enter) ? Parse(item, enter) : new SaleVO())
+                .ToList();
+        }
+
+        private record EnterNames(int ProductId, string ProductName, string ShelfName);
+
+        private Dictionary<int, EnterNames> EntersOf(IReadOnlyCollection<int> enterIds)
+        {
+            return _context.Enters
+                .Where(e => enterIds.Contains(e.EntId))
+                .Select(e => new { e.EntId, Names = new EnterNames(e.EntProId, e.Product.ProName, e.Shelf.SheName) })
+                .ToDictionary(e => e.EntId, e => e.Names);
+        }
+
+        private static SaleVO Parse(Sale origin, EnterNames enter)
+        {
+            return new SaleVO
+            {
+                Id = origin.SalId,
+                IdEnter = origin.SalEntId,
+                Qntd = origin.SalQntd,
+                ReturnedQntd = origin.SalReturnedQntd,
+                DateSale = origin.SalDateSale,
+                ProductId = enter.ProductId,
+                ProductName = enter.ProductName ?? string.Empty,
+                ShelfName = enter.ShelfName ?? string.Empty,
+                SalePrice = origin.SalPrice,
+                SaleTotal = origin.SalPrice * (origin.SalQntd - origin.SalReturnedQntd)
+            };
         }
     }
 }

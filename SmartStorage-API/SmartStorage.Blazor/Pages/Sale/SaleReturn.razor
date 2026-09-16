@@ -1,0 +1,100 @@
+@page "/product/sale/return/{saleId:int}"
+@attribute [Authorize]
+
+@using SmartStorage.Blazor.Pages.Product
+
+@inject ApiExtensions api
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Registrar devolução</MudText>
+
+@if (sale is null)
+{
+    <Loading Message="Carregando venda..." Shape="ELoadingShape.Form"></Loading>
+}
+else if (sale.NetQntd == 0)
+{
+    <MudAlert Class="mt-4" Severity="Severity.Info" Variant="Variant.Outlined">Esta venda já foi totalmente devolvida.</MudAlert>
+}
+else
+{
+    <ProductForm ProductId="sale.ProductId" ReadOnly="true" SubmitText="Devolver" OnSave="ReturnProduct">
+        <MudItem xs="12">
+            <section class="app-panel">
+                <MudText Typo="Typo.subtitle1" Class="app-panel-title">Devolução da venda de <span class="num">@sale.DateSale.ToString("dd/MM/yyyy")</span> · @sale.ShelfName</MudText>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="int" Label="Quantidade vendida" Value="sale.Qntd" ReadOnly="true" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="int" Label="Já devolvida" Value="sale.ReturnedQntd" ReadOnly="true" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="int" Label="Quantidade a devolver" @bind-Value="saleReturn.Quantity" Min="1" Max="sale.NetQntd" HelperText="@($"Até {sale.NetQntd}; volta para o depósito")" Variant="Variant.Outlined" />
+                    </MudItem>
+                </MudGrid>
+            </section>
+        </MudItem>
+    </ProductForm>
+}
+
+@code {
+
+    #region Properties
+
+    [Parameter]
+    public int saleId { get; set; }
+
+    private SaleVO sale;
+
+    private SaleReturnVO saleReturn = new() { Quantity = 1 };
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            sale = await api.GetById<SaleVO>(saleId);
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar a venda.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+
+            nav.NavigateTo(app.productsSalesPage);
+        }
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task ReturnProduct(ProductVO product)
+    {
+        if (saleReturn.Quantity < 1 || saleReturn.Quantity > sale.NetQntd)
+        {
+            await ShowDialog.ShowDialogAsync($"Informe uma quantidade entre 1 e {sale.NetQntd}.", "Devolução inválida", state: EDialogStates.Warning);
+
+            return;
+        }
+
+        try
+        {
+            await api.ReturnSale(saleId, saleReturn);
+
+            app.Sales = await api.Get<SaleVO>();
+
+            await ShowDialog.ShowDialogAsync($"Devolução de {saleReturn.Quantity} unidade(s) registrada. O saldo voltou para o depósito.", "Sucesso", app.productsSalesPage, EDialogStates.Success);
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao registrar a devolução.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+    }
+
+    #endregion
+}

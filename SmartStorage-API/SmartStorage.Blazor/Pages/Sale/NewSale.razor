@@ -6,66 +6,46 @@
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
 
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Nova venda</MudText>
+
 @if(newSale is null || entry is null || loading)
 {
-    <Loading Message="Carregando..."></Loading>
+    <Loading Message="Carregando..." Shape="ELoadingShape.Form"></Loading>
 }
 else
 {
     <EditForm Model="newSale" OnValidSubmit="SaleProduct">
         <DataAnnotationsValidator />
-        <MudGrid>
-            <MudItem xs="12" sm="7" xl="12" Class="mt-3">
-                <MudCard>
-                    <MudCardContent>
-                        <MudTextField Label="Produto" @bind-Value="newSale.ProductName" For="@(() => newSale.ProductName)" Disabled="true" />
-                    </MudCardContent>
-                </MudCard>
+        <MudGrid Spacing="4" Class="mt-1">
+            <MudItem xs="12" md="8">
+                <section class="app-panel">
+                    <MudText Typo="Typo.subtitle1" Class="app-panel-title">Venda</MudText>
+                    <MudGrid Spacing="3">
+                        <MudItem xs="12">
+                            <MudTextField Label="Produto" @bind-Value="newSale.ProductName" For="@(() => newSale.ProductName)" Disabled="true" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudNumericField T="int" Label="Quantidade da venda" For="(() => newSale.Qntd)" ValueChanged="CalculateTotal" HelperText="@($"Disponível nesta prateleira: {entry.ProductQuantity}")" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudDatePicker Label="Data da venda" @bind-Date="dateSale" Variant="Variant.Outlined" />
+                        </MudItem>
+                    </MudGrid>
+                </section>
             </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <div style="display: flex; gap: 8px;">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudNumericField Format="F1" Label="Preço atual" Disabled="true" @bind-Value="entry.ProductPrice" For="(() => entry.ProductPrice)" />
-                        </MudCardContent>
-                    </MudCard>
-                    <MudCard>
-                        <MudCardContent>
-                            <MudNumericField Label="Quantidade disponível" Disabled="true" @bind-Value="entry.ProductQuantity" For="(() => entry.ProductQuantity)"/>
-                        </MudCardContent>
-                    </MudCard>
-                    <MudCard>
-                        <MudCardContent>
-                            <MudDatePicker Disabled="true" Label="Data da entrada na prateleira" Color="Color.Info" Date="entry.DateEnter" />
-                        </MudCardContent>
-                    </MudCard>
-                </div>
+            <MudItem xs="12" md="4">
+                <section class="app-panel">
+                    <MudText Typo="Typo.subtitle1" Class="app-panel-title">Resumo</MudText>
+                    <dl class="app-summary">
+                        <div><dt>Preço atual</dt><dd class="num">@entry.ProductPrice.ToString("C", PtBr)</dd></div>
+                        <div><dt>Disponível na prateleira</dt><dd class="num">@entry.ProductQuantity</dd></div>
+                        <div><dt>Entrada na prateleira</dt><dd class="num">@entry.DateEnter.ToString("dd/MM/yyyy")</dd></div>
+                        <div class="app-summary-total"><dt>Total a pagar</dt><dd class="num">@totalValue.ToString("C", PtBr)</dd></div>
+                    </dl>
+                </section>
             </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <div style="display: flex; gap: 8px;">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudNumericField T="int" Label="Quantidade da venda" For="(() => newSale.Qntd)" ValueChanged="CalculateTotal"/>
-                        </MudCardContent>
-                    </MudCard>
-                    <MudCard>
-                        <MudCardContent>
-                            <MudDatePicker Label="Data da venda" Color="Color.Info" @bind-Date="dateSale"/>
-                        </MudCardContent>
-                    </MudCard>
-                </div>
-            </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <div style="display: flex; gap: 8px;">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudNumericField Format="F2" Label="Total a pagar" Value="totalValue" Disabled="true" For="(() => totalValue)" />
-                        </MudCardContent>
-                    </MudCard>
-                </div>
-            </MudItem>
-            <MudItem xs="12" sm="12">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Vender</MudButton>
+            <MudItem xs="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PointOfSale">Vender</MudButton>
             </MudItem>
         </MudGrid>
     </EditForm>
@@ -77,6 +57,8 @@ else
 
     [Parameter]
     public int entryId { get; set; }
+
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
 
     private SaleVO newSale = new();
     private EnterVO entry = new();
@@ -168,7 +150,7 @@ else
             return;
 
         newSale.ProductName = product.Name;
-        newSale.DateSale = Convert.ToDateTime(dateSale.ToString());
+        newSale.DateSale = dateSale ?? DateTime.Now;
         newSale.IdEnter = entry.Id;
         newSale.ProductId = product.Id;  
     }

@@ -21,9 +21,24 @@ namespace SmartStorage_Shared.VO
         [Required(ErrorMessage = "A quantidade do produto é obrigatória.")]
         public int Qntd { get; set; }
 
+        public int ShelvesQntd { get; set; }
+
+        public int TotalQntd => Qntd + ShelvesQntd;
+
+        [Range(0, int.MaxValue, ErrorMessage = "O estoque mínimo não pode ser negativo.")]
+        public int MinimumStock { get; set; }
+
+        [Range(0.001, double.MaxValue, ErrorMessage = "O volume do produto deve ser maior que zero.")]
+        public decimal? Volume { get; set; }
+
+        [Range(0.01, double.MaxValue, ErrorMessage = "O preço inicial deve ser maior que zero.")]
+        public decimal? PrecoInicial { get; set; }
+
         public int? EmployeeId { get; set; }
 
         public byte[] ProImage { get; set; }
+
+        public StockAdjustmentVO StockAdjustment { get; set; }
 
         public List<HyperMediaLink> Links { get; set; } = new List<HyperMediaLink>();
 
@@ -39,6 +54,9 @@ namespace SmartStorage_Shared.VO
                 ProDescription = origin.Descricao,
                 ProDateRegister = origin.DateRegister,
                 ProQntd = origin.Qntd,
+                ProMinimumStock = origin.MinimumStock,
+                ProVolume = origin.Volume,
+                ProPrecoInicial = origin.PrecoInicial,
                 ProEmpId = origin.EmployeeId,
             };
         }

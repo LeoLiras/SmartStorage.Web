@@ -35,9 +35,23 @@ namespace SmartStorage_API.Controllers
 
         [HttpGet]
         [TypeFilter(typeof(HyperMediaFilter))]
-        public IActionResult FindAllProducts()
+        public IActionResult FindAllProducts([FromQuery] int? page, [FromQuery] int pageSize = 10, [FromQuery] string search = null)
         {
-            return Ok(_productService.FindAllProducts());
+            if (page is null)
+                return Ok(_productService.FindAllProducts());
+
+            try
+            {
+                var (items, total) = _productService.FindProductsPage(page.Value, pageSize, search);
+
+                Response.Headers[Pagination.TotalCountHeader] = total.ToString();
+
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
@@ -92,16 +106,19 @@ namespace SmartStorage_API.Controllers
             }
         }
 
-        [HttpDelete("{productId}")]
+        [HttpPost("{productId}/adjust-stock")]
         [TypeFilter(typeof(HyperMediaFilter))]
-        public IActionResult DeleteProduct(int productId)
+        public IActionResult AdjustProductStock(int productId, [FromBody] StockAdjustmentVO adjustment)
         {
             try
             {
                 if (productId.Equals(0))
                     throw new Exception("O campo ID do Produto é obrigatório.");
 
-                return Ok(_productService.DeleteProduct(productId));
+                if (adjustment is null)
+                    throw new Exception("Os dados do ajuste são obrigatórios.");
+
+                return Ok(_productService.AdjustProductStock(productId, adjustment.Quantity, adjustment.Reason));
             }
             catch (Exception ex)
             {

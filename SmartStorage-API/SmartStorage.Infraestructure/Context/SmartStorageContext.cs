@@ -21,6 +21,8 @@ public partial class SmartStorageContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductStockMovement> ProductStockMovements { get; set; }
+
     public virtual DbSet<Sale> Sales { get; set; }
 
     public virtual DbSet<Shelf> Shelves { get; set; }
@@ -46,14 +48,44 @@ public partial class SmartStorageContext : DbContext
         {
             entity.HasIndex(e => e.ProEmpId, "IX_Product_employeeId");
 
+            entity.Property(p => p.ProVolume).HasPrecision(18, 3);
+
+            entity.Property(p => p.ProPrecoInicial).HasPrecision(18, 2);
+
             entity.HasOne(d => d.Employee).WithMany(p => p.Products).HasForeignKey(d => d.ProEmpId);
+        });
+
+        modelBuilder.Entity<Shelf>(entity =>
+        {
+            entity.Property(p => p.SheVolume).HasPrecision(18, 3);
         });
 
         modelBuilder.Entity<Sale>(entity =>
         {
             entity.HasIndex(e => e.SalEntId, "IX_Sale_enterId");
 
+            entity.Property(p => p.SalPrice).HasPrecision(18, 2);
+
             entity.HasOne(d => d.Enter).WithMany(p => p.Sales).HasForeignKey(d => d.SalEntId);
+        });
+
+        modelBuilder.Entity<ProductStockMovement>(entity =>
+        {
+            entity.HasIndex(e => e.PsmProId, "IX_ProductStockMovement_productId");
+
+            entity.HasIndex(e => e.PsmSheId, "IX_ProductStockMovement_shelfId");
+
+            entity.HasIndex(e => e.PsmUseId, "IX_ProductStockMovement_userId");
+
+            entity.Property(x => x.PsmType).HasConversion<byte>().IsRequired();
+
+            entity.ToTable(t => t.HasCheckConstraint("CK_ProductStockMovement_Tipo", "[PsmType] IN (0, 1, 2, 3, 4, 5, 6)"));
+
+            entity.HasOne(d => d.Product).WithMany().HasForeignKey(d => d.PsmProId).OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(d => d.Shelf).WithMany().HasForeignKey(d => d.PsmSheId).OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.PsmUseId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<User>(entity =>

@@ -5,93 +5,119 @@
 
 @if (loading)
 {
-    <Loading Message="Carregando..."></Loading>
+    <Loading Message="Carregando produto..." Shape="ELoadingShape.Form"></Loading>
 }
 else if(product is not null)
 {
     <EditForm Model="product" OnValidSubmit="OnValidSubmit">
         <DataAnnotationsValidator />
-        <MudGrid>
-            <MudItem xs="12" sm="7" xl="12">
-                <MudCard Class="mt-3">
-                    <MudCardContent>
-                        <MudTextField Label="Nome do Produto" @bind-Value="product.Name" For="@(() => product.Name)" />
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="7" xl="12">
-                <MudCard>
-                    <MudCardContent>
-                        <MudTextField Label="Descrição" @bind-Value="product.Descricao" For="@(() => product.Descricao)" />
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <div style="display: flex; gap: 8px;">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudNumericField Label="Quantidade" @bind-Value="product.Qntd" For="(() => product.Qntd)" />
-                        </MudCardContent>
-                    </MudCard>
-                    <MudCard>
-                        <MudCardContent>
-                            <MudDatePicker Label="Date de Registro" @bind-Date="productDate" Color="Color.Info" />
-                        </MudCardContent>
-                    </MudCard>
-                </div>
-            </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <MudCard>
-                    <MudCardContent>
-                        <MudSelect T="int?" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" AdornmentColor="Color.Info">
-                            @if(employees is not null)
-                            {
-                                foreach (var emp in employees)
+        <MudGrid Spacing="4" Class="mt-1">
+            <MudItem xs="12" md="8">
+                <section class="app-panel">
+                    <MudText Typo="Typo.subtitle1" Class="app-panel-title">Dados do produto</MudText>
+                    <MudGrid Spacing="3">
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Nome do Produto" @bind-Value="product.Name" For="@(() => product.Name)" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudSelect T="int?" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" ReadOnly="ReadOnly" Variant="Variant.Outlined">
+                                @if(employees is not null)
                                 {
-                                    <MudSelectItem T="int?" Value="@((int?)emp.Id)">@emp.Name</MudSelectItem>
+                                    foreach (var emp in employees)
+                                    {
+                                        <MudSelectItem T="int?" Value="@((int?)emp.Id)">@emp.Name</MudSelectItem>
+                                    }
                                 }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField Label="Descrição" @bind-Value="product.Descricao" For="@(() => product.Descricao)" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                        </MudItem>
+                    </MudGrid>
+                </section>
+
+                <section class="app-panel mt-4">
+                    <MudText Typo="Typo.subtitle1" Class="app-panel-title">Estoque</MudText>
+                    <MudGrid Spacing="3">
+                        <MudItem xs="12" sm="6" lg="4">
+                            @if (ProductId == 0)
+                            {
+                                <MudNumericField Label="Quantidade" @bind-Value="product.Qntd" For="(() => product.Qntd)" Variant="Variant.Outlined" />
                             }
-                        </MudSelect>
-                    </MudCardContent>
-                </MudCard>
+                            else
+                            {
+                                <MudNumericField T="int" Label="Quantidade no depósito" Value="product.Qntd" ReadOnly="true" Variant="Variant.Outlined" />
+                            }
+                        </MudItem>
+                        @if (ProductId != 0)
+                        {
+                            <MudItem xs="12" sm="6" lg="4">
+                                <MudNumericField T="int" Label="Total (depósito + prateleiras)" Value="product.TotalQntd" ReadOnly="true" Variant="Variant.Outlined" />
+                            </MudItem>
+                        }
+                        <MudItem xs="12" sm="6" lg="4">
+                            <MudDatePicker Label="Data de registro" @bind-Date="productDate" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6" lg="4">
+                            <MudNumericField T="int" Label="Estoque mínimo" @bind-Value="product.MinimumStock" For="(() => product.MinimumStock)" Min="0" HelperText="0 desativa o aviso por e-mail" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6" lg="4">
+                            <MudNumericField T="decimal?" Label="Volume (L)" @bind-Value="product.Volume" For="(() => product.Volume)" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6" lg="4">
+                            <MudNumericField T="decimal?" Label="Preço inicial" @bind-Value="product.PrecoInicial" For="(() => product.PrecoInicial)" Min="0.01m" Format="F2" HelperText="Preço padrão ao alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                        </MudItem>
+                    </MudGrid>
+                </section>
+
+                @if (ProductId != 0 && !ReadOnly)
+                {
+                    <section class="app-panel mt-4">
+                        <MudText Typo="Typo.subtitle1" Class="app-panel-title">Ajustar estoque do depósito</MudText>
+                        <MudGrid Spacing="3">
+                            <MudItem xs="12" sm="4">
+                                <MudNumericField T="int" Label="Saldo real conferido" @bind-Value="adjustQuantity" Min="0" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="12" sm="8">
+                                <MudTextField T="string" Label="Motivo" @bind-Value="adjustReason" Variant="Variant.Outlined" />
+                            </MudItem>
+                        </MudGrid>
+                    </section>
+                }
             </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <MudCard>
-                    <MudCardContent>
-                        <MudTextField Label="Imagem" @bind-Value="fileName" Disabled="true"/>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="6" sm="6" xl="6">
-                <MudCard>
-                    <MudCardContent>
-                        <MudCardMedia Image=@ProcessImage(product) Height="500" />
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-            <MudItem xs="12" sm="12" xl="12">
-                <div style="display: flex; gap: 8px;">
-                    <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
-                        <ActivatorContent>
-                            <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Image">
-                                Adicionar Imagem
+
+            <MudItem xs="12" md="4">
+                <section class="app-panel">
+                    <MudText Typo="Typo.subtitle1" Class="app-panel-title">Imagem</MudText>
+                    <div class="app-form-image">
+                        <img src="@ProcessImage(product)" alt="@($"Imagem de {product.Name}")" />
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(fileName))
+                    {
+                        <MudText Typo="Typo.caption" Class="app-muted">@fileName</MudText>
+                    }
+                    @if (!ReadOnly)
+                    {
+                        <div class="d-flex flex-wrap gap-2">
+                            <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
+                                <ActivatorContent>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Image">
+                                        Adicionar Imagem
+                                    </MudButton>
+                                </ActivatorContent>
+                            </MudFileUpload>
+                            <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Clear" OnClick="@ClearFileAsync">
+                                Limpar
                             </MudButton>
-                        </ActivatorContent>
-                    </MudFileUpload>
-                    <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" OnClick="@ClearFileAsync">
-                        Limpar
-                    </MudButton>
-                </div>
+                        </div>
+                    }
+                </section>
             </MudItem>
-            <MudItem xs="12" sm="12">
-                @if(ProductId != 0)
-                {
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Atualizar</MudButton>
-                }
-                else
-                {
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" Class="ml-auto">Criar</MudButton>
-                }
+
+            @ChildContent
+
+            <MudItem xs="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">@(SubmitText ?? (ProductId != 0 ? "Atualizar" : "Criar"))</MudButton>
             </MudItem>
         </MudGrid>
     </EditForm>
@@ -101,11 +127,22 @@ else if(product is not null)
 
     #region Properties
 
+    private const int MaxImageSide = 800;
+
     [Parameter]
     public int ProductId { get; set; }
 
-    [Parameter] 
+    [Parameter]
     public EventCallback<ProductVO> OnSave { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public string SubmitText { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
 
     private ProductVO product = new();
     private List<EmployeeVO> employees = new();
@@ -115,7 +152,12 @@ else if(product is not null)
     IBrowserFile file;
     private string fileName;
 
+    private int adjustQuantity;
+    private string adjustReason;
+
     bool loading = false;
+
+    private int? loadedProductId;
 
     #endregion
 
@@ -123,6 +165,9 @@ else if(product is not null)
 
     protected override async Task OnParametersSetAsync()
     {
+        if (loadedProductId == ProductId)
+            return;
+
         try
         {
             loading = true;
@@ -135,11 +180,15 @@ else if(product is not null)
 
             if(ProductId != 0)
             {
-                if (app.ActualProduct is null)
-                    product = await api.GetById<ProductVO>(ProductId);
-                else
+                if (app.ActualProduct is not null && app.ActualProduct.Id == ProductId)
                     product = app.ActualProduct;
+                else
+                    product = await api.GetById<ProductVO>(ProductId);
+
+                adjustQuantity = product.Qntd;
             }
+
+            loadedProductId = ProductId;
 
             loading = false;
         }
@@ -155,6 +204,28 @@ else if(product is not null)
 
     private async Task OnValidSubmit()
     {
+        product.StockAdjustment = null;
+
+        if (ProductId != 0 && !ReadOnly && adjustQuantity != product.Qntd)
+        {
+            var adjustment = new StockAdjustmentVO
+            {
+                Quantity = adjustQuantity,
+                Reason = adjustReason
+            };
+
+            var errors = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+
+            if (!System.ComponentModel.DataAnnotations.Validator.TryValidateObject(adjustment, new System.ComponentModel.DataAnnotations.ValidationContext(adjustment), errors, validateAllProperties: true))
+            {
+                await ShowDialog.ShowDialogAsync($"Ajuste de estoque inválido.\n{string.Join("\n", errors.Select(e => e.ErrorMessage))}", "Erro", state: EDialogStates.Warning);
+
+                return;
+            }
+
+            product.StockAdjustment = adjustment;
+        }
+
         await OnSave.InvokeAsync(product);
     }
 
@@ -167,7 +238,13 @@ else if(product is not null)
         this.file = file;
         fileName = file.Name;
 
-        using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+        var format = file.ContentType == "image/png" ? "image/png" : "image/jpeg";
+
+        var resized = await file.RequestImageFileAsync(format, MaxImageSide, MaxImageSide);
+
+        var stored = resized.Size < file.Size ? resized : file;
+
+        using var stream = stored.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
 
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SmartStorage.Shared.Enum;
 using SmartStorage_Shared.Model;
 
@@ -31,21 +31,32 @@ internal static class SeedData
     }
 
     /// <summary>
-    /// Administrador inicial: admin / admin123. A senha vai gravada ja com o
-    /// hash produzido pelo Sha256PasswordHasher da AuthenticationAPI, que e um
-    /// SHA-256 puro em hexadecimal - sem salt, portanto deterministico, o que e
-    /// justamente o que permite fixar o valor aqui.
+    /// Usuarios iniciais: admin / admin123 (Administrador) e usuario / usuario123
+    /// (Usuario), este ultimo para exercitar o que e barrado fora do papel de
+    /// admin. As senhas vao gravadas ja com o hash produzido pelo
+    /// Sha256PasswordHasher da AuthenticationAPI, que e um SHA-256 puro em
+    /// hexadecimal - sem salt, portanto deterministico, o que e justamente o que
+    /// permite fixar os valores aqui.
     /// </summary>
     private static void SeedUsers(this ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().HasData(new User
-        {
-            Id = 1,
-            Username = "admin",
-            FullName = "Administrador do Sistema",
-            Password = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
-            UseType = TipoUsuario.Administrador
-        });
+        modelBuilder.Entity<User>().HasData(
+            new User
+            {
+                Id = 1,
+                Username = "admin",
+                FullName = "Administrador do Sistema",
+                Password = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+                UseType = TipoUsuario.Administrador
+            },
+            new User
+            {
+                Id = 2,
+                Username = "usuario",
+                FullName = "Usuario de Teste",
+                Password = "dfa7a2273567dcd1efffb9a46308e91c20fa13c44c3441bc69cd6a7869b3f7fd",
+                UseType = TipoUsuario.Usuario
+            });
     }
 
     private static void SeedEmployees(this ModelBuilder modelBuilder)
@@ -65,39 +76,41 @@ internal static class SeedData
     private static void SeedShelves(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Shelf>().HasData(
-            new Shelf { SheId = 1, SheName = "Prateleira A1 - Ferramentas Elétricas", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 2, SheName = "Prateleira A2 - Ferramentas Manuais", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 3, SheName = "Prateleira B1 - Equipamentos de Proteção", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 4, SheName = "Prateleira B2 - Materiais Elétricos", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 5, SheName = "Prateleira C1 - Fixadores e Parafusos", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 6, SheName = "Prateleira C2 - Medição e Precisão", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 7, SheName = "Prateleira D1 - Pintura e Acabamento", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 8, SheName = "Prateleira D2 - Hidráulica", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 9, SheName = "Prateleira E1 - Jardinagem", SheDataRegister = CadastroPrateleiras },
-            new Shelf { SheId = 10, SheName = "Prateleira E2 - Estoque Geral", SheDataRegister = CadastroPrateleiras });
+            new Shelf { SheId = 1, SheName = "Prateleira A1 - Ferramentas Elétricas", SheDataRegister = CadastroPrateleiras, SheVolume = 400m },
+            new Shelf { SheId = 2, SheName = "Prateleira A2 - Ferramentas Manuais", SheDataRegister = CadastroPrateleiras, SheVolume = 400m },
+            new Shelf { SheId = 3, SheName = "Prateleira B1 - Equipamentos de Proteção", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 4, SheName = "Prateleira B2 - Materiais Elétricos", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 5, SheName = "Prateleira C1 - Fixadores e Parafusos", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 6, SheName = "Prateleira C2 - Medição e Precisão", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 7, SheName = "Prateleira D1 - Pintura e Acabamento", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 8, SheName = "Prateleira D2 - Hidráulica", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 9, SheName = "Prateleira E1 - Jardinagem", SheDataRegister = CadastroPrateleiras, SheVolume = 300m },
+            new Shelf { SheId = 10, SheName = "Prateleira E2 - Estoque Geral", SheDataRegister = CadastroPrateleiras, SheVolume = 800m });
     }
 
     private static void SeedProducts(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>().HasData(
-            Produto(1, "Furadeira de Impacto 750W", "Furadeira de impacto com mandril de 13mm, velocidade variável e reversão.", 24, 1),
-            Produto(2, "Parafusadeira sem Fio 12V", "Parafusadeira a bateria com duas velocidades, maleta e duas baterias de lítio.", 18, 1),
-            Produto(3, "Serra Circular 1400W", "Serra circular com disco de 184mm e guia paralela para cortes retos.", 9, 2),
-            Produto(4, "Martelo Unha 27mm", "Martelo com cabeça de aço forjado e cabo de fibra de vidro antiderrapante.", 40, 2),
-            Produto(5, "Jogo de Chaves de Fenda", "Conjunto com seis chaves de fenda e philips com cabo emborrachado.", 35, 3),
-            Produto(6, "Trena a Laser 40 Metros", "Medidor de distância a laser com precisão de 2mm e cálculo de área.", 12, 3),
-            Produto(7, "Capacete de Segurança Branco", "Capacete de proteção classe B com carneira ajustável e certificado pelo CA.", 60, 4),
-            Produto(8, "Luva de Proteção Nitrílica", "Par de luvas revestidas em nitrilo para manuseio de peças e ferramentas.", 150, 4),
-            Produto(9, "Óculos de Proteção Incolor", "Óculos de segurança com lente antirrisco e proteção contra impactos.", 90, 5),
-            Produto(10, "Fita Isolante 20 Metros", "Fita isolante antichama de 19mm por 20 metros para emendas elétricas.", 200, 5));
+            Produto(1, "Furadeira de Impacto 750W", "Furadeira de impacto com mandril de 13mm, velocidade variável e reversão.", 14, 1, 6.0m, 289.90m),
+            Produto(2, "Parafusadeira sem Fio 12V", "Parafusadeira a bateria com duas velocidades, maleta e duas baterias de lítio.", 0, 1, 4.5m, 349.00m),
+            Produto(3, "Serra Circular 1400W", "Serra circular com disco de 184mm e guia paralela para cortes retos.", 5, 2, 12.0m, 529.90m),
+            Produto(4, "Martelo Unha 27mm", "Martelo com cabeça de aço forjado e cabo de fibra de vidro antiderrapante.", 0, 2, 1.5m, 45.50m),
+            Produto(5, "Jogo de Chaves de Fenda", "Conjunto com seis chaves de fenda e philips com cabo emborrachado.", 15, 3, 1.2m, 79.90m),
+            Produto(6, "Trena a Laser 40 Metros", "Medidor de distância a laser com precisão de 2mm e cálculo de área.", 0, 3, 0.8m, 219.00m),
+            Produto(7, "Capacete de Segurança Branco", "Capacete de proteção classe B com carneira ajustável e certificado pelo CA.", 35, 4, 6.0m, 32.90m),
+            Produto(8, "Luva de Proteção Nitrílica", "Par de luvas revestidas em nitrilo para manuseio de peças e ferramentas.", 50, 4, 0.3m, 12.40m),
+            Produto(9, "Óculos de Proteção Incolor", "Óculos de segurança com lente antirrisco e proteção contra impactos.", 0, 5, 0.4m, 18.75m),
+            Produto(10, "Fita Isolante 20 Metros", "Fita isolante antichama de 19mm por 20 metros para emendas elétricas.", 80, 5, 0.1m, 8.90m));
     }
 
-    private static Product Produto(int id, string nome, string descricao, int quantidade, int funcionarioId) => new()
+    private static Product Produto(int id, string nome, string descricao, int quantidade, int funcionarioId, decimal volume, decimal precoInicial) => new()
     {
         ProId = id,
         ProName = nome,
         ProDescription = descricao,
         ProQntd = quantidade,
+        ProVolume = volume,
+        ProPrecoInicial = precoInicial,
         ProEmpId = funcionarioId,
         ProDateRegister = CadastroProdutos,
         ProImage = SeedImages.ForProduct(id)
@@ -111,16 +124,16 @@ internal static class SeedData
     private static void SeedEnters(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Enter>().HasData(
-            Entrada(1, produto: 1, prateleira: 1, quantidade: 24, preco: 289.90m),
+            Entrada(1, produto: 1, prateleira: 1, quantidade: 10, preco: 289.90m),
             Entrada(2, produto: 2, prateleira: 1, quantidade: 18, preco: 349.00m),
-            Entrada(3, produto: 3, prateleira: 1, quantidade: 9, preco: 529.90m),
+            Entrada(3, produto: 3, prateleira: 1, quantidade: 4, preco: 529.90m),
             Entrada(4, produto: 4, prateleira: 2, quantidade: 40, preco: 45.50m),
-            Entrada(5, produto: 5, prateleira: 2, quantidade: 35, preco: 79.90m),
+            Entrada(5, produto: 5, prateleira: 2, quantidade: 20, preco: 79.90m),
             Entrada(6, produto: 6, prateleira: 6, quantidade: 12, preco: 219.00m),
-            Entrada(7, produto: 7, prateleira: 3, quantidade: 60, preco: 32.90m),
-            Entrada(8, produto: 8, prateleira: 3, quantidade: 150, preco: 12.40m),
+            Entrada(7, produto: 7, prateleira: 3, quantidade: 25, preco: 32.90m),
+            Entrada(8, produto: 8, prateleira: 3, quantidade: 100, preco: 12.40m),
             Entrada(9, produto: 9, prateleira: 3, quantidade: 90, preco: 18.75m),
-            Entrada(10, produto: 10, prateleira: 4, quantidade: 200, preco: 8.90m));
+            Entrada(10, produto: 10, prateleira: 4, quantidade: 120, preco: 8.90m));
     }
 
     private static Enter Entrada(int id, int produto, int prateleira, int quantidade, decimal preco) => new()

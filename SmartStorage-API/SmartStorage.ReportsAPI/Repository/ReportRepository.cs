@@ -36,9 +36,9 @@ namespace SmartStorage.ReportsAPI.Repository
                 .ThenInclude(s => s.Shelf)
                 .Include(s => s.Enter)
                 .ThenInclude(s => s.Product)
-                .Where(s => s.SalDateSale.Month == DateTime.Now.Month).ToList();
+                .Where(s => s.SalDateSale.Year == DateTime.Now.Year && s.SalDateSale.Month == DateTime.Now.Month && s.SalQntd > s.SalReturnedQntd).ToList();
 
-            if (sales is null)
+            if (!sales.Any())
                 throw new Exception("Ainda não há vendas no mês corrente.");
 
             using var wb = new XLWorkbook();
@@ -63,10 +63,10 @@ namespace SmartStorage.ReportsAPI.Repository
                 ws.Cell(row, 1).Value = sale.Enter.Product.ProName;
                 ws.Cell(row, 2).Value = sale.Enter.Shelf.SheName;
                 ws.Cell(row, 3).Value = sale.SalDateSale;
-                ws.Cell(row, 4).Value = sale.SalQntd;
-                ws.Cell(row, 5).Value = sale.Enter.EntPrice;
+                ws.Cell(row, 4).Value = sale.SalQntd - sale.SalReturnedQntd;
+                ws.Cell(row, 5).Value = sale.SalPrice;
                 ws.Cell(row, 5).Style.NumberFormat.Format = "R$ #,##0.00";
-                ws.Cell(row, 6).Value = sale.Enter.EntPrice * sale.SalQntd;
+                ws.Cell(row, 6).Value = sale.SalPrice * (sale.SalQntd - sale.SalReturnedQntd);
                 ws.Cell(row, 6).Style.NumberFormat.Format = "R$ #,##0.00";
 
                 row++;
@@ -91,9 +91,9 @@ namespace SmartStorage.ReportsAPI.Repository
                 .ThenInclude(s => s.Shelf)
                 .Include(s => s.Enter)
                 .ThenInclude(s => s.Product)
-                .Where(s => s.SalDateSale.Month == DateTime.Now.Month).ToList();
+                .Where(s => s.SalDateSale.Year == DateTime.Now.Year && s.SalDateSale.Month == DateTime.Now.Month && s.SalQntd > s.SalReturnedQntd).ToList();
 
-            if (sales is null)
+            if (!sales.Any())
                 throw new Exception("Ainda não há vendas no mês corrente.");
 
             //Table grade
@@ -111,7 +111,7 @@ namespace SmartStorage.ReportsAPI.Repository
                 .Select(p => new
                 {
                     Product = p.Key,
-                    Quantity = p.Sum(x => x.SalQntd)
+                    Quantity = p.Sum(x => x.SalQntd - x.SalReturnedQntd)
                 })
                 .OrderByDescending(x => x.Quantity)
                 .Take(10)
@@ -157,7 +157,7 @@ namespace SmartStorage.ReportsAPI.Repository
                 .Select(s => new
                 {
                     Month = s.Key,
-                    Total = s.Sum(x => x.Enter.EntPrice * x.SalQntd)
+                    Total = s.Sum(x => x.SalPrice * (x.SalQntd - x.SalReturnedQntd))
                 })
                 .OrderBy(s => s.Month)
                 .ToList();
@@ -245,9 +245,9 @@ namespace SmartStorage.ReportsAPI.Repository
                                     t.Cell().Element(cellStyle).Text(sale.Enter.Product.ProName);
                                     t.Cell().Element(cellStyle).Text(sale.Enter.Shelf.SheName);
                                     t.Cell().Element(cellStyle).Text(sale.SalDateSale.ToString("d"));
-                                    t.Cell().Element(cellStyle).Text(sale.SalQntd.ToString());
-                                    t.Cell().Element(cellStyle).Text($"R$ {sale.Enter.EntPrice.ToString()}");
-                                    t.Cell().Element(cellStyle).Text($"R$ {sale.SalQntd * sale.Enter.EntPrice}");
+                                    t.Cell().Element(cellStyle).Text((sale.SalQntd - sale.SalReturnedQntd).ToString());
+                                    t.Cell().Element(cellStyle).Text($"R$ {sale.SalPrice.ToString()}");
+                                    t.Cell().Element(cellStyle).Text($"R$ {(sale.SalQntd - sale.SalReturnedQntd) * sale.SalPrice}");
                                 }
                             });
                         });

@@ -1,6 +1,6 @@
-﻿@inject VariablesExtensions app
+@inject VariablesExtensions app
 
-<MudNavMenu>
+<MudNavMenu Class="app-nav">
     <AuthorizeView>
         <Authorized>
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
@@ -8,9 +8,12 @@
             <MudNavLink Href="products/shelves" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Store">Produtos nas prateleiras</MudNavLink>
             <MudNavLink Href="products/sales" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AttachMoney">Vendas</MudNavLink>
             <MudNavLink Href="products/insight" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Lightbulb">Estatísticas</MudNavLink>
-            <br />
-            <br /> 
+            <MudDivider Class="my-3 mx-3" />
             <MudNavLink Href="user/account" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Conta</MudNavLink>
+            @if (context.User.IsInRole("Administrador"))
+            {
+                <MudNavLink Href="user/register" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.PersonAdd">Cadastrar usuário</MudNavLink>
+            }
         </Authorized>
     </AuthorizeView>
 </MudNavMenu>

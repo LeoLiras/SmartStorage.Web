@@ -1,5 +1,7 @@
-﻿using SmartStorage_API.Data.Converter.Implementations;
+﻿using SmartStorage.Shared.Enum;
+using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
+using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 
@@ -13,14 +15,17 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly ProductConverter _converter;
 
+        private readonly IProductStockMovementRepository _movementRepository;
+
         #endregion
 
         #region Construtores
 
-        public ProductBusinessImplementation(SmartStorageContext context)
+        public ProductBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository)
         {
             _context = context;
-            _converter = new ProductConverter();
+            _converter = new ProductConverter(_context);
+            _movementRepository = movementRepository;
         }
 
         #endregion
@@ -30,6 +35,31 @@ namespace SmartStorage_API.Service.Implementations
         public List<ProductVO> FindAllProducts()
         {
             return _converter.Parse(_context.Products.OrderBy(q => q.ProName).ToList());
+        }
+
+        public (List<ProductVO> Items, int Total) FindProductsPage(int page, int pageSize, string search)
+        {
+            if (page < 1)
+                throw new Exception("A página deve ser maior que zero.");
+
+            if (pageSize < 1 || pageSize > Pagination.MaxPageSize)
+                throw new Exception($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
+
+            var query = _context.Products.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(p => p.ProName.Contains(search.Trim()));
+
+            var total = query.Count();
+
+            var products = query
+                .OrderBy(p => p.ProName)
+                .ThenBy(p => p.ProId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (_converter.Parse(products), total);
         }
 
         public ProductVO FindProductById(int id)
@@ -54,18 +84,37 @@ namespace SmartStorage_API.Service.Implementations
             if (emplyeeSearch == null)
                 throw new Exception("Funcionario não encontrado com o ID informado.");
 
+            if (product.Qntd < 0)
+                throw new Exception("A quantidade do produto não pode ser negativa.");
+
+            ValidateMinimumStock(product.MinimumStock);
+
+            ValidateVolume(product.Volume);
+
+            ValidateInitialPrice(product.PrecoInicial);
+
             var newProduct = new Product
             {
                 ProName = product.Name,
                 ProDescription = product.Descricao,
                 ProDateRegister = DateTime.UtcNow,
-                ProQntd = product.Qntd,
+                ProQntd = 0,
+                ProMinimumStock = product.MinimumStock,
+                ProVolume = product.Volume,
+                ProPrecoInicial = product.PrecoInicial,
                 ProEmpId = product.EmployeeId,
                 ProImage = product.ProImage
             };
 
             _context.Add(newProduct);
             _context.SaveChanges();
+
+            if (product.Qntd > 0)
+                _movementRepository.CreateNewStockMovement(
+                    newProduct.ProId,
+                    shelfId: null,
+                    TipoMovimentacao.Entrada,
+                    product.Qntd);
 
             return _converter.Parse(newProduct);
 
@@ -88,50 +137,89 @@ namespace SmartStorage_API.Service.Implementations
             if (employee == null)
                 throw new Exception("Colaborador com o ID informado não encontrado.");
 
+            ValidateMinimumStock(product.MinimumStock);
+
+            ValidateVolume(product.Volume);
+
+            ValidateInitialPrice(product.PrecoInicial);
+
             searchProduct.ProEmpId = product.EmployeeId;
+
+            searchProduct.ProMinimumStock = product.MinimumStock;
+
+            searchProduct.ProVolume = product.Volume;
+
+            searchProduct.ProPrecoInicial = product.PrecoInicial;
 
             if (!string.IsNullOrWhiteSpace(product.Name))
                 searchProduct.ProName = product.Name;
-
-            searchProduct.ProQntd = product.Qntd;
 
             if (!string.IsNullOrWhiteSpace(product.Descricao))
                 searchProduct.ProDescription = product.Descricao;
 
             searchProduct.ProImage = product.ProImage;
 
-            _context.SaveChanges();
+            if (product.StockAdjustment is null)
+                _context.SaveChanges();
+            else
+                _movementRepository.CreateNewStockMovement(
+                    productId,
+                    shelfId: null,
+                    TipoMovimentacao.Ajuste,
+                    CalculateStockAdjustmentDelta(searchProduct, product.StockAdjustment.Quantity),
+                    product.StockAdjustment.Reason);
 
             return _converter.Parse(searchProduct);
         }
 
-        public ProductVO DeleteProduct(int productId)
+        public ProductVO AdjustProductStock(int productId, int newQuantity, string reason)
         {
-            var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(productId));
+            var product = _context.Products.FirstOrDefault(x => x.ProId == productId);
 
             if (product is null)
-                throw new Exception("Produto não encontrado com o ID informado");
+                throw new Exception("Produto não encontrado com o ID informado.");
 
-            var enters = _context.Enters.Where(e => e.EntProId.Equals(productId)).ToList();
-
-            if (enters.Count > 0)
-            {
-                foreach (var enter in enters)
-                {
-                    var sales = _context.Sales.Where(s => s.SalEntId.Equals(enter.EntId)).ToList();
-
-                    if (sales.Count > 0)
-                        _context.Sales.RemoveRange(sales);
-
-                    _context.Remove(enter);
-                }
-            }
-
-            _context.Products.Remove(product);
-            _context.SaveChanges();
+            _movementRepository.CreateNewStockMovement(
+                productId,
+                shelfId: null,
+                TipoMovimentacao.Ajuste,
+                CalculateStockAdjustmentDelta(product, newQuantity),
+                reason);
 
             return _converter.Parse(product);
         }
+
+        private static void ValidateMinimumStock(int minimumStock)
+        {
+            if (minimumStock < 0)
+                throw new Exception("O estoque mínimo não pode ser negativo.");
+        }
+
+        private static void ValidateVolume(decimal? volume)
+        {
+            if (volume <= 0)
+                throw new Exception("O volume do produto deve ser maior que zero.");
+        }
+
+        private static void ValidateInitialPrice(decimal? price)
+        {
+            if (price <= 0)
+                throw new Exception("O preço inicial do produto deve ser maior que zero.");
+        }
+
+        private static int CalculateStockAdjustmentDelta(Product product, int newQuantity)
+        {
+            if (newQuantity < 0)
+                throw new Exception("A quantidade do ajuste não pode ser negativa.");
+
+            var quantityDelta = newQuantity - product.ProQntd;
+
+            if (quantityDelta == 0)
+                throw new Exception("A quantidade informada é igual ao saldo atual do depósito.");
+
+            return quantityDelta;
+        }
+
         #endregion
     }
 }

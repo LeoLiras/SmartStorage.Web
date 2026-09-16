@@ -10,5 +10,10 @@ namespace SmartStorage.AuthenticationAPI.Repositories.Implementations
         {
             return _context.Users.SingleOrDefault(u => u.Username == username);
         }
+
+        public bool HasStockMovements(long userId)
+        {
+            return _context.ProductStockMovements.Any(m => m.PsmUseId == userId);
+        }
     }
 }

@@ -103,6 +103,30 @@ namespace SmartStorage.Blazor.Utils.API
         }
 
         /// <summary>
+        /// Requisição GET paginada; o total vem no cabeçalho X-Total-Count.
+        /// </summary>
+        public async Task<(List<TVO> Items, int Total)> GetPage<TVO>(int page, int pageSize, string search = null) where TVO : class
+        {
+            var url = $"{ReturnEndpoint<TVO>()}?page={page}&pageSize={pageSize}";
+
+            if (!string.IsNullOrWhiteSpace(search))
+                url += $"&search={Uri.EscapeDataString(search.Trim())}";
+
+            var response = await _http.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+                throw new ApiException((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+            var items = await response.Content.ReadFromJsonAsync<List<TVO>>() ?? new List<TVO>();
+
+            var total = response.Headers.TryGetValues(Pagination.TotalCountHeader, out var values) && int.TryParse(values.FirstOrDefault(), out var parsed)
+                ? parsed
+                : items.Count;
+
+            return (items, total);
+        }
+
+        /// <summary>
         /// Requisição GET que retorna um modelo com base na url e id fornecidos.
         /// </summary>
         /// <typeparam name="TVO"></typeparam>
@@ -198,6 +222,82 @@ namespace SmartStorage.Blazor.Utils.API
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<TVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        public async Task<EnterVO> TransferProductToShelf(int enterId, ShelfTransferVO transfer)
+        {
+            if (transfer == null)
+                throw new ArgumentNullException(nameof(transfer), message: "Os dados da transferência são obrigatórios.");
+
+            var response = await _http.PostAsJsonAsync($"{entersEndpoint}/{enterId}/transfer", transfer);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<EnterVO>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        public async Task<List<EnterVO>> AllocateProducts(AllocationBatchVO batch)
+        {
+            if (batch == null)
+                throw new ArgumentNullException(nameof(batch), message: "Os dados do lote são obrigatórios.");
+
+            var response = await _http.PostAsJsonAsync($"{entersEndpoint}/batch", batch);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<EnterVO>>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        public async Task<List<SaleVO>> CreateSales(SaleBatchVO batch)
+        {
+            if (batch == null)
+                throw new ArgumentNullException(nameof(batch), message: "Os dados do carrinho são obrigatórios.");
+
+            var response = await _http.PostAsJsonAsync($"{salesEndpoint}/batch", batch);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<SaleVO>>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
+        public async Task<SaleVO> ReturnSale(int saleId, SaleReturnVO saleReturn)
+        {
+            if (saleReturn == null)
+                throw new ArgumentNullException(nameof(saleReturn), message: "Os dados da devolução são obrigatórios.");
+
+            var response = await _http.PostAsJsonAsync($"{salesEndpoint}/{saleId}/return", saleReturn);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<SaleVO>();
             }
             else
             {

@@ -1,0 +1,109 @@
+@page "/product/shelf/transfer/{enterId:int}"
+@attribute [Authorize]
+
+@using SmartStorage.Blazor.Pages.Product
+
+@inject ApiExtensions api
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Transferir entre prateleiras</MudText>
+
+@if (entry is null)
+{
+    <Loading Message="Carregando entrada..." Shape="ELoadingShape.Form"></Loading>
+}
+else if (entry.ProductQuantity == 0)
+{
+    <MudAlert Class="mt-4" Severity="Severity.Info" Variant="Variant.Outlined">Não há saldo nesta prateleira para transferir.</MudAlert>
+}
+else
+{
+    <ProductForm ProductId="entry.ProductId" ReadOnly="true" SubmitText="Transferir" OnSave="TransferProduct">
+        <MudItem xs="12">
+            <section class="app-panel">
+                <MudText Typo="Typo.subtitle1" Class="app-panel-title">Transferência</MudText>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="4">
+                        <MudTextField T="string" Label="Prateleira atual" Value="entry.ShelfName" ReadOnly="true" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudNumericField T="int" Label="Quantidade na prateleira" Value="entry.ProductQuantity" ReadOnly="true" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="int" @bind-Value="transfer.ShelfId" Label="Prateleira de destino" OpenIcon="@Icons.Material.Filled.Storefront" HelperText="Todo o saldo da prateleira atual vai para o destino" Variant="Variant.Outlined">
+                            @foreach (var shelf in shelves.Where(s => s.Id != entry.ShelfId))
+                            {
+                                <MudSelectItem T="int" Value="@shelf.Id">@shelf.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </section>
+        </MudItem>
+    </ProductForm>
+}
+
+@code {
+
+    #region Properties
+
+    [Parameter]
+    public int enterId { get; set; }
+
+    private EnterVO entry;
+
+    private List<ShelfVO> shelves = new();
+
+    private ShelfTransferVO transfer = new();
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            shelves = await api.Get<ShelfVO>();
+
+            entry = await api.GetById<EnterVO>(enterId);
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar a entrada.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+
+            nav.NavigateTo(app.productsInShelvesPage);
+        }
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task TransferProduct(ProductVO product)
+    {
+        if (transfer.ShelfId == 0)
+        {
+            await ShowDialog.ShowDialogAsync("Escolha a prateleira de destino.", "Transferência inválida", state: EDialogStates.Warning);
+
+            return;
+        }
+
+        try
+        {
+            await api.TransferProductToShelf(enterId, transfer);
+
+            app.ProductEntries = await api.Get<EnterVO>();
+
+            await ShowDialog.ShowDialogAsync($"{entry.ProductQuantity} unidade(s) transferida(s) de {entry.ShelfName}.", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao transferir o produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+    }
+
+    #endregion
+}

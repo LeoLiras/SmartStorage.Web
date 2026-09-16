@@ -1,22 +1,31 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@using System.Security.Claims
+@inject NavigationManager nav
 
-<MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
+<MudThemeProvider Theme="@_theme" IsDarkMode="true" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+<SessionExpiredWatcher />
 <MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Smart Storage</MudText>
+    <MudAppBar Elevation="0" Class="app-bar">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" aria-label="Abrir ou fechar o menu" OnClick="@((e) => DrawerToggle())" />
+        <span class="brand ml-2"><i class="brand-mark"></i>Smart Storage</span>
         <MudSpacer />
-        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+        <AuthorizeView>
+            <Authorized>
+                <CartIndicator />
+                <span class="app-user">@context.User.FindFirst("unique_name")?.Value · @context.User.FindFirst(ClaimTypes.Role)?.Value</span>
+            </Authorized>
+        </AuthorizeView>
     </MudAppBar>
-    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="0" Class="app-drawer">
         <NavMenu />
     </MudDrawer>
     <MudMainContent Class="pt-16 pa-4">
-        @Body
+        <div class="page-enter" @key="CurrentPath">
+            @Body
+        </div>
     </MudMainContent>
 </MudLayout>
 
@@ -28,9 +37,12 @@
 </div>
 
 @code {
+    private static readonly string[] Manrope = ["Manrope", "system-ui", "-apple-system", "Segoe UI", "sans-serif"];
+
     private bool _drawerOpen = true;
-    private bool _isDarkMode = true;
     private MudTheme _theme = null;
+
+    private string CurrentPath => new Uri(nav.Uri).AbsolutePath;
 
     protected override void OnInitialized()
     {
@@ -38,10 +50,22 @@
 
         _theme = new()
         {
-            PaletteLight = _lightPalette,
             PaletteDark = _darkPalette,
-            LayoutProperties = new LayoutProperties()
+            LayoutProperties = new LayoutProperties { DefaultBorderRadius = "8px" }
         };
+
+        var typography = _theme.Typography;
+        BaseTypography[] styles =
+        [
+            typography.Default, typography.H1, typography.H2, typography.H3, typography.H4, typography.H5, typography.H6,
+            typography.Subtitle1, typography.Subtitle2, typography.Body1, typography.Body2,
+            typography.Button, typography.Caption, typography.Overline
+        ];
+        foreach (var style in styles)
+            style.FontFamily = Manrope;
+
+        typography.Button.TextTransform = "none";
+        typography.Button.FontWeight = "700";
     }
 
     private void DrawerToggle()
@@ -49,61 +73,51 @@
         _drawerOpen = !_drawerOpen;
     }
 
-    private void DarkModeToggle()
-    {
-        _isDarkMode = !_isDarkMode;
-    }
-
-    private readonly PaletteLight _lightPalette = new()
-    {
-        Black = "#110e2d",
-        Primary = "#080808",
-        AppbarText = "#424242",
-        AppbarBackground = "rgba(255,255,255,0.8)",
-        ActionDefault = "#8438e0",
-        DrawerBackground = "#ffffff",
-        DrawerText = "#080808",
-        GrayLight = "#e8e8e8",
-        GrayLighter = "#f9f9f9",
-        TextPrimary = "#080808",
-        HoverOpacity = 0.5,
-    };
-
     private readonly PaletteDark _darkPalette = new()
     {
-        Primary = "#f5f5f7",
-        Surface = "#1e1e2d",
-        Background = "#1a1a27",
-        BackgroundGray = "#151521",
-        AppbarText = "#ffffff",
-        AppbarBackground = "rgba(26,26,39,0.8)",
-        DrawerBackground = "#1a1a27",
-        ActionDefault = "#2296f5",
-        ActionDisabled = "#9999994d",
-        ActionDisabledBackground = "#605f6d4d",
-        TextPrimary = "#ffffff",
-        TextSecondary = "#92929f",
-        TextDisabled = "#ffffff33",
-        DrawerIcon = "#2296f5",
-        DrawerText = "#2296f5",
-        GrayLight = "#2a2833",
-        GrayLighter = "#1e1e2d",
-        Info = "#4a86ff",
-        Success = "#3dcb6c",
-        Warning = "#ffb545",
-        Error = "#ff3f5f",
-        LinesDefault = "#33323e",
-        TableLines = "#33323e",
-        Divider = "#292838",
-        OverlayLight = "#1e1e2d80",
-        HoverOpacity = 0.5,
-    };
-
-    public string DarkLightModeButtonIcon => _isDarkMode switch
-    {
-        true => Icons.Material.Rounded.AutoMode,
-        false => Icons.Material.Outlined.DarkMode,
+        Black = "#07080F",
+        Dark = "#0C1224",
+        Primary = "#6D4AFF",
+        PrimaryContrastText = "#FFFFFF",
+        PrimaryDarken = "#5A37F0",
+        PrimaryLighten = "#A78BFF",
+        Secondary = "#A78BFF",
+        SecondaryContrastText = "#07080F",
+        Tertiary = "#6D4AFF",
+        TertiaryContrastText = "#FFFFFF",
+        Info = "#60A5FA",
+        InfoContrastText = "#07080F",
+        Success = "#34D399",
+        SuccessContrastText = "#07080F",
+        Warning = "#FBBF24",
+        WarningContrastText = "#07080F",
+        Error = "#F87171",
+        ErrorContrastText = "#07080F",
+        Background = "#07080F",
+        BackgroundGray = "#0C1224",
+        Surface = "#121A33",
+        AppbarBackground = "rgba(12,18,36,0.86)",
+        AppbarText = "#E7E9F5",
+        DrawerBackground = "#0C1224",
+        DrawerText = "#9BA3C4",
+        DrawerIcon = "#A78BFF",
+        ActionDefault = "#A78BFF",
+        ActionDisabled = "rgba(155,163,196,0.38)",
+        ActionDisabledBackground = "rgba(36,48,86,0.6)",
+        TextPrimary = "#E7E9F5",
+        TextSecondary = "#9BA3C4",
+        TextDisabled = "rgba(231,233,245,0.38)",
+        LinesDefault = "#243056",
+        LinesInputs = "#5B6690",
+        TableLines = "#243056",
+        TableHover = "#1A2446",
+        TableStriped = "rgba(26,36,70,0.5)",
+        Divider = "#243056",
+        DividerLight = "rgba(36,48,86,0.6)",
+        Skeleton = "#1A2446",
+        GrayLight = "#1A2446",
+        GrayLighter = "#121A33",
+        OverlayDark = "rgba(7,8,15,0.7)",
+        OverlayLight = "rgba(18,26,51,0.5)",
     };
 }
-
-

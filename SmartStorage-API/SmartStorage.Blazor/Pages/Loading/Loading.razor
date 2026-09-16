@@ -1,20 +1,64 @@
-﻿<MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-3">
-    <div style="display: flex; gap: 8px;">
-        <MudImage Fluid="true" Width="50" Height="100" Src="images/loading.gif" Alt="Swedish Farm House" Class="rounded-lg" />
+<div class="app-skeleton mt-3" role="status" aria-live="polite" aria-busy="true">
+    <MudText Typo="Typo.body2" Class="app-skeleton-label">@(string.IsNullOrWhiteSpace(Message) ? "Carregando..." : Message)</MudText>
 
-        @if(string.IsNullOrWhiteSpace(Message))
-        {
-            <MudText>Carregando...</MudText>
-        }
-        else
-        {
-            <MudText>@Message</MudText>
-        } 
-    </div>
-</MudAlert>
+    @switch (Shape)
+    {
+        case ELoadingShape.Table:
+            <div class="app-skeleton-table">
+                <div class="sk sk-head"></div>
+                @for (var row = 0; row < 5; row++)
+                {
+                    <div class="app-skeleton-row">
+                        <div class="sk"></div>
+                        <div class="sk"></div>
+                        <div class="sk"></div>
+                        <div class="sk"></div>
+                    </div>
+                }
+            </div>
+            break;
+
+        case ELoadingShape.Cards:
+            <div class="app-skeleton-cards">
+                @for (var card = 0; card < 4; card++)
+                {
+                    <div class="app-skeleton-card">
+                        <div class="sk sk-thumb"></div>
+                        <div class="sk sk-w80"></div>
+                        <div class="sk sk-w55"></div>
+                    </div>
+                }
+            </div>
+            break;
+
+        case ELoadingShape.Form:
+            <div class="app-skeleton-form">
+                @for (var field = 0; field < 3; field++)
+                {
+                    <div class="app-skeleton-field">
+                        <div class="sk sk-w30"></div>
+                        <div class="sk sk-input"></div>
+                    </div>
+                }
+                <div class="sk sk-button"></div>
+            </div>
+            break;
+
+        default:
+            <div class="app-skeleton-lines">
+                <div class="sk sk-title"></div>
+                <div class="sk sk-w90"></div>
+                <div class="sk sk-w75"></div>
+                <div class="sk sk-w60"></div>
+            </div>
+            break;
+    }
+</div>
 
 @code{
     [Parameter]
     public string Message { get; set; }
-}
 
+    [Parameter]
+    public ELoadingShape Shape { get; set; } = ELoadingShape.Lines;
+}

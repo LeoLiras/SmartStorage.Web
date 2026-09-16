@@ -38,7 +38,7 @@ namespace SmartStorage.ReportsAPI.Controllers
                 return File(
                     report,
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
+                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.xlsx"
                 );
             }
             catch (Exception ex)
@@ -56,7 +56,7 @@ namespace SmartStorage.ReportsAPI.Controllers
                 return File(
                     await _reportRepository.GeneratePdf(),
                     "application/pdf",
-                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}"
+                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.pdf"
                 );
             }
             catch (Exception ex)

@@ -73,6 +73,9 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
 
         public void DeleteUser(int userId)
         {
+            if (_repository.HasStockMovements(userId))
+                throw new Exception("Não é possível excluir o usuário pois há movimentações de estoque registradas por ele.");
+
             _repository.Delete(userId);
         }
     }

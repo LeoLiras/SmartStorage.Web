@@ -43,6 +43,27 @@ namespace SmartStorage.EmailAPI.Repository
                 $"Por favor, realize a conferência.\n\n" +
                 $"Atenciosamente.";
 
+            await SendAsync(subject, body);
+        }
+
+        public async Task LowStockEmail(LowStockAlertVO alert)
+        {
+            var subject = $"Estoque abaixo do mínimo: {alert.ProductName}";
+
+            var body = "Prezado, o estoque de um produto ficou abaixo do mínimo definido:\n\n" +
+                $"Produto: {alert.ProductName}\n" +
+                $"Estoque total: {alert.TotalQntd}\n" +
+                $"Depósito: {alert.WarehouseQntd} · Prateleiras: {alert.ShelvesQntd}\n" +
+                $"Estoque mínimo: {alert.MinimumStock}\n" +
+                $"Movimentação que disparou o aviso: {alert.Origin}\n\n" +
+                $"Por favor, providencie a reposição.\n\n" +
+                $"Atenciosamente.";
+
+            await SendAsync(subject, body);
+        }
+
+        private async Task SendAsync(string subject, string body)
+        {
             var message = new MimeMessage();
 
             message.From.Add(new MailboxAddress("SmartStorage", Username));

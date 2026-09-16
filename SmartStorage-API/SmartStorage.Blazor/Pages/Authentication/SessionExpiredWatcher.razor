@@ -1,0 +1,30 @@
+@using SmartStorage.Blazor.Authentication
+@implements IDisposable
+
+@inject SessionExpiration session
+@inject IAuthService auth
+@inject ShowDialog ShowDialog
+
+@code {
+
+    #region Events
+
+    protected override void OnInitialized()
+    {
+        session.Expired += OnSessionExpired;
+    }
+
+    private Task OnSessionExpired() => InvokeAsync(async () =>
+    {
+        await ShowDialog.ShowDialogAsync("Sua sessão expirou.\nFaça login novamente para continuar.", "Sessão expirada", state: EDialogStates.Warning, ignoreExpiredSession: true);
+
+        await auth.Logout();
+    });
+
+    public void Dispose()
+    {
+        session.Expired -= OnSessionExpired;
+    }
+
+    #endregion
+}

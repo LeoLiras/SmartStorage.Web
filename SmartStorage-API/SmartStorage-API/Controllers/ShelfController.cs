@@ -56,9 +56,23 @@ namespace SmartStorage_API.Controllers
 
         [HttpGet("allocation")]
         [TypeFilter(typeof(HyperMediaFilter))]
-        public ActionResult<List<ShelfVO>> GetProductsInShelves()
+        public ActionResult<List<ShelfVO>> GetProductsInShelves([FromQuery] int? page, [FromQuery] int pageSize = 10, [FromQuery] string search = null)
         {
-            return Ok(_shelfService.FindAllProductsInShelves());
+            if (page is null)
+                return Ok(_shelfService.FindAllProductsInShelves());
+
+            try
+            {
+                var (items, total) = _shelfService.FindProductsInShelvesPage(page.Value, pageSize, search);
+
+                Response.Headers[Pagination.TotalCountHeader] = total.ToString();
+
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("allocation/{enterId}")]
@@ -107,7 +121,7 @@ namespace SmartStorage_API.Controllers
                 if (string.IsNullOrWhiteSpace(shelf.Name))
                     throw new Exception("O campo Nome da Prateleira é obrigatório.");
 
-                return Ok(_shelfService.UpdateShelf(shelfId, shelf.Name));
+                return Ok(_shelfService.UpdateShelf(shelfId, shelf));
             }
             catch (Exception ex)
             {
@@ -158,6 +172,23 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpPost("allocation/batch")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult AllocateProductsToShelves([FromBody] AllocationBatchVO batch)
+        {
+            try
+            {
+                if (batch is null)
+                    throw new Exception("Os dados do lote são obrigatórios.");
+
+                return Ok(_shelfService.AllocateProductsToShelves(batch.Items));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPut("allocation/{enterId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UndoAllocate(int enterId)
@@ -168,6 +199,26 @@ namespace SmartStorage_API.Controllers
                     throw new Exception("O campo ID da entrada é obrigatório.");
 
                 return Ok(_shelfService.UndoAllocate(enterId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("allocation/{enterId}/transfer")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult TransferProductToShelf(int enterId, [FromBody] ShelfTransferVO transfer)
+        {
+            try
+            {
+                if (enterId.Equals(0))
+                    throw new Exception("O campo ID da entrada é obrigatório.");
+
+                if (transfer is null)
+                    throw new Exception("Os dados da transferência são obrigatórios.");
+
+                return Ok(_shelfService.TransferProductToShelf(enterId, transfer.ShelfId));
             }
             catch (Exception ex)
             {

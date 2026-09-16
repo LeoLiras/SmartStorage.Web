@@ -7,5 +7,7 @@ namespace SmartStorage.AuthenticationAPI.Repositories
 
     {
         User FindByUsername(string username);
+
+        bool HasStockMovements(long userId);
     }
 }

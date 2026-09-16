@@ -5,5 +5,7 @@ namespace SmartStorage.EmailAPI.Repository.Interfaces
     public interface IEmailRepository
     {
         Task NewProductEmail(ProductVO product);
+
+        Task LowStockEmail(LowStockAlertVO alert);
     }
 }

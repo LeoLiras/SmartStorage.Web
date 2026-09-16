@@ -24,6 +24,12 @@ public partial class Product
     [Required(ErrorMessage = "A quantidade do produto é obrigatória.")]
     public int ProQntd { get; set; }
 
+    public int ProMinimumStock { get; set; }
+
+    public decimal? ProVolume { get; set; }
+
+    public decimal? ProPrecoInicial { get; set; }
+
     public int? ProEmpId { get; set; }
 
     public byte[] ProImage { get; set; }

@@ -47,7 +47,7 @@ namespace SmartStorage_API.RabbitMQSender
             {
                 WriteIndented = true,
             };
-            var json = JsonSerializer.Serialize<ProductVO>((ProductVO)message, options);
+            var json = JsonSerializer.Serialize(message, message.GetType(), options);
             var body = Encoding.UTF8.GetBytes(json);
             return body;
         }

@@ -10,46 +10,66 @@
 @inject NavigationManager nav
 @inject AuthenticationStateProvider authProvider
 
+<div class="app-toolbar mt-2">
+    <MudText Typo="Typo.h5" Class="app-page-title">Conta</MudText>
+    @if (!loading && app.User.Id != 0)
+    {
+        <MudButton OnClick="Logout" Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout">Sair</MudButton>
+    }
+</div>
+
 @if(loading || app.User.Id == 0)
 {
-    <Loading Message="Carregando..."></Loading>
+    <Loading Message="Carregando..." Shape="ELoadingShape.Form"></Loading>
 }
 else
 {
-    <MudButton OnClick="Logout" Variant="Variant.Filled" Color="Color.Secondary" Class="mt-3">Logout</MudButton>
     <EditUser UserId="app.User.Id"></EditUser>
-    
+
     @if (isAdm)
     {
-        <MudGrid Justify="Justify.Center">
-            <MudItem xs="12" sm="12" xl="12">
-                <div style="display: flex; flex-wrap: wrap;">
-                    @if (PagedUsers is not null)
-                    {
-                        foreach (var user in PagedUsers)
-                        {
-                            <div style="margin: 10px;">
-                                <MudCard Class="card-hover" Style="width: 250px; height: 230px;">
-                                    <MudCardContent>
-                                        <MudText Typo="Typo.h5">@user.FullName</MudText>
-                                        <MudText Typo="Typo.body2">@user.Username</MudText>
-                                        <MudText Typo="Typo.body2">Tipo: @(user.UseType == 0 ? "Usuário" : "Administrador")</MudText>
-                                    </MudCardContent>
-                                    <MudCardActions>
-                                        <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="() => Edit(user.Id)">Editar</MudButton>
-                                        <MudButton Class="m-2" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(user.Id)">Excluír</MudButton>
-                                    </MudCardActions>
-                                </MudCard>
+        <MudText Typo="Typo.h6" Class="app-page-title mt-8">Usuários</MudText>
+
+        @if (usersList.Count == 0)
+        {
+            <MudText Class="app-muted mt-2">Nenhum outro usuário cadastrado.</MudText>
+        }
+        else
+        {
+            <div class="app-card-grid mt-4">
+                @foreach (var user in PagedUsers)
+                {
+                    <article class="app-product-card app-user-card">
+                        <div class="app-card-body">
+                            <MudText Typo="Typo.subtitle1" Class="app-card-title">@user.FullName</MudText>
+                            <div class="app-card-stock">
+                                <span class="num">@user.Username</span>
+                                @if (user.UseType == 0)
+                                {
+                                    <span class="app-chip app-chip-neutral">Usuário</span>
+                                }
+                                else
+                                {
+                                    <span class="app-chip app-chip-primary">Administrador</span>
+                                }
                             </div>
-                        }
-                    }
+                        </div>
+                        <div class="app-card-actions">
+                            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Secondary" OnClick="() => Edit(user.Id)">Editar</MudButton>
+                            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(user.Id)" aria-label="@($"Excluir {user.FullName}")">Excluir</MudButton>
+                        </div>
+                    </article>
+                }
+            </div>
+
+            @if (usersList.Count > pageSize)
+            {
+                <div class="d-flex justify-center mt-6">
+                    <MudPagination Color="Color.Primary" Count="(int)Math.Ceiling((double)usersList.Count / (double)pageSize)" Selected="currentPage" SelectedChanged="ChangePage" />
                 </div>
-            </MudItem>
-            <MudItem>
-                <MudPagination Color="Color.Info" Count="(int)Math.Ceiling((double)usersList.Count / (double)pageSize)" SelectedChanged="ChangePage" Class="mt-4" />
-            </MudItem>
-        </MudGrid>
-    } 
+            }
+        }
+    }
 }
 
 @code {
@@ -117,7 +137,7 @@ else
         {
             loading = false;
 
-            await ShowDialog.ShowDialogAsync($"Falha atualizando o usuário\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+            await ShowDialog.ShowDialogAsync($"Falha deletando o usuário\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
     }
 

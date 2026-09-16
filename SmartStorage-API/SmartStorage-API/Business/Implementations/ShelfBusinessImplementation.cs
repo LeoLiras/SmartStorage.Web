@@ -1,5 +1,7 @@
-﻿using SmartStorage_API.Data.Converter.Implementations;
+﻿using SmartStorage.Shared.Enum;
+using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
+using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 
@@ -15,15 +17,21 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly EnterConverter _converterEnter;
 
+        private readonly IProductStockMovementRepository _movementRepository;
+
+        private readonly IStockAlertBusiness _stockAlert;
+
         #endregion
 
         #region Construtores
 
-        public ShelfBusinessImplementation(SmartStorageContext context)
+        public ShelfBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository, IStockAlertBusiness stockAlert)
         {
             _context = context;
-            _converterShelf = new ShelfConverter();
+            _converterShelf = new ShelfConverter(_context);
             _converterEnter = new EnterConverter(_context);
+            _movementRepository = movementRepository;
+            _stockAlert = stockAlert;
         }
 
         #endregion
@@ -50,6 +58,32 @@ namespace SmartStorage_API.Service.Implementations
             return _converterEnter.Parse(_context.Enters.OrderBy(e => e.EntId).ToList());
         }
 
+        public (List<EnterVO> Items, int Total) FindProductsInShelvesPage(int page, int pageSize, string search)
+        {
+            if (page < 1)
+                throw new Exception("A página deve ser maior que zero.");
+
+            if (pageSize < 1 || pageSize > Pagination.MaxPageSize)
+                throw new Exception($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
+
+            var query = _context.Enters.Where(e => e.EntQntd > 0);
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(e => e.Product.ProName.Contains(search.Trim()));
+
+            var total = query.Count();
+
+            var enters = query
+                .OrderBy(e => e.Shelf.SheName)
+                .ThenBy(e => e.Product.ProName)
+                .ThenBy(e => e.EntId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (_converterEnter.Parse(enters), total);
+        }
+
         public EnterVO FindProductInShelfById(int enterId)
         {
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
@@ -62,10 +96,13 @@ namespace SmartStorage_API.Service.Implementations
 
         public ShelfVO CreateNewShelf(ShelfVO newShelf)
         {
+            ValidateShelfVolume(newShelf.Volume);
+
             var shelf = new Shelf
             {
                 SheName = newShelf.Name,
                 SheDataRegister = DateTime.UtcNow,
+                SheVolume = newShelf.Volume,
             };
 
             _context.Add(shelf);
@@ -74,14 +111,18 @@ namespace SmartStorage_API.Service.Implementations
             return _converterShelf.Parse(shelf);
         }
 
-        public ShelfVO UpdateShelf(int shelfId, string shelfName)
+        public ShelfVO UpdateShelf(int shelfId, ShelfVO updatedShelf)
         {
             var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId);
 
             if (shelf == null)
                 throw new Exception("Prateleira não encontrada com o ID informado");
 
-            shelf.SheName = shelfName;
+            ValidateShelfVolume(updatedShelf.Volume);
+
+            shelf.SheName = updatedShelf.Name;
+
+            shelf.SheVolume = updatedShelf.Volume;
 
             _context.SaveChanges();
 
@@ -108,49 +149,125 @@ namespace SmartStorage_API.Service.Implementations
 
         public EnterVO AllocateProductToShelf(EnterVO newAllocation)
         {
-            var product = _context.Products.Where(p => p.ProId == newAllocation.ProductId).FirstOrDefault();
+            EnsureSingleShelf(newAllocation.ProductId, newAllocation.ShelfId);
 
-            if (product is null)
-                throw new Exception("Produto não encontrado na base de dados");
+            EnsureShelfFits(newAllocation.ProductId, newAllocation.ShelfId, newAllocation.ProductQuantity);
 
-            if (product.ProQntd < newAllocation.ProductQuantity)
-                throw new Exception("Quantidade indisponível para alocação e venda.");
+            var totalBefore = _movementRepository.FindProductTotalBalance(newAllocation.ProductId);
 
-            product.ProQntd -= newAllocation.ProductQuantity;
+            _movementRepository.TransferProductBetweenLocations(
+                newAllocation.ProductId,
+                fromShelfId: null,
+                toShelfId: newAllocation.ShelfId,
+                quantity: newAllocation.ProductQuantity,
+                shelfPrice: newAllocation.ProductPrice);
 
-            var enter = _context.Enters.Where(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId).FirstOrDefault();
+            _stockAlert.NotifyIfBelowMinimum(newAllocation.ProductId, totalBefore, "Alocação");
 
-            if (enter is null)
+            var enter = _context.Enters.First(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId);
+
+            return _converterEnter.Parse(enter);
+        }
+
+        public List<EnterVO> AllocateProductsToShelves(List<AllocationBatchItemVO> items)
+        {
+            if (items is null || items.Count == 0)
+                throw new Exception("Selecione ao menos um produto para alocar.");
+
+            var productIds = items.Select(i => i.ProductId).Distinct().ToList();
+
+            var shelfIds = items.Select(i => i.ShelfId).Distinct().ToList();
+
+            var products = _context.Products
+                .Where(p => productIds.Contains(p.ProId))
+                .ToDictionary(p => p.ProId);
+
+            var shelves = _context.Shelves
+                .Where(s => shelfIds.Contains(s.SheId))
+                .ToDictionary(s => s.SheId);
+
+            var pendingVolumeByShelf = new Dictionary<int, decimal>();
+
+            var allocatedProducts = new HashSet<int>();
+
+            for (var index = 0; index < items.Count; index++)
             {
-                var shelf = _context.Shelves.Where(s => s.SheId == newAllocation.ShelfId).FirstOrDefault();
+                var item = items[index];
 
-                if (shelf is null)
-                    throw new Exception("Prateleira não encontrada na base de dados");
+                products.TryGetValue(item.ProductId, out var product);
 
-                var newEnterProduct = new Enter
+                shelves.TryGetValue(item.ShelfId, out var shelf);
+
+                var itemName = product is null
+                    ? $"Item {index + 1}"
+                    : shelf is null
+                        ? $"Item {index + 1} ({product.ProName})"
+                        : $"Item {index + 1} ({product.ProName} na {shelf.SheName})";
+
+                try
                 {
-                    EntProId = (int)product.ProId,
-                    EntSheId = (int)shelf.SheId,
-                    EntQntd = newAllocation.ProductQuantity,
-                    EntDateEnter = newAllocation.DateEnter,
-                    EntPrice = newAllocation.ProductPrice
-                };
+                    if (product is null)
+                        throw new Exception("produto não encontrado com o ID informado.");
 
-                _context.Enters.Add(newEnterProduct);
+                    if (shelf is null)
+                        throw new Exception("prateleira não encontrada com o ID informado.");
 
-                _context.SaveChanges();
+                    if (!allocatedProducts.Add(product.ProId))
+                        throw new Exception("o produto aparece mais de uma vez no lote.");
 
-                return _converterEnter.Parse(newEnterProduct);
+                    if (item.Qntd <= 0)
+                        throw new Exception("a quantidade deve ser maior que zero.");
+
+                    if (item.Price <= 0)
+                        throw new Exception("o preço deve ser maior que zero.");
+
+                    if (item.Qntd > product.ProQntd)
+                        throw new Exception($"saldo insuficiente no depósito: há {product.ProQntd} e o lote pede {item.Qntd}.");
+
+                    EnsureSingleShelf(product.ProId, shelf.SheId);
+
+                    var pendingVolume = pendingVolumeByShelf.GetValueOrDefault(shelf.SheId);
+
+                    EnsureShelfFits(product.ProId, shelf.SheId, item.Qntd, pendingVolume);
+
+                    pendingVolumeByShelf[shelf.SheId] = pendingVolume + item.Qntd * product.ProVolume.Value;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"{itemName}: {ex.Message}");
+                }
             }
-            else
+
+            var totalsBefore = productIds.ToDictionary(
+                productId => productId,
+                productId => _movementRepository.FindProductTotalBalance(productId));
+
+            var movementDate = DateTime.Now;
+
+            using (var transaction = _context.Database.BeginTransaction())
             {
-                enter.EntQntd += newAllocation.ProductQuantity;
-                enter.EntPrice = newAllocation.ProductPrice;
+                foreach (var item in items)
+                    _movementRepository.TransferProductBetweenLocations(
+                        item.ProductId,
+                        fromShelfId: null,
+                        toShelfId: item.ShelfId,
+                        quantity: item.Qntd,
+                        shelfPrice: item.Price,
+                        date: movementDate);
 
-                _context.SaveChanges();
-
-                return _converterEnter.Parse(enter);
+                transaction.Commit();
             }
+
+            foreach (var (productId, totalBefore) in totalsBefore)
+                _stockAlert.NotifyIfBelowMinimum(productId, totalBefore, "Alocação");
+
+            var enters = _context.Enters
+                .Where(e => productIds.Contains(e.EntProId) && shelfIds.Contains(e.EntSheId))
+                .ToList();
+
+            return _converterEnter.Parse(items
+                .Select(i => enters.First(e => e.EntProId == i.ProductId && e.EntSheId == i.ShelfId))
+                .ToList());
         }
 
         public EnterVO UndoAllocate(int enterId)
@@ -160,17 +277,93 @@ namespace SmartStorage_API.Service.Implementations
             if (enter is null)
                 throw new Exception("Entrada não encontrada com o ID informado");
 
-            var product = _context.Products.FirstOrDefault(p => p.ProId.Equals(enter.EntProId));
-
-            if (product is null)
-                throw new Exception("Produto não encontrado com o ID da entrada informada");
-
-            product.ProQntd += enter.EntQntd;
-            enter.EntQntd = 0;
-
-            _context.SaveChanges();
+            if (enter.EntQntd > 0)
+                _movementRepository.TransferProductBetweenLocations(
+                    enter.EntProId,
+                    fromShelfId: enter.EntSheId,
+                    toShelfId: null,
+                    quantity: enter.EntQntd);
 
             return _converterEnter.Parse(enter);
+        }
+
+        public EnterVO TransferProductToShelf(int enterId, int toShelfId)
+        {
+            var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
+
+            if (enter is null)
+                throw new Exception("Entrada não encontrada com o ID informado");
+
+            if (enter.EntQntd <= 0)
+                throw new Exception("Não há saldo nesta prateleira para transferir.");
+
+            if (!_context.Shelves.Any(s => s.SheId == toShelfId))
+                throw new Exception("Prateleira de destino não encontrada.");
+
+            if (toShelfId != enter.EntSheId)
+                EnsureShelfFits(enter.EntProId, toShelfId, enter.EntQntd);
+
+            var destinationExists = _context.Enters.Any(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
+
+            _movementRepository.TransferProductBetweenLocations(
+                enter.EntProId,
+                fromShelfId: enter.EntSheId,
+                toShelfId: toShelfId,
+                quantity: enter.EntQntd,
+                type: TipoMovimentacao.Transferencia,
+                shelfPrice: destinationExists ? null : enter.EntPrice);
+
+            var destination = _context.Enters.First(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
+
+            return _converterEnter.Parse(destination);
+        }
+
+        private void EnsureSingleShelf(int productId, int shelfId)
+        {
+            var otherShelf = _context.Enters
+                .Where(e => e.EntProId == productId && e.EntSheId != shelfId && e.EntQntd > 0)
+                .Select(e => e.Shelf.SheName)
+                .FirstOrDefault();
+
+            if (otherShelf is not null)
+                throw new Exception($"O produto já está alocado na {otherShelf}. Um produto só pode ficar em uma prateleira: aloque nela ou transfira o saldo antes.");
+        }
+
+        private void EnsureShelfFits(int productId, int shelfId, int quantity, decimal pendingVolume = 0)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.ProId == productId)
+                ?? throw new Exception("Produto não encontrado na base de dados");
+
+            if (product.ProVolume is null)
+                throw new Exception("Cadastre o volume do produto antes de alocá-lo em uma prateleira.");
+
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId)
+                ?? throw new Exception("Prateleira não encontrada na base de dados");
+
+            if (shelf.SheVolume is null)
+                throw new Exception($"Cadastre o volume da {shelf.SheName} antes de alocar produtos nela.");
+
+            var usable = shelf.SheVolume.Value * ShelfVO.UsableFraction;
+
+            var free = usable - _converterShelf.UsedVolumeOf(shelfId) - pendingVolume;
+
+            var needed = quantity * product.ProVolume.Value;
+
+            var batchNote = pendingVolume > 0 ? $", já descontados {Liters(pendingVolume)} L de outros itens do lote" : string.Empty;
+
+            if (needed > free)
+                throw new Exception($"A {shelf.SheName} não comporta a alocação: são necessários {Liters(needed)} L e restam {Liters(Math.Max(free, 0))} L dos {Liters(usable)} L úteis (90% do volume{batchNote}).");
+        }
+
+        private static void ValidateShelfVolume(decimal? volume)
+        {
+            if (volume <= 0)
+                throw new Exception("O volume da prateleira deve ser maior que zero.");
+        }
+
+        private static string Liters(decimal value)
+        {
+            return value.ToString("0.###", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
         }
 
         #endregion

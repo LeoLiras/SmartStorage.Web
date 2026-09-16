@@ -1,0 +1,147 @@
+@page "/products/sales/cart"
+@attribute [Authorize]
+
+@inject ApiExtensions api
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+@inject SaleCart cart
+
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Carrinho</MudText>
+
+@if (loading)
+{
+    <Loading Message="Conferindo o carrinho..." Shape="ELoadingShape.Form"></Loading>
+}
+else if (cart.Count == 0)
+{
+    <MudAlert Class="mt-4" Severity="Severity.Info" Variant="Variant.Outlined">O carrinho está vazio. Adicione produtos em <MudLink Href="@app.productsInShelvesPage">Produtos nas prateleiras</MudLink>.</MudAlert>
+}
+else
+{
+    <MudGrid Spacing="4" Class="mt-1">
+        <MudItem xs="12" md="8">
+            <MudTable T="SaleCartItem" Items="cart.Items" Class="app-table" Elevation="0" Hover="true" Bordered="false" Striped="false">
+                <HeaderContent>
+                    <MudTh>Produto</MudTh>
+                    <MudTh>Prateleira</MudTh>
+                    <MudTh Class="app-cell-number">Preço</MudTh>
+                    <MudTh Class="app-cell-number">Quantidade</MudTh>
+                    <MudTh Class="app-cell-number">Subtotal</MudTh>
+                    <MudTh><span class="app-visually-hidden">Ações</span></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Produto">@context.ProductName</MudTd>
+                    <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
+                    <MudTd DataLabel="Preço" Class="app-cell-number num">@context.Price.ToString("N2", PtBr)</MudTd>
+                    <MudTd DataLabel="Quantidade" Class="app-cell-number">
+                        <MudNumericField T="int" Value="context.Qntd" ValueChanged="@(q => cart.SetQuantityAsync(context.EnterId, q))" Min="1" Error="context.ExceedsAvailable" ErrorText="@($"Há {context.Available} na prateleira")" HelperText="@($"Disponível: {context.Available}")" Variant="Variant.Outlined" Margin="Margin.Dense" aria-label="@($"Quantidade de {context.ProductName}")" />
+                    </MudTd>
+                    <MudTd DataLabel="Subtotal" Class="app-cell-number num">@context.Subtotal.ToString("N2", PtBr)</MudTd>
+                    <MudTd DataLabel="Ações" Class="app-cell-actions">
+                        <MudTooltip Text="Remover do carrinho"><MudIconButton Icon="@Icons.Material.Filled.RemoveShoppingCart" Color="Color.Warning" aria-label="@($"Remover {context.ProductName} do carrinho")" OnClick="@(() => cart.RemoveAsync(context.EnterId))"></MudIconButton></MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <section class="app-panel">
+                <MudText Typo="Typo.subtitle1" Class="app-panel-title">Resumo</MudText>
+                <MudDatePicker Label="Data da venda" @bind-Date="dateSale" Variant="Variant.Outlined" Class="mb-3" />
+                <dl class="app-summary">
+                    <div><dt>Itens</dt><dd class="num">@cart.Count</dd></div>
+                    <div><dt>Unidades</dt><dd class="num">@cart.Units</dd></div>
+                    <div class="app-summary-total"><dt>Total geral</dt><dd class="num">@cart.Total.ToString("C", PtBr)</dd></div>
+                </dl>
+                @if (cart.Items.Any(i => i.ExceedsAvailable))
+                {
+                    <MudAlert Class="mt-3" Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">Há item acima do saldo atual da prateleira. Ajuste a quantidade ou remova o item.</MudAlert>
+                }
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PointOfSale" Disabled="@(saving || !cart.CanCheckout)" OnClick="Checkout">Registrar vendas</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Warning" StartIcon="@Icons.Material.Filled.DeleteSweep" Disabled="saving" OnClick="Clear">Limpar carrinho</MudButton>
+                </div>
+            </section>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+
+    #region Properties
+
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
+
+    private DateTime? dateSale = DateTime.Now;
+
+    private bool loading = true;
+
+    private bool saving = false;
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnInitializedAsync()
+    {
+        await cart.LoadAsync();
+
+        if (cart.Count > 0)
+            await RefreshAvailability();
+
+        loading = false;
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task RefreshAvailability()
+    {
+        try
+        {
+            await cart.RefreshAsync(await api.Get<EnterVO>());
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao conferir o saldo das prateleiras.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+    }
+
+    private async Task Checkout()
+    {
+        try
+        {
+            saving = true;
+
+            var sales = await api.CreateSales(cart.ToBatch(dateSale ?? DateTime.Now));
+
+            await cart.ClearAsync();
+
+            app.ProductEntries = new();
+            app.Sales = new();
+
+            await ShowDialog.ShowDialogAsync($"{sales.Count} venda(s) registrada(s) com sucesso.", "Sucesso", app.productsSalesPage, EDialogStates.Success);
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Nenhuma venda foi registrada.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+
+            await RefreshAvailability();
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task Clear()
+    {
+        var confirmation = await ShowDialog.ShowDialogAsync("Tem certeza que deseja limpar o carrinho? Os itens serão removidos sem registrar vendas.", "Confirmação", state: EDialogStates.Warning, showCancel: true, showYes: true);
+
+        if (confirmation)
+            await cart.ClearAsync();
+    }
+
+    #endregion
+}

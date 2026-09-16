@@ -142,10 +142,10 @@ Cerca de 20 segundos depois, o sistema está no ar em **http://localhost:5000**.
 
 As imagens de todos os serviços estão publicadas em [hub.docker.com/u/lelep0](https://hub.docker.com/u/lelep0), então o `up` acima baixa em vez de buildar. Cada imagem tem a tag `latest` e uma tag com o hash do commit que a gerou — para fixar uma versão, basta apontar `IMAGE_TAG` no `.env` para esse hash. Para buildar localmente em vez de baixar, use `docker compose up -d --build`.
 
-| Acesso | |
-|---|---|
-| **Usuário** | `admin` |
-| **Senha** | `admin123` |
+| Acesso | Usuário | Senha |
+|---|---|---|
+| **Administrador** | `admin` | `admin123` |
+| **Usuário comum** | `usuario` | `usuario123` |
 
 O banco já sobe com colaboradores, prateleiras, produtos e suas alocações — dá para navegar por tudo sem cadastrar nada antes.
 

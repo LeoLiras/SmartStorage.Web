@@ -1,4 +1,5 @@
 ﻿using SmartStorage.Blazor.Services.IServices;
+using SmartStorage.Blazor.Utils.API;
 
 namespace SmartStorage.Blazor.Services
 {
@@ -28,7 +29,7 @@ namespace SmartStorage.Blazor.Services
             var response = await _client.GetAsync($"{BasePath}/export-excel");
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception(await response.Content.ReadAsStringAsync());
+                throw new ApiException((int)response.StatusCode, await response.Content.ReadAsStringAsync());
 
             return await response.Content.ReadAsByteArrayAsync();
         }
@@ -38,7 +39,7 @@ namespace SmartStorage.Blazor.Services
             var response = await _client.GetAsync($"{BasePath}/export-pdf");
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception(await response.Content.ReadAsStringAsync());
+                throw new ApiException((int)response.StatusCode, await response.Content.ReadAsStringAsync());
 
             return await response.Content.ReadAsByteArrayAsync();
         }

@@ -32,9 +32,23 @@ namespace SmartStorage_API.Controllers
 
         [HttpGet]
         [TypeFilter(typeof(HyperMediaFilter))]
-        public ActionResult<List<SaleVO>> FindAllSales()
+        public ActionResult<List<SaleVO>> FindAllSales([FromQuery] int? page, [FromQuery] int pageSize = 10, [FromQuery] string search = null)
         {
-            return Ok(_saleService.FindAllSales());
+            if (page is null)
+                return Ok(_saleService.FindAllSales());
+
+            try
+            {
+                var (items, total) = _saleService.FindSalesPage(page.Value, pageSize, search);
+
+                Response.Headers[Pagination.TotalCountHeader] = total.ToString();
+
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{saleId}")]
@@ -60,13 +74,33 @@ namespace SmartStorage_API.Controllers
         {
             try
             {
-                if (newSale.ProductId.Equals(0))
-                    throw new Exception("O campo ID do produto é obrigatório.");
+                if (newSale.IdEnter.Equals(0))
+                    throw new Exception("O campo ID da Entrada é obrigatório.");
 
                 if (newSale.Qntd.Equals(0))
                     throw new Exception("O campo Quantidade da Venda é obrigatório.");
 
                 return Ok(_saleService.CreateNewSale(newSale.IdEnter, newSale.Qntd, newSale.DateSale));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("batch")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult CreateNewSales([FromBody] SaleBatchVO newSales)
+        {
+            try
+            {
+                if (newSales is null)
+                    throw new Exception("Os dados do carrinho são obrigatórios.");
+
+                if (newSales.DateSale == default)
+                    throw new Exception("O campo Data da Venda é obrigatório.");
+
+                return Ok(_saleService.CreateNewSales(newSales.Items, newSales.DateSale));
             }
             catch (Exception ex)
             {
@@ -104,6 +138,26 @@ namespace SmartStorage_API.Controllers
                     throw new Exception("O campo ID da Venda é obrigatório.");
 
                 return Ok(_saleService.DeleteSale(saleId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{saleId}/return")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult ReturnSale(int saleId, [FromBody] SaleReturnVO saleReturn)
+        {
+            try
+            {
+                if (saleId.Equals(0))
+                    throw new Exception("O campo ID da Venda é obrigatório.");
+
+                if (saleReturn is null)
+                    throw new Exception("Os dados da devolução são obrigatórios.");
+
+                return Ok(_saleService.ReturnSale(saleId, saleReturn.Quantity));
             }
             catch (Exception ex)
             {

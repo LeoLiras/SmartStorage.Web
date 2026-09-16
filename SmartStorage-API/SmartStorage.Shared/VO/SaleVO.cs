@@ -12,7 +12,7 @@ namespace SmartStorage_Shared.VO
 
         public string ShelfName { get; set; }
 
-        public decimal EnterPrice { get; set; }
+        public decimal SalePrice { get; set; }
 
         public decimal SaleTotal { get; set; }
 
@@ -23,6 +23,10 @@ namespace SmartStorage_Shared.VO
 
         [Required(ErrorMessage = "A quantidade da venda é obrigatória.")]
         public int Qntd { get; set; }
+
+        public int ReturnedQntd { get; set; }
+
+        public int NetQntd => Qntd - ReturnedQntd;
 
         [Required(ErrorMessage = "A data da venda é obrigatória.")]
         public DateTime DateSale { get; set; }
@@ -39,6 +43,7 @@ namespace SmartStorage_Shared.VO
                 SalId = origin.Id,
                 SalEntId = origin.IdEnter,
                 SalQntd = origin.Qntd,
+                SalReturnedQntd = origin.ReturnedQntd,
                 SalDateSale = origin.DateSale
             };
         }
