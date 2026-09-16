@@ -122,7 +122,7 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
 
         var select = cut.FindComponent<MudSelect<int>>();
         cut.InvokeAsync(() => select.Instance.OpenMenu());
-        cut.WaitForAssertion(() => Assert.Contains(cut.FindAll(".mud-list-item"), i => i.TextContent.Contains(prateleira)));
+        cut.WaitForAssertion(() => Assert.Contains(cut.FindAll(".mud-list-item"), i => i.TextContent.Contains(prateleira)), TimeSpan.FromSeconds(5));
         cut.FindAll(".mud-list-item").First(i => i.TextContent.Contains(prateleira)).Click();
     }
 
@@ -134,7 +134,7 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
 
         Escolhe(cut, "Quantidade", "100", "Prateleira A1");
 
-        cut.WaitForAssertion(() => Assert.Contains("A Prateleira A1 não comporta a alocação: são necessários 250 L e restam 180 L.", cut.Markup));
+        cut.WaitForAssertion(() => Assert.Contains("A Prateleira A1 não comporta a alocação: são necessários 250 L e restam 180 L.", cut.Markup), TimeSpan.FromSeconds(5));
         Assert.Contains("Teto útil: 90% de", cut.Markup);
     }
 
@@ -146,7 +146,7 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
 
         Escolhe(cut, "Quantidade", "4", "Prateleira A1");
 
-        cut.WaitForAssertion(() => Assert.Contains("Teto útil: 90% de", cut.Markup));
+        cut.WaitForAssertion(() => Assert.Contains("Teto útil: 90% de", cut.Markup), TimeSpan.FromSeconds(5));
         Assert.DoesNotContain("não comporta", cut.Markup);
     }
 

@@ -95,6 +95,7 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
         Campo(cut, "Motivo").Change("Recontagem do inventario");
         cut.Find("form").Submit();
 
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Put));
         var escritas = api.Requisicoes.Where(r => r.Metodo != HttpMethod.Get).ToList();
         Assert.Single(escritas);
         Assert.Equal(HttpMethod.Put, escritas[0].Metodo);
@@ -113,6 +114,7 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
         Campo(cut, "Motivo").Change("Motivo digitado sem mudar o saldo");
         cut.Find("form").Submit();
 
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Put));
         var corpo = api.JsonDe(HttpMethod.Put, Caminho).RootElement;
         Assert.Equal(System.Text.Json.JsonValueKind.Null, corpo.GetProperty("stockAdjustment").ValueKind);
     }
@@ -127,6 +129,7 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
         Campo(cut, "Volume (L)").Change("3");
         cut.Find("form").Submit();
 
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Put));
         var corpo = api.JsonDe(HttpMethod.Put, Caminho).RootElement;
         Assert.Equal(12, corpo.GetProperty("minimumStock").GetInt32());
         Assert.Equal(3m, corpo.GetProperty("volume").GetDecimal());
@@ -142,7 +145,7 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
         Campo(cut, "Saldo real conferido").Change("20");
         cut.Find("form").Submit();
 
+        cut.WaitForAssertion(() => _dialogo.ReceivedWithAnyArgs().ShowAsync<Pages.Dialog.Dialog>(default, default, default));
         Assert.DoesNotContain(api.Requisicoes, r => r.Metodo != HttpMethod.Get);
-        _dialogo.ReceivedWithAnyArgs().ShowAsync<Pages.Dialog.Dialog>(default, default, default);
     }
 }

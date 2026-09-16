@@ -111,6 +111,7 @@ public class DevolucaoDeVendaTests : BunitContext, IAsyncLifetime
         Campo(cut, "Quantidade a devolver").Change("2");
         cut.Find("form").Submit();
 
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Post));
         var escritas = api.Requisicoes.Where(r => r.Metodo != HttpMethod.Get).ToList();
         Assert.Single(escritas);
         Assert.Equal($"api/storage/sales/v1/{Venda}/return", escritas[0].Caminho);

@@ -120,6 +120,7 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
         cut.InvokeAsync(() => destino.Instance.ValueChanged.InvokeAsync(2));
         cut.Find("form").Submit();
 
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Post));
         var escritas = api.Requisicoes.Where(r => r.Metodo != HttpMethod.Get).ToList();
         Assert.Single(escritas);
         Assert.Equal(CaminhoTransferencia, escritas[0].Caminho);

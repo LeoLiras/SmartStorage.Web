@@ -107,6 +107,8 @@ public class RegistroDeVendaTests : BunitContext, IAsyncLifetime
         cut.FindAll("input:not([disabled])").First().Change(quantidade.ToString());
 
         cut.Find("form").Submit();
+
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Post));
     }
 
     [Fact]

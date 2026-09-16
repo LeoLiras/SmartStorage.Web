@@ -121,7 +121,9 @@ public class CarrinhoDeVendasTests : BunitContext, IAsyncLifetime
         cut.WaitForElement("td button");
 
         cut.Find("button[aria-label='Adicionar Produto 1 ao carrinho']").Click();
+        cut.WaitForAssertion(() => Assert.Equal(1, Assert.Single(Carrinho.Items).Qntd));
         cut.Find("button[aria-label='Adicionar Produto 1 ao carrinho']").Click();
+        cut.WaitForAssertion(() => Assert.Equal(2, Assert.Single(Carrinho.Items).Qntd));
 
         var item = Assert.Single(Carrinho.Items);
         Assert.Equal(1, item.EnterId);
