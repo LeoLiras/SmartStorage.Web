@@ -1,7 +1,7 @@
 @page "/products/sales/cart"
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IShelfService shelfService
 @inject ISaleService saleService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
@@ -101,7 +101,7 @@ else
     {
         try
         {
-            await cart.RefreshAsync(await api.Get<EnterVO>());
+            await cart.RefreshAsync(await shelfService.GetAllocations());
         }
         catch (ApiException ex)
         {

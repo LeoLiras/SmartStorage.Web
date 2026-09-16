@@ -26,11 +26,6 @@ namespace SmartStorage.Blazor.Utils.API
         //Produtos em estoque
         private string productsEndpoint = "api/storage/products/v1";
 
-        private string shelvesEndpoint = "api/storage/shelf/v1";
-
-        //Produtos alocados para venda (nas prateleiras)
-        private string entersEndpoint = "api/storage/shelf/v1/allocation";
-
         private string employeesEndpoint = "api/storage/employees/v1";
 
         #endregion
@@ -229,44 +224,6 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
-        public async Task<EnterVO> TransferProductToShelf(int enterId, ShelfTransferVO transfer)
-        {
-            if (transfer == null)
-                throw new ArgumentNullException(nameof(transfer), message: "Os dados da transferência são obrigatórios.");
-
-            var response = await _http.PostAsJsonAsync($"{entersEndpoint}/{enterId}/transfer", transfer);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<EnterVO>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        public async Task<List<EnterVO>> AllocateProducts(AllocationBatchVO batch)
-        {
-            if (batch == null)
-                throw new ArgumentNullException(nameof(batch), message: "Os dados do lote são obrigatórios.");
-
-            var response = await _http.PostAsJsonAsync($"{entersEndpoint}/batch", batch);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<List<EnterVO>>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
         /// <summary>
         /// Requisição PUT para atualização de registros existentes
         /// </summary>
@@ -325,14 +282,8 @@ namespace SmartStorage.Blazor.Utils.API
             if (typeof(TVO) == typeof(EmployeeVO))
                 return employeesEndpoint;
 
-            else if (typeof(TVO) == typeof(EnterVO))
-                return entersEndpoint;
-
             else if (typeof(TVO) == typeof(ProductVO))
                 return productsEndpoint;
-
-            else if (typeof(TVO) == typeof(ShelfVO))
-                return shelvesEndpoint;
 
             else
                 return string.Empty;

@@ -82,6 +82,7 @@ public class CarrinhoDeVendasTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         Services.AddScoped<SaleCart>();
         Services.AddSingleton<ISaleService>(new SaleService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");

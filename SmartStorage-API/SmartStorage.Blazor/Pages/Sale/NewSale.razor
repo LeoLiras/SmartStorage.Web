@@ -3,6 +3,7 @@
 
 @inject ApiExtensions api
 @inject ISaleService saleService
+@inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -84,7 +85,7 @@ else
             if (entryId != 0)
             {
                 if (app.ActualEntry is null)
-                    entry = await api.GetById<EnterVO>(entryId);
+                    entry = await shelfService.GetAllocationById(entryId);
                 else
                     entry = app.ActualEntry;
 
@@ -128,7 +129,7 @@ else
 
             await saleService.CreateSale(newSale);
 
-            app.ProductEntries = await api.Get<EnterVO>();
+            app.ProductEntries = await shelfService.GetAllocations();
             app.Sales = await saleService.GetSales();
 
             await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);

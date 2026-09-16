@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @inject ApiExtensions api
+@inject IShelfService shelfService
 @inject VariablesExtensions app
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
@@ -66,7 +67,7 @@
     {
         try
         {
-            var (items, total) = await api.GetPage<EnterVO>(state.Page + 1, state.PageSize, searchString);
+            var (items, total) = await shelfService.GetAllocationsPage(state.Page + 1, state.PageSize, searchString);
 
             return new TableData<EnterVO> { Items = items, TotalItems = total };
         }
@@ -119,12 +120,7 @@
 
             if (confimation)
             {
-                var entry = await api.GetById<EnterVO>(entryId);
-
-                if (entry is null)
-                    return;
-
-                await api.Put<EnterVO>(entry, entryId);
+                await shelfService.UndoAllocation(entryId);
 
                 app.ProductEntries = new();
 

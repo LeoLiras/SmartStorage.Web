@@ -3,6 +3,7 @@
 @attribute [Authorize]
 
 @inject ApiExtensions api
+@inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -126,7 +127,7 @@ else if(enter is not null)
                     product = app.ActualProduct;
             }
 
-            shelves = await api.Get<ShelfVO>();
+            shelves = await shelfService.GetShelves();
 
             app.Shelves = shelves;
 
@@ -157,9 +158,9 @@ else if(enter is not null)
             if (enter is null)
                 return;
 
-            var result = await api.Post<EnterVO>(enter);
+            var result = await shelfService.AllocateProduct(enter);
 
-            app.ProductEntries = await api.Get<EnterVO>();
+            app.ProductEntries = await shelfService.GetAllocations();
 
             await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", app.productsInStockPage, EDialogStates.Success);
 

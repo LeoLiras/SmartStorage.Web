@@ -2,6 +2,7 @@
 
 @inject ApiExtensions api
 @inject ISaleService saleService
+@inject IShelfService shelfService
 @inject VariablesExtensions app
 @inject IAuthService auth
 @inject AuthenticationStateProvider authProvider
@@ -82,10 +83,10 @@ else
                     app.Employees = await api.Get<EmployeeVO>();
 
                 if (app.Shelves?.Count == 0)
-                    app.Shelves = await api.Get<ShelfVO>();
+                    app.Shelves = await shelfService.GetShelves();
 
                 if (app.ProductEntries?.Count == 0)
-                    app.ProductEntries = await api.Get<EnterVO>();
+                    app.ProductEntries = await shelfService.GetAllocations();
 
                 if (app.Sales?.Count == 0)
                     app.Sales = await saleService.GetSales();

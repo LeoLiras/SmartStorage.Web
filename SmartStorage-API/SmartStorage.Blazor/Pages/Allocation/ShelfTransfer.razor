@@ -3,7 +3,7 @@
 
 @using SmartStorage.Blazor.Pages.Product
 
-@inject ApiExtensions api
+@inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -66,9 +66,9 @@ else
     {
         try
         {
-            shelves = await api.Get<ShelfVO>();
+            shelves = await shelfService.GetShelves();
 
-            entry = await api.GetById<EnterVO>(enterId);
+            entry = await shelfService.GetAllocationById(enterId);
         }
         catch (ApiException ex)
         {
@@ -93,9 +93,9 @@ else
 
         try
         {
-            await api.TransferProductToShelf(enterId, transfer);
+            await shelfService.TransferAllocation(enterId, transfer);
 
-            app.ProductEntries = await api.Get<EnterVO>();
+            app.ProductEntries = await shelfService.GetAllocations();
 
             await ShowDialog.ShowDialogAsync($"{entry.ProductQuantity} unidade(s) transferida(s) de {entry.ShelfName}.", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
         }

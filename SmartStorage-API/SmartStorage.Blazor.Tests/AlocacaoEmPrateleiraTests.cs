@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
 using NSubstitute;
+using SmartStorage.Blazor.Services;
+using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Authentication;
 using SmartStorage.Blazor.Pages.Allocation;
 using SmartStorage.Blazor.Utils.API;
@@ -49,6 +51,7 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
     }
 

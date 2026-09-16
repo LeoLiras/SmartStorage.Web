@@ -1,7 +1,7 @@
 ﻿@page "/products/sales"
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IShelfService shelfService
 @inject ISaleService saleService
 @inject NavigationManager nav
 @inject VariablesExtensions app
@@ -100,7 +100,7 @@
 
                 app.Sales = new();
 
-                app.ProductEntries = await api.Get<EnterVO>();
+                app.ProductEntries = await shelfService.GetAllocations();
 
                 await table.ReloadServerData();
 

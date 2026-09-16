@@ -84,6 +84,7 @@ public class RegistroDeVendaTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         Services.AddSingleton<ISaleService>(new SaleService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
 
