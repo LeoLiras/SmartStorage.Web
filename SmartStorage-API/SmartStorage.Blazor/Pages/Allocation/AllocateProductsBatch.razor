@@ -1,7 +1,8 @@
 @page "/product/allocation/batch"
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IProductService productService
+@inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -170,14 +171,14 @@ else
                 return;
             }
 
-            shelves = await api.Get<ShelfVO>();
+            shelves = await shelfService.GetShelves();
 
-            var entries = await api.Get<EnterVO>();
+            var entries = await shelfService.GetAllocations();
 
             var products = new List<ProductVO>();
 
             foreach (var productId in productIds)
-                products.Add(await api.GetById<ProductVO>(productId));
+                products.Add(await productService.GetProductById(productId));
 
             rows = products.Select(product =>
             {
@@ -227,7 +228,7 @@ else
                 }).ToList(),
             };
 
-            var enters = await api.AllocateProducts(batch);
+            var enters = await shelfService.AllocateProducts(batch);
 
             app.ProductEntries = new();
 
@@ -249,7 +250,7 @@ else
     {
         try
         {
-            shelves = await api.Get<ShelfVO>();
+            shelves = await shelfService.GetShelves();
         }
         catch (ApiException)
         {

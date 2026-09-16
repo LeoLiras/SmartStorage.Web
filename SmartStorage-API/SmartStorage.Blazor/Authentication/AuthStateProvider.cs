@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using SmartStorage.Blazor.Utils.Local_Storage;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
-using static System.Net.WebRequestMethods;
 
 namespace SmartStorage.Blazor.Provider
 {
@@ -16,12 +14,10 @@ namespace SmartStorage.Blazor.Provider
            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
         private readonly IJSRuntime js;
-        private readonly HttpClient http;
 
-        public AuthStateProvider(IJSRuntime js, HttpClient http)
+        public AuthStateProvider(IJSRuntime js)
         {
             this.js = js;
-            this.http = http;
         }
 
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -37,12 +33,6 @@ namespace SmartStorage.Blazor.Provider
 
         public AuthenticationState CreateAuthenticationState(string token)
         {
-            // colocar o token obtido do localstorage no header do request 
-            // na seção Authorization assim poderemos estar autenticando 
-            // cada requisição HTTP enviada ao servidor por este cliente
-            http.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
             //extrair as claims
             return new AuthenticationState(new ClaimsPrincipal
                 (new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
@@ -95,7 +85,6 @@ namespace SmartStorage.Blazor.Provider
             try
             {
                 await js.RemoveItem(tokenKey);
-                http.DefaultRequestHeaders.Authorization = null;
                 NotifyAuthenticationStateChanged(Task.FromResult(notAuthenticate));
             }
             catch (Exception)

@@ -1,7 +1,7 @@
 @page "/products"
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IProductService productService
 @inject NavigationManager nav
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
@@ -156,7 +156,7 @@ else
 
         try
         {
-            var (items, count) = await api.GetPage<ProductVO>(currentPage, pageSize, searchString);
+            var (items, count) = await productService.GetProductsPage(currentPage, pageSize, searchString);
 
             if (thisRequest != request)
                 return;

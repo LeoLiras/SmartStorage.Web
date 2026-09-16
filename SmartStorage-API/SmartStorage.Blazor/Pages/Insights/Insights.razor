@@ -3,7 +3,7 @@
 
 @using System.Globalization
 
-@inject ApiExtensions api
+@inject ISaleService saleService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -115,7 +115,7 @@ else
         loading = true;
 
         if (app.Sales is null || app.Sales.Count() == 0)
-            sales = await api.Get<SaleVO>();
+            sales = await saleService.GetSales();
         else
             sales = app.Sales;
 

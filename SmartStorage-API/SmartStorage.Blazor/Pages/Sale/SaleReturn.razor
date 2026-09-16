@@ -3,7 +3,7 @@
 
 @using SmartStorage.Blazor.Pages.Product
 
-@inject ApiExtensions api
+@inject ISaleService saleService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -59,7 +59,7 @@ else
     {
         try
         {
-            sale = await api.GetById<SaleVO>(saleId);
+            sale = await saleService.GetSaleById(saleId);
         }
         catch (ApiException ex)
         {
@@ -84,9 +84,9 @@ else
 
         try
         {
-            await api.ReturnSale(saleId, saleReturn);
+            await saleService.ReturnSale(saleId, saleReturn);
 
-            app.Sales = await api.Get<SaleVO>();
+            app.Sales = await saleService.GetSales();
 
             await ShowDialog.ShowDialogAsync($"Devolução de {saleReturn.Quantity} unidade(s) registrada. O saldo voltou para o depósito.", "Sucesso", app.productsSalesPage, EDialogStates.Success);
         }

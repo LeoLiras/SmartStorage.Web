@@ -1,6 +1,9 @@
 ﻿@page "/"
 
-@inject ApiExtensions api
+@inject IEmployeeService employeeService
+@inject IProductService productService
+@inject ISaleService saleService
+@inject IShelfService shelfService
 @inject VariablesExtensions app
 @inject IAuthService auth
 @inject AuthenticationStateProvider authProvider
@@ -75,19 +78,19 @@ else
             if (user.Identity!.IsAuthenticated)
             {
                 if (app.ProductInStock?.Count == 0)
-                    app.ProductInStock = await api.Get<ProductVO>();
+                    app.ProductInStock = await productService.GetProducts();
 
                 if (app.Employees?.Count == 0)
-                    app.Employees = await api.Get<EmployeeVO>();
+                    app.Employees = await employeeService.GetEmployees();
 
                 if (app.Shelves?.Count == 0)
-                    app.Shelves = await api.Get<ShelfVO>();
+                    app.Shelves = await shelfService.GetShelves();
 
                 if (app.ProductEntries?.Count == 0)
-                    app.ProductEntries = await api.Get<EnterVO>();
+                    app.ProductEntries = await shelfService.GetAllocations();
 
                 if (app.Sales?.Count == 0)
-                    app.Sales = await api.Get<SaleVO>();
+                    app.Sales = await saleService.GetSales();
 
                 if (app.User.Id == 0)
                     app.User = await auth.GetUser(user.FindFirst("unique_name")?.Value);

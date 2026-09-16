@@ -1,7 +1,9 @@
 ﻿@page "/product/sale/{entryId:int}"
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IProductService productService
+@inject ISaleService saleService
+@inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -83,14 +85,14 @@ else
             if (entryId != 0)
             {
                 if (app.ActualEntry is null)
-                    entry = await api.GetById<EnterVO>(entryId);
+                    entry = await shelfService.GetAllocationById(entryId);
                 else
                     entry = app.ActualEntry;
 
                 if(entry is not null)
                 {
                     if (app.ActualProduct is null)
-                        product = await api.GetById<ProductVO>(entry.ProductId);
+                        product = await productService.GetProductById(entry.ProductId);
                     else
                         product = app.ActualProduct;
                 }
@@ -125,10 +127,10 @@ else
             if (entry is null || newSale is null)
                 return;
 
-            await api.Post<SaleVO>(newSale);
+            await saleService.CreateSale(newSale);
 
-            app.ProductEntries = await api.Get<EnterVO>();
-            app.Sales = await api.Get<SaleVO>();
+            app.ProductEntries = await shelfService.GetAllocations();
+            app.Sales = await saleService.GetSales();
 
             await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
 

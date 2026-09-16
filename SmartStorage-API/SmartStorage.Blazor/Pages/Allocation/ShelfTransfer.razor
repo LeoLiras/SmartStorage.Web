@@ -3,7 +3,7 @@
 
 @using SmartStorage.Blazor.Pages.Product
 
-@inject ApiExtensions api
+@inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -32,7 +32,7 @@ else
                         <MudNumericField T="int" Label="Quantidade na prateleira" Value="entry.ProductQuantity" ReadOnly="true" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="4">
-                        <MudSelect T="int" @bind-Value="transfer.ShelfId" Label="Prateleira de destino" OpenIcon="@Icons.Material.Filled.Storefront" HelperText="Todo o saldo da prateleira atual vai para o destino" Variant="Variant.Outlined">
+                        <MudSelect T="int" @bind-Value="transfer.ShelfId" ToStringFunc="ShelfLabel" Label="Prateleira de destino" OpenIcon="@Icons.Material.Filled.Storefront" HelperText="Todo o saldo da prateleira atual vai para o destino" Variant="Variant.Outlined">
                             @foreach (var shelf in shelves.Where(s => s.Id != entry.ShelfId))
                             {
                                 <MudSelectItem T="int" Value="@shelf.Id">@shelf.Name</MudSelectItem>
@@ -66,9 +66,9 @@ else
     {
         try
         {
-            shelves = await api.Get<ShelfVO>();
+            shelves = await shelfService.GetShelves();
 
-            entry = await api.GetById<EnterVO>(enterId);
+            entry = await shelfService.GetAllocationById(enterId);
         }
         catch (ApiException ex)
         {
@@ -82,6 +82,8 @@ else
 
     #region Methods
 
+    private string ShelfLabel(int shelfId) => shelves.FirstOrDefault(s => s.Id == shelfId)?.Name ?? string.Empty;
+
     private async Task TransferProduct(ProductVO product)
     {
         if (transfer.ShelfId == 0)
@@ -93,9 +95,9 @@ else
 
         try
         {
-            await api.TransferProductToShelf(enterId, transfer);
+            await shelfService.TransferAllocation(enterId, transfer);
 
-            app.ProductEntries = await api.Get<EnterVO>();
+            app.ProductEntries = await shelfService.GetAllocations();
 
             await ShowDialog.ShowDialogAsync($"{entry.ProductQuantity} unidade(s) transferida(s) de {entry.ShelfName}.", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
         }

@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
 using NSubstitute;
+using SmartStorage.Blazor.Services.IServices;
+using SmartStorage.Blazor.Services;
 using SmartStorage.Blazor.Authentication;
 using SmartStorage.Blazor.Pages.Sale;
 using SmartStorage.Blazor.Utils.API;
@@ -68,10 +70,10 @@ public class DevolucaoDeVendaTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(app ?? new VariablesExtensions());
         Services.AddSingleton(new Dialogo(dialogo, new SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(new HttpClient(api)
-        {
-            BaseAddress = new Uri("http://localhost/"),
-        }));
+        Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
+        Services.AddSingleton<ISaleService>(new SaleService(api.Cliente()));
+        Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
+        Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
 
         return api;

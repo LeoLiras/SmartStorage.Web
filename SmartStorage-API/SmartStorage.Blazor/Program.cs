@@ -18,14 +18,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddSingleton<SessionExpiration>();
 
-builder.Services.AddScoped(sp => new HttpClient(new SessionExpiredHandler(sp.GetRequiredService<SessionExpiration>())
-{
-    InnerHandler = new HttpClientHandler()
-})
-{
-    BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
-});
-
 builder.Services.AddHttpClient<IReportsService, ReportsService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ReportsAPI"])
             ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
@@ -38,6 +30,22 @@ builder.Services.AddHttpClient<IAiService, AiService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AIAPI"])
             ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
 
+builder.Services.AddHttpClient<ISaleService, SaleService>(c =>
+                c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+
+builder.Services.AddHttpClient<IShelfService, ShelfService>(c =>
+                c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+
+builder.Services.AddHttpClient<IProductService, ProductService>(c =>
+                c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+
+builder.Services.AddHttpClient<IEmployeeService, EmployeeService>(c =>
+                c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+
 builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"])
             ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
@@ -46,7 +54,6 @@ builder.Services.AddAuthorizationCore();
 
 builder.Services.AddMudServices();
 
-builder.Services.AddScoped<ApiExtensions>();
 builder.Services.AddScoped<ShowDialog>();
 builder.Services.AddScoped<VariablesExtensions>();
 builder.Services.AddScoped<SaleCart>();

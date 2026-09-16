@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
 using NSubstitute;
+using SmartStorage.Blazor.Services;
+using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Authentication;
 using SmartStorage.Blazor.Pages.Allocation;
 using SmartStorage.Blazor.Pages.Product;
@@ -75,10 +77,9 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(_dialogo, new SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(new HttpClient(api)
-        {
-            BaseAddress = new Uri("http://localhost/"),
-        }));
+        Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
+        Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
+        Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         Services.AddScoped<SaleCart>();
         AddAuthorization().SetAuthorized("admin");
 
@@ -144,6 +145,20 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Destino_comeca_vazio_e_mostra_a_prateleira_escolhida()
+    {
+        Monta(EntradaNaPrateleira(8));
+        var cut = RenderizaTransferencia();
+        var destino = cut.FindComponent<MudSelect<int>>();
+
+        Assert.Equal(string.Empty, destino.Instance.Text ?? string.Empty);
+
+        cut.InvokeAsync(() => destino.Instance.ValueChanged.InvokeAsync(2));
+
+        cut.WaitForAssertion(() => Assert.Equal("Prateleira B1", destino.Instance.Text), TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
     public void Sem_destino_escolhido_nao_transfere()
     {
         var api = Monta(EntradaNaPrateleira(8));
@@ -151,8 +166,8 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
 
         cut.Find("form").Submit();
 
+        cut.WaitForAssertion(() => _dialogo.ReceivedWithAnyArgs().ShowAsync<Pages.Dialog.Dialog>(default, default, default), TimeSpan.FromSeconds(5));
         Assert.DoesNotContain(api.Requisicoes, r => r.Metodo != HttpMethod.Get);
-        _dialogo.ReceivedWithAnyArgs().ShowAsync<Pages.Dialog.Dialog>(default, default, default);
     }
 
     [Fact]

@@ -1,7 +1,8 @@
 @page "/products/sales/cart"
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IShelfService shelfService
+@inject ISaleService saleService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -100,7 +101,7 @@ else
     {
         try
         {
-            await cart.RefreshAsync(await api.Get<EnterVO>());
+            await cart.RefreshAsync(await shelfService.GetAllocations());
         }
         catch (ApiException ex)
         {
@@ -114,7 +115,7 @@ else
         {
             saving = true;
 
-            var sales = await api.CreateSales(cart.ToBatch(dateSale ?? DateTime.Now));
+            var sales = await saleService.CreateSales(cart.ToBatch(dateSale ?? DateTime.Now));
 
             await cart.ClearAsync();
 

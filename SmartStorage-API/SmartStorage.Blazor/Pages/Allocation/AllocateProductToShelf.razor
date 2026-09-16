@@ -2,7 +2,8 @@
 
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IProductService productService
+@inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -50,7 +51,7 @@ else if(enter is not null)
                             </MudItem>
                         }
                         <MudItem xs="12">
-                            <MudSelect T="int" @bind-Value="enter.ShelfId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" Variant="Variant.Outlined">
+                            <MudSelect T="int" @bind-Value="enter.ShelfId" ToStringFunc="ShelfLabel" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" Variant="Variant.Outlined">
                                 @if (shelves is not null)
                                 {
                                     foreach (var shelf in shelves)
@@ -121,12 +122,12 @@ else if(enter is not null)
             if (productId != 0)
             {
                 if (app.ActualProduct is null)
-                    product = await api.GetById<ProductVO>(productId);
+                    product = await productService.GetProductById(productId);
                 else
                     product = app.ActualProduct;
             }
 
-            shelves = await api.Get<ShelfVO>();
+            shelves = await shelfService.GetShelves();
 
             app.Shelves = shelves;
 
@@ -157,9 +158,9 @@ else if(enter is not null)
             if (enter is null)
                 return;
 
-            var result = await api.Post<EnterVO>(enter);
+            var result = await shelfService.AllocateProduct(enter);
 
-            app.ProductEntries = await api.Get<EnterVO>();
+            app.ProductEntries = await shelfService.GetAllocations();
 
             await ShowDialog.ShowDialogAsync("Produto alocado com sucesso", "Sucesso", app.productsInStockPage, EDialogStates.Success);
 
@@ -173,6 +174,13 @@ else if(enter is not null)
 
             await ShowDialog.ShowDialogAsync($"Erro ao alocar o produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
+    }
+
+    private string ShelfLabel(int shelfId)
+    {
+        var shelf = shelves?.FirstOrDefault(s => s.Id == shelfId);
+
+        return shelf is null ? string.Empty : $"{shelf.Name} · {Occupancy(shelf)}";
     }
 
     private static string Occupancy(ShelfVO shelf)

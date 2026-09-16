@@ -56,7 +56,7 @@ public class InsightsTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(_dialogo, new SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(http));
+        Services.AddSingleton<ISaleService>(new SaleService(http));
         Services.AddSingleton<IReportsService>(new ReportsService(http));
         Services.AddSingleton<IAiService>(new AiService(http));
         AddAuthorization().SetAuthorized("admin");
