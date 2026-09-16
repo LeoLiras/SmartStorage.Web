@@ -36,7 +36,7 @@ Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests`
 Script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
 
 ```bash
-python tests/ledger_e2e.py              # os 39 casos, ~7 min
+python tests/ledger_e2e.py              # os 42 casos, ~8 min
 python tests/ledger_e2e.py --caso CT-08 # um caso só
 python tests/ledger_e2e.py --manter     # preserva os produtos criados, para inspeção
 ```
@@ -69,7 +69,7 @@ Cada projeto executável tem seu próprio `UserSecretsId`. Os `appsettings.json`
 
 ### O gateway é a única porta de entrada
 
-O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 38 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
+O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 39 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
 
 **Os dois arquivos precisam declarar as rotas na mesma ordem.** A configuração JSON do .NET faz merge de arrays por índice, então `appsettings.Docker.json` só sobrescreve corretamente se cada rota estiver na mesma posição e com todos os campos redeclarados. Ao adicionar um endpoint, edite os dois.
 
@@ -133,6 +133,8 @@ O carrinho (#21) grava várias vendas num único `POST /sales/v1/batch` (`SaleBa
 Transferência entre prateleiras (`POST /shelf/allocation/{enterId}/transfer`) move **todo o saldo** do `Enter` de origem para a prateleira de destino, em dois lançamentos `Transferencia` com o mesmo instante. O destino que já tem o produto mantém o próprio preço; o destino novo herda o preço da origem. O `Enter` de origem fica com saldo zero, porque as vendas apontam para ele.
 
 Um produto só fica em **uma prateleira por vez**: `EnsureSingleShelf` recusa a alocação quando o produto tem saldo (`EntQntd > 0`) em outra prateleira. Complementar a mesma prateleira continua permitido, e `Enter` zerado não conta, então depois de desfazer a alocação ou transferir o saldo o produto pode ir para outra prateleira. A transferência não passa por essa checagem, porque move o saldo inteiro e o produto continua numa prateleira só.
+
+A alocação em lote (#20) é `POST /shelf/v1/allocation/batch` (`AllocationBatchVO`), **tudo ou nada** como o carrinho: `AllocateProductsToShelves` valida todos os itens antes de escrever — produto e prateleira existentes, produto repetido no lote (recusado), quantidade e preço positivos, saldo do depósito, `EnsureSingleShelf` e `EnsureShelfFits` com o volume dos itens anteriores do lote na mesma prateleira já descontado — e responde `Item N (produto na prateleira): motivo`. Grava numa transação, dois lançamentos `Alocacao` por item com o mesmo instante, e repreça cada prateleira como a alocação individual. `Product.ProPrecoInicial` (`decimal(18,2)`, opcional, `PrecoInicial` no VO) é só o preço padrão das telas de alocação e nunca muda ao alocar; a migration `AddProductInitialPrice` copiou para os produtos existentes o `EntPrice` da prateleira com saldo, ou da entrada mais recente. No Blazor, os cards de Produtos em estoque têm seleção e levam a `/product/allocation/batch?ids=…`, que abre cada produto com quantidade 1, o preço inicial e a prateleira onde ele já tem saldo, e avisa teto somado e segunda prateleira — quem recusa é a API.
 
 Capacidade de prateleira (#11) é por **volume em litros**: `Product.ProVolume` e `Shelf.SheVolume`, `decimal(18,3)` e opcionais. O teto útil é **90% do volume da prateleira** (`ShelfVO.UsableFraction`), porque volume não considera encaixe. `EnsureShelfFits` em `ShelfBusinessImplementation` recusa a alocação e a transferência quando o produto ou a prateleira destino não têm volume, ou quando `quantidade × volume do produto` passa do que resta do teto — a prateleira no limite não aceita mais nada. O volume usado é `SUM(EntQntd × ProVolume)` das entradas da prateleira, calculado em lote no `ShelfConverter`, que devolve `volume`, `usedVolume`, `usableVolume`, `freeVolume` e `occupancy` no `ShelfVO`. Cancelar venda e desfazer alocação não checam capacidade: devolvem o que já estava lá. Não há tela de cadastro de prateleiras; o volume entra pelo POST/PUT de `/shelf/v1` e pelo seed. A tela de alocação sempre busca as prateleiras na API, porque a ocupação em cache ficaria velha.
 
