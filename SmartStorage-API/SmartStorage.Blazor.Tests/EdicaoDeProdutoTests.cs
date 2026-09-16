@@ -62,6 +62,7 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
 

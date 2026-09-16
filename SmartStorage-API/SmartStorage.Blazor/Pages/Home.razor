@@ -1,6 +1,6 @@
 ﻿@page "/"
 
-@inject ApiExtensions api
+@inject IEmployeeService employeeService
 @inject IProductService productService
 @inject ISaleService saleService
 @inject IShelfService shelfService
@@ -81,7 +81,7 @@ else
                     app.ProductInStock = await productService.GetProducts();
 
                 if (app.Employees?.Count == 0)
-                    app.Employees = await api.Get<EmployeeVO>();
+                    app.Employees = await employeeService.GetEmployees();
 
                 if (app.Shelves?.Count == 0)
                     app.Shelves = await shelfService.GetShelves();

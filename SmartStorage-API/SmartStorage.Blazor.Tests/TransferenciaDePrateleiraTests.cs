@@ -81,6 +81,7 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         Services.AddScoped<SaleCart>();

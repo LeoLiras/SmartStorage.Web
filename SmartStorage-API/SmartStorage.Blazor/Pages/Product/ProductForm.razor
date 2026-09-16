@@ -1,4 +1,4 @@
-﻿@inject ApiExtensions api
+﻿@inject IEmployeeService employeeService
 @inject IProductService productService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
@@ -174,7 +174,7 @@ else if(product is not null)
             loading = true;
 
             if (app.Employees.Count == 0)
-                employees = await api.Get<EmployeeVO>();
+                employees = await employeeService.GetEmployees();
             else
                 employees = app.Employees;
 
