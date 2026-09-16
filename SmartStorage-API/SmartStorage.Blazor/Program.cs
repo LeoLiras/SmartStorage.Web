@@ -18,14 +18,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddSingleton<SessionExpiration>();
 
-builder.Services.AddScoped(sp => new HttpClient(new SessionExpiredHandler(sp.GetRequiredService<SessionExpiration>())
-{
-    InnerHandler = new HttpClientHandler()
-})
-{
-    BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
-});
-
 builder.Services.AddHttpClient<IReportsService, ReportsService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ReportsAPI"])
             ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();

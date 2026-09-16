@@ -146,7 +146,7 @@ public class SessaoExpiradaTests : BunitContext, IAsyncLifetime
 
         var api = new ApiFalsa().Responde(HttpMethod.Post, "api/auth/v1/signin", "", HttpStatusCode.Unauthorized);
         var http = new HttpClient(api) { BaseAddress = new Uri("http://localhost/") };
-        var servico = new AuthService(http, new AuthStateProvider(Substitute.For<IJSRuntime>(), http), sessao);
+        var servico = new AuthService(http, new AuthStateProvider(Substitute.For<IJSRuntime>()), sessao);
 
         await Assert.ThrowsAsync<ApiException>(() => servico.Login(new UserVO { Username = "admin", Password = "errada" }));
 
