@@ -352,6 +352,32 @@ code {
     padding: 0 16px 16px;
 }
 
+.app-card-select {
+    flex-basis: 100%;
+    margin-left: -12px;
+}
+
+.app-product-card.is-selected {
+    border-color: #6D4AFF;
+    box-shadow: 0 0 0 1px #6D4AFF inset;
+}
+
+.app-batch-list {
+    display: grid;
+    gap: 16px;
+}
+
+.app-batch-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.app-text-error {
+    color: #F87171;
+}
+
 .app-chip {
     padding: 3px 8px;
     border-radius: 999px;

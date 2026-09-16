@@ -1,0 +1,284 @@
+@page "/product/allocation/batch"
+@attribute [Authorize]
+
+@inject ApiExtensions api
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Alocar produtos selecionados</MudText>
+
+@if (loading)
+{
+    <Loading Message="Carregando produtos e prateleiras..." Shape="ELoadingShape.Form"></Loading>
+}
+else if (rows.Count == 0)
+{
+    <MudAlert Class="mt-4" Severity="Severity.Info" Variant="Variant.Outlined">Nenhum produto selecionado. Marque os produtos em <MudLink Href="@app.productsInStockPage">Produtos em estoque</MudLink>.</MudAlert>
+}
+else
+{
+    <MudGrid Spacing="4" Class="mt-1">
+        <MudItem xs="12" md="8">
+            <div class="app-batch-list">
+                @foreach (var row in rows)
+                {
+                    <section class="app-panel" @key="row.Product.Id">
+                        <div class="app-batch-head">
+                            <div>
+                                <MudText Typo="Typo.subtitle1" Class="app-panel-title">@row.Product.Name</MudText>
+                                <MudText Typo="Typo.body2" Class="app-muted">
+                                    <span>Depósito </span><span class="num">@row.Product.Qntd</span>
+                                    @if (row.Product.Volume is not null)
+                                    {
+                                        <span> · </span><span class="num">@row.Product.Volume.Value.ToString("0.###", PtBr) L</span><span> por unidade</span>
+                                    }
+                                </MudText>
+                            </div>
+                            <MudTooltip Text="Tirar do lote"><MudIconButton Icon="@Icons.Material.Filled.Close" aria-label="@($"Tirar {row.Product.Name} do lote")" OnClick="@(() => Remove(row))" /></MudTooltip>
+                        </div>
+                        <MudGrid Spacing="3">
+                            <MudItem xs="12" sm="4">
+                                <MudNumericField T="int" Label="Quantidade" @bind-Value="row.Qntd" Min="1" Error="@(row.Qntd > row.Product.Qntd)" ErrorText="@($"Há {row.Product.Qntd} no depósito")" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="12" sm="4">
+                                <MudNumericField T="decimal" Label="Preço" @bind-Value="row.Price" Format="F2" Min="0m" HelperText="@(row.Product.PrecoInicial is null ? "Produto sem preço inicial" : "Preço inicial do produto")" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="12" sm="4">
+                                <MudNumericField T="decimal" Label="Volume necessário (L)" Value="RequiredVolume(row)" Format="0.###" ReadOnly="true" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect T="int" @bind-Value="row.ShelfId" ToStringFunc="ShelfLabel" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" Variant="Variant.Outlined">
+                                    @foreach (var shelf in shelves)
+                                    {
+                                        <MudSelectItem Value="@shelf.Id">@shelf.Name · @Occupancy(shelf)</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            @if (row.Product.Volume is null)
+                            {
+                                <MudItem xs="12">
+                                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">Este produto não tem volume cadastrado. Edite o produto antes de alocá-lo.</MudAlert>
+                                </MudItem>
+                            }
+                            @if (row.CurrentShelf is not null && row.ShelfId != 0 && row.ShelfId != row.CurrentShelf.Id)
+                            {
+                                <MudItem xs="12">
+                                    <MudAlert Severity="Severity.Error" Variant="Variant.Outlined" Dense="true">O produto já está na @row.CurrentShelf.Name. Um produto só fica em uma prateleira: aloque nela ou transfira o saldo antes.</MudAlert>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </section>
+                }
+            </div>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <section class="app-panel">
+                <MudText Typo="Typo.subtitle1" Class="app-panel-title">Prateleiras do lote</MudText>
+                @if (ShelvesInBatch.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Class="app-muted">Escolha a prateleira de cada produto.</MudText>
+                }
+                else
+                {
+                    <dl class="app-summary">
+                        @foreach (var (shelf, needed) in ShelvesInBatch)
+                        {
+                            <div>
+                                <dt>@shelf.Name</dt>
+                                <dd class="num @(Exceeds(shelf, needed) ? "app-text-error" : "")">@needed.ToString("0.###", PtBr) de @Math.Max(shelf.FreeVolume ?? 0, 0).ToString("0.###", PtBr) L</dd>
+                            </div>
+                        }
+                    </dl>
+                    @foreach (var (shelf, needed) in ShelvesInBatch.Where(s => Exceeds(s.Shelf, s.Needed)))
+                    {
+                        <MudAlert Class="mt-3" Severity="Severity.Error" Variant="Variant.Outlined" Dense="true">A @shelf.Name não comporta o lote: são necessários @needed.ToString("0.###", PtBr) L e restam @Math.Max(shelf.FreeVolume ?? 0, 0).ToString("0.###", PtBr) L.</MudAlert>
+                    }
+                }
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send" Disabled="@(saving || !IsComplete)" OnClick="Allocate">@($"Alocar {rows.Count} produto(s)")</MudButton>
+                </div>
+                @if (!IsComplete)
+                {
+                    <MudText Typo="Typo.caption" Class="app-muted">Preencha quantidade, preço e prateleira de todos os produtos.</MudText>
+                }
+            </section>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+
+    #region Properties
+
+    [SupplyParameterFromQuery(Name = "ids")]
+    public string ids { get; set; }
+
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
+
+    private List<BatchRow> rows = new();
+
+    private List<ShelfVO> shelves = new();
+
+    private bool loading = true;
+
+    private bool saving = false;
+
+    private bool IsComplete => rows.Count > 0 && rows.All(r => r.Qntd > 0 && r.Price > 0 && r.ShelfId != 0);
+
+    private List<(ShelfVO Shelf, decimal Needed)> ShelvesInBatch => rows
+        .Where(r => r.ShelfId != 0)
+        .GroupBy(r => r.ShelfId)
+        .Select(g => (Shelf: shelves.FirstOrDefault(s => s.Id == g.Key), Needed: g.Sum(RequiredVolume)))
+        .Where(x => x.Shelf is not null)
+        .ToList();
+
+    private class BatchRow
+    {
+        public ProductVO Product { get; set; }
+
+        public int Qntd { get; set; } = 1;
+
+        public decimal Price { get; set; }
+
+        public int ShelfId { get; set; }
+
+        public ShelfVO CurrentShelf { get; set; }
+    }
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            loading = true;
+
+            var productIds = (ids ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(id => int.TryParse(id, out var parsed) ? parsed : 0)
+                .Where(id => id > 0)
+                .Distinct()
+                .ToList();
+
+            if (productIds.Count == 0)
+            {
+                rows = new();
+
+                return;
+            }
+
+            shelves = await api.Get<ShelfVO>();
+
+            var entries = await api.Get<EnterVO>();
+
+            var products = new List<ProductVO>();
+
+            foreach (var productId in productIds)
+                products.Add(await api.GetById<ProductVO>(productId));
+
+            rows = products.Select(product =>
+            {
+                var current = entries.FirstOrDefault(e => e.ProductId == product.Id && e.ProductQuantity > 0);
+
+                var currentShelf = current is null ? null : shelves.FirstOrDefault(s => s.Id == current.ShelfId);
+
+                return new BatchRow
+                {
+                    Product = product,
+                    Price = product.PrecoInicial ?? 0,
+                    ShelfId = currentShelf?.Id ?? 0,
+                    CurrentShelf = currentShelf,
+                };
+            }).ToList();
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar produtos e prateleiras.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+
+            nav.NavigateTo(app.productsInStockPage);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task Allocate()
+    {
+        try
+        {
+            saving = true;
+
+            var batch = new AllocationBatchVO
+            {
+                Items = rows.Select(r => new AllocationBatchItemVO
+                {
+                    ProductId = r.Product.Id,
+                    ShelfId = r.ShelfId,
+                    Qntd = r.Qntd,
+                    Price = r.Price,
+                }).ToList(),
+            };
+
+            var enters = await api.AllocateProducts(batch);
+
+            app.ProductEntries = new();
+
+            await ShowDialog.ShowDialogAsync($"{enters.Count} produto(s) alocado(s) com sucesso.", "Sucesso", app.productsInStockPage, EDialogStates.Success);
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Nenhum produto foi alocado.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+
+            await RefreshShelves();
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task RefreshShelves()
+    {
+        try
+        {
+            shelves = await api.Get<ShelfVO>();
+        }
+        catch (ApiException)
+        {
+        }
+    }
+
+    private void Remove(BatchRow row)
+    {
+        rows.Remove(row);
+    }
+
+    private static decimal RequiredVolume(BatchRow row) => row.Qntd * (row.Product.Volume ?? 0);
+
+    private string ShelfLabel(int shelfId)
+    {
+        var shelf = shelves.FirstOrDefault(s => s.Id == shelfId);
+
+        return shelf is null ? string.Empty : $"{shelf.Name} · {Occupancy(shelf)}";
+    }
+
+    private static bool Exceeds(ShelfVO shelf, decimal needed) => shelf.FreeVolume is not null && needed > shelf.FreeVolume;
+
+    private static string Occupancy(ShelfVO shelf)
+    {
+        if (shelf.Volume is null)
+            return "sem volume cadastrado";
+
+        return $"{shelf.Occupancy?.ToString("0", PtBr)}% ocupada · {Math.Max(shelf.FreeVolume ?? 0, 0).ToString("0.###", PtBr)} L livres";
+    }
+
+    #endregion
+}

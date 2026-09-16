@@ -10,6 +10,11 @@
     <MudText Typo="Typo.h5" Class="app-page-title">Produtos em estoque</MudText>
     <div class="app-toolbar-actions">
         <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Variant="Variant.Outlined" Margin="Margin.Dense" Class="app-search mt-0"></MudTextField>
+        @if (selected.Count > 0)
+        {
+            <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="ClearSelection">Limpar seleção</MudButton>
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Send" Color="Color.Secondary" OnClick="AllocateSelected">@($"Alocar selecionados ({selected.Count})")</MudButton>
+        }
         <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Href="product/insert">Adicionar produto</MudButton>
     </div>
 </div>
@@ -27,7 +32,7 @@ else
     <div class="app-card-grid mt-4">
         @foreach (var product in products)
         {
-            <article class="app-product-card">
+            <article class="@(selected.ContainsKey(product.Id) ? "app-product-card is-selected" : "app-product-card")">
                 <div class="app-card-thumb">
                     <img src="@ProcessImage(product)" alt="" loading="lazy" />
                 </div>
@@ -64,6 +69,7 @@ else
                     </div>
                 </div>
                 <div class="app-card-actions">
+                    <MudCheckBox T="bool" Value="selected.ContainsKey(product.Id)" ValueChanged="@(value => ToggleSelection(product, value))" Label="Selecionar" Color="Color.Primary" Class="app-card-select" aria-label="@($"Selecionar {product.Name} para alocar em lote")" />
                     <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Edit" OnClick="() => Edit(product)">Editar</MudButton>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send" OnClick="() => AllocateToShelf(product)" aria-label="@($"Alocar {product.Name} para prateleira")">Alocar</MudButton>
                 </div>
@@ -93,6 +99,8 @@ else
 
     string searchString = string.Empty;
 
+    private Dictionary<int, ProductVO> selected = new();
+
     bool loading = false;
 
     #endregion
@@ -120,6 +128,24 @@ else
         app.ActualProduct = product;
 
         nav.NavigateTo($"product/allocation/{product.Id}");
+    }
+
+    private void ToggleSelection(ProductVO product, bool value)
+    {
+        if (value)
+            selected[product.Id] = product;
+        else
+            selected.Remove(product.Id);
+    }
+
+    private void ClearSelection()
+    {
+        selected.Clear();
+    }
+
+    private void AllocateSelected()
+    {
+        nav.NavigateTo($"product/allocation/batch?ids={string.Join(",", selected.Keys)}");
     }
 
     private async Task GetProducts()
