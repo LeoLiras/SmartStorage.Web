@@ -148,6 +148,8 @@ O Blazor é WebAssembly: a imagem final é `nginx-unprivileged:alpine` servindo 
 
 Healthchecks: a âncora `x-dotnet-healthcheck` abre `/dev/tcp` pelo bash porque as imagens aspnet não têm curl nem wget. O check do SQL Server exige que nenhum banco de usuário esteja fora de `ONLINE` (um `SELECT 1` no `master` responde antes do banco da aplicação terminar a recuperação) e o `-b` do `sqlcmd` é obrigatório, senão erro de T-SQL sai com código 0.
 
+O SQL Server e os serviços .NET rodam com `TZ: America/Sao_Paulo`. O Blazor manda as datas com o fuso do navegador (`-03:00`) e o model binding converte para a hora local do container: em UTC, a venda das 09:00 era gravada como 12:00, e `DateTime.Now` e `GETDATE()` carimbavam o ledger três horas adiantado. Linhas gravadas antes dessa mudança continuam em UTC.
+
 Env var só entra no container na **criação**: depois de mexer no `.env`, `docker compose up -d --force-recreate <serviço>`. E `docker compose exec <svc> printenv` **não** prova o ambiente do processo rodando — leia `/proc/1/environ` dentro do container.
 
 Antes de publicar imagens, sempre `docker compose build` — uma imagem local velha já quase subiu com um segredo removido do código.
