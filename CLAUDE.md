@@ -36,7 +36,7 @@ Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests`
 Script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
 
 ```bash
-python tests/ledger_e2e.py              # os 31 casos, ~6 min
+python tests/ledger_e2e.py              # os 39 casos, ~7 min
 python tests/ledger_e2e.py --caso CT-08 # um caso só
 python tests/ledger_e2e.py --manter     # preserva os produtos criados, para inspeção
 ```
@@ -69,7 +69,7 @@ Cada projeto executável tem seu próprio `UserSecretsId`. Os `appsettings.json`
 
 ### O gateway é a única porta de entrada
 
-O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 37 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
+O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 38 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
 
 **Os dois arquivos precisam declarar as rotas na mesma ordem.** A configuração JSON do .NET faz merge de arrays por índice, então `appsettings.Docker.json` só sobrescreve corretamente se cada rota estiver na mesma posição e com todos os campos redeclarados. Ao adicionar um endpoint, edite os dois.
 
@@ -127,6 +127,8 @@ O autor de cada movimentação (`PsmUseId`, FK para `User`) e o instante (`PsmDa
 Devolução de venda (`POST /sales/{id}/return`) soma em `Sale.SalReturnedQntd` e lança `Devolucao` com sinal positivo **no depósito**, não na prateleira, com motivo `Devolução da venda {id}`. A listagem de vendas mostra quantidade e total líquidos e esconde a venda totalmente devolvida, que continua no banco. Venda com devolução não pode ser cancelada nem editada abaixo do devolvido: o estorno do cancelamento voltaria para a prateleira unidades que já voltaram ao depósito.
 
 A venda guarda o preço do momento em `Sale.SalPrice`, copiado do `EntPrice` da prateleira na criação e nunca mais alterado; o total da venda (API, Excel e PDF) sai dele. Como a alocação repreça a prateleira, calcular pelo `EntPrice` fazia o repreço reescrever o faturamento de vendas antigas. Sem FIFO nem custo por lote: um produto tem um preço por prateleira. As vendas anteriores à migration `AddSalePrice` receberam o `EntPrice` vigente na hora da migration.
+
+O carrinho (#21) grava várias vendas num único `POST /sales/v1/batch` (`SaleBatchVO`), **tudo ou nada**: `CreateNewSales` valida todos os itens antes de escrever — entrada existente, quantidade positiva e saldo da entrada somando os itens repetidos dela — e responde 400 com `Item N (produto na prateleira): motivo` sem gravar nada; a gravação corre numa transação, com o mesmo `PsmDate` em todos os lançamentos. Cada item continua uma `Sale` independente (não há pedido), e o alerta de estoque mínimo sai uma vez por produto, depois do commit. No Blazor o carrinho é o `SaleCart` (scoped), salvo no `localStorage` na chave `saleCart:{usuário}` — por usuário, para sobreviver à sessão expirada sem passar para outro login no mesmo navegador. A tela `/products/sales/cart` confere preço e saldo na API ao abrir e depois de uma recusa, e só esvazia o carrinho quando a API aceita.
 
 Transferência entre prateleiras (`POST /shelf/allocation/{enterId}/transfer`) move **todo o saldo** do `Enter` de origem para a prateleira de destino, em dois lançamentos `Transferencia` com o mesmo instante. O destino que já tem o produto mantém o próprio preço; o destino novo herda o preço da origem. O `Enter` de origem fica com saldo zero, porque as vendas apontam para ele.
 
