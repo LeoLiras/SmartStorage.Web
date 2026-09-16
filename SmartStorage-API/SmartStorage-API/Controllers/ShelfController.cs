@@ -172,6 +172,23 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpPost("allocation/batch")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult AllocateProductsToShelves([FromBody] AllocationBatchVO batch)
+        {
+            try
+            {
+                if (batch is null)
+                    throw new Exception("Os dados do lote são obrigatórios.");
+
+                return Ok(_shelfService.AllocateProductsToShelves(batch.Items));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPut("allocation/{enterId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UndoAllocate(int enterId)

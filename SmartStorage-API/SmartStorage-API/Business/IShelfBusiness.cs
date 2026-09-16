@@ -13,6 +13,7 @@ namespace SmartStorage_API.Service
         ShelfVO DeleteShelf(int shelfId);
         ShelfVO CreateNewShelf(ShelfVO newShelf);
         EnterVO AllocateProductToShelf(EnterVO newAllocation);
+        List<EnterVO> AllocateProductsToShelves(List<AllocationBatchItemVO> items);
         EnterVO UndoAllocate(int enterId);
         EnterVO TransferProductToShelf(int enterId, int toShelfId);
 
