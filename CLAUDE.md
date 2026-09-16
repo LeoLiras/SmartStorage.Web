@@ -27,7 +27,7 @@ A verificação tem duas camadas, e elas cobrem coisas diferentes de propósito.
 
 ### Testes de componente (`dotnet test`)
 
-`SmartStorage.Blazor.Tests` usa bUnit e NSubstitute para renderizar as telas e afirmar sobre o **JSON que o Blazor serializa**, com os serviços e o `ApiExtensions` reais sobre um `HttpMessageHandler` falso (`ApiFalsa`, que também entrega um `HttpClient` pronto em `Cliente()`). É a camada que pega bug de front, que o roteiro de API não vê.
+`SmartStorage.Blazor.Tests` usa bUnit e NSubstitute para renderizar as telas e afirmar sobre o **JSON que o Blazor serializa**, com os serviços reais sobre um `HttpMessageHandler` falso (`ApiFalsa`, que também entrega um `HttpClient` pronto em `Cliente()`). É a camada que pega bug de front, que o roteiro de API não vê.
 
 Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests` e que vale copiar ao escrever teste novo: o contexto é `BunitContext` (não `TestContext`) e a autorização é `AddAuthorization()` (não `AddTestAuthorization()`); toda tela com `MudDatePicker` exige um `MudPopoverProvider` na árvore, que **não** pode ser wrapper por não ter `ChildContent` — renderize os dois como irmãos num mesmo fragmento; e a classe de teste precisa de `IAsyncLifetime`, senão o descarte síncrono estoura em `MudBlazor.PointerEventsNoneService`, que só implementa `IAsyncDisposable`.
 
@@ -91,13 +91,13 @@ Listagem paginada é opcional por query string: `GET /sales/v1?page=1&pageSize=1
 
 ### Chamadas do Blazor à API
 
-A API principal está migrando do `Utils/API/ApiExtensions.cs` genérico (endpoint escolhido pelo tipo do VO) para serviços tipados, como os de IA, relatórios, e-mail e autenticação (#22). Ordem: vendas, prateleiras e alocações, produtos, funcionários; no fim o `ApiExtensions` sai. **Vendas já estão em `ISaleService`/`SaleService`, prateleiras e alocações em `IShelfService`/`ShelfService`** (listas, página, alocação individual e em lote, desfazer com `PUT` sem corpo e transferência) **e produtos em `IProductService`/`ProductService`** (o ajuste de estoque segue dentro do `PUT` do produto); o `ApiExtensions` só atende `EmployeeVO`.
+Cada domínio da API principal tem um serviço tipado, como os de IA, relatórios, e-mail e autenticação; o antigo `ApiExtensions` genérico, que escolhia o endpoint pelo tipo do VO, saiu com a #22. `ISaleService`/`SaleService` cobre vendas, carrinho, cancelamento e devolução; `IShelfService`/`ShelfService` cobre prateleiras e alocações (listas, página, alocação individual e em lote, desfazer com `PUT` sem corpo e transferência); `IProductService`/`ProductService` cobre produtos (o ajuste de estoque segue dentro do `PUT` do produto); `IEmployeeService`/`EmployeeService` só lista funcionários. Cada serviço expõe apenas as rotas que as telas usam.
 
 Cada serviço tem interface em `Services/IServices`, é registrado no `Program.cs` com `AddHttpClient`, `AuthHandler` (token do `localStorage` por requisição) e `SessionExpiredHandler` (401 leva ao login), e trata a resposta com `HttpResponseExtensions`: `ReadApiAsync` lança `ApiException` com o status e a mensagem da API, `ReadApiPageAsync` lê o `X-Total-Count` e `WithPage` monta a query de paginação. Nos testes, registre o serviço sobre `api.Cliente()`.
 
 ### VOs (`SmartStorage.Shared/VO/`)
 
-Cada VO implementa `ISupportHyperMedia`, herda `BaseMessage` (do `SmartStorage.MessageBus`, o que dá o `Id` e permite publicar o VO na fila) e expõe `static Parse(VO)` / `static ParseList(List<VO>)` retornando o Model. `Utils/API/ApiExtensions.cs` ainda tem `Get<TVO, T>` e `GetById<TVO, T>`, que chamariam esses métodos por reflexão, mas nenhuma tela as usa e elas saem com a #22.
+Cada VO implementa `ISupportHyperMedia`, herda `BaseMessage` (do `SmartStorage.MessageBus`, o que dá o `Id` e permite publicar o VO na fila) e expõe `static Parse(VO)` / `static ParseList(List<VO>)` retornando o Model.
 
 ### Configuração compartilhada
 
@@ -118,7 +118,7 @@ Os dois serviços só leem o banco: referenciam `SmartStorage.Infraestructure` e
 - **AIAPI** — `POST /api/storage/ai/v1/analyse-sales` com `AiRequest { aiQuestion }`. `AiRepository` serializa as **10 vendas mais recentes** como entidade `Sale` crua (quantidades, datas e `SalPrice`, sem nome de produto nem prateleira, porque `Enter` não é incluído) e manda pergunta e JSON ao Gemini (`gemini-2.5-flash`, pacote `Google.GenAI`), devolvendo só o texto da primeira resposta. A chave vem de `Environment.GetEnvironmentVariable("GOOGLE_API_KEY")`, **não** do `IConfiguration`: user secrets e `appsettings` não funcionam, fora do Docker precisa ser variável de ambiente. No compose ela vem do `.env`.
 - **ReportsAPI** — `GET /api/storage/reports/v1/export-excel` (ClosedXML) e `export-pdf` (QuestPDF, licença Community declarada no `Program.cs`), com gráficos do ScottPlot renderizados em PNG. Quantidades e valores são **líquidos de devolução** (`SalQntd - SalReturnedQntd`, vezes `SalPrice`), inclusive nos gráficos, e a venda totalmente devolvida fica fora, como na listagem de vendas. O recorte é o mês corrente do ano corrente, pelo `SalDateSale`; mês sem vendas responde 400 com aviso em vez de arquivo vazio. O resumo por IA dentro do PDF está comentado — é a issue #5.
 
-O roteiro e2e não chama esses endpoints. `InsightsTests` (bUnit) cobre só o lado da tela: `AiService` e `ReportsService` lançam `ApiException` em resposta de erro, como o `ApiExtensions`, e o Insights mostra o aviso sem deixar o carregamento girando nem pôr o erro da IA no chat.
+O roteiro e2e não chama esses endpoints. `InsightsTests` (bUnit) cobre só o lado da tela: `AiService` e `ReportsService` lançam `ApiException` em resposta de erro, como os demais serviços, e o Insights mostra o aviso sem deixar o carregamento girando nem pôr o erro da IA no chat.
 
 ### Papéis
 
