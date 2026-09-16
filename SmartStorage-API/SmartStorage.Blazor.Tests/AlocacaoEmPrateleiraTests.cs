@@ -127,9 +127,12 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
             .Closest(".mud-input-control")!.QuerySelector("input")!;
         quantidade.Change("4");
 
-        var necessario = cut.FindAll("label").First(l => l.TextContent.Trim() == "Volume necessário (L)")
-            .Closest(".mud-input-control")!.QuerySelector("input")!;
-        cut.WaitForAssertion(() => Assert.Equal("10", necessario.GetAttribute("value")));
+        cut.WaitForAssertion(() =>
+        {
+            var necessario = cut.FindAll("label").First(l => l.TextContent.Trim() == "Volume necessário (L)")
+                .Closest(".mud-input-control")!.QuerySelector("input")!;
+            Assert.Equal("10", necessario.GetAttribute("value"));
+        }, TimeSpan.FromSeconds(5));
         Assert.DoesNotContain("não tem volume cadastrado", cut.Markup);
     }
 
