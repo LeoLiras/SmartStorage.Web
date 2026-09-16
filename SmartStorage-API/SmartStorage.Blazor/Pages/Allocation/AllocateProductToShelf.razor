@@ -192,6 +192,9 @@ else if(enter is not null)
         {
             enter.ProductId = product.Id;
             enter.ProductName = product.Name;
+
+            if (enter.ProductPrice == 0)
+                enter.ProductPrice = product.PrecoInicial ?? 0;
         }
 
         enter.DateEnter = DateTime.Now;

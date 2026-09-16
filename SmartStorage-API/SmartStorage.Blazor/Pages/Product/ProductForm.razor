@@ -64,6 +64,9 @@ else if(product is not null)
                         <MudItem xs="12" sm="6" lg="4">
                             <MudNumericField T="decimal?" Label="Volume (L)" @bind-Value="product.Volume" For="(() => product.Volume)" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
                         </MudItem>
+                        <MudItem xs="12" sm="6" lg="4">
+                            <MudNumericField T="decimal?" Label="Preço inicial" @bind-Value="product.PrecoInicial" For="(() => product.PrecoInicial)" Min="0.01m" Format="F2" HelperText="Preço padrão ao alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                        </MudItem>
                     </MudGrid>
                 </section>
 
