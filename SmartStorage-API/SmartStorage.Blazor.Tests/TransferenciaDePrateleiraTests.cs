@@ -145,6 +145,20 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Destino_comeca_vazio_e_mostra_a_prateleira_escolhida()
+    {
+        Monta(EntradaNaPrateleira(8));
+        var cut = RenderizaTransferencia();
+        var destino = cut.FindComponent<MudSelect<int>>();
+
+        Assert.Equal(string.Empty, destino.Instance.Text ?? string.Empty);
+
+        cut.InvokeAsync(() => destino.Instance.ValueChanged.InvokeAsync(2));
+
+        cut.WaitForAssertion(() => Assert.Equal("Prateleira B1", destino.Instance.Text), TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
     public void Sem_destino_escolhido_nao_transfere()
     {
         var api = Monta(EntradaNaPrateleira(8));

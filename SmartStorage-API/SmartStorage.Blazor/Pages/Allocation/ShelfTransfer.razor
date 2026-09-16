@@ -32,7 +32,7 @@ else
                         <MudNumericField T="int" Label="Quantidade na prateleira" Value="entry.ProductQuantity" ReadOnly="true" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="4">
-                        <MudSelect T="int" @bind-Value="transfer.ShelfId" Label="Prateleira de destino" OpenIcon="@Icons.Material.Filled.Storefront" HelperText="Todo o saldo da prateleira atual vai para o destino" Variant="Variant.Outlined">
+                        <MudSelect T="int" @bind-Value="transfer.ShelfId" ToStringFunc="ShelfLabel" Label="Prateleira de destino" OpenIcon="@Icons.Material.Filled.Storefront" HelperText="Todo o saldo da prateleira atual vai para o destino" Variant="Variant.Outlined">
                             @foreach (var shelf in shelves.Where(s => s.Id != entry.ShelfId))
                             {
                                 <MudSelectItem T="int" Value="@shelf.Id">@shelf.Name</MudSelectItem>
@@ -81,6 +81,8 @@ else
     #endregion
 
     #region Methods
+
+    private string ShelfLabel(int shelfId) => shelves.FirstOrDefault(s => s.Id == shelfId)?.Name ?? string.Empty;
 
     private async Task TransferProduct(ProductVO product)
     {
