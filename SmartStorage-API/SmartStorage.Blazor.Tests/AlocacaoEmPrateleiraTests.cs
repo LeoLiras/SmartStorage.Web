@@ -83,6 +83,20 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Campo_de_prateleira_comeca_vazio_e_mostra_a_prateleira_escolhida()
+    {
+        Monta(volumeDoProduto: 2.5m);
+        var cut = Renderiza();
+        var select = cut.FindComponent<MudSelect<int>>();
+
+        Assert.Equal(string.Empty, select.Instance.Text ?? string.Empty);
+
+        Escolhe(cut, "Quantidade", "4", "Prateleira A1");
+
+        cut.WaitForAssertion(() => Assert.Equal("Prateleira A1 · 50% ocupada · 180 L livres", select.Instance.Text), TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
     public void Ocupacao_vem_da_api_mesmo_com_prateleiras_em_cache()
     {
         var app = new VariablesExtensions

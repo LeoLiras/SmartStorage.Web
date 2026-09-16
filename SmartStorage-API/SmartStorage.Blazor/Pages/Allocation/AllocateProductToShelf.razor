@@ -50,7 +50,7 @@ else if(enter is not null)
                             </MudItem>
                         }
                         <MudItem xs="12">
-                            <MudSelect T="int" @bind-Value="enter.ShelfId" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" Variant="Variant.Outlined">
+                            <MudSelect T="int" @bind-Value="enter.ShelfId" ToStringFunc="ShelfLabel" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" Variant="Variant.Outlined">
                                 @if (shelves is not null)
                                 {
                                     foreach (var shelf in shelves)
@@ -173,6 +173,13 @@ else if(enter is not null)
 
             await ShowDialog.ShowDialogAsync($"Erro ao alocar o produto.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
+    }
+
+    private string ShelfLabel(int shelfId)
+    {
+        var shelf = shelves?.FirstOrDefault(s => s.Id == shelfId);
+
+        return shelf is null ? string.Empty : $"{shelf.Name} · {Occupancy(shelf)}";
     }
 
     private static string Occupancy(ShelfVO shelf)
