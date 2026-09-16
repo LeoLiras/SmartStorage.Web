@@ -88,6 +88,26 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpPost("batch")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult CreateNewSales([FromBody] SaleBatchVO newSales)
+        {
+            try
+            {
+                if (newSales is null)
+                    throw new Exception("Os dados do carrinho são obrigatórios.");
+
+                if (newSales.DateSale == default)
+                    throw new Exception("O campo Data da Venda é obrigatório.");
+
+                return Ok(_saleService.CreateNewSales(newSales.Items, newSales.DateSale));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPut("{saleId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UpdateSale(int saleId, [FromBody] SaleVO newSale)

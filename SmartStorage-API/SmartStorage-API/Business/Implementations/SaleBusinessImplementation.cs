@@ -108,6 +108,90 @@ namespace SmartStorage_API.Service.Implementations
             return _converter.Parse(sale);
         }
 
+        public List<SaleVO> CreateNewSales(List<SaleBatchItemVO> items, DateTime dateSale)
+        {
+            if (items is null || items.Count == 0)
+                throw new Exception("O carrinho está vazio.");
+
+            var enterIds = items.Select(i => i.IdEnter).Distinct().ToList();
+
+            var enters = _context.Enters
+                .Where(e => enterIds.Contains(e.EntId))
+                .ToDictionary(e => e.EntId);
+
+            var names = _context.Enters
+                .Where(e => enterIds.Contains(e.EntId))
+                .Select(e => new { e.EntId, Description = e.Product.ProName + " na " + e.Shelf.SheName })
+                .ToDictionary(e => e.EntId, e => e.Description);
+
+            var requestedByEnter = new Dictionary<int, int>();
+
+            for (var index = 0; index < items.Count; index++)
+            {
+                var item = items[index];
+
+                var itemName = names.TryGetValue(item.IdEnter, out var description)
+                    ? $"Item {index + 1} ({description})"
+                    : $"Item {index + 1}";
+
+                if (!enters.TryGetValue(item.IdEnter, out var enter))
+                    throw new Exception($"{itemName}: entrada não encontrada com o ID informado.");
+
+                if (item.Qntd <= 0)
+                    throw new Exception($"{itemName}: a quantidade da venda deve ser maior que zero.");
+
+                var requested = requestedByEnter.GetValueOrDefault(enter.EntId) + item.Qntd;
+
+                if (requested > enter.EntQntd)
+                    throw new Exception($"{itemName}: saldo insuficiente na prateleira: há {enter.EntQntd} e o carrinho pede {requested}.");
+
+                requestedByEnter[enter.EntId] = requested;
+            }
+
+            var totalsBefore = enters.Values
+                .Select(e => e.EntProId)
+                .Distinct()
+                .ToDictionary(productId => productId, productId => _movementRepository.FindProductTotalBalance(productId));
+
+            var movementDate = DateTime.Now;
+
+            var sales = new List<Sale>();
+
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                foreach (var item in items)
+                {
+                    var enter = enters[item.IdEnter];
+
+                    var sale = new Sale
+                    {
+                        SalEntId = enter.EntId,
+                        SalQntd = item.Qntd,
+                        SalDateSale = dateSale,
+                        SalPrice = enter.EntPrice,
+                    };
+
+                    _context.Sales.Add(sale);
+
+                    _movementRepository.CreateNewStockMovement(
+                        enter.EntProId,
+                        enter.EntSheId,
+                        TipoMovimentacao.Venda,
+                        -item.Qntd,
+                        date: movementDate);
+
+                    sales.Add(sale);
+                }
+
+                transaction.Commit();
+            }
+
+            foreach (var (productId, totalBefore) in totalsBefore)
+                _stockAlert.NotifyIfBelowMinimum(productId, totalBefore, "Venda");
+
+            return _converter.Parse(sales);
+        }
+
         public SaleVO UpdateSale(int saleId, int saleQntd)
         {
             var sale = _context.Sales.FirstOrDefault(s => s.SalId == saleId);
