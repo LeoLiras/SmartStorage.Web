@@ -91,7 +91,7 @@ Listagem paginada é opcional por query string: `GET /sales/v1?page=1&pageSize=1
 
 ### Chamadas do Blazor à API
 
-A API principal está migrando do `Utils/API/ApiExtensions.cs` genérico (endpoint escolhido pelo tipo do VO) para serviços tipados, como os de IA, relatórios, e-mail e autenticação (#22). Ordem: vendas, prateleiras e alocações, produtos, funcionários; no fim o `ApiExtensions` sai. **Vendas já estão em `ISaleService`/`SaleService`**, e o `ApiExtensions` não conhece mais `SaleVO`.
+A API principal está migrando do `Utils/API/ApiExtensions.cs` genérico (endpoint escolhido pelo tipo do VO) para serviços tipados, como os de IA, relatórios, e-mail e autenticação (#22). Ordem: vendas, prateleiras e alocações, produtos, funcionários; no fim o `ApiExtensions` sai. **Vendas já estão em `ISaleService`/`SaleService` e prateleiras e alocações em `IShelfService`/`ShelfService`** (listas, página, alocação individual e em lote, desfazer com `PUT` sem corpo e transferência); o `ApiExtensions` não conhece mais `SaleVO`, `ShelfVO` nem `EnterVO`.
 
 Cada serviço tem interface em `Services/IServices`, é registrado no `Program.cs` com `AddHttpClient`, `AuthHandler` (token do `localStorage` por requisição) e `SessionExpiredHandler` (401 leva ao login), e trata a resposta com `HttpResponseExtensions`: `ReadApiAsync` lança `ApiException` com o status e a mensagem da API, `ReadApiPageAsync` lê o `X-Total-Count` e `WithPage` monta a query de paginação. Nos testes, registre o serviço sobre `api.Cliente()`.
 
