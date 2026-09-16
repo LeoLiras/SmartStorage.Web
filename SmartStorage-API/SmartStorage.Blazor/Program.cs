@@ -38,6 +38,10 @@ builder.Services.AddHttpClient<IAiService, AiService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AIAPI"])
             ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
 
+builder.Services.AddHttpClient<ISaleService, SaleService>(c =>
+                c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+
 builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"])
             ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
