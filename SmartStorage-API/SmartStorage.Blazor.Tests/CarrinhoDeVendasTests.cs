@@ -78,10 +78,6 @@ public class CarrinhoDeVendasTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(dialogo, new SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(new HttpClient(api)
-        {
-            BaseAddress = new Uri("http://localhost/"),
-        }));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         Services.AddScoped<SaleCart>();

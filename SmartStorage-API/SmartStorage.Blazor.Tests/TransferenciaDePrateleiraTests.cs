@@ -77,10 +77,6 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(_dialogo, new SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(new HttpClient(api)
-        {
-            BaseAddress = new Uri("http://localhost/"),
-        }));
         Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));

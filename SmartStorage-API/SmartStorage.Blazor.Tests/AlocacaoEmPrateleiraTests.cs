@@ -47,10 +47,6 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(app ?? new VariablesExtensions());
         Services.AddSingleton(new Dialogo(Substitute.For<IDialogService>(), new SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(new HttpClient(api)
-        {
-            BaseAddress = new Uri("http://localhost/"),
-        }));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");

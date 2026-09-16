@@ -112,7 +112,6 @@ public class SessaoExpiradaTests : BunitContext, IAsyncLifetime
         Services.AddSingleton(auth);
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(dialogo, sessao));
-        Services.AddSingleton(new ApiExtensions(Cliente(api, sessao)));
         Services.AddSingleton<IEmployeeService>(new EmployeeService(Cliente(api, sessao)));
         Services.AddSingleton<IProductService>(new ProductService(Cliente(api, sessao)));
         AddAuthorization().SetAuthorized("admin");

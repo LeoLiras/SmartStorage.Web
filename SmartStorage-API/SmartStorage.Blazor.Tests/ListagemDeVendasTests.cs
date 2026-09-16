@@ -53,10 +53,6 @@ public class ListagemDeVendasTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(dialogo, new SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(new HttpClient(api)
-        {
-            BaseAddress = new Uri("http://localhost/"),
-        }));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         Services.AddSingleton<ISaleService>(new SaleService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");

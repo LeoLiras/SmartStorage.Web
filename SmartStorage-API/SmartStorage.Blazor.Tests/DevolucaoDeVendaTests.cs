@@ -70,10 +70,6 @@ public class DevolucaoDeVendaTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(app ?? new VariablesExtensions());
         Services.AddSingleton(new Dialogo(dialogo, new SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(new HttpClient(api)
-        {
-            BaseAddress = new Uri("http://localhost/"),
-        }));
         Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
         Services.AddSingleton<ISaleService>(new SaleService(api.Cliente()));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));

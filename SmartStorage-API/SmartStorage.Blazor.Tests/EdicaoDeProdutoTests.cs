@@ -58,10 +58,6 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
         Services.AddMudServices();
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(_dialogo, new SmartStorage.Blazor.Authentication.SessionExpiration()));
-        Services.AddSingleton(new ApiExtensions(new HttpClient(api)
-        {
-            BaseAddress = new Uri("http://localhost/"),
-        }));
         Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
