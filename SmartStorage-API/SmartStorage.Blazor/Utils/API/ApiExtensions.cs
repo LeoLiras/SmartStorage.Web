@@ -31,8 +31,6 @@ namespace SmartStorage.Blazor.Utils.API
         //Produtos alocados para venda (nas prateleiras)
         private string entersEndpoint = "api/storage/shelf/v1/allocation";
 
-        private string salesEndpoint = "api/storage/sales/v1";
-
         private string employeesEndpoint = "api/storage/employees/v1";
 
         #endregion
@@ -269,44 +267,6 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
-        public async Task<List<SaleVO>> CreateSales(SaleBatchVO batch)
-        {
-            if (batch == null)
-                throw new ArgumentNullException(nameof(batch), message: "Os dados do carrinho são obrigatórios.");
-
-            var response = await _http.PostAsJsonAsync($"{salesEndpoint}/batch", batch);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<List<SaleVO>>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
-        public async Task<SaleVO> ReturnSale(int saleId, SaleReturnVO saleReturn)
-        {
-            if (saleReturn == null)
-                throw new ArgumentNullException(nameof(saleReturn), message: "Os dados da devolução são obrigatórios.");
-
-            var response = await _http.PostAsJsonAsync($"{salesEndpoint}/{saleId}/return", saleReturn);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<SaleVO>();
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-
-                throw new ApiException((int)response.StatusCode, error);
-            }
-        }
-
         /// <summary>
         /// Requisição PUT para atualização de registros existentes
         /// </summary>
@@ -370,9 +330,6 @@ namespace SmartStorage.Blazor.Utils.API
 
             else if (typeof(TVO) == typeof(ProductVO))
                 return productsEndpoint;
-
-            else if (typeof(TVO) == typeof(SaleVO))
-                return salesEndpoint;
 
             else if (typeof(TVO) == typeof(ShelfVO))
                 return shelvesEndpoint;

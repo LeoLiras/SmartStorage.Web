@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @inject ApiExtensions api
+@inject ISaleService saleService
 @inject NavigationManager nav
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
@@ -62,7 +63,7 @@
     {
         try
         {
-            var (items, total) = await api.GetPage<SaleVO>(state.Page + 1, state.PageSize, searchString);
+            var (items, total) = await saleService.GetSalesPage(state.Page + 1, state.PageSize, searchString);
 
             return new TableData<SaleVO> { Items = items, TotalItems = total };
         }
@@ -95,7 +96,7 @@
 
             if (dialogConfirmmation)
             {
-                await api.Delete<SaleVO>(saleId);
+                await saleService.CancelSale(saleId);
 
                 app.Sales = new();
 

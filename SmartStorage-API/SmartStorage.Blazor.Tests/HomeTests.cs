@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
 using NSubstitute;
+using SmartStorage.Blazor.Services;
 using SmartStorage.Blazor.Authentication;
 using SmartStorage.Blazor.Pages;
 using SmartStorage.Blazor.Services.IServices;
@@ -40,6 +41,7 @@ public class HomeTests : BunitContext, IAsyncLifetime
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(Substitute.For<IDialogService>(), new SessionExpiration()));
         Services.AddSingleton(new ApiExtensions(new HttpClient(api) { BaseAddress = new Uri("http://localhost/") }));
+        Services.AddSingleton<ISaleService>(new SaleService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin").SetRoles(papel).SetClaims(new Claim("unique_name", "admin"));
 
         var cut = Render<Home>();

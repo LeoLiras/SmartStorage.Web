@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @inject ApiExtensions api
+@inject ISaleService saleService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -114,7 +115,7 @@ else
         {
             saving = true;
 
-            var sales = await api.CreateSales(cart.ToBatch(dateSale ?? DateTime.Now));
+            var sales = await saleService.CreateSales(cart.ToBatch(dateSale ?? DateTime.Now));
 
             await cart.ClearAsync();
 

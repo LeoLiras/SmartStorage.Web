@@ -28,6 +28,11 @@ public class ApiFalsa : HttpMessageHandler
         return this;
     }
 
+    public HttpClient Cliente() => new(this, disposeHandler: false)
+    {
+        BaseAddress = new Uri("http://localhost/"),
+    };
+
     public string CorpoDe(HttpMethod metodo, string caminho)
     {
         var achado = Requisicoes.LastOrDefault(

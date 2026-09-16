@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
 using NSubstitute;
+using SmartStorage.Blazor.Services.IServices;
+using SmartStorage.Blazor.Services;
 using SmartStorage.Blazor.Authentication;
 using SmartStorage.Blazor.Layout;
 using SmartStorage.Blazor.Pages.Product;
@@ -81,6 +83,7 @@ public class CarrinhoDeVendasTests : BunitContext, IAsyncLifetime
             BaseAddress = new Uri("http://localhost/"),
         }));
         Services.AddScoped<SaleCart>();
+        Services.AddSingleton<ISaleService>(new SaleService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
 
         return api;

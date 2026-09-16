@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 @inject ApiExtensions api
+@inject ISaleService saleService
 @inject VariablesExtensions app
 @inject IAuthService auth
 @inject AuthenticationStateProvider authProvider
@@ -87,7 +88,7 @@ else
                     app.ProductEntries = await api.Get<EnterVO>();
 
                 if (app.Sales?.Count == 0)
-                    app.Sales = await api.Get<SaleVO>();
+                    app.Sales = await saleService.GetSales();
 
                 if (app.User.Id == 0)
                     app.User = await auth.GetUser(user.FindFirst("unique_name")?.Value);

@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @inject ApiExtensions api
+@inject ISaleService saleService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -125,10 +126,10 @@ else
             if (entry is null || newSale is null)
                 return;
 
-            await api.Post<SaleVO>(newSale);
+            await saleService.CreateSale(newSale);
 
             app.ProductEntries = await api.Get<EnterVO>();
-            app.Sales = await api.Get<SaleVO>();
+            app.Sales = await saleService.GetSales();
 
             await ShowDialog.ShowDialogAsync("Produto vendido com sucesso", "Sucesso", app.productsInShelvesPage, EDialogStates.Success);
 
