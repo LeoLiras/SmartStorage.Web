@@ -28,6 +28,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 ProQntd = origin.Qntd,
                 ProMinimumStock = origin.MinimumStock,
                 ProVolume = origin.Volume,
+                ProPrecoInicial = origin.PrecoInicial,
                 ProEmpId = origin.EmployeeId,
             };
         }
@@ -80,6 +81,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 ShelvesQntd = shelvesQuantity,
                 MinimumStock = origin.ProMinimumStock,
                 Volume = origin.ProVolume,
+                PrecoInicial = origin.ProPrecoInicial,
                 EmployeeId = origin.ProEmpId,
                 ProImage = origin.ProImage,
             };

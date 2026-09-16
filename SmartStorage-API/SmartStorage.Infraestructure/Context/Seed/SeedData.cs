@@ -91,25 +91,26 @@ internal static class SeedData
     private static void SeedProducts(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>().HasData(
-            Produto(1, "Furadeira de Impacto 750W", "Furadeira de impacto com mandril de 13mm, velocidade variável e reversão.", 14, 1, 6.0m),
-            Produto(2, "Parafusadeira sem Fio 12V", "Parafusadeira a bateria com duas velocidades, maleta e duas baterias de lítio.", 0, 1, 4.5m),
-            Produto(3, "Serra Circular 1400W", "Serra circular com disco de 184mm e guia paralela para cortes retos.", 5, 2, 12.0m),
-            Produto(4, "Martelo Unha 27mm", "Martelo com cabeça de aço forjado e cabo de fibra de vidro antiderrapante.", 0, 2, 1.5m),
-            Produto(5, "Jogo de Chaves de Fenda", "Conjunto com seis chaves de fenda e philips com cabo emborrachado.", 15, 3, 1.2m),
-            Produto(6, "Trena a Laser 40 Metros", "Medidor de distância a laser com precisão de 2mm e cálculo de área.", 0, 3, 0.8m),
-            Produto(7, "Capacete de Segurança Branco", "Capacete de proteção classe B com carneira ajustável e certificado pelo CA.", 35, 4, 6.0m),
-            Produto(8, "Luva de Proteção Nitrílica", "Par de luvas revestidas em nitrilo para manuseio de peças e ferramentas.", 50, 4, 0.3m),
-            Produto(9, "Óculos de Proteção Incolor", "Óculos de segurança com lente antirrisco e proteção contra impactos.", 0, 5, 0.4m),
-            Produto(10, "Fita Isolante 20 Metros", "Fita isolante antichama de 19mm por 20 metros para emendas elétricas.", 80, 5, 0.1m));
+            Produto(1, "Furadeira de Impacto 750W", "Furadeira de impacto com mandril de 13mm, velocidade variável e reversão.", 14, 1, 6.0m, 289.90m),
+            Produto(2, "Parafusadeira sem Fio 12V", "Parafusadeira a bateria com duas velocidades, maleta e duas baterias de lítio.", 0, 1, 4.5m, 349.00m),
+            Produto(3, "Serra Circular 1400W", "Serra circular com disco de 184mm e guia paralela para cortes retos.", 5, 2, 12.0m, 529.90m),
+            Produto(4, "Martelo Unha 27mm", "Martelo com cabeça de aço forjado e cabo de fibra de vidro antiderrapante.", 0, 2, 1.5m, 45.50m),
+            Produto(5, "Jogo de Chaves de Fenda", "Conjunto com seis chaves de fenda e philips com cabo emborrachado.", 15, 3, 1.2m, 79.90m),
+            Produto(6, "Trena a Laser 40 Metros", "Medidor de distância a laser com precisão de 2mm e cálculo de área.", 0, 3, 0.8m, 219.00m),
+            Produto(7, "Capacete de Segurança Branco", "Capacete de proteção classe B com carneira ajustável e certificado pelo CA.", 35, 4, 6.0m, 32.90m),
+            Produto(8, "Luva de Proteção Nitrílica", "Par de luvas revestidas em nitrilo para manuseio de peças e ferramentas.", 50, 4, 0.3m, 12.40m),
+            Produto(9, "Óculos de Proteção Incolor", "Óculos de segurança com lente antirrisco e proteção contra impactos.", 0, 5, 0.4m, 18.75m),
+            Produto(10, "Fita Isolante 20 Metros", "Fita isolante antichama de 19mm por 20 metros para emendas elétricas.", 80, 5, 0.1m, 8.90m));
     }
 
-    private static Product Produto(int id, string nome, string descricao, int quantidade, int funcionarioId, decimal volume) => new()
+    private static Product Produto(int id, string nome, string descricao, int quantidade, int funcionarioId, decimal volume, decimal precoInicial) => new()
     {
         ProId = id,
         ProName = nome,
         ProDescription = descricao,
         ProQntd = quantidade,
         ProVolume = volume,
+        ProPrecoInicial = precoInicial,
         ProEmpId = funcionarioId,
         ProDateRegister = CadastroProdutos,
         ProImage = SeedImages.ForProduct(id)

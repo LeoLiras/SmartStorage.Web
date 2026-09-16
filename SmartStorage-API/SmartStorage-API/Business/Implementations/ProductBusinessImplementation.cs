@@ -91,6 +91,8 @@ namespace SmartStorage_API.Service.Implementations
 
             ValidateVolume(product.Volume);
 
+            ValidateInitialPrice(product.PrecoInicial);
+
             var newProduct = new Product
             {
                 ProName = product.Name,
@@ -99,6 +101,7 @@ namespace SmartStorage_API.Service.Implementations
                 ProQntd = 0,
                 ProMinimumStock = product.MinimumStock,
                 ProVolume = product.Volume,
+                ProPrecoInicial = product.PrecoInicial,
                 ProEmpId = product.EmployeeId,
                 ProImage = product.ProImage
             };
@@ -138,11 +141,15 @@ namespace SmartStorage_API.Service.Implementations
 
             ValidateVolume(product.Volume);
 
+            ValidateInitialPrice(product.PrecoInicial);
+
             searchProduct.ProEmpId = product.EmployeeId;
 
             searchProduct.ProMinimumStock = product.MinimumStock;
 
             searchProduct.ProVolume = product.Volume;
+
+            searchProduct.ProPrecoInicial = product.PrecoInicial;
 
             if (!string.IsNullOrWhiteSpace(product.Name))
                 searchProduct.ProName = product.Name;
@@ -192,6 +199,12 @@ namespace SmartStorage_API.Service.Implementations
         {
             if (volume <= 0)
                 throw new Exception("O volume do produto deve ser maior que zero.");
+        }
+
+        private static void ValidateInitialPrice(decimal? price)
+        {
+            if (price <= 0)
+                throw new Exception("O preço inicial do produto deve ser maior que zero.");
         }
 
         private static int CalculateStockAdjustmentDelta(Product product, int newQuantity)

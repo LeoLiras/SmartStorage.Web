@@ -28,6 +28,8 @@ public partial class Product
 
     public decimal? ProVolume { get; set; }
 
+    public decimal? ProPrecoInicial { get; set; }
+
     public int? ProEmpId { get; set; }
 
     public byte[] ProImage { get; set; }
