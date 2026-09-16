@@ -352,7 +352,7 @@ class Contexto:
             raise Erro("preciso de pelo menos duas prateleiras cadastradas")
         return corpo[0]["id"], corpo[1]["id"]
 
-    def cria_produto(self, qntd, sufixo, minimo=0, volume=0.01):
+    def cria_produto(self, qntd, sufixo, minimo=0, volume=0.01, preco_inicial=None):
         nome = "%s %s %s" % (PREFIXO, EXECUCAO, sufixo)
         corpo = {
             "name": nome,
@@ -361,6 +361,7 @@ class Contexto:
             "qntd": qntd,
             "minimumStock": minimo,
             "volume": volume,
+            "precoInicial": preco_inicial,
             "employeeId": self.funcionario,
             "proImage": None,
         }
@@ -1462,6 +1463,97 @@ def ct39(ctx):
     confere_autor(ctx, movs)
     confere_invariante(pid, antes, {ctx.prateleira_a: 0}, movs)
     R.exige(total_vendas() == vendas + 2, "itens repetidos nao viraram vendas separadas")
+
+
+def _lote(ctx, itens):
+    return ctx.api("POST", "/api/storage/shelf/v1/allocation/batch", {
+        "items": [{"productId": produto, "shelfId": prateleira, "qntd": quantidade, "price": preco}
+                  for produto, prateleira, quantidade, preco in itens]})
+
+
+def _preco_inicial(ctx, pid):
+    status, vo = ctx.api("GET", "/api/storage/products/v1/%d" % pid)
+    return vo.get("precoInicial") if status == 200 and isinstance(vo, dict) else None
+
+
+@caso("CT-40", "Lote aloca varios produtos num unico envio")
+def ct40(ctx):
+    p1 = ctx.cria_produto(10, "CT40 Um", preco_inicial=11.5)
+    p2 = ctx.cria_produto(10, "CT40 Dois", preco_inicial=22.0)
+    R.exige(_preco_inicial(ctx, p1) == 11.5, "preco inicial nao voltou na API", "%r" % _preco_inicial(ctx, p1))
+
+    antes1, antes2 = saldos(p1), saldos(p2)
+    marca = ultimo_movimento()
+    status, corpo = _lote(ctx, [(p1, ctx.prateleira_a, 3, 11.5), (p2, ctx.prateleira_b, 4, 25.0)])
+    R.exige(status == 200 and isinstance(corpo, list) and len(corpo) == 2,
+            "lote valido recusado", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+    movs1, movs2 = movimentos_depois(marca, p1), movimentos_depois(marca, p2)
+    confere_linhas(movs1, [(None, ALOCACAO, -3), (ctx.prateleira_a, ALOCACAO, 3)])
+    confere_linhas(movs2, [(None, ALOCACAO, -4), (ctx.prateleira_b, ALOCACAO, 4)])
+    confere_carimbo(movs1 + movs2)
+    R.exige(len({m["data"] for m in movs1 + movs2}) == 1, "lancamentos do lote com carimbos diferentes",
+            str(sorted({m["data"] for m in movs1 + movs2})))
+    confere_autor(ctx, movs1 + movs2)
+    confere_invariante(p1, antes1, {None: 7, ctx.prateleira_a: 3}, movs1)
+    confere_invariante(p2, antes2, {None: 6, ctx.prateleira_b: 4}, movs2)
+
+    e1, e2 = entrada_de(p1, ctx.prateleira_a), entrada_de(p2, ctx.prateleira_b)
+    R.exige(e1 is not None and abs(e1["preco"] - 11.5) < 0.001, "preco da prateleira diferente do enviado no lote", "%r" % e1)
+    R.exige(e2 is not None and abs(e2["preco"] - 25.0) < 0.001, "preco alterado no lote nao foi gravado", "%r" % e2)
+    R.exige(_preco_inicial(ctx, p2) == 22.0, "alocar mudou o preco inicial do produto", "%r" % _preco_inicial(ctx, p2))
+
+
+@caso("CT-41", "Lote que estoura a capacidade somada nao grava nada")
+def ct41(ctx):
+    pequena = _cria_prateleira(ctx, "CT41 Dez Litros", 10)
+    p1 = ctx.cria_produto(10, "CT41 Um", volume=1.5)
+    p2 = ctx.cria_produto(10, "CT41 Dois", volume=1.5)
+    antes1, antes2 = saldos(p1), saldos(p2)
+    marca = ultimo_movimento()
+
+    status, corpo = _lote(ctx, [(p1, pequena, 4, 5.0), (p2, pequena, 4, 5.0)])
+    R.exige(status == 400 and "Item 2" in _mensagem(corpo) and "não comporta" in _mensagem(corpo)
+            and "outros itens do lote" in _mensagem(corpo),
+            "lote acima do teto somado aceito ou sem apontar o item", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.nota(_mensagem(corpo))
+
+    confere_linhas(movimentos_depois(marca), [])
+    R.exige(saldos(p1) == antes1 and saldos(p2) == antes2, "saldo mudou num lote recusado")
+    R.exige(entrada_de(p1, pequena) is None and entrada_de(p2, pequena) is None, "lote recusado criou entrada na prateleira")
+
+    status, corpo = _lote(ctx, [(p1, pequena, 3, 5.0), (p2, pequena, 3, 5.0)])
+    R.exige(status == 200, "lote que cabe no teto somado (9 L) foi recusado", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+
+@caso("CT-42", "Lote com item invalido nao grava nada")
+def ct42(ctx):
+    p1 = ctx.cria_produto(10, "CT42 Um")
+    p2 = ctx.cria_produto(2, "CT42 Dois")
+    p3 = ctx.cria_produto(10, "CT42 Tres")
+    R.exige(_aloca(ctx, p3, ctx.prateleira_a, 2, 4.0) == 200, "pre-condicao falhou: alocacao recusada")
+    antes = {p: saldos(p) for p in (p1, p2, p3)}
+    marca = ultimo_movimento()
+
+    status, sem_saldo = _lote(ctx, [(p1, ctx.prateleira_a, 1, 4.0), (p2, ctx.prateleira_a, 3, 4.0)])
+    R.exige(status == 400 and "Item 2" in _mensagem(sem_saldo) and "saldo insuficiente no depósito" in _mensagem(sem_saldo),
+            "item sem saldo no deposito aceito ou sem apontar o item", "HTTP %s: %s" % (status, _mensagem(sem_saldo)))
+    R.nota(_mensagem(sem_saldo))
+
+    status, repetido = _lote(ctx, [(p1, ctx.prateleira_a, 1, 4.0), (p1, ctx.prateleira_a, 1, 4.0)])
+    R.exige(status == 400 and "Item 2" in _mensagem(repetido) and "mais de uma vez" in _mensagem(repetido),
+            "produto repetido no lote aceito", "HTTP %s: %s" % (status, _mensagem(repetido)))
+
+    status, outra = _lote(ctx, [(p1, ctx.prateleira_a, 1, 4.0), (p3, ctx.prateleira_b, 1, 4.0)])
+    R.exige(status == 400 and "Item 2" in _mensagem(outra) and "já está alocado" in _mensagem(outra),
+            "produto com saldo em outra prateleira aceito no lote", "HTTP %s: %s" % (status, _mensagem(outra)))
+
+    status, vazio = _lote(ctx, [])
+    R.exige(status == 400, "lote vazio aceito", "HTTP %s: %s" % (status, _mensagem(vazio)))
+
+    confere_linhas(movimentos_depois(marca), [])
+    R.exige({p: saldos(p) for p in (p1, p2, p3)} == antes, "saldo mudou num lote recusado")
+    R.exige(entrada_de(p1, ctx.prateleira_a) is None, "lote recusado criou entrada do item valido")
 
 
 # --------------------------------------------------------------------------- #
