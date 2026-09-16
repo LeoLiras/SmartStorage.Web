@@ -155,8 +155,8 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
 
         cut.Find("form").Submit();
 
+        cut.WaitForAssertion(() => _dialogo.ReceivedWithAnyArgs().ShowAsync<Pages.Dialog.Dialog>(default, default, default), TimeSpan.FromSeconds(5));
         Assert.DoesNotContain(api.Requisicoes, r => r.Metodo != HttpMethod.Get);
-        _dialogo.ReceivedWithAnyArgs().ShowAsync<Pages.Dialog.Dialog>(default, default, default);
     }
 
     [Fact]
