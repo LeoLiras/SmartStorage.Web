@@ -51,6 +51,7 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
     }

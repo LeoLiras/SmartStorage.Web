@@ -2,7 +2,7 @@
 
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IProductService productService
 @inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
@@ -122,7 +122,7 @@ else if(enter is not null)
             if (productId != 0)
             {
                 if (app.ActualProduct is null)
-                    product = await api.GetById<ProductVO>(productId);
+                    product = await productService.GetProductById(productId);
                 else
                     product = app.ActualProduct;
             }

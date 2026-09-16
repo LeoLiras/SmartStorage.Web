@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using MudBlazor.Services;
 using NSubstitute;
+using SmartStorage.Blazor.Services;
+using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Pages.Product;
 using SmartStorage.Blazor.Utils.API;
 using SmartStorage.Blazor.Utils.Variables;
@@ -60,6 +62,7 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
 
         return api;

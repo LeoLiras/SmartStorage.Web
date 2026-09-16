@@ -1,7 +1,7 @@
 @page "/products/shelves"
 @attribute [Authorize]
 
-@inject ApiExtensions api
+@inject IProductService productService
 @inject IShelfService shelfService
 @inject VariablesExtensions app
 @inject NavigationManager nav
@@ -90,7 +90,7 @@
     private async Task SaleProduct(EnterVO entry)
     {
         app.ActualEntry = entry;
-        app.ActualProduct = await api.GetById<ProductVO>(entry.ProductId);
+        app.ActualProduct = await productService.GetProductById(entry.ProductId);
 
         nav.NavigateTo($"product/sale/{entry.Id}");
     }

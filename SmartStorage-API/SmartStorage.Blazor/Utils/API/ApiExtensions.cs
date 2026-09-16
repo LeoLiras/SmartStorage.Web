@@ -23,9 +23,6 @@ namespace SmartStorage.Blazor.Utils.API
 
         #region Endpoints
 
-        //Produtos em estoque
-        private string productsEndpoint = "api/storage/products/v1";
-
         private string employeesEndpoint = "api/storage/employees/v1";
 
         #endregion
@@ -281,9 +278,6 @@ namespace SmartStorage.Blazor.Utils.API
         {
             if (typeof(TVO) == typeof(EmployeeVO))
                 return employeesEndpoint;
-
-            else if (typeof(TVO) == typeof(ProductVO))
-                return productsEndpoint;
 
             else
                 return string.Empty;

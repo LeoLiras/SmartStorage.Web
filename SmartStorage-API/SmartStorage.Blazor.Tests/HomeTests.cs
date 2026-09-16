@@ -41,6 +41,7 @@ public class HomeTests : BunitContext, IAsyncLifetime
         Services.AddSingleton(new VariablesExtensions());
         Services.AddSingleton(new Dialogo(Substitute.For<IDialogService>(), new SessionExpiration()));
         Services.AddSingleton(new ApiExtensions(new HttpClient(api) { BaseAddress = new Uri("http://localhost/") }));
+        Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         Services.AddSingleton<ISaleService>(new SaleService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin").SetRoles(papel).SetClaims(new Claim("unique_name", "admin"));

@@ -59,6 +59,7 @@ public class ListagemDePrateleirasTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
         Services.AddScoped<SaleCart>();
         AddAuthorization().SetAuthorized("admin");

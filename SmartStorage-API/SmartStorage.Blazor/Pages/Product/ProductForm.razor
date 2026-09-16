@@ -1,4 +1,5 @@
 ﻿@inject ApiExtensions api
+@inject IProductService productService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -183,7 +184,7 @@ else if(product is not null)
                 if (app.ActualProduct is not null && app.ActualProduct.Id == ProductId)
                     product = app.ActualProduct;
                 else
-                    product = await api.GetById<ProductVO>(ProductId);
+                    product = await productService.GetProductById(ProductId);
 
                 adjustQuantity = product.Qntd;
             }
