@@ -10,6 +10,7 @@ using SmartStorage.Blazor.Authentication;
 using SmartStorage.Blazor.Pages.Allocation;
 using SmartStorage.Blazor.Pages.Product;
 using SmartStorage.Blazor.Utils.API;
+using SmartStorage.Blazor.Utils.Cart;
 using SmartStorage.Blazor.Utils.Variables;
 using Dialogo = SmartStorage.Blazor.Utils.ShowDialog.ShowDialog;
 
@@ -78,6 +79,7 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddScoped<SaleCart>();
         AddAuthorization().SetAuthorized("admin");
 
         return api;
@@ -177,7 +179,7 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
         });
 
         cut.WaitForElement("td button");
-        cut.FindAll("td button")[1].Click();
+        cut.Find("button[aria-label='Transferir para outra prateleira']").Click();
 
         Assert.EndsWith($"product/shelf/transfer/{Entrada}", Services.GetRequiredService<NavigationManager>().Uri);
     }

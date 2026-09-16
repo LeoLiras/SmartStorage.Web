@@ -250,6 +250,25 @@ namespace SmartStorage.Blazor.Utils.API
             }
         }
 
+        public async Task<List<SaleVO>> CreateSales(SaleBatchVO batch)
+        {
+            if (batch == null)
+                throw new ArgumentNullException(nameof(batch), message: "Os dados do carrinho são obrigatórios.");
+
+            var response = await _http.PostAsJsonAsync($"{salesEndpoint}/batch", batch);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<SaleVO>>();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new ApiException((int)response.StatusCode, error);
+            }
+        }
+
         public async Task<SaleVO> ReturnSale(int saleId, SaleReturnVO saleReturn)
         {
             if (saleReturn == null)

@@ -1,0 +1,24 @@
+@implements IDisposable
+@inject SaleCart cart
+
+@if (cart.Count > 0)
+{
+    <MudTooltip Text="@($"Carrinho: {cart.Count} item(ns)")">
+        <MudBadge Content="cart.Count" Color="Color.Primary" Overlap="true" Class="mr-3">
+            <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" Href="products/sales/cart" aria-label="Abrir o carrinho" />
+        </MudBadge>
+    </MudTooltip>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        cart.Changed += OnCartChanged;
+
+        await cart.LoadAsync();
+    }
+
+    private void OnCartChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => cart.Changed -= OnCartChanged;
+}

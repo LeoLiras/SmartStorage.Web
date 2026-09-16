@@ -5,6 +5,8 @@
 @inject VariablesExtensions app
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
+@inject SaleCart cart
+@inject ISnackbar Snackbar
 
 <MudTable @ref="table" T="EnterVO" Class="app-table mt-3" Elevation="0" ServerData="LoadEntries" Dense="false" Hover="true" Bordered="false" Striped="false" RowsPerPage="10">
     <ToolBarContent>
@@ -27,6 +29,7 @@
         <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
         <MudTd DataLabel="Data de entrada" Class="num">@context.DateEnter.ToString("dd/MM/yyyy HH:mm")</MudTd>
         <MudTd DataLabel="Ações" Class="app-cell-actions">
+            <MudTooltip Text="Adicionar ao carrinho"><MudIconButton Icon="@Icons.Material.Filled.AddShoppingCart" Color="Color.Primary" aria-label="@($"Adicionar {context.ProductName} ao carrinho")" OnClick="@(() => AddToCart(context))"></MudIconButton></MudTooltip>
             <MudTooltip Text="Vender"><MudIconButton Icon="@Icons.Material.Filled.PointOfSale" Color="Color.Success" aria-label="Vender" OnClick="@(() => SaleProduct(context))"></MudIconButton></MudTooltip>
             <MudTooltip Text="Transferir para outra prateleira"><MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Info" aria-label="Transferir para outra prateleira" OnClick="@(() => TransferProduct(context.Id))"></MudIconButton></MudTooltip>
             <MudTooltip Text="Enviar de volta para o estoque"><MudIconButton Icon="@Icons.Material.Filled.AssignmentReturn" Color="Color.Warning" aria-label="Enviar de volta para o estoque" OnClick="@(() => UndoAllocation(context.Id))"></MudIconButton></MudTooltip>
@@ -52,6 +55,8 @@
     private MudTable<EnterVO> table;
 
     string searchString = string.Empty;
+
+    private Snackbar cartSnackbar;
 
     #endregion
 
@@ -87,6 +92,18 @@
         app.ActualProduct = await api.GetById<ProductVO>(entry.ProductId);
 
         nav.NavigateTo($"product/sale/{entry.Id}");
+    }
+
+    private async Task AddToCart(EnterVO entry)
+    {
+        var item = await cart.AddAsync(entry);
+
+        if (cartSnackbar is not null)
+            Snackbar.Remove(cartSnackbar);
+
+        cartSnackbar = item.ExceedsAvailable
+            ? Snackbar.Add($"O carrinho tem {item.Qntd} de {entry.ProductName}, mas a prateleira só tem {entry.ProductQuantity}.", Severity.Warning)
+            : Snackbar.Add($"{entry.ProductName} no carrinho: {item.Qntd} unidade(s).", Severity.Success);
     }
 
     private void TransferProduct(int entryId)

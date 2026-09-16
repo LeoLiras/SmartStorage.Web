@@ -8,6 +8,7 @@ using NSubstitute;
 using SmartStorage.Blazor.Authentication;
 using SmartStorage.Blazor.Pages.Product;
 using SmartStorage.Blazor.Utils.API;
+using SmartStorage.Blazor.Utils.Cart;
 using SmartStorage.Blazor.Utils.Variables;
 using Dialogo = SmartStorage.Blazor.Utils.ShowDialog.ShowDialog;
 
@@ -57,6 +58,7 @@ public class ListagemDePrateleirasTests : BunitContext, IAsyncLifetime
         {
             BaseAddress = new Uri("http://localhost/"),
         }));
+        Services.AddScoped<SaleCart>();
         AddAuthorization().SetAuthorized("admin");
 
         return api;
@@ -133,7 +135,7 @@ public class ListagemDePrateleirasTests : BunitContext, IAsyncLifetime
         var cut = RenderizaPrateleiras();
         cut.WaitForAssertion(() => Assert.Contains("Produto 3", cut.Markup));
 
-        cut.FindAll("td button")[2].Click();
+        cut.Find("button[aria-label='Enviar de volta para o estoque']").Click();
 
         cut.WaitForAssertion(() => Assert.Equal(2, ConsultasDaListagem(api).Count));
         Assert.Single(api.Requisicoes, r => r.Metodo == HttpMethod.Put && r.Caminho == $"{Alocacoes}/1");

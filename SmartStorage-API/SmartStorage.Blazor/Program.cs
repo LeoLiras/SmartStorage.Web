@@ -8,6 +8,7 @@ using SmartStorage.Blazor.Provider;
 using SmartStorage.Blazor.Services;
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.API;
+using SmartStorage.Blazor.Utils.Cart;
 using SmartStorage.Blazor.Utils.ShowDialog;
 using SmartStorage.Blazor.Utils.Variables;
 
@@ -48,6 +49,7 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<ApiExtensions>();
 builder.Services.AddScoped<ShowDialog>();
 builder.Services.AddScoped<VariablesExtensions>();
+builder.Services.AddScoped<SaleCart>();
 
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(
