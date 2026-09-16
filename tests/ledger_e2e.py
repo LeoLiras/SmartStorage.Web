@@ -1371,6 +1371,99 @@ def ct36(ctx):
     R.nota(_mensagem(corpo))
 
 
+def _carrinho(ctx, itens):
+    return ctx.api("POST", "/api/storage/sales/v1/batch", {
+        "dateSale": datetime.now().isoformat(),
+        "items": [{"idEnter": entrada, "qntd": quantidade} for entrada, quantidade in itens]})
+
+
+@caso("CT-37", "Carrinho registra todas as vendas num unico envio")
+def ct37(ctx):
+    p1 = ctx.cria_produto(10, "CT37 Um")
+    p2 = ctx.cria_produto(10, "CT37 Dois")
+    R.exige(_aloca(ctx, p1, ctx.prateleira_a, 6, 12.5) == 200, "pre-condicao falhou: alocacao do primeiro recusada")
+    R.exige(_aloca(ctx, p2, ctx.prateleira_b, 5, 3.0) == 200, "pre-condicao falhou: alocacao do segundo recusada")
+    e1, e2 = entrada_de(p1, ctx.prateleira_a), entrada_de(p2, ctx.prateleira_b)
+    if not R.exige(e1 is not None and e2 is not None, "pre-condicao falhou: entradas nao criadas"):
+        return
+    antes1, antes2 = saldos(p1), saldos(p2)
+    vendas = total_vendas()
+    marca = ultimo_movimento()
+    status, corpo = _carrinho(ctx, [(e1["id"], 2), (e2["id"], 4)])
+    R.exige(status == 200 and isinstance(corpo, list) and len(corpo) == 2,
+            "carrinho valido recusado", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(total_vendas() == vendas + 2, "carrinho nao gravou uma venda por item",
+            "antes %d, depois %d" % (vendas, total_vendas()))
+    movs1, movs2 = movimentos_depois(marca, p1), movimentos_depois(marca, p2)
+    confere_linhas(movs1, [(ctx.prateleira_a, VENDA, -2)])
+    confere_linhas(movs2, [(ctx.prateleira_b, VENDA, -4)])
+    confere_carimbo(movs1 + movs2)
+    confere_autor(ctx, movs1 + movs2)
+    confere_invariante(p1, antes1, {ctx.prateleira_a: 4}, movs1)
+    confere_invariante(p2, antes2, {ctx.prateleira_b: 1}, movs2)
+    if isinstance(corpo, list):
+        precos = {v.get("idEnter"): float(v.get("salePrice", 0)) for v in corpo}
+        R.exige(precos == {e1["id"]: 12.5, e2["id"]: 3.0},
+                "preco das vendas do carrinho diferente do preco da prateleira", str(precos))
+
+
+@caso("CT-38", "Carrinho com item invalido nao grava nenhuma venda")
+def ct38(ctx):
+    p1 = ctx.cria_produto(10, "CT38 Um")
+    p2 = ctx.cria_produto(10, "CT38 Dois")
+    R.exige(_aloca(ctx, p1, ctx.prateleira_a, 5, 7.0) == 200, "pre-condicao falhou: alocacao do primeiro recusada")
+    R.exige(_aloca(ctx, p2, ctx.prateleira_b, 2, 7.0) == 200, "pre-condicao falhou: alocacao do segundo recusada")
+    e1, e2 = entrada_de(p1, ctx.prateleira_a), entrada_de(p2, ctx.prateleira_b)
+    if not R.exige(e1 is not None and e2 is not None, "pre-condicao falhou: entradas nao criadas"):
+        return
+    antes1, antes2 = saldos(p1), saldos(p2)
+    vendas = total_vendas()
+    marca = ultimo_movimento()
+
+    status, corpo = _carrinho(ctx, [(e1["id"], 1), (e2["id"], 3)])
+    R.exige(status == 400 and "Item 2" in _mensagem(corpo),
+            "carrinho com item acima do saldo aceito ou sem apontar o item", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.nota(_mensagem(corpo))
+
+    status, vazio = _carrinho(ctx, [])
+    R.exige(status == 400, "carrinho vazio aceito", "HTTP %s: %s" % (status, _mensagem(vazio)))
+
+    status, inexistente = _carrinho(ctx, [(e1["id"], 1), (2147483000, 1)])
+    R.exige(status == 400 and "Item 2" in _mensagem(inexistente),
+            "carrinho com entrada inexistente aceito ou sem apontar o item", "HTTP %s: %s" % (status, _mensagem(inexistente)))
+
+    confere_linhas(movimentos_depois(marca), [])
+    R.exige(saldos(p1) == antes1 and saldos(p2) == antes2, "saldo mudou num carrinho recusado")
+    R.exige(total_vendas() == vendas, "linha em Sale criada num carrinho recusado")
+
+
+@caso("CT-39", "Carrinho soma itens repetidos da mesma entrada contra o saldo")
+def ct39(ctx):
+    pid = ctx.cria_produto(10, "CT39")
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 5, 9.0) == 200, "pre-condicao falhou: alocacao recusada")
+    ent = entrada_de(pid, ctx.prateleira_a)
+    if not R.exige(ent is not None, "pre-condicao falhou: entrada nao criada"):
+        return
+    antes = saldos(pid)
+    vendas = total_vendas()
+    marca = ultimo_movimento()
+
+    status, corpo = _carrinho(ctx, [(ent["id"], 3), (ent["id"], 3)])
+    R.exige(status == 400 and "Item 2" in _mensagem(corpo) and "pede 6" in _mensagem(corpo),
+            "itens repetidos que somam acima do saldo foram aceitos", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    confere_linhas(movimentos_depois(marca, pid), [])
+    R.exige(saldos(pid) == antes and total_vendas() == vendas, "carrinho recusado mexeu no saldo ou nas vendas")
+
+    status, corpo = _carrinho(ctx, [(ent["id"], 2), (ent["id"], 3)])
+    R.exige(status == 200, "itens repetidos que cabem no saldo foram recusados", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    movs = movimentos_depois(marca, pid)
+    confere_linhas(movs, [(ctx.prateleira_a, VENDA, -2), (ctx.prateleira_a, VENDA, -3)])
+    confere_carimbo(movs)
+    confere_autor(ctx, movs)
+    confere_invariante(pid, antes, {ctx.prateleira_a: 0}, movs)
+    R.exige(total_vendas() == vendas + 2, "itens repetidos nao viraram vendas separadas")
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
