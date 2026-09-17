@@ -12,5 +12,6 @@ namespace SmartStorage.Blazor.Services.IServices
         Task<List<EnterVO>> AllocateProducts(AllocationBatchVO batch);
         Task<EnterVO> UndoAllocation(int enterId);
         Task<EnterVO> TransferAllocation(int enterId, ShelfTransferVO transfer);
+        Task<List<EnterVO>> CountInventory(int shelfId, InventoryCountVO count);
     }
 }
