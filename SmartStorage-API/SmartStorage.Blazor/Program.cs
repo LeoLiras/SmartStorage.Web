@@ -46,6 +46,10 @@ builder.Services.AddHttpClient<IEmployeeService, EmployeeService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
             ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
 
+builder.Services.AddHttpClient<IInvoiceService, InvoiceService>(c =>
+                c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+
 builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"])
             ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();

@@ -34,6 +34,14 @@ namespace SmartStorage_Shared.VO
         [Range(0.01, double.MaxValue, ErrorMessage = "O preço inicial deve ser maior que zero.")]
         public decimal? PrecoInicial { get; set; }
 
+        [RegularExpression(@"^\d{8}$|^\d{12,14}$", ErrorMessage = "O código de barras deve ter 8, 12, 13 ou 14 dígitos.")]
+        public string Codigo { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "O fator de conversão deve ser maior que zero.")]
+        public int FatorConversao { get; set; } = 1;
+
+        public decimal? Custo { get; set; }
+
         public int? EmployeeId { get; set; }
 
         public byte[] ProImage { get; set; }
@@ -57,6 +65,9 @@ namespace SmartStorage_Shared.VO
                 ProMinimumStock = origin.MinimumStock,
                 ProVolume = origin.Volume,
                 ProPrecoInicial = origin.PrecoInicial,
+                ProCodigo = origin.Codigo,
+                ProFatorConversao = origin.FatorConversao,
+                ProCusto = origin.Custo,
                 ProEmpId = origin.EmployeeId,
             };
         }

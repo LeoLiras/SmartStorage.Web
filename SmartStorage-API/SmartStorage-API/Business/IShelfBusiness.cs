@@ -16,6 +16,7 @@ namespace SmartStorage_API.Service
         List<EnterVO> AllocateProductsToShelves(List<AllocationBatchItemVO> items);
         EnterVO UndoAllocate(int enterId);
         EnterVO TransferProductToShelf(int enterId, int toShelfId);
+        List<EnterVO> CountShelfInventory(int shelfId, InventoryCountVO count);
 
     }
 }

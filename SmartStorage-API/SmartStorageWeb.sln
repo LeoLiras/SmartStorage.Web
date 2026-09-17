@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.Authentication
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.Blazor.Tests", "SmartStorage.Blazor.Tests\SmartStorage.Blazor.Tests.csproj", "{CC7B0CA0-F352-4756-A8EE-7DD80E07F3BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.API.Tests", "SmartStorage.API.Tests\SmartStorage.API.Tests.csproj", "{CED0623C-A85D-4885-B279-C9537996110D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -193,6 +195,18 @@ Global
 		{CC7B0CA0-F352-4756-A8EE-7DD80E07F3BB}.Release|x64.Build.0 = Release|Any CPU
 		{CC7B0CA0-F352-4756-A8EE-7DD80E07F3BB}.Release|x86.ActiveCfg = Release|Any CPU
 		{CC7B0CA0-F352-4756-A8EE-7DD80E07F3BB}.Release|x86.Build.0 = Release|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Debug|x64.Build.0 = Debug|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Debug|x86.Build.0 = Debug|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Release|x64.ActiveCfg = Release|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Release|x64.Build.0 = Release|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Release|x86.ActiveCfg = Release|Any CPU
+		{CED0623C-A85D-4885-B279-C9537996110D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

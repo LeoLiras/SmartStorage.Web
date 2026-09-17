@@ -2,6 +2,7 @@
 using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
 using SmartStorage_API.Repository.Interfaces;
+using SmartStorage_API.Service.Nfe;
 using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
 
@@ -93,6 +94,10 @@ namespace SmartStorage_API.Service.Implementations
 
             ValidateInitialPrice(product.PrecoInicial);
 
+            var code = ValidateCode(product.Codigo, productId: 0);
+
+            ValidateConversionFactor(product.FatorConversao);
+
             var newProduct = new Product
             {
                 ProName = product.Name,
@@ -102,6 +107,8 @@ namespace SmartStorage_API.Service.Implementations
                 ProMinimumStock = product.MinimumStock,
                 ProVolume = product.Volume,
                 ProPrecoInicial = product.PrecoInicial,
+                ProCodigo = code,
+                ProFatorConversao = product.FatorConversao,
                 ProEmpId = product.EmployeeId,
                 ProImage = product.ProImage
             };
@@ -142,6 +149,14 @@ namespace SmartStorage_API.Service.Implementations
             ValidateVolume(product.Volume);
 
             ValidateInitialPrice(product.PrecoInicial);
+
+            var code = ValidateCode(product.Codigo, productId);
+
+            ValidateConversionFactor(product.FatorConversao);
+
+            searchProduct.ProCodigo = code;
+
+            searchProduct.ProFatorConversao = product.FatorConversao;
 
             searchProduct.ProEmpId = product.EmployeeId;
 
@@ -187,6 +202,30 @@ namespace SmartStorage_API.Service.Implementations
                 reason);
 
             return _converter.Parse(product);
+        }
+
+        private string ValidateCode(string code, int productId)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                return null;
+
+            code = code.Trim();
+
+            if (!NfeXmlReader.IsValidGtin(code))
+                throw new Exception("O código de barras não é um GTIN válido: confira os dígitos.");
+
+            var owner = _context.Products.FirstOrDefault(p => p.ProCodigo == code && p.ProId != productId);
+
+            if (owner is not null)
+                throw new Exception($"O código de barras {code} já pertence ao produto {owner.ProName}.");
+
+            return code;
+        }
+
+        private static void ValidateConversionFactor(int factor)
+        {
+            if (factor < 1)
+                throw new Exception("O fator de conversão deve ser maior que zero.");
         }
 
         private static void ValidateMinimumStock(int minimumStock)

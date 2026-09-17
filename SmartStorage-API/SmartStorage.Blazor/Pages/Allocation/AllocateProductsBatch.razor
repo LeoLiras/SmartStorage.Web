@@ -1,7 +1,10 @@
 @page "/product/allocation/batch"
 @attribute [Authorize]
 
+@using SmartStorage.Blazor.Pages.Product
+
 @inject IProductService productService
+@inject IEmployeeService employeeService
 @inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
@@ -55,6 +58,9 @@ else
                                         <MudSelectItem Value="@shelf.Id">@shelf.Name · @Occupancy(shelf)</MudSelectItem>
                                     }
                                 </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <EmployeeSelect @bind-Value="row.EmployeeId" Employees="employees" />
                             </MudItem>
                             @if (row.Product.Volume is null)
                             {
@@ -121,6 +127,8 @@ else
 
     private List<ShelfVO> shelves = new();
 
+    private List<EmployeeVO> employees = new();
+
     private bool loading = true;
 
     private bool saving = false;
@@ -145,6 +153,8 @@ else
         public int ShelfId { get; set; }
 
         public ShelfVO CurrentShelf { get; set; }
+
+        public int? EmployeeId { get; set; }
     }
 
     #endregion
@@ -173,6 +183,8 @@ else
 
             shelves = await shelfService.GetShelves();
 
+            employees = app.Employees.Count > 0 ? app.Employees : await employeeService.GetEmployees();
+
             var entries = await shelfService.GetAllocations();
 
             var products = new List<ProductVO>();
@@ -192,6 +204,7 @@ else
                     Price = product.PrecoInicial ?? 0,
                     ShelfId = currentShelf?.Id ?? 0,
                     CurrentShelf = currentShelf,
+                    EmployeeId = product.EmployeeId,
                 };
             }).ToList();
         }
@@ -225,6 +238,7 @@ else
                     ShelfId = r.ShelfId,
                     Qntd = r.Qntd,
                     Price = r.Price,
+                    EmployeeId = r.EmployeeId,
                 }).ToList(),
             };
 

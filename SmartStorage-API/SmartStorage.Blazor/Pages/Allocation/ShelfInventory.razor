@@ -1,0 +1,209 @@
+@page "/products/shelves/inventory"
+@attribute [Authorize]
+
+@inject IShelfService shelfService
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Inventário de prateleira</MudText>
+
+@if (shelves is null)
+{
+    <Loading Message="Carregando prateleiras..." Shape="ELoadingShape.Form"></Loading>
+}
+else
+{
+    <MudGrid Spacing="4" Class="mt-1">
+        <MudItem xs="12" md="8">
+            <section class="app-panel">
+                <MudSelect T="int" Value="shelfId" ValueChanged="SelectShelf" ToStringFunc="ShelfLabel" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" HelperText="Os produtos com saldo nela são carregados para a contagem" Variant="Variant.Outlined" Disabled="saving">
+                    @foreach (var shelf in shelves)
+                    {
+                        <MudSelectItem T="int" Value="@shelf.Id">@shelf.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </section>
+
+            @if (loadingRows)
+            {
+                <Loading Message="Carregando produtos da prateleira..."></Loading>
+            }
+            else if (shelfId != 0 && rows.Count == 0)
+            {
+                <MudAlert Class="mt-4" Severity="Severity.Info" Variant="Variant.Outlined">Não há produtos com saldo na @ShelfLabel(shelfId).</MudAlert>
+            }
+            else if (rows.Count > 0)
+            {
+                <MudTable T="InventoryRow" Items="rows" Class="app-table mt-3" Elevation="0" Dense="true" Hover="true">
+                    <HeaderContent>
+                        <MudTh>Produto</MudTh>
+                        <MudTh Class="app-cell-number">No sistema</MudTh>
+                        <MudTh Class="app-cell-number">Contado</MudTh>
+                        <MudTh Class="app-cell-number">Diferença</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Produto">@context.Entry.ProductName</MudTd>
+                        <MudTd DataLabel="No sistema" Class="app-cell-number num">@context.Entry.ProductQuantity</MudTd>
+                        <MudTd DataLabel="Contado" Class="app-cell-number">
+                            <MudNumericField T="int" @bind-Value="context.Counted" Min="0" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="saving" />
+                        </MudTd>
+                        <MudTd DataLabel="Diferença" Class="app-cell-number num"><span class="@(context.Difference < 0 ? "app-text-error" : "")">@DifferenceText(context.Difference)</span></MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <section class="app-panel">
+                <MudText Typo="Typo.subtitle1" Class="app-panel-title">Ajuste</MudText>
+                <MudText Typo="Typo.body2" Class="app-muted">@($"{ChangedRows.Count} produto(s) com diferença")</MudText>
+                <MudTextField T="string" @bind-Value="reason" Label="Motivo" Lines="3" MaxLength="180" Counter="180" Immediate="true" HelperText="Gravado em cada ajuste do inventário" Variant="Variant.Outlined" Class="mt-3" Disabled="saving" />
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <MudButton Variant="Variant.Text" Href="@app.productsInShelvesPage">Voltar</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FactCheck" Disabled="@(saving || !IsComplete)" OnClick="Register">Registrar inventário</MudButton>
+                </div>
+                @if (ChangedRows.Count > 0 && !ReasonIsValid)
+                {
+                    <MudText Typo="Typo.caption" Class="app-muted">Informe o motivo, com pelo menos 5 caracteres.</MudText>
+                }
+            </section>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+
+    #region Properties
+
+    private List<ShelfVO> shelves;
+
+    private int shelfId;
+
+    private List<InventoryRow> rows = new();
+
+    private string reason = string.Empty;
+
+    private bool loadingRows = false;
+
+    private bool saving = false;
+
+    private List<InventoryRow> ChangedRows => rows.Where(r => r.Difference != 0).ToList();
+
+    private bool ReasonIsValid => (reason?.Trim().Length ?? 0) >= 5;
+
+    private bool IsComplete => ChangedRows.Count > 0 && ReasonIsValid && rows.All(r => r.Counted >= 0);
+
+    private class InventoryRow
+    {
+        public EnterVO Entry { get; set; }
+
+        public int Counted { get; set; }
+
+        public int Difference => Counted - Entry.ProductQuantity;
+    }
+
+    #endregion
+
+    #region Events
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            shelves = await shelfService.GetShelves();
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar as prateleiras.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+
+            nav.NavigateTo(app.productsInShelvesPage);
+        }
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task SelectShelf(int selected)
+    {
+        shelfId = selected;
+
+        rows = new();
+
+        await LoadRows(keepCounts: false);
+    }
+
+    private async Task LoadRows(bool keepCounts)
+    {
+        var counted = keepCounts ? rows.ToDictionary(r => r.Entry.Id, r => r.Counted) : new Dictionary<int, int>();
+
+        try
+        {
+            loadingRows = true;
+
+            var entries = await shelfService.GetAllocations();
+
+            rows = entries
+                .Where(e => e.ShelfId == shelfId && (e.ProductQuantity > 0 || counted.ContainsKey(e.Id)))
+                .OrderBy(e => e.ProductName)
+                .Select(e => new InventoryRow
+                {
+                    Entry = e,
+                    Counted = counted.TryGetValue(e.Id, out var value) ? value : e.ProductQuantity,
+                })
+                .ToList();
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Erro ao buscar os produtos da prateleira.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+        finally
+        {
+            loadingRows = false;
+        }
+    }
+
+    private async Task Register()
+    {
+        try
+        {
+            saving = true;
+
+            var count = new InventoryCountVO
+            {
+                Reason = reason.Trim(),
+                Items = ChangedRows.Select(r => new InventoryCountItemVO
+                {
+                    EnterId = r.Entry.Id,
+                    CountedQntd = r.Counted,
+                }).ToList(),
+            };
+
+            var adjusted = await shelfService.CountInventory(shelfId, count);
+
+            app.ProductEntries = new();
+
+            reason = string.Empty;
+
+            await LoadRows(keepCounts: false);
+
+            await ShowDialog.ShowDialogAsync($"Inventário da {ShelfLabel(shelfId)} registrado: {adjusted.Count} ajuste(s).", "Sucesso", state: EDialogStates.Success);
+        }
+        catch (ApiException ex)
+        {
+            await LoadRows(keepCounts: true);
+
+            await ShowDialog.ShowDialogAsync($"Nenhum ajuste foi gravado.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private string ShelfLabel(int id) => shelves?.FirstOrDefault(s => s.Id == id)?.Name ?? string.Empty;
+
+    private static string DifferenceText(int difference) => difference > 0 ? $"+{difference}" : difference.ToString();
+
+    #endregion
+}

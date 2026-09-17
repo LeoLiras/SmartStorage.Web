@@ -90,6 +90,15 @@ namespace SmartStorage.Blazor.Services
             return await response.ReadApiAsync<EnterVO>();
         }
 
+        public async Task<List<EnterVO>> CountInventory(int shelfId, InventoryCountVO count)
+        {
+            ArgumentNullException.ThrowIfNull(count);
+
+            var response = await _client.PostAsJsonAsync($"{BasePath}/{shelfId}/inventory", count);
+
+            return await response.ReadApiAsync<List<EnterVO>>();
+        }
+
         #endregion
     }
 }

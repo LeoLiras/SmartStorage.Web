@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartStorage_API.Model.Context;
 
@@ -11,9 +12,11 @@ using SmartStorage_API.Model.Context;
 namespace SmartStorage_API.Migrations
 {
     [DbContext(typeof(SmartStorageContext))]
-    partial class SmartStorageContextModelSnapshot : ModelSnapshot
+    [Migration("20260917141432_AddInvoiceImport")]
+    partial class AddInvoiceImport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,7 +101,7 @@ namespace SmartStorage_API.Migrations
                             EmpId = 6,
                             EmpCpf = "12345678909",
                             EmpDateRegister = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EmpName = "Admin",
+                            EmpName = "Colaborador Padrão",
                             EmpRg = "NA0000000"
                         });
                 });

@@ -153,6 +153,8 @@ namespace SmartStorage_API.Service.Implementations
 
             EnsureShelfFits(newAllocation.ProductId, newAllocation.ShelfId, newAllocation.ProductQuantity);
 
+            AssignResponsible(newAllocation.ProductId, newAllocation.EmployeeId);
+
             var totalBefore = _movementRepository.FindProductTotalBalance(newAllocation.ProductId);
 
             _movementRepository.TransferProductBetweenLocations(
@@ -221,6 +223,9 @@ namespace SmartStorage_API.Service.Implementations
                     if (item.Price <= 0)
                         throw new Exception("o preço deve ser maior que zero.");
 
+                    if (item.EmployeeId is not null && !_context.Employees.Any(e => e.EmpId == item.EmployeeId))
+                        throw new Exception("colaborador não encontrado com o ID informado.");
+
                     if (item.Qntd > product.ProQntd)
                         throw new Exception($"saldo insuficiente no depósito: há {product.ProQntd} e o lote pede {item.Qntd}.");
 
@@ -246,6 +251,9 @@ namespace SmartStorage_API.Service.Implementations
 
             using (var transaction = _context.Database.BeginTransaction())
             {
+                foreach (var item in items.Where(i => i.EmployeeId is not null))
+                    products[item.ProductId].ProEmpId = item.EmployeeId;
+
                 foreach (var item in items)
                     _movementRepository.TransferProductBetweenLocations(
                         item.ProductId,
@@ -316,6 +324,107 @@ namespace SmartStorage_API.Service.Implementations
             var destination = _context.Enters.First(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
 
             return _converterEnter.Parse(destination);
+        }
+
+        public List<EnterVO> CountShelfInventory(int shelfId, InventoryCountVO count)
+        {
+            var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId)
+                ?? throw new Exception("Prateleira não encontrada com o ID informado");
+
+            var reason = count?.Reason?.Trim();
+
+            if (string.IsNullOrWhiteSpace(reason) || reason.Length < 5 || reason.Length > 180)
+                throw new Exception("Informe o motivo do inventário, entre 5 e 180 caracteres.");
+
+            if (count.Items is null || count.Items.Count == 0)
+                throw new Exception("Informe ao menos uma quantidade contada.");
+
+            var enterIds = count.Items.Select(i => i.EnterId).Distinct().ToList();
+
+            var enters = _context.Enters
+                .Where(e => enterIds.Contains(e.EntId))
+                .ToDictionary(e => e.EntId);
+
+            var productNames = _context.Products
+                .Where(p => enters.Values.Select(e => e.EntProId).Contains(p.ProId))
+                .ToDictionary(p => p.ProId, p => p.ProName);
+
+            var countedEnters = new HashSet<int>();
+
+            var adjustments = new List<(Enter Enter, int Delta)>();
+
+            for (var index = 0; index < count.Items.Count; index++)
+            {
+                var item = count.Items[index];
+
+                enters.TryGetValue(item.EnterId, out var enter);
+
+                var itemName = enter is null
+                    ? $"Item {index + 1}"
+                    : $"Item {index + 1} ({productNames.GetValueOrDefault(enter.EntProId)})";
+
+                try
+                {
+                    if (enter is null)
+                        throw new Exception("entrada não encontrada com o ID informado.");
+
+                    if (enter.EntSheId != shelfId)
+                        throw new Exception($"o produto não está na {shelf.SheName}.");
+
+                    if (!countedEnters.Add(enter.EntId))
+                        throw new Exception("o produto aparece mais de uma vez na contagem.");
+
+                    if (item.CountedQntd < 0)
+                        throw new Exception("a quantidade contada não pode ser negativa.");
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"{itemName}: {ex.Message}");
+                }
+
+                if (item.CountedQntd != enter.EntQntd)
+                    adjustments.Add((enter, item.CountedQntd - enter.EntQntd));
+            }
+
+            if (adjustments.Count == 0)
+                throw new Exception("Nenhuma quantidade contada difere do saldo do sistema.");
+
+            var totalsBefore = adjustments
+                .Select(a => a.Enter.EntProId)
+                .Distinct()
+                .ToDictionary(productId => productId, productId => _movementRepository.FindProductTotalBalance(productId));
+
+            var movementDate = DateTime.Now;
+
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                foreach (var (enter, delta) in adjustments)
+                    _movementRepository.CreateNewStockMovement(
+                        enter.EntProId,
+                        shelfId,
+                        TipoMovimentacao.Ajuste,
+                        delta,
+                        $"Inventário da {shelf.SheName}: {reason}",
+                        date: movementDate);
+
+                transaction.Commit();
+            }
+
+            foreach (var (productId, totalBefore) in totalsBefore)
+                _stockAlert.NotifyIfBelowMinimum(productId, totalBefore, "Inventário");
+
+            return _converterEnter.Parse(adjustments.Select(a => a.Enter).ToList());
+        }
+
+        private void AssignResponsible(int productId, int? employeeId)
+        {
+            if (employeeId is null)
+                return;
+
+            if (!_context.Employees.Any(e => e.EmpId == employeeId))
+                throw new Exception("Colaborador não encontrado com o ID informado.");
+
+            _context.Products.First(p => p.ProId == productId).ProEmpId = employeeId;
         }
 
         private void EnsureSingleShelf(int productId, int shelfId)

@@ -226,6 +226,26 @@ namespace SmartStorage_API.Controllers
             }
         }
 
+        [HttpPost("{shelfId}/inventory")]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        public IActionResult CountShelfInventory(int shelfId, [FromBody] InventoryCountVO count)
+        {
+            try
+            {
+                if (shelfId.Equals(0))
+                    throw new Exception("O campo ID da Prateleira é obrigatório.");
+
+                if (count is null)
+                    throw new Exception("Os dados do inventário são obrigatórios.");
+
+                return Ok(_shelfService.CountShelfInventory(shelfId, count));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         #endregion
     }
 }

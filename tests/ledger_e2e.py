@@ -65,7 +65,7 @@ def sql(consulta):
         "docker", "compose", "exec", "-T", SERVICO_SQL,
         "/opt/mssql-tools18/bin/sqlcmd",
         "-S", "localhost", "-U", "sa", "-P", senha_sa(),
-        "-C", "-b", "-d", BANCO, "-h-1", "-W", "-s|",
+        "-C", "-I", "-b", "-d", BANCO, "-h-1", "-W", "-s|",
         "-Q", "SET NOCOUNT ON; " + consulta,
     ]
     p = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True,
@@ -174,11 +174,14 @@ def apaga_produtos_de_teste(produtos):
     alvo = "SELECT ProId FROM dbo.Product WHERE ProId IN (%s) AND ProName LIKE '%s%%'" % (
         ",".join(str(int(p)) for p in produtos), PREFIXO.replace("'", "''"))
     sql("SET XACT_ABORT ON; BEGIN TRAN; "
+        "DELETE FROM dbo.InvoiceItem WHERE IniProId IN (%(alvo)s); "
+        "DELETE i FROM dbo.Invoice i WHERE i.InvEmitenteNome LIKE '%(prefixo)s%%' "
+        "AND NOT EXISTS (SELECT 1 FROM dbo.InvoiceItem n WHERE n.IniInvId = i.InvId); "
         "DELETE s FROM dbo.Sale s JOIN dbo.Enter e ON e.EntId = s.SalEntId WHERE e.EntProId IN (%(alvo)s); "
         "DELETE FROM dbo.ProductStockMovement WHERE PsmProId IN (%(alvo)s); "
         "DELETE FROM dbo.Enter WHERE EntProId IN (%(alvo)s); "
         "DELETE FROM dbo.Product WHERE ProId IN (%(alvo)s); "
-        "COMMIT" % {"alvo": alvo})
+        "COMMIT" % {"alvo": alvo, "prefixo": PREFIXO.replace("'", "''")})
 
 
 def apaga_prateleiras_de_teste():
@@ -1554,6 +1557,327 @@ def ct42(ctx):
     confere_linhas(movimentos_depois(marca), [])
     R.exige({p: saldos(p) for p in (p1, p2, p3)} == antes, "saldo mudou num lote recusado")
     R.exige(entrada_de(p1, ctx.prateleira_a) is None, "lote recusado criou entrada do item valido")
+
+
+def _inventario(ctx, prateleira, itens, motivo="Contagem do roteiro"):
+    return ctx.api("POST", "/api/storage/shelf/v1/%d/inventory" % prateleira, {
+        "reason": motivo,
+        "items": [{"enterId": entrada, "countedQntd": contado} for entrada, contado in itens]})
+
+
+@caso("CT-43", "Inventario ajusta so os produtos com diferenca na prateleira")
+def ct43(ctx):
+    nome = "%s %s CT43" % (PREFIXO, EXECUCAO)
+    prateleira = _cria_prateleira(ctx, "CT43", 100)
+    p1 = ctx.cria_produto(10, "CT43 Sobra")
+    p2 = ctx.cria_produto(10, "CT43 Falta")
+    p3 = ctx.cria_produto(10, "CT43 Confere")
+    for pid in (p1, p2, p3):
+        R.exige(_aloca(ctx, pid, prateleira, 5, 4.0) == 200, "pre-condicao falhou: alocacao recusada")
+    e1, e2, e3 = (entrada_de(p, prateleira) for p in (p1, p2, p3))
+    antes = {p: saldos(p) for p in (p1, p2, p3)}
+    marca = ultimo_movimento()
+
+    status, corpo = _inventario(ctx, prateleira, [(e1["id"], 7), (e2["id"], 0), (e3["id"], 5)], "Contagem CT43")
+    R.exige(status == 200 and isinstance(corpo, list) and len(corpo) == 2,
+            "inventario valido recusado ou devolveu entradas sem diferenca", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+    movs1, movs2, movs3 = (movimentos_depois(marca, p) for p in (p1, p2, p3))
+    confere_linhas(movs1, [(prateleira, AJUSTE, 2)])
+    confere_linhas(movs2, [(prateleira, AJUSTE, -5)])
+    confere_linhas(movs3, [])
+    confere_carimbo(movs1 + movs2)
+    R.exige(len({m["data"] for m in movs1 + movs2}) == 1, "lancamentos do inventario com carimbos diferentes",
+            str(sorted({m["data"] for m in movs1 + movs2})))
+    confere_autor(ctx, movs1 + movs2)
+    motivo = "Inventário da %s: Contagem CT43" % nome
+    R.exige(all(m["motivo"] == motivo for m in movs1 + movs2), "motivo do inventario diferente do esperado",
+            "esperado %r, gravado %r" % (motivo, [m["motivo"] for m in movs1 + movs2]))
+    confere_invariante(p1, antes[p1], {None: 5, prateleira: 7}, movs1)
+    confere_invariante(p2, antes[p2], {None: 5, prateleira: 0}, movs2)
+    R.exige(saldos(p3) == antes[p3], "produto sem diferenca teve o saldo alterado")
+
+
+@caso("CT-44", "Inventario com item invalido nao grava nada")
+def ct44(ctx):
+    prateleira = _cria_prateleira(ctx, "CT44", 100)
+    p1 = ctx.cria_produto(10, "CT44 Na Prateleira")
+    p2 = ctx.cria_produto(10, "CT44 Em Outra")
+    R.exige(_aloca(ctx, p1, prateleira, 4, 4.0) == 200, "pre-condicao falhou: alocacao recusada")
+    R.exige(_aloca(ctx, p2, ctx.prateleira_a, 2, 4.0) == 200, "pre-condicao falhou: alocacao recusada")
+    e1, e2 = entrada_de(p1, prateleira), entrada_de(p2, ctx.prateleira_a)
+    antes = {p: saldos(p) for p in (p1, p2)}
+    marca = ultimo_movimento()
+
+    status, outra = _inventario(ctx, prateleira, [(e1["id"], 3), (e2["id"], 1)])
+    R.exige(status == 400 and "Item 2" in _mensagem(outra) and "não está na" in _mensagem(outra),
+            "entrada de outra prateleira aceita no inventario", "HTTP %s: %s" % (status, _mensagem(outra)))
+    R.nota(_mensagem(outra))
+
+    status, repetido = _inventario(ctx, prateleira, [(e1["id"], 3), (e1["id"], 2)])
+    R.exige(status == 400 and "Item 2" in _mensagem(repetido) and "mais de uma vez" in _mensagem(repetido),
+            "entrada repetida aceita no inventario", "HTTP %s: %s" % (status, _mensagem(repetido)))
+
+    status, igual = _inventario(ctx, prateleira, [(e1["id"], 4)])
+    R.exige(status == 400 and "Nenhuma quantidade contada difere" in _mensagem(igual),
+            "inventario sem diferenca aceito", "HTTP %s: %s" % (status, _mensagem(igual)))
+
+    status, curto = _inventario(ctx, prateleira, [(e1["id"], 3)], "abc")
+    R.exige(status == 400, "inventario com motivo curto aceito", "HTTP %s: %s" % (status, _mensagem(curto)))
+
+    status, negativo = _inventario(ctx, prateleira, [(e1["id"], -1)])
+    R.exige(status == 400, "quantidade contada negativa aceita", "HTTP %s: %s" % (status, _mensagem(negativo)))
+
+    status, vazio = _inventario(ctx, prateleira, [])
+    R.exige(status == 400, "inventario vazio aceito", "HTTP %s: %s" % (status, _mensagem(vazio)))
+
+    confere_linhas(movimentos_depois(marca), [])
+    R.exige({p: saldos(p) for p in (p1, p2)} == antes, "saldo mudou num inventario recusado")
+
+
+EMITENTE = "%s Fornecedor" % PREFIXO
+COLABORADOR_PADRAO = "Admin"
+_notas_emitidas = [0]
+_id_do_padrao = []
+
+
+def colaborador_padrao():
+    """O produto novo da NF-e sem colaborador fica com o Admin, achado por consulta."""
+    if not _id_do_padrao:
+        linhas = sql("SELECT EmpId FROM dbo.Employee WHERE EmpName = '%s'" % COLABORADOR_PADRAO)
+        if not linhas:
+            raise Erro("colaborador %r nao encontrado no banco" % COLABORADOR_PADRAO)
+        _id_do_padrao.append(int(linhas[0][0]))
+    return _id_do_padrao[0]
+
+
+def _gtin(sufixo):
+    base = "2" + EXECUCAO + "%01d" % sufixo
+    soma = sum(int(d) * (3 if i % 2 == 0 else 1) for i, d in enumerate(reversed(base)))
+    return base + str((10 - soma % 10) % 10)
+
+
+def _nota(itens, modelo="55"):
+    """itens: lista de (codigo, descricao, unidade, quantidade, valor_total)"""
+    _notas_emitidas[0] += 1
+    chave = "35260912345678000195550010" + EXECUCAO + "%08d" % _notas_emitidas[0]
+    numero = str(_notas_emitidas[0])
+    dets = "".join(
+        '<det nItem="%d"><prod><cProd>E2E-%d</cProd><cEAN>%s</cEAN><xProd>%s</xProd><uCom>%s</uCom>'
+        '<qCom>%s</qCom><vUnCom>%.4f</vUnCom><vProd>%.2f</vProd></prod></det>'
+        % (n, n, codigo or "SEM GTIN", descricao, unidade, quantidade, total / float(quantidade), total)
+        for n, (codigo, descricao, unidade, quantidade, total) in enumerate(itens, start=1))
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>'
+           '<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00"><NFe>'
+           '<infNFe Id="NFe%s" versao="4.00"><ide><mod>%s</mod><serie>1</serie><nNF>%s</nNF>'
+           '<dhEmi>2026-09-17T09:00:00-03:00</dhEmi></ide>'
+           '<emit><CNPJ>12345678000195</CNPJ><xNome>%s</xNome></emit>%s</infNFe></NFe></nfeProc>'
+           % (chave, modelo, numero, EMITENTE, dets))
+    return xml, chave, numero
+
+
+def _previa(ctx, xml):
+    return ctx.api("POST", "/api/storage/invoices/v1/preview", {"xml": xml})
+
+
+def _importa(ctx, xml, itens):
+    return ctx.api("POST", "/api/storage/invoices/v1", {"xml": xml, "items": itens})
+
+
+def _item_existente(numero, pid, fator, quantidade):
+    return {"numero": numero, "productId": pid, "fatorConversao": fator, "qntdEstoque": quantidade}
+
+
+def _item_novo(numero, nome, fator, quantidade, colaborador=None):
+    return {"numero": numero, "fatorConversao": fator, "qntdEstoque": quantidade, "newProduct": {
+        "name": nome, "descricao": DESCRICAO, "employeeId": colaborador, "volume": 0.01,
+        "dateRegister": datetime.now().isoformat()}}
+
+
+def _define_codigo(ctx, pid, codigo, fator=1):
+    status, vo = ctx.api("GET", "/api/storage/products/v1/%d" % pid)
+    if status != 200 or not isinstance(vo, dict):
+        raise Erro("produto %d nao encontrado (HTTP %s)" % (pid, status))
+    vo.pop("links", None)
+    vo["codigo"], vo["fatorConversao"], vo["stockAdjustment"] = codigo, fator, None
+    return ctx.api("PUT", "/api/storage/products/v1/%d" % pid, vo)
+
+
+def _produto_no_banco(pid):
+    linha = sql("SELECT ISNULL(ProCodigo,'NULL'), ProFatorConversao, ISNULL(CAST(ProCusto AS varchar(30)),'NULL'), "
+                "ISNULL(CAST(ProEmpId AS varchar(10)),'NULL') FROM dbo.Product WHERE ProId=%d" % pid)[0]
+    return {"codigo": None if linha[0] == "NULL" else linha[0], "fator": int(linha[1]),
+            "custo": None if linha[2] == "NULL" else float(linha[2]),
+            "responsavel": None if linha[3] == "NULL" else int(linha[3])}
+
+
+def _id_pelo_nome(ctx, nome):
+    linhas = sql("SELECT ProId FROM dbo.Product WHERE ProName = '%s'" % nome.replace("'", "''"))
+    if not linhas:
+        return None
+    pid = int(linhas[0][0])
+    if pid not in ctx.criados:
+        ctx.criados.append(pid)
+    return pid
+
+
+def _nota_no_banco(chave):
+    linhas = sql("SELECT InvId, InvUseId, (SELECT COUNT(*) FROM dbo.InvoiceItem WHERE IniInvId = InvId) "
+                 "FROM dbo.Invoice WHERE InvChave = '%s'" % chave)
+    if not linhas:
+        return None
+    return {"id": int(linhas[0][0]), "usuario": int(linhas[0][1]), "itens": int(linhas[0][2])}
+
+
+@caso("CT-45", "NF-e cria produto novo e lanca entrada no produto existente")
+def ct45(ctx):
+    existente = ctx.cria_produto(10, "CT45 Existente")
+    codigo_existente, codigo_novo = _gtin(1), _gtin(2)
+    status, corpo = _define_codigo(ctx, existente, codigo_existente, fator=6)
+    if not R.exige(status == 200, "pre-condicao falhou: codigo nao gravado no produto", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+
+    nome_novo = "%s %s CT45 Novo" % (PREFIXO, EXECUCAO)
+    xml, chave, numero = _nota([(codigo_existente, "Caixa CT45", "CX", 2, 120.0), (codigo_novo, "Item novo CT45", "UN", 5, 40.0)])
+
+    status, previa = _previa(ctx, xml)
+    if R.exige(status == 200 and isinstance(previa, dict), "previa da nota recusada", "HTTP %s: %s" % (status, _mensagem(previa))):
+        itens = previa.get("items", [])
+        R.exige(len(itens) == 2 and itens[0].get("productId") == existente and itens[0].get("fatorConversao") == 6
+                and itens[0].get("qntdEstoque") == 12, "previa nao ligou o item ao produto pelo codigo com o fator dele", "%r" % itens[:1])
+        R.exige(len(itens) == 2 and itens[1].get("productId") is None and itens[1].get("qntdEstoque") == 5,
+                "previa ligou o item novo a algum produto", "%r" % itens[1:])
+        R.exige(previa.get("importadaEm") is None, "nota nova aparece como importada")
+
+    antes = saldos(existente)
+    marca = ultimo_movimento()
+    status, corpo = _importa(ctx, xml, [_item_existente(1, existente, 6, 12), _item_novo(2, nome_novo, 1, 5)])
+    novo = _id_pelo_nome(ctx, nome_novo)
+    if not R.exige(status == 200 and isinstance(corpo, dict) and corpo.get("createdProducts") == 1 and corpo.get("itemsCount") == 2,
+                   "importacao valida recusada", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+    if not R.exige(novo is not None, "produto novo da nota nao foi criado"):
+        return
+
+    movs_existente, movs_novo = movimentos_depois(marca, existente), movimentos_depois(marca, novo)
+    confere_linhas(movs_existente, [(None, ENTRADA, 12)])
+    confere_linhas(movs_novo, [(None, ENTRADA, 5)])
+    confere_carimbo(movs_existente + movs_novo)
+    R.exige(len({m["data"] for m in movs_existente + movs_novo}) == 1, "lancamentos da nota com carimbos diferentes")
+    confere_autor(ctx, movs_existente + movs_novo)
+    motivo = "NF-e %s/1 de %s" % (numero, EMITENTE)
+    R.exige(all(m["motivo"] == motivo for m in movs_existente + movs_novo), "motivo da entrada diferente do esperado",
+            "esperado %r, gravado %r" % (motivo, [m["motivo"] for m in movs_existente + movs_novo]))
+    confere_invariante(existente, antes, {None: 22}, movs_existente)
+
+    dados_existente, dados_novo = _produto_no_banco(existente), _produto_no_banco(novo)
+    R.exige(dados_existente["fator"] == 6 and dados_existente["custo"] == 10.0, "custo ou fator do produto existente errado", "%r" % dados_existente)
+    R.exige(dados_novo == {"codigo": codigo_novo, "fator": 1, "custo": 8.0, "responsavel": colaborador_padrao()},
+            "produto novo sem codigo, custo ou colaborador padrao", "%r" % dados_novo)
+    nota = _nota_no_banco(chave)
+    R.exige(nota is not None and nota["itens"] == 2 and nota["usuario"] == ctx.usuario, "nota nao gravada com os itens e o usuario", "%r" % nota)
+
+
+@caso("CT-46", "Custo medio ponderado entre duas notas")
+def ct46(ctx):
+    pid = ctx.cria_produto(0, "CT46")
+    codigo = _gtin(3)
+    status, corpo = _define_codigo(ctx, pid, codigo)
+    if not R.exige(status == 200, "pre-condicao falhou: codigo nao gravado", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+
+    xml1, _, _ = _nota([(codigo, "Item CT46", "UN", 10, 100.0)])
+    status, corpo = _importa(ctx, xml1, [_item_existente(1, pid, 1, 10)])
+    R.exige(status == 200, "primeira nota recusada", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(_produto_no_banco(pid)["custo"] == 10.0, "custo da primeira nota diferente de 10,00", "%r" % _produto_no_banco(pid))
+
+    xml2, _, _ = _nota([(codigo, "Item CT46", "UN", 10, 70.0)])
+    status, corpo = _importa(ctx, xml2, [_item_existente(1, pid, 1, 10)])
+    R.exige(status == 200, "segunda nota recusada", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(_produto_no_banco(pid)["custo"] == 8.5, "custo medio depois das duas notas diferente de 8,50", "%r" % _produto_no_banco(pid))
+    R.exige(saldos(pid)[None] == 20, "saldo do deposito diferente de 20 depois das duas notas", "%r" % saldos(pid))
+
+
+@caso("CT-47", "NF-e reimportada ou com item invalido nao grava nada")
+def ct47(ctx):
+    pid = ctx.cria_produto(5, "CT47")
+    outro = ctx.cria_produto(5, "CT47 Outro")
+    codigo = _gtin(4)
+    status, corpo = _define_codigo(ctx, pid, codigo)
+    if not R.exige(status == 200, "pre-condicao falhou: codigo nao gravado", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+
+    status, corpo = _define_codigo(ctx, outro, codigo)
+    R.exige(status == 400 and "já pertence" in _mensagem(corpo), "codigo repetido aceito no cadastro", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    status, corpo = _define_codigo(ctx, outro, "7891000100104")
+    R.exige(status == 400 and "GTIN" in _mensagem(corpo), "codigo com digito verificador errado aceito", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+    xml, chave, _ = _nota([(codigo, "Item CT47", "UN", 3, 30.0)])
+    R.exige(_importa(ctx, xml, [_item_existente(1, pid, 1, 3)])[0] == 200, "pre-condicao falhou: primeira importacao recusada")
+
+    antes = {p: saldos(p) for p in (pid, outro)}
+    marca = ultimo_movimento()
+    status, corpo = _importa(ctx, xml, [_item_existente(1, pid, 1, 3)])
+    R.exige(status == 400 and "já foi importada" in _mensagem(corpo), "nota reimportada aceita", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    status, previa = _previa(ctx, xml)
+    R.exige(status == 200 and isinstance(previa, dict) and previa.get("importadaEm"), "previa nao avisa a nota ja importada", "%r" % previa)
+
+    nome_duplicado = "%s %s CT47" % (PREFIXO, EXECUCAO)
+    nome_novo = "%s %s CT47 Nao Deve Existir" % (PREFIXO, EXECUCAO)
+    xml2, chave2, _ = _nota([(codigo, "Item CT47", "UN", 1, 10.0), (None, "Item sem codigo CT47", "UN", 1, 5.0)])
+    tentativas = [
+        ("item sem resolucao", [_item_existente(1, pid, 1, 1)], "Item 2"),
+        ("codigo de outro produto", [_item_existente(1, outro, 1, 1), _item_novo(2, nome_novo, 1, 1)], "já pertence"),
+        ("nome repetido", [_item_existente(1, pid, 1, 1), _item_novo(2, nome_duplicado, 1, 1)], "já existe um produto"),
+        ("existente e novo no mesmo item", [_item_existente(1, pid, 1, 1), dict(_item_novo(2, nome_novo, 1, 1), productId=outro)], "não os dois"),
+    ]
+    for descricao, itens, trecho in tentativas:
+        status, corpo = _importa(ctx, xml2, itens)
+        R.exige(status == 400 and trecho in _mensagem(corpo), "importacao com %s aceita" % descricao, "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.nota(_mensagem(_importa(ctx, xml2, [_item_existente(1, pid, 1, 1)])[1]))
+
+    xml3, _, _ = _nota([(codigo, "Item CT47", "UN", 1, 10.0)], modelo="65")
+    status, corpo = _previa(ctx, xml3)
+    R.exige(status == 400 and "modelo 55" in _mensagem(corpo), "NFC-e aceita na previa", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    status, corpo = _previa(ctx, "isto nao e xml")
+    R.exige(status == 400 and "XML válido" in _mensagem(corpo), "arquivo que nao e XML aceito", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+    confere_linhas(movimentos_depois(marca), [])
+    R.exige({p: saldos(p) for p in (pid, outro)} == antes, "saldo mudou numa importacao recusada")
+    R.exige(_nota_no_banco(chave2) is None, "nota recusada ficou gravada")
+    R.exige(_id_pelo_nome(ctx, nome_novo) is None, "produto de importacao recusada foi criado")
+
+
+@caso("CT-48", "Alocacao define o responsavel do produto")
+def ct48(ctx):
+    pid = ctx.cria_produto(10, "CT48")
+    outro = ctx.cria_produto(10, "CT48 Lote")
+    R.exige(_produto_no_banco(pid)["responsavel"] == ctx.funcionario, "pre-condicao falhou: responsavel inicial diferente")
+
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": ctx.prateleira_a, "productQuantity": 1, "productPrice": 4.0,
+        "employeeId": 999999, "dateEnter": datetime.now().isoformat()})
+    R.exige(status == 400 and "Colaborador não encontrado" in _mensagem(corpo), "alocacao com colaborador inexistente aceita",
+            "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(entrada_de(pid, ctx.prateleira_a) is None and _produto_no_banco(pid)["responsavel"] == ctx.funcionario,
+            "alocacao recusada gravou entrada ou trocou o responsavel")
+
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": ctx.prateleira_a, "productQuantity": 1, "productPrice": 4.0,
+        "employeeId": colaborador_padrao(), "dateEnter": datetime.now().isoformat()})
+    R.exige(status == 200, "alocacao com responsavel recusada", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(_produto_no_banco(pid)["responsavel"] == colaborador_padrao(), "alocacao individual nao trocou o responsavel", "%r" % _produto_no_banco(pid))
+
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation/batch", {"items": [
+        {"productId": outro, "shelfId": ctx.prateleira_b, "qntd": 1, "price": 4.0, "employeeId": colaborador_padrao()}]})
+    R.exige(status == 200, "lote com responsavel recusado", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(_produto_no_banco(outro)["responsavel"] == colaborador_padrao(), "lote nao trocou o responsavel", "%r" % _produto_no_banco(outro))
+
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": ctx.prateleira_a, "productQuantity": 1, "productPrice": 4.0,
+        "dateEnter": datetime.now().isoformat()})
+    R.exige(status == 200 and _produto_no_banco(pid)["responsavel"] == colaborador_padrao(),
+            "alocacao sem responsavel apagou o responsavel atual", "%r" % _produto_no_banco(pid))
 
 
 # --------------------------------------------------------------------------- #

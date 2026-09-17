@@ -30,6 +30,13 @@ public partial class Product
 
     public decimal? ProPrecoInicial { get; set; }
 
+    [StringLength(14, MinimumLength = 8, ErrorMessage = "O código de barras deve ter entre 8 e 14 dígitos.")]
+    public string ProCodigo { get; set; }
+
+    public int ProFatorConversao { get; set; } = 1;
+
+    public decimal? ProCusto { get; set; }
+
     public int? ProEmpId { get; set; }
 
     public byte[] ProImage { get; set; }

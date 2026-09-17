@@ -41,6 +41,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IEmployeeBusiness, EmployeeBusinessImplementation>();
 builder.Services.AddScoped<IProductBusiness, ProductBusinessImplementation>();
+builder.Services.AddScoped<IInvoiceBusiness, InvoiceBusinessImplementation>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusinessImplementation>();
 builder.Services.AddScoped<IShelfBusiness, ShelfBusinessImplementation>();
 builder.Services.AddScoped<IStockAlertBusiness, StockAlertBusinessImplementation>();

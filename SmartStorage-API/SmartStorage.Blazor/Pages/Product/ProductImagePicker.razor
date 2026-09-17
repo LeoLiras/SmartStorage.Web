@@ -1,0 +1,88 @@
+@inject VariablesExtensions app
+
+<div class="app-form-image">
+    <img src="@ImageSource" alt="@AltText" />
+</div>
+@if (!string.IsNullOrWhiteSpace(fileName))
+{
+    <MudText Typo="Typo.caption" Class="app-muted">@fileName</MudText>
+}
+@if (!ReadOnly)
+{
+    <div class="d-flex flex-wrap gap-2">
+        <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Image">
+                    Adicionar Imagem
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+        <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Clear" OnClick="@Clear">
+            Limpar
+        </MudButton>
+    </div>
+}
+
+@code {
+
+    #region Properties
+
+    private const int MaxImageSide = 800;
+
+    [Parameter]
+    public byte[] Image { get; set; }
+
+    [Parameter]
+    public EventCallback<byte[]> ImageChanged { get; set; }
+
+    [Parameter]
+    public string AltText { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    private string fileName;
+
+    private string ImageSource => ToDataUrl(Image) ?? app.DefaultImage;
+
+    #endregion
+
+    #region Methods
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        fileName = file.Name;
+
+        var format = file.ContentType == "image/png" ? "image/png" : "image/jpeg";
+
+        var resized = await file.RequestImageFileAsync(format, MaxImageSide, MaxImageSide);
+
+        var stored = resized.Size < file.Size ? resized : file;
+
+        using var stream = stored.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+
+        await ImageChanged.InvokeAsync(memoryStream.ToArray());
+    }
+
+    private async Task Clear()
+    {
+        fileName = string.Empty;
+
+        await ImageChanged.InvokeAsync(null);
+    }
+
+    public static string ToDataUrl(byte[] image)
+    {
+        if (image is null || image.Length < 2)
+            return null;
+
+        var contentType = image[0] == 0x89 && image[1] == 0x50 ? "png" : "jpeg";
+
+        return $"data:image/{contentType};base64,{Convert.ToBase64String(image)}";
+    }
+
+    #endregion
+}

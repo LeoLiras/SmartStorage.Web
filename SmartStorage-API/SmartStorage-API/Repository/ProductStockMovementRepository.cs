@@ -177,7 +177,7 @@ namespace SmartStorage_API.Repository
             return movement;
         }
 
-        private long FindAuthenticatedUserId()
+        public long FindAuthenticatedUserId()
         {
             var username = _httpContextAccessor.HttpContext?.User.Identity?.Name;
 

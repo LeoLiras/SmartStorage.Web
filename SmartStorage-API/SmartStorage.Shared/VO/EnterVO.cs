@@ -26,6 +26,8 @@ namespace SmartStorage_Shared.VO
 
         public string ShelfName { get; set; }
 
+        public int? EmployeeId { get; set; }
+
         [Required(ErrorMessage = "A data da entrada é obrigatória.")]
         public DateTime DateEnter { get; set; }
 
