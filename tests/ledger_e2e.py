@@ -1556,6 +1556,82 @@ def ct42(ctx):
     R.exige(entrada_de(p1, ctx.prateleira_a) is None, "lote recusado criou entrada do item valido")
 
 
+def _inventario(ctx, prateleira, itens, motivo="Contagem do roteiro"):
+    return ctx.api("POST", "/api/storage/shelf/v1/%d/inventory" % prateleira, {
+        "reason": motivo,
+        "items": [{"enterId": entrada, "countedQntd": contado} for entrada, contado in itens]})
+
+
+@caso("CT-43", "Inventario ajusta so os produtos com diferenca na prateleira")
+def ct43(ctx):
+    nome = "%s %s CT43" % (PREFIXO, EXECUCAO)
+    prateleira = _cria_prateleira(ctx, "CT43", 100)
+    p1 = ctx.cria_produto(10, "CT43 Sobra")
+    p2 = ctx.cria_produto(10, "CT43 Falta")
+    p3 = ctx.cria_produto(10, "CT43 Confere")
+    for pid in (p1, p2, p3):
+        R.exige(_aloca(ctx, pid, prateleira, 5, 4.0) == 200, "pre-condicao falhou: alocacao recusada")
+    e1, e2, e3 = (entrada_de(p, prateleira) for p in (p1, p2, p3))
+    antes = {p: saldos(p) for p in (p1, p2, p3)}
+    marca = ultimo_movimento()
+
+    status, corpo = _inventario(ctx, prateleira, [(e1["id"], 7), (e2["id"], 0), (e3["id"], 5)], "Contagem CT43")
+    R.exige(status == 200 and isinstance(corpo, list) and len(corpo) == 2,
+            "inventario valido recusado ou devolveu entradas sem diferenca", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+    movs1, movs2, movs3 = (movimentos_depois(marca, p) for p in (p1, p2, p3))
+    confere_linhas(movs1, [(prateleira, AJUSTE, 2)])
+    confere_linhas(movs2, [(prateleira, AJUSTE, -5)])
+    confere_linhas(movs3, [])
+    confere_carimbo(movs1 + movs2)
+    R.exige(len({m["data"] for m in movs1 + movs2}) == 1, "lancamentos do inventario com carimbos diferentes",
+            str(sorted({m["data"] for m in movs1 + movs2})))
+    confere_autor(ctx, movs1 + movs2)
+    motivo = "Inventário da %s: Contagem CT43" % nome
+    R.exige(all(m["motivo"] == motivo for m in movs1 + movs2), "motivo do inventario diferente do esperado",
+            "esperado %r, gravado %r" % (motivo, [m["motivo"] for m in movs1 + movs2]))
+    confere_invariante(p1, antes[p1], {None: 5, prateleira: 7}, movs1)
+    confere_invariante(p2, antes[p2], {None: 5, prateleira: 0}, movs2)
+    R.exige(saldos(p3) == antes[p3], "produto sem diferenca teve o saldo alterado")
+
+
+@caso("CT-44", "Inventario com item invalido nao grava nada")
+def ct44(ctx):
+    prateleira = _cria_prateleira(ctx, "CT44", 100)
+    p1 = ctx.cria_produto(10, "CT44 Na Prateleira")
+    p2 = ctx.cria_produto(10, "CT44 Em Outra")
+    R.exige(_aloca(ctx, p1, prateleira, 4, 4.0) == 200, "pre-condicao falhou: alocacao recusada")
+    R.exige(_aloca(ctx, p2, ctx.prateleira_a, 2, 4.0) == 200, "pre-condicao falhou: alocacao recusada")
+    e1, e2 = entrada_de(p1, prateleira), entrada_de(p2, ctx.prateleira_a)
+    antes = {p: saldos(p) for p in (p1, p2)}
+    marca = ultimo_movimento()
+
+    status, outra = _inventario(ctx, prateleira, [(e1["id"], 3), (e2["id"], 1)])
+    R.exige(status == 400 and "Item 2" in _mensagem(outra) and "não está na" in _mensagem(outra),
+            "entrada de outra prateleira aceita no inventario", "HTTP %s: %s" % (status, _mensagem(outra)))
+    R.nota(_mensagem(outra))
+
+    status, repetido = _inventario(ctx, prateleira, [(e1["id"], 3), (e1["id"], 2)])
+    R.exige(status == 400 and "Item 2" in _mensagem(repetido) and "mais de uma vez" in _mensagem(repetido),
+            "entrada repetida aceita no inventario", "HTTP %s: %s" % (status, _mensagem(repetido)))
+
+    status, igual = _inventario(ctx, prateleira, [(e1["id"], 4)])
+    R.exige(status == 400 and "Nenhuma quantidade contada difere" in _mensagem(igual),
+            "inventario sem diferenca aceito", "HTTP %s: %s" % (status, _mensagem(igual)))
+
+    status, curto = _inventario(ctx, prateleira, [(e1["id"], 3)], "abc")
+    R.exige(status == 400, "inventario com motivo curto aceito", "HTTP %s: %s" % (status, _mensagem(curto)))
+
+    status, negativo = _inventario(ctx, prateleira, [(e1["id"], -1)])
+    R.exige(status == 400, "quantidade contada negativa aceita", "HTTP %s: %s" % (status, _mensagem(negativo)))
+
+    status, vazio = _inventario(ctx, prateleira, [])
+    R.exige(status == 400, "inventario vazio aceito", "HTTP %s: %s" % (status, _mensagem(vazio)))
+
+    confere_linhas(movimentos_depois(marca), [])
+    R.exige({p: saldos(p) for p in (p1, p2)} == antes, "saldo mudou num inventario recusado")
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
