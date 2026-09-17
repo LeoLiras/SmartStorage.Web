@@ -21,15 +21,10 @@ else if(product is not null)
                             <MudTextField Label="Nome do Produto" @bind-Value="product.Name" For="@(() => product.Name)" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6">
-                            <MudSelect T="int?" @bind-Value="product.EmployeeId" Label="Colaborador Responsável" OpenIcon="@Icons.Material.Filled.Person" ReadOnly="ReadOnly" Variant="Variant.Outlined">
-                                @if(employees is not null)
-                                {
-                                    foreach (var emp in employees)
-                                    {
-                                        <MudSelectItem T="int?" Value="@((int?)emp.Id)">@emp.Name</MudSelectItem>
-                                    }
-                                }
-                            </MudSelect>
+                            <EmployeeSelect @bind-Value="product.EmployeeId" Employees="employees" ReadOnly="ReadOnly" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Label="Código de barras" @bind-Value="product.Codigo" For="@(() => product.Codigo)" InputMode="InputMode.numeric" MaxLength="14" HelperText="EAN/GTIN do fabricante" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12">
                             <MudTextField Label="Descrição" @bind-Value="product.Descricao" For="@(() => product.Descricao)" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
@@ -68,6 +63,15 @@ else if(product is not null)
                         <MudItem xs="12" sm="6" lg="4">
                             <MudNumericField T="decimal?" Label="Preço inicial" @bind-Value="product.PrecoInicial" For="(() => product.PrecoInicial)" Min="0.01m" Format="F2" HelperText="Preço padrão ao alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
                         </MudItem>
+                        <MudItem xs="12" sm="6" lg="4">
+                            <MudNumericField T="int" Label="Fator de conversão" @bind-Value="product.FatorConversao" For="(() => product.FatorConversao)" Min="1" HelperText="Unidades de estoque por unidade da nota fiscal" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                        </MudItem>
+                        @if (ProductId != 0)
+                        {
+                            <MudItem xs="12" sm="6" lg="4">
+                                <MudTextField T="string" Label="Custo médio" Value="@(product.Custo?.ToString("N2", PtBr) ?? "Sem custo")" ReadOnly="true" HelperText="Calculado pelas notas fiscais importadas" Variant="Variant.Outlined" />
+                            </MudItem>
+                        }
                     </MudGrid>
                 </section>
 
@@ -90,28 +94,7 @@ else if(product is not null)
             <MudItem xs="12" md="4">
                 <section class="app-panel">
                     <MudText Typo="Typo.subtitle1" Class="app-panel-title">Imagem</MudText>
-                    <div class="app-form-image">
-                        <img src="@ProcessImage(product)" alt="@($"Imagem de {product.Name}")" />
-                    </div>
-                    @if (!string.IsNullOrWhiteSpace(fileName))
-                    {
-                        <MudText Typo="Typo.caption" Class="app-muted">@fileName</MudText>
-                    }
-                    @if (!ReadOnly)
-                    {
-                        <div class="d-flex flex-wrap gap-2">
-                            <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
-                                <ActivatorContent>
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Image">
-                                        Adicionar Imagem
-                                    </MudButton>
-                                </ActivatorContent>
-                            </MudFileUpload>
-                            <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Clear" OnClick="@ClearFileAsync">
-                                Limpar
-                            </MudButton>
-                        </div>
-                    }
+                    <ProductImagePicker @bind-Image="product.ProImage" AltText="@($"Imagem de {product.Name}")" ReadOnly="ReadOnly" />
                 </section>
             </MudItem>
 
@@ -128,7 +111,7 @@ else if(product is not null)
 
     #region Properties
 
-    private const int MaxImageSide = 800;
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
 
     [Parameter]
     public int ProductId { get; set; }
@@ -149,9 +132,6 @@ else if(product is not null)
     private List<EmployeeVO> employees = new();
 
     private DateTime? productDate = DateTime.Today;
-
-    IBrowserFile file;
-    private string fileName;
 
     private int adjustQuantity;
     private string adjustReason;
@@ -232,57 +212,4 @@ else if(product is not null)
 
     #endregion
 
-    #region Methods
-
-    private async void UploadFile(IBrowserFile file)
-    {
-        this.file = file;
-        fileName = file.Name;
-
-        var format = file.ContentType == "image/png" ? "image/png" : "image/jpeg";
-
-        var resized = await file.RequestImageFileAsync(format, MaxImageSide, MaxImageSide);
-
-        var stored = resized.Size < file.Size ? resized : file;
-
-        using var stream = stored.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-
-        using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-
-        if(product is not null)
-            product.ProImage = memoryStream.ToArray();
-
-        StateHasChanged();
-    }
-
-    private void ClearFileAsync()
-    {
-        file = null;
-        fileName = string.Empty;
-
-        if(product is not null)
-            product.ProImage = null;
-
-        StateHasChanged();
-    }
-
-    private string ProcessImage(ProductVO product)
-    {
-        if (product.ProImage is null)
-            return app.DefaultImage;
-
-        string contentType = string.Empty;
-
-        if (product.ProImage[0] == 0xFF && product.ProImage[1] == 0xD8)
-            contentType = "jpeg";
-
-        if (product.ProImage[0] == 0x89 && product.ProImage[1] == 0x50)
-            contentType = "png";
-
-        var base64 = Convert.ToBase64String(product.ProImage);
-        return $"data:image/{contentType};base64,{base64}";
-    }
-
-    #endregion
 }

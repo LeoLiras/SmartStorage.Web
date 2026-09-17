@@ -1,0 +1,328 @@
+@page "/product/invoice/import"
+@attribute [Authorize]
+
+@inject IInvoiceService invoiceService
+@inject IProductService productService
+@inject IEmployeeService employeeService
+@inject NavigationManager nav
+@inject ShowDialog ShowDialog
+@inject VariablesExtensions app
+
+<MudText Typo="Typo.h5" Class="app-page-title mt-2">Importar NF-e</MudText>
+
+@if (loading)
+{
+    <Loading Message="Lendo a nota fiscal..." Shape="ELoadingShape.Form"></Loading>
+}
+else if (preview is null)
+{
+    <section class="app-panel mt-3">
+        <MudText Typo="Typo.subtitle1" Class="app-panel-title">Arquivo da nota</MudText>
+        <MudText Typo="Typo.body2" Class="app-muted mb-3">Escolha o XML da NF-e de compra. Os itens são conferidos antes de gravar: os que já existem são ligados pelo código de barras, e os novos podem ser cadastrados com imagem e colaborador.</MudText>
+        <div class="d-flex flex-wrap gap-2">
+            <MudFileUpload T="IBrowserFile" Accept=".xml" MaximumFileCount="1" FilesChanged="@ReadFile">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.UploadFile">Escolher XML</MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+            <MudButton Variant="Variant.Text" Href="@app.productsInStockPage">Voltar</MudButton>
+        </div>
+    </section>
+}
+else
+{
+    <MudGrid Spacing="4" Class="mt-1">
+        <MudItem xs="12" md="8">
+            <div class="app-batch-list">
+                @foreach (var row in rows)
+                {
+                    <section class="app-panel" @key="row.Item.Numero">
+                        <div class="app-batch-head">
+                            <div>
+                                <MudText Typo="Typo.subtitle1" Class="app-panel-title">@row.Item.Descricao</MudText>
+                                <MudText Typo="Typo.body2" Class="app-muted">
+                                    <span>Item </span><span class="num">@row.Item.Numero</span>
+                                    <span> · </span><span class="num">@(row.Item.Codigo ?? "sem código de barras")</span>
+                                    <span> · </span><span class="num">@row.Item.QntdNota.ToString("0.####", PtBr) @row.Item.Unidade</span>
+                                    <span> × </span><span class="num">@row.Item.ValorUnitario.ToString("N2", PtBr)</span>
+                                    <span> = </span><span class="num">@row.Item.ValorTotal.ToString("N2", PtBr)</span>
+                                </MudText>
+                            </div>
+                        </div>
+                        <MudGrid Spacing="3">
+                            @if (row.Item.CodigoInvalido is not null)
+                            {
+                                <MudItem xs="12">
+                                    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">O código @row.Item.CodigoInvalido da nota não é um GTIN válido e foi ignorado.</MudAlert>
+                                </MudItem>
+                            }
+                            <MudItem xs="12">
+                                <MudSelect T="int?" Value="row.ProductId" ValueChanged="@((int? id) => SelectProduct(row, id))" ToStringFunc="ProductLabel" Label="Produto" HelperText="@(row.ProductId is not null && row.ProductId == row.Item.ProductId ? "Encontrado pelo código de barras" : null)" OpenIcon="@Icons.Material.Filled.Inventory2" Variant="Variant.Outlined">
+                                    <MudSelectItem T="int?" Value="@((int?)null)">Cadastrar novo produto</MudSelectItem>
+                                    @foreach (var product in products)
+                                    {
+                                        <MudSelectItem T="int?" Value="@((int?)product.Id)">@product.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="4">
+                                <MudNumericField T="int" Label="Fator de conversão" Value="row.FatorConversao" ValueChanged="@((int value) => ChangeFactor(row, value))" Min="1" HelperText="@($"Unidades por {row.Item.Unidade}")" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="12" sm="4">
+                                <MudNumericField T="int" Label="Quantidade de entrada" Value="row.QntdEstoque" ValueChanged="@((int value) => ChangeQuantity(row, value))" Min="1" Error="@(row.QntdEstoque < 1)" ErrorText="Informe a quantidade que entra no estoque" HelperText="@SuggestedText(row)" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="12" sm="4">
+                                <MudTextField T="string" Label="Custo unitário" Value="@UnitCost(row)" ReadOnly="true" HelperText="Valor do item ÷ quantidade" Variant="Variant.Outlined" />
+                            </MudItem>
+                            @if (row.ProductId is null)
+                            {
+                                <MudItem xs="12" md="8">
+                                    <MudGrid Spacing="3">
+                                        <MudItem xs="12" sm="6">
+                                            <MudTextField T="string" Label="Nome do Produto" @bind-Value="row.NewProduct.Name" MaxLength="100" Error="@(!NameIsValid(row))" ErrorText="Entre 5 e 100 caracteres" Variant="Variant.Outlined" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="6">
+                                            <EmployeeSelect @bind-Value="row.NewProduct.EmployeeId" Employees="employees" />
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <MudTextField T="string" Label="Descrição" @bind-Value="row.NewProduct.Descricao" MaxLength="300" Error="@(!DescriptionIsValid(row))" ErrorText="Entre 5 e 300 caracteres" Variant="Variant.Outlined" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="4">
+                                            <MudNumericField T="decimal?" Label="Volume (L)" @bind-Value="row.NewProduct.Volume" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar" Variant="Variant.Outlined" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="4">
+                                            <MudNumericField T="int" Label="Estoque mínimo" @bind-Value="row.NewProduct.MinimumStock" Min="0" Variant="Variant.Outlined" />
+                                        </MudItem>
+                                        <MudItem xs="12" sm="4">
+                                            <MudNumericField T="decimal?" Label="Preço inicial" @bind-Value="row.NewProduct.PrecoInicial" Min="0.01m" Format="F2" Variant="Variant.Outlined" />
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                                <MudItem xs="12" md="4">
+                                    <ProductImagePicker @bind-Image="row.NewProduct.ProImage" AltText="@($"Imagem de {row.NewProduct.Name}")" />
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </section>
+                }
+            </div>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <section class="app-panel">
+                <MudText Typo="Typo.subtitle1" Class="app-panel-title">Nota fiscal</MudText>
+                <dl class="app-summary">
+                    <div><dt>Número</dt><dd class="num">@preview.Numero / @preview.Serie</dd></div>
+                    <div><dt>Fornecedor</dt><dd>@preview.EmitenteNome</dd></div>
+                    <div><dt>CNPJ</dt><dd class="num">@preview.EmitenteCnpj</dd></div>
+                    <div><dt>Emissão</dt><dd class="num">@preview.DataEmissao.ToString("dd/MM/yyyy HH:mm")</dd></div>
+                    <div><dt>Itens</dt><dd class="num">@rows.Count(r => r.ProductId is not null) existente(s) · @rows.Count(r => r.ProductId is null) novo(s)</dd></div>
+                </dl>
+                <MudText Typo="Typo.caption" Class="app-muted num">@preview.Chave</MudText>
+                @if (preview.ImportadaEm is not null)
+                {
+                    <MudAlert Class="mt-3" Severity="Severity.Error" Variant="Variant.Outlined" Dense="true">Esta nota já foi importada em @preview.ImportadaEm.Value.ToString("dd/MM/yyyy HH:mm").</MudAlert>
+                }
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <MudButton Variant="Variant.Text" OnClick="Reset" Disabled="saving">Trocar arquivo</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Inventory" Disabled="@(saving || !IsComplete)" OnClick="Import">Importar nota</MudButton>
+                </div>
+                @if (preview.ImportadaEm is null && !IsComplete)
+                {
+                    <MudText Typo="Typo.caption" Class="app-muted">Confira quantidade, nome e descrição de todos os itens.</MudText>
+                }
+            </section>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+
+    #region Properties
+
+    private const long MaxXmlSize = 5 * 1024 * 1024;
+
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
+
+    private InvoicePreviewVO preview;
+
+    private string xml;
+
+    private List<ImportRow> rows = new();
+
+    private List<ProductVO> products = new();
+
+    private List<EmployeeVO> employees = new();
+
+    private bool loading = false;
+
+    private bool saving = false;
+
+    private bool IsComplete => preview?.ImportadaEm is null && rows.Count > 0 && rows.All(r =>
+        r.FatorConversao >= 1 && r.QntdEstoque >= 1 && (r.ProductId is not null || (NameIsValid(r) && DescriptionIsValid(r))));
+
+    private class ImportRow
+    {
+        public InvoicePreviewItemVO Item { get; set; }
+
+        public int? ProductId { get; set; }
+
+        public int FatorConversao { get; set; }
+
+        public int QntdEstoque { get; set; }
+
+        public bool QuantityEdited { get; set; }
+
+        public ProductVO NewProduct { get; set; }
+    }
+
+    #endregion
+
+    #region Methods
+
+    private async Task ReadFile(IBrowserFile file)
+    {
+        if (file is null)
+            return;
+
+        if (file.Size > MaxXmlSize)
+        {
+            await ShowDialog.ShowDialogAsync("O arquivo passa de 5 MB e não parece um XML de NF-e.", "Arquivo inválido", state: EDialogStates.Warning);
+
+            return;
+        }
+
+        try
+        {
+            loading = true;
+
+            using var reader = new StreamReader(file.OpenReadStream(MaxXmlSize));
+
+            xml = await reader.ReadToEndAsync();
+
+            preview = await invoiceService.PreviewInvoice(xml);
+
+            if (employees.Count == 0)
+                employees = app.Employees.Count > 0 ? app.Employees : await employeeService.GetEmployees();
+
+            products = (await productService.GetProducts()).OrderBy(p => p.Name).ToList();
+
+            rows = preview.Items.Select(item => new ImportRow
+            {
+                Item = item,
+                ProductId = item.ProductId,
+                FatorConversao = item.FatorConversao,
+                QntdEstoque = item.QntdEstoque ?? 0,
+                NewProduct = NewProductFrom(item),
+            }).ToList();
+        }
+        catch (ApiException ex)
+        {
+            preview = null;
+
+            await ShowDialog.ShowDialogAsync($"Não foi possível ler a nota fiscal.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task Import()
+    {
+        try
+        {
+            saving = true;
+
+            var import = new InvoiceImportVO
+            {
+                Xml = xml,
+                Items = rows.Select(r => new InvoiceImportItemVO
+                {
+                    Numero = r.Item.Numero,
+                    ProductId = r.ProductId,
+                    FatorConversao = r.FatorConversao,
+                    QntdEstoque = r.QntdEstoque,
+                    NewProduct = r.ProductId is null ? PrepareNewProduct(r) : null,
+                }).ToList(),
+            };
+
+            var invoice = await invoiceService.ImportInvoice(import);
+
+            app.ProductInStock = new();
+
+            await ShowDialog.ShowDialogAsync($"NF-e {invoice.Numero}/{invoice.Serie} importada: {invoice.ItemsCount} item(ns), {invoice.CreatedProducts} produto(s) novo(s).", "Sucesso", app.productsInStockPage, EDialogStates.Success);
+        }
+        catch (ApiException ex)
+        {
+            await ShowDialog.ShowDialogAsync($"Nenhum item foi importado.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private void Reset()
+    {
+        preview = null;
+        xml = null;
+        rows = new();
+    }
+
+    private void SelectProduct(ImportRow row, int? productId)
+    {
+        row.ProductId = productId;
+
+        var product = products.FirstOrDefault(p => p.Id == productId);
+
+        ChangeFactor(row, product?.FatorConversao ?? row.FatorConversao);
+    }
+
+    private void ChangeFactor(ImportRow row, int factor)
+    {
+        row.FatorConversao = factor;
+
+        if (row.QuantityEdited)
+            return;
+
+        var suggested = row.Item.QntdNota * factor;
+
+        row.QntdEstoque = suggested >= 1 && suggested == decimal.Truncate(suggested) ? (int)suggested : 0;
+    }
+
+    private void ChangeQuantity(ImportRow row, int quantity)
+    {
+        row.QntdEstoque = quantity;
+
+        row.QuantityEdited = true;
+    }
+
+    private static ProductVO NewProductFrom(InvoicePreviewItemVO item) => new()
+    {
+        Name = item.Descricao.Length > 100 ? item.Descricao[..100] : item.Descricao,
+        Descricao = item.Descricao,
+        EmployeeId = Employee.GenericEmployeeId,
+        DateRegister = DateTime.Now,
+    };
+
+    private static ProductVO PrepareNewProduct(ImportRow row)
+    {
+        row.NewProduct.Name = row.NewProduct.Name?.Trim();
+        row.NewProduct.Descricao = row.NewProduct.Descricao?.Trim();
+        row.NewProduct.FatorConversao = row.FatorConversao;
+
+        return row.NewProduct;
+    }
+
+    private static bool NameIsValid(ImportRow row) => row.NewProduct.Name?.Trim().Length is >= 5 and <= 100;
+
+    private static bool DescriptionIsValid(ImportRow row) => row.NewProduct.Descricao?.Trim().Length is >= 5 and <= 300;
+
+    private string ProductLabel(int? productId) => productId is null ? "Cadastrar novo produto" : products.FirstOrDefault(p => p.Id == productId)?.Name ?? string.Empty;
+
+    private static string SuggestedText(ImportRow row) => $"{row.Item.QntdNota.ToString("0.####", PtBr)} {row.Item.Unidade} × {row.FatorConversao}";
+
+    private static string UnitCost(ImportRow row) => row.QntdEstoque < 1 ? "—" : (row.Item.ValorTotal / row.QntdEstoque).ToString("N4", PtBr);
+
+    #endregion
+}

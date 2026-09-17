@@ -2,7 +2,10 @@
 
 @attribute [Authorize]
 
+@using SmartStorage.Blazor.Pages.Product
+
 @inject IProductService productService
+@inject IEmployeeService employeeService
 @inject IShelfService shelfService
 @inject NavigationManager nav
 @inject ShowDialog ShowDialog
@@ -61,6 +64,9 @@ else if(enter is not null)
                                 }
                             </MudSelect>
                         </MudItem>
+                        <MudItem xs="12">
+                            <EmployeeSelect @bind-Value="enter.EmployeeId" Employees="employees" HelperText="Quem responde pelo produto a partir desta alocação" />
+                        </MudItem>
                         @if (SelectedShelf?.Volume is not null)
                         {
                             <MudItem xs="12">
@@ -98,6 +104,7 @@ else if(enter is not null)
     private ProductVO product = new();
     private EnterVO enter = new();
     private List<ShelfVO> shelves = new();
+    private List<EmployeeVO> employees = new();
 
     private DateTime? entryDate = DateTime.Today;
 
@@ -130,6 +137,8 @@ else if(enter is not null)
             shelves = await shelfService.GetShelves();
 
             app.Shelves = shelves;
+
+            employees = app.Employees.Count > 0 ? app.Employees : await employeeService.GetEmployees();
 
             AtribuirDados();
 
@@ -200,6 +209,8 @@ else if(enter is not null)
         {
             enter.ProductId = product.Id;
             enter.ProductName = product.Name;
+
+            enter.EmployeeId ??= product.EmployeeId;
 
             if (enter.ProductPrice == 0)
                 enter.ProductPrice = product.PrecoInicial ?? 0;

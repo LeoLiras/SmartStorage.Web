@@ -1,0 +1,37 @@
+<MudSelect T="int?" Value="Value" ValueChanged="ValueChanged" ToStringFunc="EmployeeLabel" Label="@Label" HelperText="@HelperText" OpenIcon="@Icons.Material.Filled.Person" ReadOnly="ReadOnly" Variant="Variant.Outlined">
+    @foreach (var employee in Employees ?? new())
+    {
+        <MudSelectItem T="int?" Value="@((int?)employee.Id)">@employee.Name</MudSelectItem>
+    }
+</MudSelect>
+
+@code {
+
+    #region Properties
+
+    [Parameter]
+    public int? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> ValueChanged { get; set; }
+
+    [Parameter]
+    public List<EmployeeVO> Employees { get; set; }
+
+    [Parameter]
+    public string Label { get; set; } = "Colaborador Responsável";
+
+    [Parameter]
+    public string HelperText { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    #endregion
+
+    #region Methods
+
+    private string EmployeeLabel(int? employeeId) => Employees?.FirstOrDefault(e => e.Id == employeeId)?.Name ?? string.Empty;
+
+    #endregion
+}
