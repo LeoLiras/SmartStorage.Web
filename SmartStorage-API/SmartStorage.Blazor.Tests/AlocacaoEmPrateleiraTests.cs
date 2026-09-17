@@ -24,7 +24,13 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
 
     private const int Produto = 42;
 
-    private void Monta(decimal? volumeDoProduto, VariablesExtensions? app = null)
+    internal static readonly object[] Funcionarios =
+    {
+        new { id = 1, name = "Ana Paula Ribeiro", rg = "MG1234567", cpf = "52998224725" },
+        new { id = 2, name = "Bruno Carvalho Lima", rg = "SP2345678", cpf = "11144477735" },
+    };
+
+    private ApiFalsa Monta(decimal? volumeDoProduto, VariablesExtensions? app = null)
     {
         var api = new ApiFalsa()
             .Responde(HttpMethod.Get, $"api/storage/products/v1/{Produto}", new
@@ -41,7 +47,8 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
             {
                 new { id = 1, name = "Prateleira A1", volume = 400m, usedVolume = 180m },
                 new { id = 2, name = "Prateleira B1", volume = (decimal?)null, usedVolume = 0m },
-            });
+            })
+            .Responde(HttpMethod.Get, "api/storage/employees/v1", Funcionarios);
 
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMudServices();
@@ -49,7 +56,10 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
         Services.AddSingleton(new Dialogo(Substitute.For<IDialogService>(), new SessionExpiration()));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
+        Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
+
+        return api;
     }
 
     private IRenderedComponent<IComponent> Renderiza()
@@ -141,6 +151,27 @@ public class AlocacaoEmPrateleiraTests : BunitContext, IAsyncLifetime
         cut.InvokeAsync(() => select.Instance.OpenMenu());
         cut.WaitForAssertion(() => Assert.Contains(cut.FindAll(".mud-list-item"), i => i.TextContent.Contains(prateleira)), TimeSpan.FromSeconds(5));
         cut.FindAll(".mud-list-item").First(i => i.TextContent.Contains(prateleira)).Click();
+    }
+
+    [Fact]
+    public void Responsavel_vem_do_produto_e_a_troca_vai_na_alocacao()
+    {
+        var api = Monta(volumeDoProduto: 2.5m);
+        api.Responde(HttpMethod.Post, "api/storage/shelf/v1/allocation", new { id = 9, productId = Produto, shelfId = 1, productQuantity = 4, productPrice = 10m, dateEnter = "2026-09-17T10:00:00" })
+           .Responde(HttpMethod.Get, "api/storage/shelf/v1/allocation", Array.Empty<object>());
+        var cut = Renderiza();
+
+        var responsavel = cut.FindComponent<MudSelect<int?>>();
+        cut.WaitForAssertion(() => Assert.Equal("Ana Paula Ribeiro", responsavel.Instance.Text), TimeSpan.FromSeconds(5));
+
+        cut.InvokeAsync(() => responsavel.Instance.ValueChanged.InvokeAsync(2));
+        Escolhe(cut, "Quantidade", "4", "Prateleira A1");
+        cut.WaitForAssertion(() => Assert.Equal("Bruno Carvalho Lima", responsavel.Instance.Text), TimeSpan.FromSeconds(5));
+
+        cut.Find("form").Submit();
+
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Post), TimeSpan.FromSeconds(5));
+        Assert.Equal(2, api.JsonDe(HttpMethod.Post, "api/storage/shelf/v1/allocation").RootElement.GetProperty("employeeId").GetInt32());
     }
 
     [Fact]

@@ -68,7 +68,8 @@ public class AlocacaoEmLoteTests : BunitContext, IAsyncLifetime
                 new { id = 1, name = "Prateleira A1", volume = volumeDaPrimeira, usedVolume = 0m },
                 new { id = 2, name = "Prateleira A2", volume = 400m, usedVolume = 0m },
             })
-            .Responde(HttpMethod.Get, Alocacoes, entradas);
+            .Responde(HttpMethod.Get, Alocacoes, entradas)
+            .Responde(HttpMethod.Get, "api/storage/employees/v1", AlocacaoEmPrateleiraTests.Funcionarios);
 
         foreach (dynamic produto in produtos)
             api.Responde(HttpMethod.Get, $"{Produtos}/{produto.id}", produto);
@@ -85,6 +86,7 @@ public class AlocacaoEmLoteTests : BunitContext, IAsyncLifetime
         Services.AddSingleton(new Dialogo(_dialogo, new SessionExpiration()));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         Services.AddSingleton<IShelfService>(new ShelfService(api.Cliente()));
+        Services.AddSingleton<IEmployeeService>(new EmployeeService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
 
         return api;
@@ -129,6 +131,30 @@ public class AlocacaoEmLoteTests : BunitContext, IAsyncLifetime
             .ToList();
 
         Assert.Equal(new[] { (41, 1, 1, 25.5m), (42, 2, 1, 7.9m) }, itens);
+    }
+
+    [Fact]
+    public void Lote_envia_o_responsavel_de_cada_produto_com_a_troca_feita_na_tela()
+    {
+        var api = Monta(
+            new[] { Produto(41, 25.5m), Produto(42, 7.9m) },
+            new[] { Entrada(1, 41, 1, 3), Entrada(2, 42, 2, 5) });
+        api.Responde(HttpMethod.Post, Lote, new[] { Entrada(1, 41, 1, 4), Entrada(2, 42, 2, 6) });
+        var cut = RenderizaLote("41,42");
+
+        var responsaveis = cut.FindComponents<MudSelect<int?>>();
+        Assert.All(responsaveis, r => Assert.Equal(1, r.Instance.Value));
+        cut.InvokeAsync(() => responsaveis[1].Instance.ValueChanged.InvokeAsync(2));
+        cut.WaitForAssertion(() => Assert.Equal(2, cut.FindComponents<MudSelect<int?>>()[1].Instance.Value), TimeSpan.FromSeconds(5));
+
+        Botao(cut, "Alocar 2 produto(s)").Click();
+
+        cut.WaitForAssertion(() => Assert.Single(api.Requisicoes, r => r.Metodo == HttpMethod.Post), TimeSpan.FromSeconds(5));
+        var responsaveisEnviados = api.JsonDe(HttpMethod.Post, Lote).RootElement.GetProperty("items").EnumerateArray()
+            .Select(i => i.GetProperty("employeeId").GetInt32())
+            .ToList();
+
+        Assert.Equal(new[] { 1, 2 }, responsaveisEnviados);
     }
 
     [Fact]
