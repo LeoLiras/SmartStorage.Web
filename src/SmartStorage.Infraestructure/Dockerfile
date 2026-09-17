@@ -4,14 +4,14 @@ WORKDIR /src
 RUN dotnet tool install --global dotnet-ef --version 10.0.*
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-COPY SmartStorage-API/SmartStorage.API.csproj SmartStorage-API/
+COPY SmartStorage.API/SmartStorage.API.csproj SmartStorage.API/
 COPY SmartStorage.Configurations/SmartStorage.Configurations.csproj SmartStorage.Configurations/
 COPY SmartStorage.Infraestructure/SmartStorage.Infraestructure.csproj SmartStorage.Infraestructure/
 COPY SmartStorage.MessageBus/SmartStorage.MessageBus.csproj SmartStorage.MessageBus/
 COPY SmartStorage.Shared/SmartStorage.Shared.csproj SmartStorage.Shared/
-RUN dotnet restore SmartStorage-API/SmartStorage.API.csproj
+RUN dotnet restore SmartStorage.API/SmartStorage.API.csproj
 
-COPY SmartStorage-API/ SmartStorage-API/
+COPY SmartStorage.API/ SmartStorage.API/
 COPY SmartStorage.Configurations/ SmartStorage.Configurations/
 COPY SmartStorage.Infraestructure/ SmartStorage.Infraestructure/
 COPY SmartStorage.MessageBus/ SmartStorage.MessageBus/
@@ -21,7 +21,7 @@ COPY SmartStorage.Shared/ SmartStorage.Shared/
 # das migrations no momento do build, entao a imagem carrega um schema versionado e fixo.
 RUN dotnet ef migrations bundle \
         --project SmartStorage.Infraestructure/SmartStorage.Infraestructure.csproj \
-        --startup-project SmartStorage-API/SmartStorage.API.csproj \
+        --startup-project SmartStorage.API/SmartStorage.API.csproj \
         --configuration Release \
         --self-contained -r linux-x64 \
         --output /app/efbundle

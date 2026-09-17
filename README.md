@@ -37,7 +37,7 @@ flowchart TB
 
     subgraph services["Microsserviços"]
         AUTH["AuthenticationAPI<br/>JWT + Refresh · :5202"]
-        CORE["SmartStorage-API<br/>CRUD + HATEOAS · :5100"]
+        CORE["SmartStorage.API<br/>CRUD + HATEOAS · :5100"]
         REP["ReportsAPI<br/>PDF · Excel · :5105"]
         AI["AIAPI<br/>Gemini · :5103"]
         MAIL["EmailAPI<br/>MailKit · :5107"]
@@ -76,7 +76,7 @@ A comunicação entre serviços é assíncrona onde faz sentido: criar um produt
 ### 🔐 AuthenticationAPI
 Autenticação própria com **JWT + refresh token**: `signin`, `refresh`, `revoke`, CRUD de usuários e alteração de credenciais. Dois papéis (`Usuário` e `Administrador`) propagados como *claims* e verificados tanto nas APIs quanto na interface, que esconde ações restritas.
 
-### 📦 SmartStorage-API
+### 📦 SmartStorage.API
 Núcleo do domínio — produtos, colaboradores, prateleiras e vendas. Organizado em camadas explícitas (`Business` → `Repository` → `Converter`), com **HATEOAS** implementado de verdade: cada recurso retorna os links das ações possíveis, montados por *enrichers* dedicados e injetados por um action filter.
 
 ### 📊 ReportsAPI
@@ -155,9 +155,9 @@ O banco já sobe com colaboradores, prateleiras, produtos e suas alocações —
 Os `appsettings.json` não guardam credenciais. A connection string, o segredo do JWT e as credenciais de e-mail ficam em [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets), fora do repositório, e cada projeto executável precisa dos seus:
 
 ```bash
-cd SmartStorage-API
-dotnet user-secrets set "ConnectionStrings:SqlServerConnection" "<sua connection string>" -p SmartStorage-API/SmartStorage.API.csproj
-dotnet user-secrets set "TokenConfigurations:Secret" "<segredo do JWT>" -p SmartStorage-API/SmartStorage.API.csproj
+cd src
+dotnet user-secrets set "ConnectionStrings:SqlServerConnection" "<sua connection string>" -p SmartStorage.API/SmartStorage.API.csproj
+dotnet user-secrets set "TokenConfigurations:Secret" "<segredo do JWT>" -p SmartStorage.API/SmartStorage.API.csproj
 ```
 
 O mesmo para `SmartStorage.AIAPI`, `SmartStorage.AuthenticationAPI` e `SmartStorage.ReportsAPI`. O `SmartStorage.EmailAPI` usa `TokenConfigurations:Secret`, `Email:Username`, `Email:Password` e `Email:Destinatario` (o endereço que recebe a notificação de novo produto). O segredo do JWT precisa ser **o mesmo em todos** — é ele que assina e valida os tokens.
@@ -187,7 +187,7 @@ O `build` e o `push` do compose usam o nome declarado em `image:` de cada servi�
 |---|---|
 | Blazor | 5000 |
 | API Gateway | 4480 |
-| SmartStorage-API | 5100 |
+| SmartStorage.API | 5100 |
 | AIAPI | 5103 |
 | ReportsAPI | 5105 |
 | EmailAPI | 5107 |
@@ -223,8 +223,9 @@ O `build` e o `push` do compose usam o nome declarado em `image:` de cada servi�
 SmartStorage.Web/
 ├── docker-compose.yml              # orquestração dos 10 containers
 ├── .env.example                    # modelo das variáveis de ambiente
-└── SmartStorage-API/
-    ├── SmartStorage-API/           # API core (domínio + HATEOAS)
+├── tests/                          # roteiro fim a fim do ledger
+└── src/
+    ├── SmartStorage.API/           # API core (domínio + HATEOAS)
     ├── SmartStorage.APIGateway/    # Ocelot
     ├── SmartStorage.AuthenticationAPI/
     ├── SmartStorage.ReportsAPI/

@@ -57,7 +57,7 @@ services:
   migrator:
     image: lelep0/smartstorage-migrator:${IMAGE_TAG:-latest}
     build:
-      context: ./SmartStorage-API
+      context: ./src
       dockerfile: SmartStorage.Infraestructure/Dockerfile
     environment:
       ConnectionStrings__SqlServerConnection: "Server=sqlserver,1433;Database=SmartStorageWeb.db;User Id=sa;Password=${SQLSERVER_SA_PASSWORD};TrustServerCertificate=True;"
@@ -69,8 +69,8 @@ services:
   smartstorage-api:
     image: lelep0/smartstorage-api:${IMAGE_TAG:-latest}
     build:
-      context: ./SmartStorage-API
-      dockerfile: SmartStorage-API/Dockerfile
+      context: ./src
+      dockerfile: SmartStorage.API/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       TZ: America/Sao_Paulo
@@ -93,7 +93,7 @@ services:
   authenticationapi:
     image: lelep0/smartstorage-authapi:${IMAGE_TAG:-latest}
     build:
-      context: ./SmartStorage-API
+      context: ./src
       dockerfile: SmartStorage.AuthenticationAPI/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -112,7 +112,7 @@ services:
   emailapi:
     image: lelep0/smartstorage-emailapi:${IMAGE_TAG:-latest}
     build:
-      context: ./SmartStorage-API
+      context: ./src
       dockerfile: SmartStorage.EmailAPI/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -139,7 +139,7 @@ services:
   aiapi:
     image: lelep0/smartstorage-aiapi:${IMAGE_TAG:-latest}
     build:
-      context: ./SmartStorage-API
+      context: ./src
       dockerfile: SmartStorage.AIAPI/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -159,7 +159,7 @@ services:
   reportsapi:
     image: lelep0/smartstorage-reportsapi:${IMAGE_TAG:-latest}
     build:
-      context: ./SmartStorage-API
+      context: ./src
       dockerfile: SmartStorage.ReportsAPI/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -178,7 +178,7 @@ services:
   apigateway:
     image: lelep0/smartstorage-gateway:${IMAGE_TAG:-latest}
     build:
-      context: ./SmartStorage-API
+      context: ./src
       dockerfile: SmartStorage.APIGateway/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Docker
@@ -199,7 +199,7 @@ services:
   blazor:
     image: lelep0/smartstorage-blazor:${IMAGE_TAG:-latest}
     build:
-      context: ./SmartStorage-API
+      context: ./src
       dockerfile: SmartStorage.Blazor/Dockerfile
     ports:
       - "5000:8080"

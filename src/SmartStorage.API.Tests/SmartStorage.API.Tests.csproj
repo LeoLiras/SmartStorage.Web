@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SmartStorage-API\SmartStorage.API.csproj" />
+    <ProjectReference Include="..\SmartStorage.API\SmartStorage.API.csproj" />
   </ItemGroup>
 
 </Project>

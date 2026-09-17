@@ -3,7 +3,7 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "SmartStorage-API\\SmartStorage.API.csproj",
+        "Path": "SmartStorage.API\\SmartStorage.API.csproj",
         "Action": "Start",
         "DebugTarget": "https"
       },

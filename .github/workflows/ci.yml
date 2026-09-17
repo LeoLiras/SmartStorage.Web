@@ -19,17 +19,17 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore SmartStorage-API/SmartStorageWeb.sln
+        run: dotnet restore src/SmartStorageWeb.sln
 
       - name: Build
-        run: dotnet build SmartStorage-API/SmartStorageWeb.sln -c Release --no-restore
+        run: dotnet build src/SmartStorageWeb.sln -c Release --no-restore
 
       # Só os testes de componente do Blazor (bUnit) e os de unidade da API rodam
       # aqui: eles não precisam de nada de pé. O roteiro tests/ledger_e2e.py exige
       # o compose inteiro com banco e gateway, por isso continua fora do CI e é
       # rodado à mão.
       - name: Testes de componente
-        run: dotnet test SmartStorage-API/SmartStorageWeb.sln -c Release --no-build
+        run: dotnet test src/SmartStorageWeb.sln -c Release --no-build
 
   images:
     name: Build e push das imagens

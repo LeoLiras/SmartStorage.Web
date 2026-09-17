@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SmartStorage é um sistema de gestão de estoque em .NET 10 dividido em microsserviços, com front Blazor WebAssembly, gateway Ocelot, SQL Server, RabbitMQ e Docker Compose. O README na raiz descreve o produto e como subir tudo; este arquivo cobre o que só se descobre lendo o código.
 
-**A raiz do repositório não é a raiz da solution.** O `docker-compose.yml`, o `.env` e o `README.md` ficam na raiz; todos os projetos e a `SmartStorageWeb.sln` ficam em `SmartStorage-API/`. Dentro dela existe ainda `SmartStorage-API/SmartStorage-API/`, que é o projeto da API core (`SmartStorage.API.csproj`). Todo `context` de build no compose é `./SmartStorage-API`.
+**A raiz do repositório não é a raiz da solution.** O `docker-compose.yml`, o `.env` e o `README.md` ficam na raiz; todos os projetos e a `SmartStorageWeb.sln` ficam em `src/`, e os testes fim a fim em `tests/`. A API core é `src/SmartStorage.API/` (`SmartStorage.API.csproj`). Todo `context` de build no compose é `./src`.
 
 ## Comandos
 
@@ -17,10 +17,10 @@ docker compose up -d --build          # buildar localmente em vez de baixar
 docker compose logs -f <serviço>
 
 # Build da solution
-dotnet build SmartStorage-API/SmartStorageWeb.sln -c Release
+dotnet build src/SmartStorageWeb.sln -c Release
 
-# Rodar um serviço isolado (a partir de SmartStorage-API/)
-dotnet run --project SmartStorage-API/SmartStorage.API.csproj
+# Rodar um serviço isolado (a partir de src/)
+dotnet run --project SmartStorage.API/SmartStorage.API.csproj
 ```
 
 A verificação tem duas camadas, e elas cobrem coisas diferentes de propósito.
@@ -56,9 +56,9 @@ Nenhum caso do roteiro sai pulado ou como lacuna: qualquer resultado diferente d
 O projeto de migrations é `SmartStorage.Infraestructure`, com startup em `SmartStorage.API.csproj`:
 
 ```bash
-cd SmartStorage-API
-dotnet ef migrations add <Nome> -p SmartStorage.Infraestructure -s SmartStorage-API/SmartStorage.API.csproj
-dotnet ef migrations has-pending-model-changes -p SmartStorage.Infraestructure -s SmartStorage-API/SmartStorage.API.csproj
+cd src
+dotnet ef migrations add <Nome> -p SmartStorage.Infraestructure -s SmartStorage.API/SmartStorage.API.csproj
+dotnet ef migrations has-pending-model-changes -p SmartStorage.Infraestructure -s SmartStorage.API/SmartStorage.API.csproj
 ```
 
 `SmartStorageContextFactory` (`IDesignTimeDbContextFactory`) existe justamente para as ferramentas do EF não subirem o host da aplicação — que exigiria `TokenConfigurations:Secret`. Em tempo de design a connection string não precisa ser real.
@@ -79,7 +79,7 @@ O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `Servic
 
 Cuidado com as portas: as rotas de **dev** apontam para as portas **HTTPS** dos serviços (5100, 5102, 5104, 5106, 5202), que são diferentes das portas publicadas pelo compose (5100, 5103, 5105, 5107, 5202).
 
-### Camadas da API core (`SmartStorage-API/`)
+### Camadas da API core (`src/SmartStorage.API/`)
 
 `Controller → Business → SmartStorageContext`, com `Converter` traduzindo Model ↔ VO. Não há repositório aqui — as `*BusinessImplementation` recebem o `DbContext` direto e instanciam o converter no construtor. A AuthenticationAPI é a exceção: ela tem `Repositories/` com um `GenericRepository`.
 
