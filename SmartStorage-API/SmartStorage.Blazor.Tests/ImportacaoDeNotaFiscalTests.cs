@@ -45,7 +45,7 @@ public class ImportacaoDeNotaFiscalTests : BunitContext, IAsyncLifetime
         },
     };
 
-    private ApiFalsa Monta(object previa, HttpStatusCode statusImportacao = HttpStatusCode.OK)
+    private ApiFalsa Monta(object previa, HttpStatusCode statusImportacao = HttpStatusCode.OK, bool comAdmin = true)
     {
         var api = new ApiFalsa()
             .Responde(HttpMethod.Post, CaminhoPrevia, previa)
@@ -54,11 +54,16 @@ public class ImportacaoDeNotaFiscalTests : BunitContext, IAsyncLifetime
                 new { id = 7, name = "Capacete de Seguranca Branco", descricao = "Capacete classe B", qntd = 5, fatorConversao = 1, employeeId = 1, dateRegister = "2026-03-01T00:00:00" },
                 new { id = 4, name = "Martelo Unha 27mm", descricao = "Martelo de aco forjado", qntd = 40, fatorConversao = 6, employeeId = 2, dateRegister = "2026-03-01T00:00:00" },
             })
-            .Responde(HttpMethod.Get, "api/storage/employees/v1", new object[]
-            {
-                new { id = 1, name = "Ana Paula Ribeiro", rg = "MG1234567", cpf = "52998224725" },
-                new { id = 6, name = "Colaborador Padrão", rg = "NA0000000", cpf = "12345678909" },
-            });
+            .Responde(HttpMethod.Get, "api/storage/employees/v1", comAdmin
+                ? new object[]
+                {
+                    new { id = 1, name = "Ana Paula Ribeiro", rg = "MG1234567", cpf = "52998224725" },
+                    new { id = 6, name = "Admin", rg = "NA0000000", cpf = "12345678909" },
+                }
+                : new object[]
+                {
+                    new { id = 1, name = "Ana Paula Ribeiro", rg = "MG1234567", cpf = "52998224725" },
+                });
 
         if (statusImportacao == HttpStatusCode.OK)
             api.Responde(HttpMethod.Post, CaminhoImportacao, new { id = 1, numero = "1234", serie = "1", itemsCount = 2, createdProducts = 1 });
@@ -122,6 +127,15 @@ public class ImportacaoDeNotaFiscalTests : BunitContext, IAsyncLifetime
         Assert.Contains("1 existente(s) · 1 novo(s)", cut.Markup);
         Assert.Single(cut.FindComponents<ProductImagePicker>());
         Assert.False(BotaoImportar(cut).HasAttribute("disabled"));
+    }
+
+    [Fact]
+    public void Sem_o_colaborador_Admin_o_responsavel_comeca_vazio()
+    {
+        Monta(Previa(), comAdmin: false);
+        var cut = RenderizaComNota();
+
+        Assert.Null(Select(cut, "Colaborador Responsável").Instance.Value);
     }
 
     [Fact]

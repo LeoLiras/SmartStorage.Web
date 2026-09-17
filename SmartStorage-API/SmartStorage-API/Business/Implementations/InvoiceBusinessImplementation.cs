@@ -110,6 +110,11 @@ namespace SmartStorage_API.Service.Implementations
 
             var factorByProduct = new Dictionary<int, int>();
 
+            var defaultEmployeeId = _context.Employees
+                .Where(e => e.EmpName == Employee.DefaultEmployeeName)
+                .Select(e => (int?)e.EmpId)
+                .FirstOrDefault();
+
             var plan = new List<(NfeItem Item, InvoiceImportItemVO Request)>();
 
             foreach (var item in nfe.Items)
@@ -140,7 +145,7 @@ namespace SmartStorage_API.Service.Implementations
                     if (request.ProductId is not null)
                         ValidateExistingProduct(item, request, existingProducts, productsByCode, factorByProduct);
                     else
-                        ValidateNewProduct(item, request.NewProduct, productsByCode, newNames, newCodes);
+                        ValidateNewProduct(item, request.NewProduct, productsByCode, newNames, newCodes, defaultEmployeeId);
 
                     plan.Add((item, request));
                 }
@@ -152,7 +157,8 @@ namespace SmartStorage_API.Service.Implementations
 
             var employeeIds = plan
                 .Where(p => p.Request.NewProduct is not null)
-                .Select(p => p.Request.NewProduct.EmployeeId ?? Employee.GenericEmployeeId)
+                .Where(p => p.Request.NewProduct.EmployeeId is not null)
+                .Select(p => p.Request.NewProduct.EmployeeId.Value)
                 .Distinct()
                 .ToList();
 
@@ -198,7 +204,7 @@ namespace SmartStorage_API.Service.Implementations
                     }
                     else
                     {
-                        product = CreateProduct(item, request.NewProduct);
+                        product = CreateProduct(item, request.NewProduct, defaultEmployeeId);
 
                         totals[product.ProId] = 0;
 
@@ -293,8 +299,12 @@ namespace SmartStorage_API.Service.Implementations
             ProductVO newProduct,
             Dictionary<string, Product> productsByCode,
             HashSet<string> newNames,
-            HashSet<string> newCodes)
+            HashSet<string> newCodes,
+            int? defaultEmployeeId)
         {
+            if (newProduct.EmployeeId is null && defaultEmployeeId is null)
+                throw new Exception($"escolha um colaborador: nenhum colaborador chamado {Employee.DefaultEmployeeName} está cadastrado.");
+
             var name = newProduct.Name?.Trim();
 
             if (string.IsNullOrEmpty(name) || name.Length < 5 || name.Length > 100)
@@ -327,7 +337,7 @@ namespace SmartStorage_API.Service.Implementations
                 throw new Exception("o preço inicial do produto deve ser maior que zero.");
         }
 
-        private Product CreateProduct(NfeItem item, ProductVO newProduct)
+        private Product CreateProduct(NfeItem item, ProductVO newProduct, int? defaultEmployeeId)
         {
             var product = new Product
             {
@@ -339,7 +349,7 @@ namespace SmartStorage_API.Service.Implementations
                 ProVolume = newProduct.Volume,
                 ProPrecoInicial = newProduct.PrecoInicial,
                 ProCodigo = item.Codigo,
-                ProEmpId = newProduct.EmployeeId ?? Employee.GenericEmployeeId,
+                ProEmpId = newProduct.EmployeeId ?? defaultEmployeeId.Value,
                 ProImage = newProduct.ProImage,
             };
 

@@ -1636,8 +1636,19 @@ def ct44(ctx):
 
 
 EMITENTE = "%s Fornecedor" % PREFIXO
-COLABORADOR_PADRAO = 6
+COLABORADOR_PADRAO = "Admin"
 _notas_emitidas = [0]
+_id_do_padrao = []
+
+
+def colaborador_padrao():
+    """O produto novo da NF-e sem colaborador fica com o Admin, achado por consulta."""
+    if not _id_do_padrao:
+        linhas = sql("SELECT EmpId FROM dbo.Employee WHERE EmpName = '%s'" % COLABORADOR_PADRAO)
+        if not linhas:
+            raise Erro("colaborador %r nao encontrado no banco" % COLABORADOR_PADRAO)
+        _id_do_padrao.append(int(linhas[0][0]))
+    return _id_do_padrao[0]
 
 
 def _gtin(sufixo):
@@ -1761,7 +1772,7 @@ def ct45(ctx):
 
     dados_existente, dados_novo = _produto_no_banco(existente), _produto_no_banco(novo)
     R.exige(dados_existente["fator"] == 6 and dados_existente["custo"] == 10.0, "custo ou fator do produto existente errado", "%r" % dados_existente)
-    R.exige(dados_novo == {"codigo": codigo_novo, "fator": 1, "custo": 8.0, "responsavel": COLABORADOR_PADRAO},
+    R.exige(dados_novo == {"codigo": codigo_novo, "fator": 1, "custo": 8.0, "responsavel": colaborador_padrao()},
             "produto novo sem codigo, custo ou colaborador padrao", "%r" % dados_novo)
     nota = _nota_no_banco(chave)
     R.exige(nota is not None and nota["itens"] == 2 and nota["usuario"] == ctx.usuario, "nota nao gravada com os itens e o usuario", "%r" % nota)
@@ -1853,19 +1864,19 @@ def ct48(ctx):
 
     status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
         "productId": pid, "shelfId": ctx.prateleira_a, "productQuantity": 1, "productPrice": 4.0,
-        "employeeId": COLABORADOR_PADRAO, "dateEnter": datetime.now().isoformat()})
+        "employeeId": colaborador_padrao(), "dateEnter": datetime.now().isoformat()})
     R.exige(status == 200, "alocacao com responsavel recusada", "HTTP %s: %s" % (status, _mensagem(corpo)))
-    R.exige(_produto_no_banco(pid)["responsavel"] == COLABORADOR_PADRAO, "alocacao individual nao trocou o responsavel", "%r" % _produto_no_banco(pid))
+    R.exige(_produto_no_banco(pid)["responsavel"] == colaborador_padrao(), "alocacao individual nao trocou o responsavel", "%r" % _produto_no_banco(pid))
 
     status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation/batch", {"items": [
-        {"productId": outro, "shelfId": ctx.prateleira_b, "qntd": 1, "price": 4.0, "employeeId": COLABORADOR_PADRAO}]})
+        {"productId": outro, "shelfId": ctx.prateleira_b, "qntd": 1, "price": 4.0, "employeeId": colaborador_padrao()}]})
     R.exige(status == 200, "lote com responsavel recusado", "HTTP %s: %s" % (status, _mensagem(corpo)))
-    R.exige(_produto_no_banco(outro)["responsavel"] == COLABORADOR_PADRAO, "lote nao trocou o responsavel", "%r" % _produto_no_banco(outro))
+    R.exige(_produto_no_banco(outro)["responsavel"] == colaborador_padrao(), "lote nao trocou o responsavel", "%r" % _produto_no_banco(outro))
 
     status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
         "productId": pid, "shelfId": ctx.prateleira_a, "productQuantity": 1, "productPrice": 4.0,
         "dateEnter": datetime.now().isoformat()})
-    R.exige(status == 200 and _produto_no_banco(pid)["responsavel"] == COLABORADOR_PADRAO,
+    R.exige(status == 200 and _produto_no_banco(pid)["responsavel"] == colaborador_padrao(),
             "alocacao sem responsavel apagou o responsavel atual", "%r" % _produto_no_banco(pid))
 
 

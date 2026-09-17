@@ -206,13 +206,15 @@ else
 
             products = (await productService.GetProducts()).OrderBy(p => p.Name).ToList();
 
+            var defaultEmployeeId = employees.FirstOrDefault(e => e.Name == Employee.DefaultEmployeeName)?.Id;
+
             rows = preview.Items.Select(item => new ImportRow
             {
                 Item = item,
                 ProductId = item.ProductId,
                 FatorConversao = item.FatorConversao,
                 QntdEstoque = item.QntdEstoque ?? 0,
-                NewProduct = NewProductFrom(item),
+                NewProduct = NewProductFrom(item, defaultEmployeeId),
             }).ToList();
         }
         catch (ApiException ex)
@@ -297,11 +299,11 @@ else
         row.QuantityEdited = true;
     }
 
-    private static ProductVO NewProductFrom(InvoicePreviewItemVO item) => new()
+    private static ProductVO NewProductFrom(InvoicePreviewItemVO item, int? employeeId) => new()
     {
         Name = item.Descricao.Length > 100 ? item.Descricao[..100] : item.Descricao,
         Descricao = item.Descricao,
-        EmployeeId = Employee.GenericEmployeeId,
+        EmployeeId = employeeId,
         DateRegister = DateTime.Now,
     };
 
