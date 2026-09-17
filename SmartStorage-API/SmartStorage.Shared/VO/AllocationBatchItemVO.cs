@@ -15,5 +15,7 @@ namespace SmartStorage_Shared.VO
 
         [Range(0.01, double.MaxValue, ErrorMessage = "O preço deve ser maior que zero.")]
         public decimal Price { get; set; }
+
+        public int? EmployeeId { get; set; }
     }
 }

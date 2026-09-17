@@ -19,6 +19,10 @@ public partial class SmartStorageContext : DbContext
 
     public virtual DbSet<Enter> Enters { get; set; }
 
+    public virtual DbSet<Invoice> Invoices { get; set; }
+
+    public virtual DbSet<InvoiceItem> InvoiceItems { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<ProductStockMovement> ProductStockMovements { get; set; }
@@ -52,7 +56,37 @@ public partial class SmartStorageContext : DbContext
 
             entity.Property(p => p.ProPrecoInicial).HasPrecision(18, 2);
 
+            entity.Property(p => p.ProCusto).HasPrecision(18, 4);
+
+            entity.HasIndex(e => e.ProCodigo, "UQ_Product_codigo").IsUnique().HasFilter("[ProCodigo] IS NOT NULL");
+
             entity.HasOne(d => d.Employee).WithMany(p => p.Products).HasForeignKey(d => d.ProEmpId);
+        });
+
+        modelBuilder.Entity<Invoice>(entity =>
+        {
+            entity.HasIndex(e => e.InvChave, "UQ_Invoice_chave").IsUnique();
+
+            entity.HasIndex(e => e.InvUseId, "IX_Invoice_userId");
+
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.InvUseId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<InvoiceItem>(entity =>
+        {
+            entity.HasIndex(e => e.IniInvId, "IX_InvoiceItem_invoiceId");
+
+            entity.HasIndex(e => e.IniProId, "IX_InvoiceItem_productId");
+
+            entity.Property(p => p.IniQntdNota).HasPrecision(18, 4);
+
+            entity.Property(p => p.IniValorTotal).HasPrecision(18, 2);
+
+            entity.Property(p => p.IniCustoUnitario).HasPrecision(18, 4);
+
+            entity.HasOne(d => d.Invoice).WithMany(p => p.Items).HasForeignKey(d => d.IniInvId).OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.Product).WithMany().HasForeignKey(d => d.IniProId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Shelf>(entity =>

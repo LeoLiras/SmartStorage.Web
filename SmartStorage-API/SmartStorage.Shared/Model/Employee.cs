@@ -7,6 +7,8 @@ namespace SmartStorage_Shared.Model;
 [Table("Employee", Schema = "dbo")]
 public partial class Employee
 {
+    public const int GenericEmployeeId = 6;
+
     [Key]
     public int EmpId { get; set; }
 

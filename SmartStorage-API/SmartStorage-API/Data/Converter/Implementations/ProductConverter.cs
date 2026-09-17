@@ -29,6 +29,9 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 ProMinimumStock = origin.MinimumStock,
                 ProVolume = origin.Volume,
                 ProPrecoInicial = origin.PrecoInicial,
+                ProCodigo = origin.Codigo,
+                ProFatorConversao = origin.FatorConversao,
+                ProCusto = origin.Custo,
                 ProEmpId = origin.EmployeeId,
             };
         }
@@ -82,6 +85,9 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 MinimumStock = origin.ProMinimumStock,
                 Volume = origin.ProVolume,
                 PrecoInicial = origin.ProPrecoInicial,
+                Codigo = origin.ProCodigo,
+                FatorConversao = origin.ProFatorConversao,
+                Custo = origin.ProCusto,
                 EmployeeId = origin.ProEmpId,
                 ProImage = origin.ProImage,
             };

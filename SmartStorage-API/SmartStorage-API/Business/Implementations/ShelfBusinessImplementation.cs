@@ -153,6 +153,8 @@ namespace SmartStorage_API.Service.Implementations
 
             EnsureShelfFits(newAllocation.ProductId, newAllocation.ShelfId, newAllocation.ProductQuantity);
 
+            AssignResponsible(newAllocation.ProductId, newAllocation.EmployeeId);
+
             var totalBefore = _movementRepository.FindProductTotalBalance(newAllocation.ProductId);
 
             _movementRepository.TransferProductBetweenLocations(
@@ -221,6 +223,9 @@ namespace SmartStorage_API.Service.Implementations
                     if (item.Price <= 0)
                         throw new Exception("o preço deve ser maior que zero.");
 
+                    if (item.EmployeeId is not null && !_context.Employees.Any(e => e.EmpId == item.EmployeeId))
+                        throw new Exception("colaborador não encontrado com o ID informado.");
+
                     if (item.Qntd > product.ProQntd)
                         throw new Exception($"saldo insuficiente no depósito: há {product.ProQntd} e o lote pede {item.Qntd}.");
 
@@ -246,6 +251,9 @@ namespace SmartStorage_API.Service.Implementations
 
             using (var transaction = _context.Database.BeginTransaction())
             {
+                foreach (var item in items.Where(i => i.EmployeeId is not null))
+                    products[item.ProductId].ProEmpId = item.EmployeeId;
+
                 foreach (var item in items)
                     _movementRepository.TransferProductBetweenLocations(
                         item.ProductId,
@@ -406,6 +414,17 @@ namespace SmartStorage_API.Service.Implementations
                 _stockAlert.NotifyIfBelowMinimum(productId, totalBefore, "Inventário");
 
             return _converterEnter.Parse(adjustments.Select(a => a.Enter).ToList());
+        }
+
+        private void AssignResponsible(int productId, int? employeeId)
+        {
+            if (employeeId is null)
+                return;
+
+            if (!_context.Employees.Any(e => e.EmpId == employeeId))
+                throw new Exception("Colaborador não encontrado com o ID informado.");
+
+            _context.Products.First(p => p.ProId == productId).ProEmpId = employeeId;
         }
 
         private void EnsureSingleShelf(int productId, int shelfId)

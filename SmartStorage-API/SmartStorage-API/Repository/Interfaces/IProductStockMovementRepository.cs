@@ -27,5 +27,7 @@ namespace SmartStorage_API.Repository.Interfaces
         int FindProductBalanceByLocation(int productId, int? shelfId);
 
         int FindProductTotalBalance(int productId);
+
+        long FindAuthenticatedUserId();
     }
 }

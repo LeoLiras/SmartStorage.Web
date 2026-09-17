@@ -66,7 +66,8 @@ internal static class SeedData
             new Employee { EmpId = 2, EmpName = "Bruno Carvalho Lima", EmpCpf = "11144477735", EmpRg = "SP2345678", EmpDateRegister = CadastroFuncionarios },
             new Employee { EmpId = 3, EmpName = "Carla Menezes Souza", EmpCpf = "39053344705", EmpRg = "RJ3456789", EmpDateRegister = CadastroFuncionarios },
             new Employee { EmpId = 4, EmpName = "Diego Ferreira Alves", EmpCpf = "16899535009", EmpRg = "MG4567890", EmpDateRegister = CadastroFuncionarios },
-            new Employee { EmpId = 5, EmpName = "Eduarda Nogueira Pinto", EmpCpf = "40442820850", EmpRg = "SP5678901", EmpDateRegister = CadastroFuncionarios });
+            new Employee { EmpId = 5, EmpName = "Eduarda Nogueira Pinto", EmpCpf = "40442820850", EmpRg = "SP5678901", EmpDateRegister = CadastroFuncionarios },
+            new Employee { EmpId = Employee.GenericEmployeeId, EmpName = "Colaborador Padrão", EmpCpf = "12345678909", EmpRg = "NA0000000", EmpDateRegister = CadastroFuncionarios });
     }
 
     /// <summary>
