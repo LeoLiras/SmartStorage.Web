@@ -36,7 +36,7 @@ Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests`
 Script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
 
 ```bash
-python tests/ledger_e2e.py              # os 42 casos, ~8 min
+python tests/ledger_e2e.py              # os 44 casos, ~8 min
 python tests/ledger_e2e.py --caso CT-08 # um caso só
 python tests/ledger_e2e.py --manter     # preserva os produtos criados, para inspeção
 ```
@@ -69,7 +69,7 @@ Cada projeto executável tem seu próprio `UserSecretsId`. Os `appsettings.json`
 
 ### O gateway é a única porta de entrada
 
-O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 39 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
+O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 40 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
 
 **Os dois arquivos precisam declarar as rotas na mesma ordem.** A configuração JSON do .NET faz merge de arrays por índice, então `appsettings.Docker.json` só sobrescreve corretamente se cada rota estiver na mesma posição e com todos os campos redeclarados. Ao adicionar um endpoint, edite os dois.
 
@@ -91,7 +91,7 @@ Listagem paginada é opcional por query string: `GET /sales/v1?page=1&pageSize=1
 
 ### Chamadas do Blazor à API
 
-Cada domínio da API principal tem um serviço tipado, como os de IA, relatórios, e-mail e autenticação; o antigo `ApiExtensions` genérico, que escolhia o endpoint pelo tipo do VO, saiu com a #22. `ISaleService`/`SaleService` cobre vendas, carrinho, cancelamento e devolução; `IShelfService`/`ShelfService` cobre prateleiras e alocações (listas, página, alocação individual e em lote, desfazer com `PUT` sem corpo e transferência); `IProductService`/`ProductService` cobre produtos (o ajuste de estoque segue dentro do `PUT` do produto); `IEmployeeService`/`EmployeeService` só lista funcionários. Cada serviço expõe apenas as rotas que as telas usam.
+Cada domínio da API principal tem um serviço tipado, como os de IA, relatórios, e-mail e autenticação; o antigo `ApiExtensions` genérico, que escolhia o endpoint pelo tipo do VO, saiu com a #22. `ISaleService`/`SaleService` cobre vendas, carrinho, cancelamento e devolução; `IShelfService`/`ShelfService` cobre prateleiras e alocações (listas, página, alocação individual e em lote, desfazer com `PUT` sem corpo, transferência e inventário); `IProductService`/`ProductService` cobre produtos (o ajuste de estoque segue dentro do `PUT` do produto); `IEmployeeService`/`EmployeeService` só lista funcionários. Cada serviço expõe apenas as rotas que as telas usam.
 
 Cada serviço tem interface em `Services/IServices`, é registrado no `Program.cs` com `AddHttpClient`, `AuthHandler` (token do `localStorage` por requisição) e `SessionExpiredHandler` (401 leva ao login), e trata a resposta com `HttpResponseExtensions`: `ReadApiAsync` lança `ApiException` com o status e a mensagem da API, `ReadApiPageAsync` lê o `X-Total-Count` e `WithPage` monta a query de paginação. Nos testes, registre o serviço sobre `api.Cliente()`.
 
@@ -137,6 +137,8 @@ A venda guarda o preço do momento em `Sale.SalPrice`, copiado do `EntPrice` da 
 O carrinho (#21) grava várias vendas num único `POST /sales/v1/batch` (`SaleBatchVO`), **tudo ou nada**: `CreateNewSales` valida todos os itens antes de escrever — entrada existente, quantidade positiva e saldo da entrada somando os itens repetidos dela — e responde 400 com `Item N (produto na prateleira): motivo` sem gravar nada; a gravação corre numa transação, com o mesmo `PsmDate` em todos os lançamentos. Cada item continua uma `Sale` independente (não há pedido), e o alerta de estoque mínimo sai uma vez por produto, depois do commit. No Blazor o carrinho é o `SaleCart` (scoped), salvo no `localStorage` na chave `saleCart:{usuário}` — por usuário, para sobreviver à sessão expirada sem passar para outro login no mesmo navegador. A tela `/products/sales/cart` confere preço e saldo na API ao abrir e depois de uma recusa, e só esvazia o carrinho quando a API aceita.
 
 Transferência entre prateleiras (`POST /shelf/allocation/{enterId}/transfer`) move **todo o saldo** do `Enter` de origem para a prateleira de destino, em dois lançamentos `Transferencia` com o mesmo instante. O destino que já tem o produto mantém o próprio preço; o destino novo herda o preço da origem. O `Enter` de origem fica com saldo zero, porque as vendas apontam para ele.
+
+O inventário cíclico (#12) é `POST /shelf/v1/{shelfId}/inventory` (`InventoryCountVO`: motivo e, por entrada, a quantidade contada), **tudo ou nada** como o lote: `CountShelfInventory` recusa entrada de outra prateleira, entrada repetida e contagem sem nenhuma diferença, com `Item N (produto): motivo`. A quantidade contada é absoluta e a diferença sai do saldo do momento no servidor, não do que a tela carregou; cada entrada com diferença vira um lançamento `Ajuste` na prateleira, todos com o mesmo instante e o motivo `Inventário da {prateleira}: {motivo}` (motivo até 180 caracteres, para caber nos 300 do `PsmReason`). Não checa capacidade — a contagem registra o que já está lá — e dispara o alerta de estoque mínimo por produto depois do commit. No Blazor, o botão Inventário de Produtos nas prateleiras leva a `/products/shelves/inventory`: escolhida a prateleira, carrega as entradas com saldo dela e envia só as linhas alteradas; numa recusa, mantém as contagens e atualiza o saldo do sistema.
 
 Um produto só fica em **uma prateleira por vez**: `EnsureSingleShelf` recusa a alocação quando o produto tem saldo (`EntQntd > 0`) em outra prateleira. Complementar a mesma prateleira continua permitido, e `Enter` zerado não conta, então depois de desfazer a alocação ou transferir o saldo o produto pode ir para outra prateleira. A transferência não passa por essa checagem, porque move o saldo inteiro e o produto continua numa prateleira só.
 
