@@ -9,13 +9,15 @@
 @inject SaleCart cart
 @inject ISnackbar Snackbar
 
-<MudTable @ref="table" T="EnterVO" Class="app-table mt-3" Elevation="0" ServerData="LoadEntries" Dense="false" Hover="true" Bordered="false" Striped="false" RowsPerPage="10">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6" Class="app-page-title">Produtos nas prateleiras para venda</MudText>
-        <MudSpacer />
+<div class="app-toolbar mt-2">
+    <MudText Typo="Typo.h5" Class="app-page-title">Produtos nas prateleiras para venda</MudText>
+    <div class="app-toolbar-actions">
         <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Variant="Variant.Outlined" Margin="Margin.Dense" Class="app-search mt-0"></MudTextField>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FactCheck" Href="products/shelves/inventory" Class="ml-3">Inventário</MudButton>
-    </ToolBarContent>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FactCheck" Href="products/shelves/inventory">Inventário</MudButton>
+    </div>
+</div>
+
+<MudTable @ref="table" T="EnterVO" Class="app-table mt-3" Elevation="0" ServerData="LoadEntries" Dense="false" Hover="true" Bordered="false" Striped="false" RowsPerPage="10">
     <HeaderContent>
         <MudTh>Produto</MudTh>
         <MudTh Class="app-cell-number">Preço</MudTh>

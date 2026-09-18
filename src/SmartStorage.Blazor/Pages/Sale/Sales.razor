@@ -7,12 +7,14 @@
 @inject VariablesExtensions app
 @inject ShowDialog ShowDialog
 
-<MudTable @ref="table" T="SaleVO" Class="app-table mt-3" Elevation="0" ServerData="LoadSales" Dense="false" Hover="true" Bordered="false" Striped="false" RowsPerPage="10">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6" Class="app-page-title">Produtos vendidos</MudText>
-        <MudSpacer />
+<div class="app-toolbar mt-2">
+    <MudText Typo="Typo.h5" Class="app-page-title">Produtos vendidos</MudText>
+    <div class="app-toolbar-actions">
         <MudTextField T="string" @bind-Value="searchString" DebounceInterval="400" OnDebounceIntervalElapsed="Search" Placeholder="Pesquisar produto" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Variant="Variant.Outlined" Margin="Margin.Dense" Class="app-search mt-0"></MudTextField>
-    </ToolBarContent>
+    </div>
+</div>
+
+<MudTable @ref="table" T="SaleVO" Class="app-table mt-3" Elevation="0" ServerData="LoadSales" Dense="false" Hover="true" Bordered="false" Striped="false" RowsPerPage="10">
     <HeaderContent>
         <MudTh>Produto</MudTh>
         <MudTh Class="app-cell-number">Preço</MudTh>
