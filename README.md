@@ -25,6 +25,92 @@ O foco do projeto não é o domínio em si — é a **arquitetura**. Cada respon
 
 ---
 
+## A aplicação
+
+As telas abaixo são do sistema logo depois de um `docker compose up`: tudo o que aparece nelas veio do seed que viaja nas migrations.
+
+### Acesso
+
+![Tela de login](docs/screenshots/login.jpg)
+
+A `AuthenticationAPI` emite JWT e refresh token; o Blazor guarda o par no LocalStorage e um `AuthenticationStateProvider` próprio lê as claims dele. Quando alguma API responde 401 — token expirado, revogado ou adulterado —, a SPA avisa que a sessão expirou, limpa o estado e devolve o usuário para esta tela.
+
+![Home](docs/screenshots/home.jpg)
+
+A home é o mapa do sistema. O papel vem da claim e comanda o menu: **Cadastrar usuário** só existe para administrador, e o mesmo papel é verificado de novo na API — esconder o botão é conveniência, não segurança.
+
+### Catálogo
+
+![Produtos em estoque](docs/screenshots/produtos.jpg)
+
+O depósito. Cada card mostra o estoque total e como ele se divide entre depósito e prateleiras, mais o volume unitário em litros. O selo **sem volume** marca o produto que ainda não pode ser alocado: sem volume não há como conferir a capacidade da prateleira. As caixas de seleção abrem a alocação em lote.
+
+![Novo produto](docs/screenshots/novo-produto.jpg)
+
+No cadastro, os campos que não são óbvios: o **fator de conversão** traduz a unidade da nota fiscal (a caixa com doze) para a unidade de estoque; o **estoque mínimo** dispara o aviso por e-mail e zero o desliga; o **preço inicial** é o que a prateleira herda quando o produto é alocado.
+
+![Conferência da NF-e](docs/screenshots/importar-nfe-conferencia.jpg)
+
+A importação de NF-e lê o XML e o coloca em conferência antes de gravar qualquer coisa. O painel resume a nota — número, fornecedor, CNPJ, chave de acesso — e diz quantos itens já existem e quantos são novos: os conhecidos são reconhecidos pelo GTIN, os novos entram com nome, imagem e colaborador. Nada toca o banco até **Importar nota**.
+
+### Armazenamento
+
+![Seleção em lote](docs/screenshots/selecao-lote.jpg)
+
+Selecionar produtos no catálogo troca o cabeçalho pela ação do lote.
+
+![Alocação em lote](docs/screenshots/alocacao-lote.jpg)
+
+Cada item entra com sua quantidade, preço e prateleira, e o painel da direita soma o volume do lote contra o espaço livre do destino. A alocação respeita o teto de 90% da prateleira e a regra de uma prateleira por produto — o mesmo produto não se espalha por dois lugares.
+
+![Produtos nas prateleiras](docs/screenshots/prateleiras.jpg)
+
+O que está efetivamente disponível para venda, com o preço congelado no momento da alocação. Cada linha carrega as quatro ações do dia a dia: mandar ao carrinho, vender, transferir para outra prateleira e devolver o saldo ao depósito.
+
+![Inventário de prateleira](docs/screenshots/inventario.jpg)
+
+O inventário carrega o saldo que o sistema acredita ter, recebe a contagem física e mostra a diferença item a item. O motivo é gravado junto do ajuste, então a correção fica rastreável no histórico.
+
+![Transferência entre prateleiras](docs/screenshots/transferencia.jpg)
+
+A transferência move todo o saldo da prateleira atual para a de destino, registrando a movimentação como tal em vez de simular uma saída seguida de uma entrada.
+
+### Vendas
+
+![Carrinho](docs/screenshots/carrinho.jpg)
+
+O carrinho junta itens de prateleiras diferentes e fecha tudo em uma submissão só, com a data da venda escolhida no resumo. Cada linha lembra quanto há disponível na prateleira de origem.
+
+![Vendas registradas](docs/screenshots/vendas.jpg)
+
+A venda guarda o preço praticado no momento em que aconteceu, e não o preço atual do produto — o relatório de ontem continua dizendo o que dizia ontem. Daqui saem a devolução e o cancelamento.
+
+![Devolução de venda](docs/screenshots/devolucao.jpg)
+
+A devolução pode ser parcial: o saldo devolvido volta para o depósito, a venda passa a valer pela diferença e some da listagem quando devolvida por inteiro. Uma venda com devolução registrada não pode mais ser cancelada.
+
+### Análise
+
+![Estatísticas](docs/screenshots/estatisticas.jpg)
+
+O painel gerencial: total vendido por mês, participação de cada produto nas vendas do mês e a exportação dos relatórios.
+
+![Chat com a IA](docs/screenshots/ia-chat.jpg)
+
+O chat monta o contexto no servidor, a partir das vendas reais do banco, e manda a pergunta ao Gemini. A chave da API fica na `AIAPI` — o WebAssembly conversa apenas com o endpoint interno.
+
+![Relatório em PDF](docs/screenshots/relatorio-pdf.jpg)
+
+O relatório em PDF sai da `ReportsAPI` pelo QuestPDF, com os gráficos rasterizados no servidor pelo ScottPlot. A mesma tela exporta a versão em Excel, montada com ClosedXML.
+
+### Conta
+
+![Conta e usuários](docs/screenshots/conta.jpg)
+
+Cada um altera seus próprios dados; o administrador ganha, na mesma tela, a lista de usuários para editar papéis ou remover contas.
+
+---
+
 ## Arquitetura
 
 ```mermaid
@@ -223,6 +309,7 @@ O `build` e o `push` do compose usam o nome declarado em `image:` de cada servi�
 SmartStorage.Web/
 ├── docker-compose.yml              # orquestração dos 10 containers
 ├── .env.example                    # modelo das variáveis de ambiente
+├── docs/screenshots/               # telas usadas neste README
 ├── tests/                          # roteiro fim a fim do ledger
 └── src/
     ├── SmartStorage.API/           # API core (domínio + HATEOAS)
