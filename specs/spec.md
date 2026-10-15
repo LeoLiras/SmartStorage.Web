@@ -26,7 +26,8 @@ das vendas por IA.
 - **Operador** (papel `Usuario`): cadastra produtos, recebe mercadoria, aloca,
   transfere, vende, devolve, faz inventário e consulta relatórios
 - **Administrador** (papel `Administrador`): tudo o que o operador faz, mais
-  cadastrar, editar e excluir usuários
+  cadastrar, editar e excluir usuários, e cadastrar e excluir prateleiras e
+  colaboradores [planejado #32]
 - **Administrador geral** (papel `AdministradorGeral`) [planejado #28]:
   cadastra empresas e o primeiro administrador de cada uma
 - **Destinatário dos avisos**: recebe por e-mail o cadastro de produto e o
@@ -48,6 +49,8 @@ das vendas por IA.
 - Como gestor, quero o relatório do mês em Excel e PDF e perguntar à IA sobre
   as vendas
 - Como administrador, quero controlar quem acessa o sistema e com qual papel
+- Como operador, quero trabalhar o turno inteiro sem entrar de novo
+  [planejado #31]
 - Como usuário, quero recuperar minha senha sozinho pelo e-mail [planejado #29]
 - Como empresa, quero ver só os meus dados quando outras empresas usam o mesmo
   sistema [planejado #28]
@@ -80,10 +83,15 @@ movimentação com autor e instante.
 ## Requisitos funcionais
 
 ### Acesso
-- RF-01 [feito]: login por usuário e senha devolve JWT e refresh token; o
-  refresh renova a sessão e o revoke a encerra
-- RF-02 [feito]: toda API, exceto o login, exige token válido; resposta 401
-  leva o Blazor de volta ao login com o aviso de sessão expirada
+- RF-01 [feito]: login por usuário e senha devolve JWT, válido por 60
+  minutos, e refresh token; a AuthenticationAPI tem refresh e revoke, mas o
+  Blazor ainda não os usa (RF-44)
+- RF-44 [planejado #31]: a sessão dura até 9 horas desde o login; o Blazor
+  renova o token pelo refresh sem o operador perceber, a renovação não estende
+  esse limite, e sair revoga o refresh token no servidor
+- RF-02 [feito]: toda API, exceto login e refresh, exige token válido;
+  resposta 401 que o refresh não resolve leva o Blazor de volta ao login com o
+  aviso de sessão expirada
 - RF-03 [feito]: o administrador cadastra, edita, lista e exclui usuários e
   define o papel de cada um
 - RF-03a [planejado #30, a decidir]: cada usuário altera os próprios dados;
@@ -94,8 +102,9 @@ movimentação com autor e instante.
   o papel de novo
 - RF-41 [planejado #30]: os endpoints de usuário respondem só com id,
   usuário, nome completo e papel, nunca com hash de senha nem refresh token;
-  listar e buscar usuários por id exige administrador, e cada usuário lê os
-  próprios dados por `GET /api/auth/v1/me`
+  listar e buscar usuários por id exige administrador, `user-by-username` sai
+  da API e do gateway, e cada usuário lê os próprios dados por
+  `GET /api/auth/v1/me`
 - RF-42 [planejado #30]: a atualização de usuário recebe só os campos que
   podem mudar, nunca o refresh token
 - RF-43 [planejado #30]: o refresh emite as claims a partir do usuário no
@@ -116,6 +125,9 @@ movimentação com autor e instante.
 - RF-08a [feito]: colaboradores (nome, CPF único e RG) são cadastrados,
   editados e excluídos pela API e pelo seed; o Blazor só os lista, para
   escolher o responsável
+- RF-45 [planejado #32]: só o administrador cadastra e exclui prateleiras e
+  colaboradores; a leitura e a edição continuam abertas a qualquer usuário
+  logado
 
 ### Entrada de mercadoria (NF-e) (#25)
 - RF-09 [feito]: o operador envia o XML da NF-e modelo 55 e recebe uma prévia
@@ -133,7 +145,8 @@ movimentação com autor e instante.
 ### Prateleiras e alocação
 - RF-14 [feito]: prateleira tem nome e volume em litros, e mostra volume
   usado, livre e ocupação (#11); é cadastrada, editada e excluída só pela API
-  e pelo seed, e a exclusão é recusada se a prateleira já teve entradas
+  e pelo seed, e a exclusão é recusada se a prateleira já teve entradas;
+  cadastro e exclusão passam a exigir administrador pelo RF-45
 - RF-15 [feito]: alocação move quantidade do depósito para uma prateleira, com
   preço de venda e colaborador responsável
 - RF-16 [feito]: alocação em lote de vários produtos selecionados nos cards,
@@ -270,9 +283,6 @@ movimentação com autor e instante.
   mês corrente do ano corrente; mês sem vendas responde com aviso, sem arquivo
 
 ### Planejadas
-- RN-38 [planejado #30]: só a recusa de regra de negócio devolve o motivo ao
-  cliente, com 400; erro inesperado responde 500 com mensagem genérica e o
-  detalhe vai para o log
 - RN-31 [planejado #28]: código de produto e chave de NF-e são únicos por
   empresa; username e e-mail continuam únicos no sistema todo
 - RN-32 [planejado #28]: a empresa de um dado vem do token, nunca do corpo da
@@ -286,6 +296,9 @@ movimentação com autor e instante.
 - RN-36 [planejado #29]: o banco guarda só o hash do token enviado por e-mail
 - RN-37 [planejado #29]: quem tem e-mail cadastrado e não confirmado não faz
   login; usuário antigo sem e-mail continua entrando
+- RN-38 [planejado #30]: só a recusa de regra de negócio devolve o motivo ao
+  cliente, com 400; erro inesperado responde 500 com mensagem genérica e o
+  detalhe vai para o log
 
 ## Casos de borda e falhas
 Regra geral: a API recusa com 400 e uma mensagem em português dizendo o
@@ -295,7 +308,14 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 ### Sessão e acesso
 - Token vencido, revogado ou adulterado: qualquer API responde 401, o Blazor
   avisa que a sessão expirou, limpa o estado e volta ao login; o carrinho fica
-  salvo para o mesmo usuário
+  salvo para o mesmo usuário. Pela #31, o token vencido dentro das 9 horas é
+  renovado pelo refresh e a requisição é repetida, e só o refresh recusado
+  leva ao login
+- Várias requisições recebem 401 ao mesmo tempo [planejado #31]: o Blazor faz
+  um refresh só, porque o refresh troca o refresh token e uma segunda
+  renovação com o token antigo seria recusada
+- Sair com a rede fora ou o token já vencido [planejado #31]: o revoke falha,
+  mas o Blazor limpa a sessão local mesmo assim
 - Usuário sem papel de administrador chama endpoint de administrador: 403,
   mesmo que a tela tenha sido contornada
 - Usuário e senha errados: o login responde 401 sem dizer qual dos dois errou
@@ -306,6 +326,8 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
   senha; pela #30 recebe 403
 - Excluir usuário que já movimentou estoque: recusado, para o histórico não
   perder o autor
+- Usuário comum cadastra ou exclui prateleira ou colaborador pela API: hoje é
+  aceito; pela #32 recebe 403 e nada é gravado
 
 ### Produtos
 - Nome com menos de 5 ou mais de 100 caracteres, descrição fora de 5 a 300,
@@ -331,6 +353,8 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 - Código do item que pertence a outro produto, produto novo com nome repetido
   ou sem colaborador padrão cadastrado: recusada a nota inteira, apontando o
   item
+- Item ligado a um produto que já tem outro código: recusada a nota inteira;
+  a importação não troca o código de um produto
 
 ### Alocação e prateleiras
 - Quantidade maior que o saldo do depósito: recusada
@@ -404,8 +428,8 @@ Fica fora até virar requisito numa revisão desta spec.
   marketplace
 
 ## Lacunas conhecidas
-Encontradas na verificação do código em 2026-10-14. Uma lacuna só vira
-requisito depois de ter issue.
+Encontradas na verificação do código em 2026-10-14 e revisadas em
+2026-10-15. Uma lacuna só vira requisito depois de ter issue.
 
 ### Segurança (#30)
 Descritas e planejadas na #30, que deve entrar antes da #28 e da #29:
@@ -418,15 +442,39 @@ Descritas e planejadas na #30, que deve entrar antes da #28 e da #29:
 - métodos sem uso que executam SQL recebido como texto no
   `GenericRepository` da AuthenticationAPI
 
+### Sessão (#31)
+Planejadas na #31, que deve entrar depois da #30 (RF-44):
+- o gateway não tem rota de `refresh` nem de `revoke`, e o Blazor guarda só o
+  access token: a sessão cai em 60 minutos, no meio do turno
+- o refresh grava um prazo novo de 7 dias a cada renovação, então a sessão
+  nunca teria fim
+- sair só apaga o token do navegador; o refresh token continua válido no banco
+
+### Papéis (#32)
+- cadastro e exclusão de prateleiras e colaboradores aceitam qualquer usuário
+  logado, inclusive o papel `Usuario` (RF-45)
+
 ### Regras (sem issue)
 - O tipo de movimentação `Perda` existe no ledger, mas nenhuma tela ou
   endpoint o lança
 - A política de senha (8 caracteres, maiúscula, minúscula e número) só existe
   no Blazor; a API aceita qualquer senha. A #29 planeja a validação na API com
-  uma regra diferente (letra e número), que precisa ser alinhada
+  uma regra diferente (letra e número), que precisa ser alinhada. As senhas
+  do seed (`admin123`, `usuario123`) não passam na regra do Blazor: editar
+  esses usuários pela tela obriga a trocar a senha
 - A alocação individual aceita preço zero ou negativo; o lote recusa
 - O ajuste de estoque do depósito não avalia o alerta de estoque mínimo
 - Toda recusa responde 400, inclusive recurso inexistente, que seria 404
+- A imagem do produto só é conferida no Blazor: a API grava qualquer
+  conteúdo, sem checar PNG ou JPEG nem o limite de 10 MB
+
+### Código (sem issue)
+- As mensagens de validação da AuthenticationAPI estão em inglês ("Username
+  and password are required.", "Invalid client request!")
+- `POST /api/storage/email/v1/new-product` está roteado no gateway, mas
+  ninguém o chama: a chamada em `CreateProduct.razor` está comentada e o
+  `IEmailService` do Blazor ficou sem uso. Ele deixa o administrador
+  disparar o e-mail de produto novo pelo navegador, por fora da fila
 
 ### Falhas (sem issue)
 - Cadastrar produto com o RabbitMQ fora do ar grava o produto e responde 400:
@@ -452,4 +500,8 @@ Descritas e planejadas na #30, que deve entrar antes da #28 e da #29:
   pela tela nem pela API
 - [planejado #30] Nenhuma resposta da API traz hash de senha, refresh token
   ou texto de erro interno
-- Os 48 casos de `tests/ledger_e2e.py` e os testes de `dotnet test` passam
+- [planejado #31] O operador trabalha 9 horas sem entrar de novo; depois
+  delas, ou depois de sair, o refresh é recusado
+- [planejado #32] Usuário sem papel de administrador não cadastra nem exclui
+  prateleiras e colaboradores
+- Todos os casos de `tests/ledger_e2e.py` e os testes de `dotnet test` passam
