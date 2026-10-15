@@ -84,11 +84,14 @@ nenhuma mudança pode quebrar.
   celular, antes do commit
 
 ## Segurança e tratamento de dados
-- Toda API exige JWT, exceto login e refresh; o token vale 60 minutos e o
-  refresh 7 dias
+- Toda API exige JWT, exceto login e refresh
+- A sessão dura no máximo 9 horas desde o login: o token vale 60 minutos e o
+  Blazor o renova pelo refresh até esse limite, que a renovação não estende;
+  sair revoga o refresh token no servidor
 - Papel é verificado na API com `[Authorize(Roles = ...)]` e as constantes de
   `Role.cs`; esconder o botão no Blazor é conveniência, não proteção
 - Endpoint que lê ou altera dado de outro usuário exige administrador
+- Cadastrar e excluir prateleiras e colaboradores exige administrador
 - Identidade, autor e instante vêm do token e do relógio do servidor, nunca do
   corpo da requisição
 - Segredos nunca entram no repositório: no Docker vêm do `.env` (ignorado pelo
@@ -141,6 +144,9 @@ nenhuma mudança pode quebrar.
 - Citam a issue quando houver e, depois que a feature tiver spec, os
   requisitos (`RF-xx`, `RN-xx`) que atendem
 - Mudança da constituição sai em commit separado
+- Branches seguem o GitFlow: `main` só recebe merge de `release/*` e
+  `hotfix/*`, `develop` integra o trabalho, e cada issue é desenvolvida numa
+  `feature/<número>-<descrição>` criada a partir de `develop`
 - Nada é commitado em `main` sem o build e os testes passando
 
 ### Pastas
@@ -150,8 +156,8 @@ nenhuma mudança pode quebrar.
   build do compose é `./src`
 - API core: `Controllers/`, `Business/`, `Data/Converter/`, `Hypermedia/`,
   `Repository/` (só o ledger) e `RabbitMQSender/`
-- Modelos e VOs compartilhados: `SmartStorage.Shared/Model` e
-  `SmartStorage.Shared/VO`
+- Modelos, VOs e enums compartilhados: `SmartStorage.Shared/Model`,
+  `SmartStorage.Shared/VO` e `SmartStorage.Shared/Enum`
 - Blazor: telas em `Pages/<Domínio>/`, serviços em `Services/` com interfaces
   em `Services/IServices/`
 - Testes: `src/SmartStorage.API.Tests`, `src/SmartStorage.Blazor.Tests` e o
@@ -162,6 +168,8 @@ nenhuma mudança pode quebrar.
 - Feature nova entra primeiro na `spec.md`, com requisitos numerados, e só
   depois ganha plano e tarefas; a issue no GitHub registra a discussão, a
   spec registra o que foi decidido
+- Requisitos e regras nunca são renumerados: um item novo recebe o próximo
+  número livre (`RF-44`), e o que sai deixa o número sem uso
 - Se o plano contradiz a constituição, quem muda é o plano
 - Se a constituição precisa mudar, muda em commit separado, com o motivo
 - Spec que muda depois de implementada é atualizada no mesmo commit do código
