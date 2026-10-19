@@ -5,9 +5,11 @@ traz a situação entre colchetes.
 
 - **[feito]** já implementado; o número indica a issue de origem, quando houver
 - **[planejado #N]** descrito numa issue aberta no GitHub, ainda não implementado
+- **[decidido]** decidido numa revisão desta spec, ainda sem issue e sem
+  implementação; a issue registra a discussão quando for aberta
 
-O que o código ainda faz de errado e não tem issue fica em "Lacunas
-conhecidas", no fim, fora dos requisitos.
+O que o código ainda faz de errado fica em "Lacunas conhecidas", no fim, fora
+dos requisitos, apontando o requisito que o corrige quando ele já existe.
 
 ## Problema
 Um almoxarifado pequeno controla estoque em planilha ou de memória. Não sabe
@@ -26,12 +28,14 @@ das vendas por IA.
 - **Operador** (papel `Usuario`): cadastra produtos, recebe mercadoria, aloca,
   transfere, vende, devolve, faz inventário e consulta relatórios
 - **Administrador** (papel `Administrador`): tudo o que o operador faz, mais
-  cadastrar, editar e excluir usuários, e cadastrar e excluir prateleiras e
-  colaboradores [planejado #32]
+  cadastrar, editar e excluir usuários, e cadastrar, editar e excluir
+  prateleiras e colaboradores [planejado #32, decidido para a edição]
 - **Administrador geral** (papel `AdministradorGeral`) [planejado #28]:
-  cadastra empresas e o primeiro administrador de cada uma
+  cadastra empresas e gerencia os administradores de cada uma, sem ver o
+  estoque nem as vendas delas (RF-49)
 - **Destinatário dos avisos**: recebe por e-mail o cadastro de produto e o
-  alerta de estoque baixo
+  alerta de estoque baixo; hoje é um endereço único configurado no sistema, e
+  com empresas passa a ser os administradores de cada uma (RF-48)
 
 ## Histórias
 - Como operador, quero importar o XML da NF-e para dar entrada na mercadoria
@@ -69,7 +73,7 @@ movimentação com autor e instante.
    prateleiras com quantidade, preço e responsável; o saldo sai do depósito e
    entra na prateleira, dentro do espaço livre dela
 4. **Venda**: em Produtos nas prateleiras, põe os itens no carrinho, confere
-   o total, escolhe a data e registra; o saldo sai das prateleiras e o preço
+   o total, escolhe a data (hoje ou um dia anterior do mês) e registra; o saldo sai das prateleiras e o preço
    fica congelado em cada venda
 5. **Alerta**: se a venda deixou um produto abaixo do mínimo, o destinatário
    recebe um e-mail
@@ -94,10 +98,10 @@ movimentação com autor e instante.
   aviso de sessão expirada
 - RF-03 [feito]: o administrador cadastra, edita, lista e exclui usuários e
   define o papel de cada um
-- RF-03a [planejado #30, a decidir]: cada usuário altera os próprios dados;
-  a tela existe, mas o endpoint que ela chama (`update-credentials`) só aceita
-  administrador. A #30 decide entre um endpoint próprio, que nunca troca o
-  papel, e a tela só de leitura para o usuário comum
+- RF-03a [planejado #30]: cada usuário altera o próprio nome completo e a
+  própria senha, informando a senha atual; username e papel só mudam pelo
+  administrador. Hoje a tela existe, mas o que ela chama só aceita
+  administrador
 - RF-04 [feito]: a interface esconde as ações fora do papel, e a API verifica
   o papel de novo
 - RF-41 [planejado #30]: os endpoints de usuário respondem só com id,
@@ -109,6 +113,11 @@ movimentação com autor e instante.
   podem mudar, nunca o refresh token
 - RF-43 [planejado #30]: o refresh emite as claims a partir do usuário no
   banco, então a troca de papel vale no próximo refresh
+- RF-46 [decidido]: excluir ou desativar o usuário, desativar a empresa e
+  redefinir a senha encerram as sessões dele na hora: a próxima requisição
+  recebe 401, mesmo com o token ainda no prazo. A troca de papel não encerra
+  a sessão e vale no próximo refresh, em até 60 minutos (RF-43). A empresa
+  depende da #28, e a redefinição de senha da #29
 
 ### Produtos
 - RF-05 [feito]: cadastro de produto com nome, descrição, imagem (PNG ou
@@ -126,8 +135,10 @@ movimentação com autor e instante.
   editados e excluídos pela API e pelo seed; o Blazor só os lista, para
   escolher o responsável
 - RF-45 [planejado #32]: só o administrador cadastra e exclui prateleiras e
-  colaboradores; a leitura e a edição continuam abertas a qualquer usuário
-  logado
+  colaboradores; a leitura continua aberta a qualquer usuário logado
+- RF-47 [decidido]: a edição de prateleiras e colaboradores também exige
+  administrador, como o cadastro, porque o volume da prateleira é o que limita
+  a alocação (RN-08, RN-40)
 
 ### Entrada de mercadoria (NF-e) (#25)
 - RF-09 [feito]: o operador envia o XML da NF-e modelo 55 e recebe uma prévia
@@ -146,7 +157,8 @@ movimentação com autor e instante.
 - RF-14 [feito]: prateleira tem nome e volume em litros, e mostra volume
   usado, livre e ocupação (#11); é cadastrada, editada e excluída só pela API
   e pelo seed, e a exclusão é recusada se a prateleira já teve entradas;
-  cadastro e exclusão passam a exigir administrador pelo RF-45
+  cadastro e exclusão passam a exigir administrador pelo RF-45, e a edição
+  pelo RF-47
 - RF-15 [feito]: alocação move quantidade do depósito para uma prateleira, com
   preço de venda e colaborador responsável
 - RF-16 [feito]: alocação em lote de vários produtos selecionados nos cards,
@@ -159,7 +171,8 @@ movimentação com autor e instante.
 - RF-20 [feito]: listagem dos produtos nas prateleiras, com busca e paginação
 
 ### Vendas
-- RF-21 [feito]: venda de uma entrada de prateleira, com quantidade e data
+- RF-21 [feito]: venda de uma entrada de prateleira, com quantidade e data;
+  os limites da data estão na RN-39
 - RF-22 [feito]: carrinho com itens de prateleiras diferentes, quantidade
   editável, total, e registro de todos os itens num único envio (#21)
 - RF-23 [feito]: o carrinho fica salvo no navegador, por usuário, até ser
@@ -175,13 +188,20 @@ movimentação com autor e instante.
 - RF-27 [feito]: toda movimentação (entrada, alocação, venda, perda, ajuste,
   devolução, transferência) grava local, tipo, quantidade com sinal, autor,
   instante e motivo (#6, #7)
-- RF-28 [feito]: alerta por e-mail quando o saldo total do produto cruza o
-  estoque mínimo para baixo, avaliado depois da venda, do carrinho, da edição
-  que aumenta a venda, da alocação e do inventário (#8)
+- RF-28 [feito]: alerta por e-mail quando uma operação que reduz o saldo
+  total do produto o leva para abaixo do estoque mínimo (RN-28): venda,
+  carrinho, edição que aumenta a venda e inventário (#8). O ajuste do depósito
+  e a perda também avaliam o alerta [decidido]; a alocação não, porque não
+  muda o saldo total
+- RF-48 [decidido, depende da #28 e da #29]: os avisos de produto novo e de
+  estoque baixo de uma empresa vão para os administradores dela com e-mail
+  confirmado, e não mais para um endereço único
 
 ### Relatórios e IA
 - RF-29 [feito]: exportação das vendas do mês corrente em Excel e em PDF; o
   PDF traz os 10 produtos mais vendidos do mês e o total por mês do ano
+- RF-50 [decidido]: o gestor escolhe o mês e o ano do relatório, com o mês
+  corrente como padrão, para tirar o fechamento depois que o mês acabou
 - RF-30 [feito]: tela de Insights com gráficos e um chat que responde
   perguntas sobre as 10 vendas mais recentes pelo Gemini
 - RF-31 [planejado #5]: o PDF inclui um resumo das vendas escrito pela IA
@@ -200,13 +220,19 @@ movimentação com autor e instante.
 - RF-36 [planejado #28]: todo usuário e todo dado pertencem a uma empresa, e
   a aplicação só mostra os dados da empresa do usuário logado, inclusive
   relatórios, IA e alertas
-- RF-37 [planejado #28]: empresa inativa não faz login nem renova sessão
+- RF-37 [planejado #28]: empresa inativa não faz login nem renova sessão, e
+  as sessões abertas caem na hora (RF-46)
+- RF-49 [decidido, depende da #28]: o administrador geral cria, desativa e
+  redefine a senha dos administradores de qualquer empresa, sem ver o estoque,
+  as vendas nem os demais usuários dela; assim a empresa cujo único
+  administrador saiu não fica sem acesso
 
 ### E-mail do usuário e senha (#29)
 - RF-38 [planejado #29]: o usuário tem e-mail, confirmado por link de uso
   único válido por 24 horas
 - RF-39 [planejado #29]: "Esqueci minha senha" envia um link de uso único
   válido por 30 minutos, que define a senha nova e derruba as sessões abertas
+  na hora (RF-46)
 - RF-40 [planejado #29]: os e-mails de confirmação, de redefinição e de aviso
   de senha alterada vão para o endereço do usuário
 
@@ -238,8 +264,14 @@ movimentação com autor e instante.
   prateleira
 - RN-10: um produto tem saldo em uma prateleira por vez; complementar a mesma
   prateleira é permitido, e entrada zerada não conta
-- RN-11: transferência leva todo o saldo; o destino que já tem o produto
-  mantém o próprio preço, e o destino novo herda o preço da origem
+- RN-11: transferência leva todo o saldo e o preço da origem. Como o produto
+  só tem saldo numa prateleira (RN-10), o destino que já tem o produto é
+  sempre uma entrada zerada, de quando ele esteve lá; ela passa a usar o
+  preço da origem [decidido], e não o preço antigo que guardava
+- RN-40 [decidido]: o volume da prateleira não pode ser reduzido abaixo do
+  volume já usado. Reduzido a um valor em que o usado passa de 90% sem passar
+  de 100%, é aceito: a prateleira fica acima do teto e só recusa novas
+  alocações
 - RN-12: desfazer alocação e cancelar venda não checam capacidade, porque
   devolvem o que já estava lá
 - RN-13: inventário não checa capacidade; a contagem é absoluta e a diferença
@@ -263,6 +295,9 @@ movimentação com autor e instante.
 - RN-21: venda totalmente devolvida some da listagem e dos relatórios, mas
   continua no banco
 - RN-22: cada item do carrinho é uma venda independente
+- RN-39 [decidido]: a data da venda é hoje ou um dia anterior do mês
+  corrente, pelo relógio do servidor; data futura ou de mês anterior é
+  recusada, para uma venda nova não mudar o faturamento de um mês fechado
 
 ### NF-e
 - RN-23: a mesma nota (chave de acesso) não é importada duas vezes
@@ -276,11 +311,14 @@ movimentação com autor e instante.
 - RN-27: só NF-e modelo 55 é aceita
 
 ### Alertas e relatórios
-- RN-28: o alerta compara o mínimo com o saldo total e só sai ao cruzar o
-  limite; com o estoque já baixo, não repete
+- RN-28: o alerta compara o mínimo com o saldo total e só sai quando a
+  operação leva o saldo de igual ou acima do mínimo para abaixo dele; saldo
+  igual ao mínimo não é abaixo, mínimo zero desliga o alerta e, com o estoque
+  já baixo, não repete
 - RN-29: falha ao enviar o alerta não desfaz a venda
-- RN-30: relatórios usam quantidade e total líquidos de devolução e cobrem o
-  mês corrente do ano corrente; mês sem vendas responde com aviso, sem arquivo
+- RN-30: relatórios usam quantidade e total líquidos de devolução e cobrem um
+  mês de um ano: hoje só o corrente, e pelo RF-50 o escolhido; mês sem vendas
+  responde com aviso, sem arquivo
 
 ### Planejadas
 - RN-31 [planejado #28]: código de produto e chave de NF-e são únicos por
@@ -289,8 +327,9 @@ movimentação com autor e instante.
   requisição; ID de outra empresa é tratado como inexistente
 - RN-33 [planejado #28]: empresa não é excluída, só desativada; a empresa do
   administrador geral não pode ser desativada
-- RN-34 [planejado #29]: senha com no mínimo 8 caracteres, ao menos uma letra
-  e um número, diferente da atual
+- RN-34 [decidido; a troca por e-mail é da #29]: senha com no mínimo 8
+  caracteres, ao menos uma letra e um número, diferente da atual; a API
+  confere em todo cadastro e troca de senha, e a tela repete a mesma regra
 - RN-35 [planejado #29]: os endpoints anônimos de senha e confirmação
   respondem igual exista o usuário ou não, e limitam as tentativas
 - RN-36 [planejado #29]: o banco guarda só o hash do token enviado por e-mail
@@ -326,8 +365,14 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
   senha; pela #30 recebe 403
 - Excluir usuário que já movimentou estoque: recusado, para o histórico não
   perder o autor
-- Usuário comum cadastra ou exclui prateleira ou colaborador pela API: hoje é
-  aceito; pela #32 recebe 403 e nada é gravado
+- Usuário comum cadastra, edita ou exclui prateleira ou colaborador pela API:
+  hoje é aceito; pela #32 e pelo RF-47 recebe 403 e nada é gravado
+- Usuário excluído ou desativado com a sessão aberta [decidido]: a próxima
+  requisição recebe 401 e o Blazor volta ao login (RF-46)
+- Usuário altera os próprios dados com a senha atual errada [planejado #30]:
+  recusado
+- Senha sem letra, sem número, com menos de 8 caracteres ou igual à atual
+  [decidido]: recusada pela API, mesmo que a tela tenha sido contornada
 
 ### Produtos
 - Nome com menos de 5 ou mais de 100 caracteres, descrição fora de 5 a 300,
@@ -367,6 +412,8 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 - Produto repetido no mesmo lote: recusado o lote inteiro
 - Transferência de entrada zerada, para a própria prateleira, para
   prateleira inexistente ou que não cabe no destino: recusada
+- Volume da prateleira editado para menos que o volume já usado [decidido]:
+  recusado (RN-40)
 - Inventário sem nenhuma diferença, com entrada de outra prateleira ou com
   entrada repetida: recusado; a tela mantém as contagens e atualiza o saldo do
   sistema para o operador conferir de novo
@@ -376,6 +423,7 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 
 ### Vendas
 - Quantidade zero ou negativa: recusada
+- Data futura ou de mês anterior [decidido]: recusada (RN-39)
 - Quantidade maior que o saldo da entrada, somando os itens repetidos da
   mesma entrada no carrinho: recusado o carrinho inteiro, apontando o item
 - Carrinho reaberto depois que preço ou saldo mudaram: a tela confere na API
@@ -394,7 +442,10 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
   só volta a ser entregue quando o consumidor reconecta; não há nova
   tentativa automática nem aviso na tela
 - Relatório de mês sem vendas: 400 com o aviso "ainda não há vendas no mês
-  corrente", sem arquivo
+  corrente", sem arquivo; pelo RF-50, o aviso fala do mês escolhido, e mês
+  futuro cai no mesmo caso
+- Empresa sem nenhum administrador com e-mail confirmado [decidido]: o aviso
+  não sai e a falha só é registrada em log, como na RN-29 (RF-48)
 - Chave do Gemini ausente, cota esgotada ou AIAPI fora do ar: o Insights
   mostra o aviso, para o carregamento e não põe o erro no chat
 - ReportsAPI fora do ar: o Insights mostra o aviso e libera o botão de
@@ -429,7 +480,8 @@ Fica fora até virar requisito numa revisão desta spec.
 
 ## Lacunas conhecidas
 Encontradas na verificação do código em 2026-10-14 e revisadas em
-2026-10-15. Uma lacuna só vira requisito depois de ter issue.
+2026-10-15 e 2026-10-19. Uma lacuna vira requisito quando ganha issue ou é
+decidida numa revisão desta spec ([decidido]).
 
 ### Segurança (#30)
 Descritas e planejadas na #30, que deve entrar antes da #28 e da #29:
@@ -454,16 +506,26 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 - cadastro e exclusão de prateleiras e colaboradores aceitam qualquer usuário
   logado, inclusive o papel `Usuario` (RF-45)
 
+### Decididas (sem issue)
+Decididas na revisão de 2026-10-19 e ainda sem issue:
+- a edição de prateleiras e colaboradores aceita qualquer usuário logado, e o
+  volume da prateleira pode ser reduzido abaixo do usado (RF-47, RN-40)
+- excluir o usuário não encerra a sessão dele: o token segue válido até
+  vencer (RF-46)
+- a venda aceita qualquer data, inclusive futura ou de um mês já fechado
+  (RN-39)
+- o relatório só sai para o mês corrente (RF-50)
+- transferir para a prateleira onde o produto já esteve mantém o preço antigo
+  dela, e não o da origem (RN-11)
+- a política de senha (8 caracteres, maiúscula, minúscula e número) só existe
+  no Blazor, com uma regra diferente da RN-34, e a API aceita qualquer senha
+- o ajuste de estoque do depósito não avalia o alerta de estoque mínimo
+  (RF-28)
+
 ### Regras (sem issue)
 - O tipo de movimentação `Perda` existe no ledger, mas nenhuma tela ou
   endpoint o lança
-- A política de senha (8 caracteres, maiúscula, minúscula e número) só existe
-  no Blazor; a API aceita qualquer senha. A #29 planeja a validação na API com
-  uma regra diferente (letra e número), que precisa ser alinhada. As senhas
-  do seed (`admin123`, `usuario123`) não passam na regra do Blazor: editar
-  esses usuários pela tela obriga a trocar a senha
 - A alocação individual aceita preço zero ou negativo; o lote recusa
-- O ajuste de estoque do depósito não avalia o alerta de estoque mínimo
 - Toda recusa responde 400, inclusive recurso inexistente, que seria 404
 - A imagem do produto só é conferida no Blazor: a API grava qualquer
   conteúdo, sem checar PNG ou JPEG nem o limite de 10 MB
@@ -502,6 +564,10 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
   ou texto de erro interno
 - [planejado #31] O operador trabalha 9 horas sem entrar de novo; depois
   delas, ou depois de sair, o refresh é recusado
-- [planejado #32] Usuário sem papel de administrador não cadastra nem exclui
-  prateleiras e colaboradores
+- [planejado #32] Usuário sem papel de administrador não cadastra, não edita
+  nem exclui prateleiras e colaboradores
+- [decidido] Usuário excluído perde o acesso na requisição seguinte, sem
+  esperar o token vencer
+- [decidido] Nenhuma venda nova tem data futura nem cai num mês já encerrado
+- [decidido] A API recusa senha fora da RN-34, mesmo com a tela contornada
 - Todos os casos de `tests/ledger_e2e.py` e os testes de `dotnet test` passam
