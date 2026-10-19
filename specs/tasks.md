@@ -58,6 +58,7 @@ O trabalho anterior às issues está agrupado em blocos, um por frente.
 | T-00.26 | Mover os projetos para `src` e renomear a pasta da API core | Constituição (Pastas) | | Build da solution e `docker compose build` com `context: ./src` passam | `a001bde` |
 | T-00.27 | Telas de tabela no celular | Constituição (Testes) | | As tabelas cabem na largura do celular | `e76391d` |
 | T-00.28 | Constituição, spec, revisões e plano do SDD | | | `specs/` com constituição, spec e plano, e as issues #30 a #40 ligadas à spec | `02071b6..b124e4d` |
+| T-00.29 | Criar a `develop` a partir da `main` | Constituição (GitFlow) | | `develop` existe no GitHub, criada da ponta da `main`, e a `claude-studies` já integrada saiu do remoto | `2240e86` (ponta) |
 
 ### #1 Portas dos microsserviços
 Fechada como já atendida pela T-00.10 e pela T-00.11: no Docker todo serviço
@@ -233,11 +234,6 @@ navegador.
 ## Abertas
 Na ordem de implementação do plano. Cada issue é desenvolvida numa
 `feature/<número>-<descrição>` criada a partir de `develop`.
-
-### Preparação (T-00)
-| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
-|---|---|---|---|---|---|
-| T-00.29 | Criar a `develop` a partir da `main` | Constituição (GitFlow) | | `develop` existe no GitHub, e a primeira `feature/*` sai dela | |
 
 ### #37 Transferência leva o preço da origem (T-37)
 | ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
