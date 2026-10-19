@@ -160,9 +160,11 @@ nenhuma mudança pode quebrar.
   `SmartStorage.Shared/VO` e `SmartStorage.Shared/Enum`
 - Blazor: telas em `Pages/<Domínio>/`, serviços em `Services/` com interfaces
   em `Services/IServices/`
-- Testes: `src/SmartStorage.API.Tests`, `src/SmartStorage.Blazor.Tests` e o
-  roteiro em `tests/`
-- Especificações: `specs/constitution.md` e `specs/spec.md`
+- Testes: `src/SmartStorage.API.Tests`, `src/SmartStorage.Blazor.Tests`, a
+  partir da #30 `src/SmartStorage.AuthenticationAPI.Tests`, e o roteiro em
+  `tests/`
+- Especificações: `specs/constitution.md`, `specs/spec.md`, `specs/plan.md`
+  (decisões técnicas) e `specs/tasks.md` (tarefas de cada issue)
 
 ## Governança
 - Feature nova entra primeiro na `spec.md`, com requisitos numerados, e só
