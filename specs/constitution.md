@@ -63,8 +63,8 @@ nenhuma mudança pode quebrar.
 
 ## Testes e cobertura mínima
 - Três camadas, cada uma cobrindo o que as outras não veem:
-  - **unidade** (`SmartStorage.API.Tests`, xUnit): funções puras da API,
-    como parser, cálculo e validação
+  - **unidade** (`SmartStorage.API.Tests` e o projeto `.Tests` de cada
+    serviço, xUnit): funções puras, como parser, cálculo e validação
   - **componente** (`SmartStorage.Blazor.Tests`, bUnit e NSubstitute): o que
     a tela monta e envia, afirmando sobre o JSON serializado na `ApiFalsa`
   - **fim a fim** (`tests/ledger_e2e.py`): o ledger pelo gateway, conferindo
@@ -160,9 +160,10 @@ nenhuma mudança pode quebrar.
   `SmartStorage.Shared/VO` e `SmartStorage.Shared/Enum`
 - Blazor: telas em `Pages/<Domínio>/`, serviços em `Services/` com interfaces
   em `Services/IServices/`
-- Testes: `src/SmartStorage.API.Tests`, `src/SmartStorage.Blazor.Tests`, a
-  partir da #30 `src/SmartStorage.AuthenticationAPI.Tests`, e o roteiro em
-  `tests/`
+- Testes: `src/SmartStorage.API.Tests`, `src/SmartStorage.Blazor.Tests`, um
+  `src/SmartStorage.<Serviço>.Tests` por serviço que tenha regra própria (a
+  partir da #30 o da AuthenticationAPI, da #36 o da ReportsAPI e da #27 o da
+  AIAPI), e o roteiro em `tests/`
 - Especificações: `specs/constitution.md`, `specs/spec.md`, `specs/plan.md`
   (decisões técnicas) e `specs/tasks.md` (tarefas de cada issue)
 
