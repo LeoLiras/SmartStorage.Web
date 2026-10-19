@@ -207,8 +207,9 @@ movimentação com autor e instante.
 - RF-31 [planejado #5]: o PDF inclui um resumo das vendas escrito pela IA
 - RF-32 [planejado #27]: o provedor de IA é escolhido por configuração entre
   Gemini e um modelo local no Ollama
-- RF-33 [planejado #27]: a IA recebe ao menos 100 vendas, com nomes em vez de
-  IDs, e agregados já calculados por produto, mês e colaborador
+- RF-33 [planejado #27]: a IA recebe ao menos 100 vendas, com nomes de
+  produto e prateleira em vez de IDs, e agregados já calculados por produto e
+  por mês, sem dado pessoal
 
 ### Código de barras (#13)
 - RF-34 [planejado #13]: o operador lê o código de barras pela câmera do
