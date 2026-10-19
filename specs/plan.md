@@ -211,6 +211,14 @@ que for abandonada deixa o número sem uso.
   `ProCodigo` (RF-34). A dependência se justifica porque Safari e Firefox não
   têm `BarcodeDetector`
 
+### Testes da ReportsAPI e da AIAPI (#36, #27)
+- D-46: projetos `SmartStorage.ReportsAPI.Tests` (criado na #36) e
+  `SmartStorage.AIAPI.Tests` (criado na #27), xUnit e sem banco, como o
+  `SmartStorage.API.Tests`: testam as funções puras extraídas do repositório
+  (o recorte do mês, a montagem do contexto da IA e os agregados). Um projeto
+  por serviço, pelo mesmo motivo da D-21: cada um referencia só o serviço que
+  testa
+
 ## Modelo de dados
 Atual:
 - `Product`, `Shelf`, `Enter`, `Sale`, `Employee`, `Invoice`, `InvoiceItem`,
