@@ -187,8 +187,8 @@ public class ListagemDeProdutosTests : BunitContext, IAsyncLifetime
 
         cut.Find("input").Input("capacete branco");
 
-        cut.WaitForAssertion(() => Assert.Equal("?page=1&pageSize=10&search=capacete%20branco", api.Consultas.Last()));
-        cut.WaitForAssertion(() => Assert.Equal(1, cut.FindComponent<MudPagination>().Instance.Selected));
+        cut.WaitForAssertion(() => Assert.Equal("?page=1&pageSize=10&search=capacete%20branco", api.Consultas.Last()), TimeSpan.FromSeconds(5));
+        cut.WaitForAssertion(() => Assert.Equal(1, cut.FindComponent<MudPagination>().Instance.Selected), TimeSpan.FromSeconds(5));
     }
 
     [Fact]

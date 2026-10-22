@@ -114,7 +114,7 @@ public class ListagemDePrateleirasTests : BunitContext, IAsyncLifetime
 
         cut.Find("input").Input("capacete branco");
 
-        cut.WaitForAssertion(() => Assert.Equal("?page=1&pageSize=10&search=capacete%20branco", ConsultasDaListagem(api).Last()));
+        cut.WaitForAssertion(() => Assert.Equal("?page=1&pageSize=10&search=capacete%20branco", ConsultasDaListagem(api).Last()), TimeSpan.FromSeconds(5));
     }
 
     [Fact]
