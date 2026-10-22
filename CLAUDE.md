@@ -99,6 +99,8 @@ Cada domínio da API principal tem um serviço tipado, como os de IA, relatório
 
 Cada serviço tem interface em `Services/IServices`, é registrado no `Program.cs` com `AddHttpClient`, `AuthHandler` (token do `localStorage` por requisição) e `SessionExpiredHandler` (401 leva ao login), e trata a resposta com `HttpResponseExtensions`: `ReadApiAsync` lança `ApiException` com o status e a mensagem da API, `ReadApiPageAsync` lê o `X-Total-Count` e `WithPage` monta a query de paginação. Nos testes, registre o serviço sobre `api.Cliente()`.
 
+**Campo decimal e `MudDatePicker` precisam de `Culture="InputCulture.PtBr"`.** O padrão do MudBlazor é a cultura invariante, em que a vírgula é separador de milhar: "15,90" virava 1590 sem aviso. `InputCulture` (`Utils/Globalization`) é o pt-BR com um separador de milhar que não se digita, para "15.90" ser recusado no campo em vez de virar 1590. O `PtBr` que cada tela declara para `ToString` continua sendo o pt-BR comum. A data de venda passa por `SaleDate.At`: o dia vem do calendário e a hora vem do envio, porque o picker guarda o instante em que a tela abriu.
+
 ### VOs (`SmartStorage.Shared/VO/`)
 
 Cada VO implementa `ISupportHyperMedia`, herda `BaseMessage` (do `SmartStorage.MessageBus`, o que dá o `Id` e permite publicar o VO na fila) e expõe `static Parse(VO)` / `static ParseList(List<VO>)` retornando o Model.

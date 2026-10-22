@@ -52,16 +52,16 @@ else if(product is not null)
                             </MudItem>
                         }
                         <MudItem xs="12" sm="6" lg="4">
-                            <MudDatePicker Label="Data de registro" @bind-Date="productDate" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudDatePicker Culture="InputCulture.PtBr" Label="Data de registro" @bind-Date="productDate" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6" lg="4">
                             <MudNumericField T="int" Label="Estoque mínimo" @bind-Value="product.MinimumStock" For="(() => product.MinimumStock)" Min="0" HelperText="0 desativa o aviso por e-mail" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6" lg="4">
-                            <MudNumericField T="decimal?" Label="Volume (L)" @bind-Value="product.Volume" For="(() => product.Volume)" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudNumericField Culture="InputCulture.PtBr" T="decimal?" Label="Volume (L)" @bind-Value="product.Volume" For="(() => product.Volume)" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6" lg="4">
-                            <MudNumericField T="decimal?" Label="Preço inicial" @bind-Value="product.PrecoInicial" For="(() => product.PrecoInicial)" Min="0.01m" Format="F2" HelperText="Preço padrão ao alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudNumericField Culture="InputCulture.PtBr" T="decimal?" Label="Preço inicial" @bind-Value="product.PrecoInicial" For="(() => product.PrecoInicial)" Min="0.01m" Format="F2" HelperText="Preço padrão ao alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6" lg="4">
                             <MudNumericField T="int" Label="Fator de conversão" @bind-Value="product.FatorConversao" For="(() => product.FatorConversao)" Min="1" HelperText="Unidades de estoque por unidade da nota fiscal" ReadOnly="ReadOnly" Variant="Variant.Outlined" />

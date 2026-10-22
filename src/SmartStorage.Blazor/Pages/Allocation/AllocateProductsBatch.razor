@@ -46,10 +46,10 @@ else
                                 <MudNumericField T="int" Label="Quantidade" @bind-Value="row.Qntd" Min="1" Error="@(row.Qntd > row.Product.Qntd)" ErrorText="@($"Há {row.Product.Qntd} no depósito")" Variant="Variant.Outlined" />
                             </MudItem>
                             <MudItem xs="12" sm="4">
-                                <MudNumericField T="decimal" Label="Preço" @bind-Value="row.Price" Format="F2" Min="0m" HelperText="@(row.Product.PrecoInicial is null ? "Produto sem preço inicial" : "Preço inicial do produto")" Variant="Variant.Outlined" />
+                                <MudNumericField Culture="InputCulture.PtBr" T="decimal" Label="Preço" @bind-Value="row.Price" Format="F2" Min="0m" HelperText="@(row.Product.PrecoInicial is null ? "Produto sem preço inicial" : "Preço inicial do produto")" Variant="Variant.Outlined" />
                             </MudItem>
                             <MudItem xs="12" sm="4">
-                                <MudNumericField T="decimal" Label="Volume necessário (L)" Value="RequiredVolume(row)" Format="0.###" ReadOnly="true" Variant="Variant.Outlined" />
+                                <MudNumericField Culture="InputCulture.PtBr" T="decimal" Label="Volume necessário (L)" Value="RequiredVolume(row)" Format="0.###" ReadOnly="true" Variant="Variant.Outlined" />
                             </MudItem>
                             <MudItem xs="12">
                                 <MudSelect T="int" @bind-Value="row.ShelfId" ToStringFunc="ShelfLabel" Label="Prateleira" OpenIcon="@Icons.Material.Filled.Storefront" Variant="Variant.Outlined">

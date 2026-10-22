@@ -137,6 +137,42 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Volume_e_preco_com_virgula_decimal_vao_como_decimal()
+    {
+        var api = Monta();
+        var cut = Renderiza();
+
+        Campo(cut, "Volume (L)").Change("0,01");
+        Campo(cut, "Preço inicial").Change("15,90");
+        cut.Find("form").Submit();
+
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Put), TimeSpan.FromSeconds(5));
+        var corpo = api.JsonDe(HttpMethod.Put, Caminho).RootElement;
+        Assert.Equal(0.01m, corpo.GetProperty("volume").GetDecimal());
+        Assert.Equal(15.90m, corpo.GetProperty("precoInicial").GetDecimal());
+    }
+
+    /// <summary>
+    /// Na cultura invariante, padrão do MudBlazor, a vírgula é separador de milhar e "0,01" virava 1.
+    /// O ponto é o mesmo engano do outro lado: precisa ser recusado no campo, não virar milhar.
+    /// </summary>
+    [Fact]
+    public void Volume_com_ponto_e_recusado_em_vez_de_virar_milhar()
+    {
+        var api = Monta();
+        var cut = Renderiza();
+
+        Campo(cut, "Volume (L)").Change("0.01");
+
+        cut.WaitForAssertion(() => Assert.Contains("mud-input-error", Campo(cut, "Volume (L)").Closest(".mud-input-control")!.InnerHtml), TimeSpan.FromSeconds(5));
+        cut.Find("form").Submit();
+
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Put), TimeSpan.FromSeconds(5));
+        var corpo = api.JsonDe(HttpMethod.Put, Caminho).RootElement;
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, corpo.GetProperty("volume").ValueKind);
+    }
+
+    [Fact]
     public void Saldo_alterado_sem_motivo_nao_grava_nada()
     {
         var api = Monta();

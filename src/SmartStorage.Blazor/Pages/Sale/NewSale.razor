@@ -30,7 +30,7 @@ else
                             <MudNumericField T="int" Label="Quantidade da venda" For="(() => newSale.Qntd)" ValueChanged="CalculateTotal" HelperText="@($"Disponível nesta prateleira: {entry.ProductQuantity}")" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6">
-                            <MudDatePicker Label="Data da venda" @bind-Date="dateSale" Variant="Variant.Outlined" />
+                            <MudDatePicker Culture="InputCulture.PtBr" Label="Data da venda" @bind-Date="dateSale" Variant="Variant.Outlined" />
                         </MudItem>
                     </MudGrid>
                 </section>
@@ -152,7 +152,7 @@ else
             return;
 
         newSale.ProductName = product.Name;
-        newSale.DateSale = dateSale ?? DateTime.Now;
+        newSale.DateSale = SaleDate.At(dateSale, DateTime.Now);
         newSale.IdEnter = entry.Id;
         newSale.ProductId = product.Id;  
     }

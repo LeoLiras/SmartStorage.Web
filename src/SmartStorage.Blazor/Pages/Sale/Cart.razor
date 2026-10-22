@@ -48,7 +48,7 @@ else
         <MudItem xs="12" md="4">
             <section class="app-panel">
                 <MudText Typo="Typo.subtitle1" Class="app-panel-title">Resumo</MudText>
-                <MudDatePicker Label="Data da venda" @bind-Date="dateSale" Variant="Variant.Outlined" Class="mb-3" />
+                <MudDatePicker Culture="InputCulture.PtBr" Label="Data da venda" @bind-Date="dateSale" Variant="Variant.Outlined" Class="mb-3" />
                 <dl class="app-summary">
                     <div><dt>Itens</dt><dd class="num">@cart.Count</dd></div>
                     <div><dt>Unidades</dt><dd class="num">@cart.Units</dd></div>
@@ -115,7 +115,7 @@ else
         {
             saving = true;
 
-            var sales = await saleService.CreateSales(cart.ToBatch(dateSale ?? DateTime.Now));
+            var sales = await saleService.CreateSales(cart.ToBatch(SaleDate.At(dateSale, DateTime.Now)));
 
             await cart.ClearAsync();
 

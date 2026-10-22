@@ -88,13 +88,13 @@ else
                                             <MudTextField T="string" Label="Descrição" @bind-Value="row.NewProduct.Descricao" MaxLength="300" Error="@(!DescriptionIsValid(row))" ErrorText="Entre 5 e 300 caracteres" Variant="Variant.Outlined" />
                                         </MudItem>
                                         <MudItem xs="12" sm="4">
-                                            <MudNumericField T="decimal?" Label="Volume (L)" @bind-Value="row.NewProduct.Volume" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar" Variant="Variant.Outlined" />
+                                            <MudNumericField Culture="InputCulture.PtBr" T="decimal?" Label="Volume (L)" @bind-Value="row.NewProduct.Volume" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar" Variant="Variant.Outlined" />
                                         </MudItem>
                                         <MudItem xs="12" sm="4">
                                             <MudNumericField T="int" Label="Estoque mínimo" @bind-Value="row.NewProduct.MinimumStock" Min="0" Variant="Variant.Outlined" />
                                         </MudItem>
                                         <MudItem xs="12" sm="4">
-                                            <MudNumericField T="decimal?" Label="Preço inicial" @bind-Value="row.NewProduct.PrecoInicial" Min="0.01m" Format="F2" Variant="Variant.Outlined" />
+                                            <MudNumericField Culture="InputCulture.PtBr" T="decimal?" Label="Preço inicial" @bind-Value="row.NewProduct.PrecoInicial" Min="0.01m" Format="F2" Variant="Variant.Outlined" />
                                         </MudItem>
                                     </MudGrid>
                                 </MudItem>

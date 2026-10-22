@@ -45,12 +45,12 @@ else if(enter is not null)
                             <MudNumericField Label="Quantidade" @bind-Value="enter.ProductQuantity" For="(() => enter.ProductQuantity)" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="4">
-                            <MudNumericField Format="F2" Label="Preço" @bind-Value="enter.ProductPrice" For="(() => enter.ProductPrice)" Variant="Variant.Outlined" />
+                            <MudNumericField Culture="InputCulture.PtBr" Format="F2" Label="Preço" @bind-Value="enter.ProductPrice" For="(() => enter.ProductPrice)" Variant="Variant.Outlined" />
                         </MudItem>
                         @if (product.Volume is not null)
                         {
                             <MudItem xs="12" sm="4">
-                                <MudNumericField T="decimal" Label="Volume necessário (L)" Value="RequiredVolume" Format="0.###" ReadOnly="true" Variant="Variant.Outlined" />
+                                <MudNumericField Culture="InputCulture.PtBr" T="decimal" Label="Volume necessário (L)" Value="RequiredVolume" Format="0.###" ReadOnly="true" Variant="Variant.Outlined" />
                             </MudItem>
                         }
                         <MudItem xs="12">
