@@ -268,6 +268,11 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 |---|---|---|---|---|---|
 | T-44.01 | Botão Voltar no `ProductForm`, com o destino por parâmetro: Produtos em estoque na edição e no cadastro, Produtos nas prateleiras na transferência e Vendas na devolução | RF-05, RF-07, RF-18, RF-26 | T-00.29 | bUnit: na edição, Voltar navega para Produtos em estoque sem enviar o `PUT`, e na transferência e na devolução para a listagem de cada uma sem enviar nada; as quatro telas conferidas em desktop e celular | |
 
+### #45 Campo numérico vermelho sem o motivo (T-45)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-45.01 | O `ErrorText` dos `MudNumericField` aparece: quantidade da alocação em lote, do carrinho e de entrada da NF-e | RF-11, RF-16, RF-22 | T-00.29 | bUnit, falhando antes da correção: lote acima do depósito mostra "Há N no depósito", carrinho acima da prateleira mostra "Há N na prateleira" e NF-e com quantidade zero mostra o motivo; telas conferidas em desktop e celular | |
+
 ### #30 Segurança da AuthenticationAPI (T-30)
 | ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|
