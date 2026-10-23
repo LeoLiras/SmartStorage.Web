@@ -43,11 +43,13 @@ Checklist para testar pela tela as features de set/2026 (NF-e, alocação em lot
 
 ## 2. Campos decimais e datas (correção de 22/10)
 
-- [ ] **2.1** Edite o Produto B. Volume `0,02`, preço inicial `8,50` → **Atualizar** → reabra o produto.
+**Aprovado em 23/10/2026.**
+
+- [x] **2.1** Edite o Produto B. Volume `0,02`, preço inicial `8,50` → **Atualizar** → reabra o produto.
   **Esperado:** mostra `0,02` e `8,50`, e não 2 e 850.
-- [ ] **2.2** No mesmo campo de volume, digite `0.02` (com ponto).
+- [x] **2.2** No mesmo campo de volume, digite `0.02` (com ponto).
   **Esperado:** campo vermelho; o valor não vira 2. Saia sem salvar.
-- [ ] **2.3** Repare na data de registro.
+- [x] **2.3** Repare na data de registro.
   **Esperado:** formato dia/mês/ano (`22/10/2026`).
 
 ## 3. Alocação em lote
