@@ -69,17 +69,19 @@ Checklist para testar pela tela as features de set/2026 (NF-e, alocação em lot
 
 ## 4. Carrinho
 
-- [ ] **4.1** Em Produtos nas prateleiras, clique no ícone de carrinho de A e de B.
+**Aprovado em 23/10/2026.** No 4.4, a primeira tentativa reabriu o carrinho depois da venda na outra aba, e ele bloqueou o envio com o saldo novo; refeito com o carrinho aberto, a API recusou como esperado. Por isso o Produto A teve uma venda avulsa a mais, e o 4.5 registrou A = 1.
+
+- [x] **4.1** Em Produtos nas prateleiras, clique no ícone de carrinho de A e de B.
   **Esperado:** badge 2 no topo e um aviso a cada item.
-- [ ] **4.2** Abra o carrinho e aperte F5.
+- [x] **4.2** Abra o carrinho e aperte F5.
   **Esperado:** os itens continuam; o total mostra R$ 25,80; a data aparece como dia/mês/ano.
-- [ ] **4.3** Mude a quantidade de A para 5.
+- [x] **4.3** Mude a quantidade de A para 5.
   **Esperado:** alerta "Há item acima do saldo…" e **Registrar vendas** desabilitado.
-- [ ] **4.4** Ponha A = 3 e B = 2. Em **outra aba**, venda 1 unidade de A pelo ícone **Vender**. Volte à aba do carrinho e clique em **Registrar vendas**.
+- [x] **4.4** Ponha A = 3 e B = 2. Em **outra aba**, venda 1 unidade de A pelo ícone **Vender**. Volte à aba do carrinho e clique em **Registrar vendas**.
   **Esperado:** "Nenhuma venda foi registrada. Item 1 … há 2 e o carrinho pede 3"; o carrinho é mantido e o campo mostra "Há 2 na prateleira".
-- [ ] **4.5** Mude A para 2 e registre.
+- [x] **4.5** Mude A para 2 e registre.
   **Esperado:** "2 venda(s) registrada(s)", carrinho vazio e as vendas aparecem em Vendas com os preços 15,90 e 9,90.
-- [ ] **4.6** Ponha C no carrinho. Em Conta → **Sair**, entre como `usuario` / `usuario123` e abra o carrinho.
+- [x] **4.6** Ponha C no carrinho. Em Conta → **Sair**, entre como `usuario` / `usuario123` e abra o carrinho.
   **Esperado:** vazio. Saia, volte como `admin`: o C continua no carrinho.
 
 ## 5. Venda individual e hora gravada (correção de 22/10)
