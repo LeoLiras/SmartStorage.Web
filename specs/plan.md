@@ -144,6 +144,16 @@ que for abandonada deixa o número sem uso.
   mês fora de 1 a 12 responde 400 (RF-50); o Insights ganha um seletor de mês
   e um de ano
 
+### Dashboard (#46)
+- D-47: `GET /api/storage/reports/v1/dashboard?year=&month=` na ReportsAPI,
+  que já só lê o banco, devolve um `DashboardVO` (em `SmartStorage.Shared`)
+  com os indicadores e as séries agregados no servidor, pelo mesmo `(year,
+  month)` da D-33; o Insights deixa de baixar a lista inteira de vendas para
+  desenhar os gráficos. As agregações são funções puras testadas no
+  `SmartStorage.ReportsAPI.Tests`, e os gráficos usam o `MudChart`, sem
+  biblioteca nova. Margem fica de fora: a venda não grava o custo do momento,
+  e o custo médio atual reescreveria a margem de vendas antigas (RF-51)
+
 ### Transferência (#37)
 - D-34: a transferência manda sempre `shelfPrice: enter.EntPrice` ao ledger
   (RN-11)
@@ -248,6 +258,7 @@ Entram ou mudam:
 - #32: `POST`, `PUT` e `DELETE` de `shelf` e `employees` exigem administrador
 - #33: `PATCH /api/auth/v1/{userId}/active`
 - #36: `?month=&year=` em `export-excel` e `export-pdf`
+- #46: `GET /api/storage/reports/v1/dashboard?year=&month=`
 - #28: `/api/companies/v1` (lista, busca, cadastro, edição e
   `PATCH {id}/active`)
 - #29: `confirm-email`, `resend-confirmation`, `forgot-password` e
@@ -262,7 +273,7 @@ gateway, na mesma posição.
 1. #37, #38, #41, #42, #43, #44 e #45: pequenas e independentes
 2. #30 → #34 → #31 → #32 → #33: as lacunas de segurança antes de feature
    nova na mesma área, como manda a constituição
-3. #35 e #36
+3. #35 e #36, e depois a #46, que usa o mês e o ano da #36
 4. #28 → #29 → #39 e #40
 5. #27 → #5
 6. #13, sem prioridade

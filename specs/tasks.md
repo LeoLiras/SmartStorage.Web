@@ -350,6 +350,14 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-36.03 | `month` e `year` opcionais na query dos dois exports, com o mês corrente como padrão; mês fora de 1 a 12 responde 400 | RF-50, D-33 | T-36.02 | Pelo gateway, com vendas no mês anterior, Excel e PDF desse mês saem com as vendas dele e o nome do mês escolhido; mês sem vendas responde "Não há vendas em 09/2026." | |
 | T-36.04 | Seletor de mês e ano no Insights, ao lado dos botões de exportar | RF-50 | T-36.03 | bUnit (`InsightsTests`): o mês e o ano vão na requisição, e o aviso de mês sem vendas não trava o botão; tela conferida em desktop e celular | |
 
+### #46 Dashboard de estatísticas (T-46)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-46.01 | `DashboardVO` e as agregações como funções puras: indicadores, vendas por dia, mais vendidos em unidades, vendidas e devolvidas por mês, ocupação, dias de cobertura e capital parado | RF-51, RN-30, D-47 | T-36.02 | Testes de unidade: líquido de devolução, cobertura com e sem vendas nos 30 dias, produto sem custo fora do capital parado e prateleira sem volume fora da ocupação | |
+| T-46.02 | `GET /api/storage/reports/v1/dashboard?year=&month=` na ReportsAPI, com `[Authorize]`, e a rota no gateway | RF-51, D-47 | T-46.01, T-36.03 | Pelo gateway, um mês do seed devolve os números conferidos no banco; mês fora de 1 a 12 responde 400; os dois `appsettings` têm a rota na mesma posição | |
+| T-46.03 | `IReportsService` busca o dashboard; o Insights mostra os cards e os seis gráficos novos e tira os dois atuais do mesmo endpoint, sem baixar a lista inteira de vendas | RF-51, D-47 | T-46.02, T-36.04 | bUnit (`InsightsTests`): o mês e o ano vão na requisição, cards e gráficos aparecem, e o erro da API aparece sem travar a tela; o chat da IA continua funcionando | |
+| T-46.04 | Conferir no navegador e documentar | RF-51 | T-46.03 | Tela conferida em desktop e celular; a seção "AIAPI e ReportsAPI" do `CLAUDE.md` descreve o endpoint e que margem fica de fora | |
+
 ### #28 Empresas (T-28)
 | ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|

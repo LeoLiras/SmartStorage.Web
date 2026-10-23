@@ -204,6 +204,12 @@ movimentação com autor e instante.
   corrente como padrão, para tirar o fechamento depois que o mês acabou
 - RF-30 [feito]: tela de Insights com gráficos e um chat que responde
   perguntas sobre as 10 vendas mais recentes pelo Gemini
+- RF-51 [planejado #46]: o Insights é um dashboard do mês escolhido, com
+  indicadores (faturamento e variação sobre o mês anterior, unidades, ticket
+  médio, valor do estoque a custo médio, produtos abaixo do mínimo e ocupação
+  média) e gráficos de vendas por dia, produtos mais vendidos em unidades,
+  vendidas e devolvidas por mês, ocupação das prateleiras, dias de cobertura e
+  capital parado, todos líquidos de devolução
 - RF-31 [planejado #5]: o PDF inclui um resumo das vendas escrito pela IA
 - RF-32 [planejado #27]: o provedor de IA é escolhido por configuração entre
   Gemini e um modelo local no Ollama
