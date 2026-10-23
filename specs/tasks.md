@@ -273,6 +273,12 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 |---|---|---|---|---|---|
 | T-45.01 | O `ErrorText` da quantidade na alocação em lote aparece, como já aparece no carrinho | RF-16 | T-00.29 | bUnit, falhando antes da correção: lote acima do depósito mostra "Há N no depósito"; testes do carrinho ("Há N na prateleira") e da NF-e (quantidade zero mostra o motivo) seguem passando; tela conferida em desktop e celular | |
 
+### #47 Ícone próprio (T-47)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-47.01 | Ícone em SVG nas cores do layout, legível em 16 px | | T-00.29 | O SVG está em `wwwroot` e foi aprovado pelo usuário | |
+| T-47.02 | O ícone no lugar do `.brand-mark` na barra superior e no login; `favicon.svg`, `favicon.png` de reserva e `apple-touch-icon`; título "Smart Storage"; o `icon-192.png` do template trocado ou removido | | T-47.01 | Aba, barra superior e login conferidos em desktop e celular, sem o "@" do template; a imagem do Docker serve o `favicon.svg` como `image/svg+xml` | |
+
 ### #30 Segurança da AuthenticationAPI (T-30)
 | ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|
