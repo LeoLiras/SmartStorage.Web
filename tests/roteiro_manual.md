@@ -86,7 +86,9 @@ Checklist para testar pela tela as features de set/2026 (NF-e, alocação em lot
 
 ## 5. Venda individual e hora gravada (correção de 22/10)
 
-- [ ] **5.1** Anote a hora, clique em **Vender** no Produto B, espere 1 a 2 minutos com a tela aberta e venda 1 unidade.
+**Aprovado em 23/10/2026.**
+
+- [x] **5.1** Anote a hora, clique em **Vender** no Produto B, espere 1 a 2 minutos com a tela aberta e venda 1 unidade.
   **Esperado:** em Vendas, a hora da venda é a do clique em Vender, não a da abertura da tela.
 
 ## 6. Devolução e cancelamento
