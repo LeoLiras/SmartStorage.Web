@@ -279,6 +279,12 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-47.01 | Ícone em SVG nas cores do layout, legível em 16 px | | T-00.29 | O SVG está em `wwwroot` e foi aprovado pelo usuário | |
 | T-47.02 | O ícone no lugar do `.brand-mark` na barra superior e no login; `favicon.svg`, `favicon.png` de reserva e `apple-touch-icon`; título "Smart Storage"; o `icon-192.png` do template trocado ou removido | | T-47.01 | Aba, barra superior e login conferidos em desktop e celular, sem o "@" do template; a imagem do Docker serve o `favicon.svg` como `image/svg+xml` | |
 
+### #48 Campo só leitura distinto do editável (T-48)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-48.01 | Estilo de campo só leitura em `app.css` (classe `app-readonly`, tokens nos temas claro e escuro), mostrado num campo editável ao lado de um só leitura | D-48 | T-00.29 | Proposta aprovada pelo usuário nos dois temas | |
+| T-48.02 | A classe nos campos sempre só leitura (`ProductForm`, alocação individual e em lote, NF-e, transferência, devolução) e nos do `ProductForm`, `EmployeeSelect`, `MudDatePicker` e `ProductImagePicker` quando `ReadOnly`; o Produto da venda individual troca `Disabled` por `ReadOnly` | RF-05, D-48 | T-48.01 | bUnit: na transferência, os campos do produto saem com `app-readonly` e a quantidade a transferir sem; as sete telas conferidas em desktop e celular, com o só leitura reconhecível sem clicar | |
+
 ### #30 Segurança da AuthenticationAPI (T-30)
 | ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|

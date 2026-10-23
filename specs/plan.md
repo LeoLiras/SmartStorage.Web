@@ -154,6 +154,12 @@ que for abandonada deixa o número sem uso.
   biblioteca nova. Margem fica de fora: a venda não grava o custo do momento,
   e o custo médio atual reescreveria a margem de vendas antigas (RF-51)
 
+### Campos só leitura (#48)
+- D-48: campo só leitura ganha a classe `app-readonly`, aplicada pela tela e
+  não por seletor sobre `input[readonly]`, com fundo preenchido e sem
+  destaque de foco nos dois temas; `Disabled` fica para o que está
+  indisponível, não para valor que só se mostra
+
 ### Transferência (#37)
 - D-34: a transferência manda sempre `shelfPrice: enter.EntPrice` ao ledger
   (RN-11)
@@ -270,7 +276,7 @@ Toda rota nova entra no `appsettings.json` e no `appsettings.Docker.json` do
 gateway, na mesma posição.
 
 ## Ordem de implementação
-1. #37, #38, #41, #42, #43, #44, #45 e #47: pequenas e independentes
+1. #37, #38, #41, #42, #43, #44, #45, #47 e #48: pequenas e independentes
 2. #30 → #34 → #31 → #32 → #33: as lacunas de segurança antes de feature
    nova na mesma área, como manda a constituição
 3. #35 e #36, e depois a #46, que usa o mês e o ano da #36
