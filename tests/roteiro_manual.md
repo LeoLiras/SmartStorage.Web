@@ -13,30 +13,32 @@ Checklist para testar pela tela as features de set/2026 (NF-e, alocação em lot
 
 ## 1. Importação de NF-e
 
-- [ ] **1.1** Abra Produtos em estoque → **Importar NF-e** → escolha `C:\temp\nfe1\nfe_ui.xml`.
+**Aprovado em 23/10/2026.**
+
+- [x] **1.1** Abra Produtos em estoque → **Importar NF-e** → escolha `C:\temp\nfe1\nfe_ui.xml`.
   **Esperado:** número 1/1, fornecedor "ZZ Roteiro UI Fornecedor", "0 existente(s) · 2 novo(s)".
-- [ ] **1.2** No item 2 (CX, 2 caixas), mude o **Fator de conversão** para 12.
+- [x] **1.2** No item 2 (CX, 2 caixas), mude o **Fator de conversão** para 12.
   **Esperado:** quantidade de entrada vira 24 e o custo unitário vira 5,0000.
-- [ ] **1.3** Item 1: nome "ZZ Roteiro UI Produto A", volume `0,01`, preço inicial `15,90`. Item 2: nome "ZZ Roteiro UI Produto B", volume `0,01`.
+- [x] **1.3** Item 1: nome "ZZ Roteiro UI Produto A", volume `0,01`, preço inicial `15,90`. Item 2: nome "ZZ Roteiro UI Produto B", volume `0,01`.
   **Esperado:** os campos mostram `0,01` e `15,90`, sem erro.
-- [ ] **1.4** Apague o nome do item 2 e digite só `ABC`.
+- [x] **1.4** Apague o nome do item 2 e digite só `ABC`.
   **Esperado:** campo vermelho ("Entre 5 e 100 caracteres") e **Importar nota** desabilitado. Depois volte o nome.
-- [ ] **1.5** Clique em **Importar nota**.
+- [x] **1.5** Clique em **Importar nota**.
   **Esperado:** "2 item(ns), 2 produto(s) novo(s)". Em Produtos em estoque, A aparece com 5 e B com 24.
-- [ ] **1.6** Gere a segunda nota com o GTIN anotado e importe:
+- [x] **1.6** Gere a segunda nota com o GTIN anotado e importe:
   ```
   python tests/gera_nfe_ui.py C:\temp\nfe2 --gtin-existente <GTIN anotado>
   ```
   **Esperado:** item 1 já ligado ao Produto A, com "Encontrado pelo código de barras".
-- [ ] **1.7** No item 2, escolha **Produto B** no seletor e clique em importar.
+- [x] **1.7** No item 2, escolha **Produto B** no seletor e clique em importar.
   **Esperado:** erro "o produto … Produto B tem o código …, e a nota traz …" e nada gravado.
-- [ ] **1.8** Volte o item 2 para "Cadastrar novo produto", dê o nome "ZZ Roteiro UI Produto C" e volume `0,01`, e importe.
+- [x] **1.8** Volte o item 2 para "Cadastrar novo produto", dê o nome "ZZ Roteiro UI Produto C" e volume `0,01`, e importe.
   **Esperado:** sucesso. A passa a ter 10 em estoque.
-- [ ] **1.9** Abra de novo `C:\temp\nfe1\nfe_ui.xml`.
+- [x] **1.9** Abra de novo `C:\temp\nfe1\nfe_ui.xml`.
   **Esperado:** alerta vermelho "Esta nota já foi importada em …" e botão desabilitado.
-- [ ] **1.10** Abra `nfe_gtin_invalido.xml`.
+- [x] **1.10** Abra `nfe_gtin_invalido.xml`.
   **Esperado:** aviso amarelo "O código … não é um GTIN válido e foi ignorado". **Não importe.**
-- [ ] **1.11** Abra `nao_e_nfe.xml`.
+- [x] **1.11** Abra `nao_e_nfe.xml`.
   **Esperado:** erro "O arquivo não é uma NF-e" e volta à escolha de arquivo.
 
 ## 2. Campos decimais e datas (correção de 22/10)
