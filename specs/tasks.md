@@ -248,6 +248,21 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-38.02 | Tirar a avaliação do alerta da alocação individual e da em lote | RF-28, D-35 | T-38.01 | `ShelfBusinessImplementation` só avalia o alerta no inventário; CT-34, CT-40 e CT-43 passam | |
 | T-38.03 | Atualizar os gatilhos do alerta no `CLAUDE.md` | RF-28 | T-38.02 | O `CLAUDE.md` lista venda, carrinho, aumento de venda, inventário e ajuste, e não a alocação | |
 
+### #41 Valor do item da NF-e na importação (T-41)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-41.01 | Campo "Valor na nota", só leitura, em cada item da prévia, com o `vProd` em pt-BR ao lado do custo unitário | RF-11, D-09 | T-00.29 | bUnit: o item 2 da nota de exemplo mostra 120,00, e o valor não muda com o fator em 12 enquanto o custo unitário vai a 5,0000; tela conferida em desktop e celular | |
+
+### #42 Espaço entre a imagem do produto e os botões (T-42)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-42.01 | Margem entre a moldura da imagem e a linha de botões no `ProductImagePicker` | RF-05 | T-00.29 | Cadastro e edição de produto e produto novo na NF-e conferidos em desktop e celular, com e sem o nome do arquivo: os botões não encostam na moldura | |
+
+### #43 Página de produtos com a linha cheia (T-43)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-43.01 | Colunas da grade de cards por faixa de largura, com contagens que dividem o tamanho da página, e o `pageSize` de Produtos em estoque ajustado a elas | RF-06, D-10 | T-00.29 | bUnit: a tela pede a página com o novo `pageSize`; conferida em celular, tablet, desktop e tela larga, com toda página que não é a última terminando com a linha cheia | |
+
 ### #30 Segurança da AuthenticationAPI (T-30)
 | ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|
