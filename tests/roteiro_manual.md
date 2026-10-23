@@ -93,11 +93,13 @@ Checklist para testar pela tela as features de set/2026 (NF-e, alocação em lot
 
 ## 6. Devolução e cancelamento
 
-- [ ] **6.1** Em Vendas, na venda de 2 unidades do Produto B, clique em **Registrar devolução** e devolva 1.
+**Aprovado em 23/10/2026.**
+
+- [x] **6.1** Em Vendas, na venda de 2 unidades do Produto B, clique em **Registrar devolução** e devolva 1.
   **Esperado:** "O saldo voltou para o depósito"; a listagem mostra 1 unidade e R$ 9,90.
-- [ ] **6.2** Clique em **Cancelar venda** nessa mesma venda e confirme.
+- [x] **6.2** Clique em **Cancelar venda** nessa mesma venda e confirme.
   **Esperado:** erro "Não é possível cancelar a venda pois ela já tem devoluções registradas".
-- [ ] **6.3** Devolva a unidade restante.
+- [x] **6.3** Devolva a unidade restante.
   **Esperado:** a venda some da listagem.
 
 ## 7. Transferência
