@@ -122,7 +122,9 @@ Checklist para testar pela tela as features de set/2026 (NF-e, alocação em lot
 
 ## 9. Listagens
 
-- [ ] **9.1** Em Vendas, Produtos em estoque e Produtos nas prateleiras: vá à página 2 e pesquise "ZZ Roteiro UI".
+**Aprovado em 23/10/2026.**
+
+- [x] **9.1** Em Vendas, Produtos em estoque e Produtos nas prateleiras: vá à página 2 e pesquise "ZZ Roteiro UI".
   **Esperado:** volta para a página 1 e mostra só os produtos do teste.
 
 ## Encerramento
