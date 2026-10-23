@@ -285,6 +285,18 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-48.01 | Estilo de campo só leitura em `app.css` (classe `app-readonly`, tokens nos temas claro e escuro), mostrado num campo editável ao lado de um só leitura | D-48 | T-00.29 | Proposta aprovada pelo usuário nos dois temas | |
 | T-48.02 | A classe nos campos sempre só leitura (`ProductForm`, alocação individual e em lote, NF-e, transferência, devolução) e nos do `ProductForm`, `EmployeeSelect`, `MudDatePicker` e `ProductImagePicker` quando `ReadOnly`; o Produto da venda individual troca `Disabled` por `ReadOnly` | RF-05, D-48 | T-48.01 | bUnit: na transferência, os campos do produto saem com `app-readonly` e a quantidade a transferir sem; as sete telas conferidas em desktop e celular, com o só leitura reconhecível sem clicar | |
 
+### #49 Texto do preço no lote (T-49)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-49.01 | O `HelperText` do preço na alocação em lote diz "Preço inicial do produto" só quando o valor é o preço inicial, e "Preço inicial: R$ …" quando é outro | RF-16, RN-16 | T-00.29 | bUnit: o texto troca ao mudar o preço e volta ao restaurar o valor; produto sem preço inicial mostra "Produto sem preço inicial"; tela conferida em desktop e celular | |
+
+### #50 Custo na venda (T-50)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-50.01 | `Sale.SalCusto` e a migration, sem preencher as vendas antigas | RN-41, D-49 | T-00.29 | `has-pending-model-changes` limpo; o `migrator` aplica sobre um banco com vendas, que ficam com `SalCusto` nulo | |
+| T-50.02 | A venda individual e o carrinho copiam o `ProCusto` para o `SalCusto`; o `SaleVO` expõe o custo | RF-52, RN-41, D-49 | T-50.01 | Caso novo no `ledger_e2e.py`: venda individual e pelo carrinho gravam o custo do momento, uma NF-e depois não muda o `SalCusto` e produto sem custo vende com nulo; o roteiro inteiro passa | |
+| T-50.03 | Card de margem bruta do mês no dashboard, só sobre as vendas com custo e com a contagem das que ficaram de fora | RF-52, D-49 | T-50.02, T-46.03 | Teste de unidade da agregação com vendas com e sem custo e com devolução; bUnit do card; tela conferida em desktop e celular | |
+
 ### #30 Segurança da AuthenticationAPI (T-30)
 | ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|

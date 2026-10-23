@@ -210,6 +210,9 @@ movimentação com autor e instante.
   média) e gráficos de vendas por dia, produtos mais vendidos em unidades,
   vendidas e devolvidas por mês, ocupação das prateleiras, dias de cobertura e
   capital parado, todos líquidos de devolução
+- RF-52 [planejado #50]: a venda guarda o custo do produto no momento, e o
+  dashboard mostra a margem bruta do mês sobre as vendas com custo, dizendo
+  quantas ficaram de fora
 - RF-31 [planejado #5]: o PDF inclui um resumo das vendas escrito pela IA
 - RF-32 [planejado #27]: o provedor de IA é escolhido por configuração entre
   Gemini e um modelo local no Ollama
@@ -292,6 +295,9 @@ movimentação com autor e instante.
   muda ao alocar
 - RN-17: o custo do produto é a média ponderada pelo saldo total antes da
   entrada; o custo do item da nota é `vProd ÷ quantidade de entrada`
+- RN-41 [planejado #50]: a venda congela o custo médio do produto no momento,
+  e uma nota importada depois não muda a margem de vendas antigas; venda de
+  produto sem custo, e as anteriores à #50, ficam sem custo e fora da margem
 
 ### Vendas e devoluções
 - RN-18: a venda não passa do saldo da entrada; no carrinho, somam-se os itens
@@ -467,7 +473,8 @@ Fica fora até virar requisito numa revisão desta spec.
 
 - **Vendas**: pedido agrupando as vendas, pagamento, desconto, troco, emissão
   de nota de saída e devolução do carrinho inteiro de uma vez
-- **Custo**: FIFO, custo por lote, margem por venda e preço por cliente
+- **Custo**: FIFO, custo por lote e preço por cliente (a margem por venda
+  entrou como RF-52, pelo custo médio do momento)
 - **Compras**: consulta da NF-e na SEFAZ, validação da assinatura do XML,
   cadastro de fornecedores, pedido de compra e contas a pagar
 - **Catálogo**: consulta do produto em base externa (Cosmos, GS1), variações

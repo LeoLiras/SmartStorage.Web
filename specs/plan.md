@@ -152,7 +152,15 @@ que for abandonada deixa o número sem uso.
   desenhar os gráficos. As agregações são funções puras testadas no
   `SmartStorage.ReportsAPI.Tests`, e os gráficos usam o `MudChart`, sem
   biblioteca nova. Margem fica de fora: a venda não grava o custo do momento,
-  e o custo médio atual reescreveria a margem de vendas antigas (RF-51)
+  e o custo médio atual reescreveria a margem de vendas antigas (RF-51); ela
+  entra pela #50 (D-49)
+
+### Custo na venda (#50)
+- D-49: `Sale.SalCusto`, `decimal(18,4)` e anulável, copiado do `ProCusto` na
+  criação da venda, individual e pelo carrinho, como o `SalPrice` (RN-41); a
+  migration deixa as vendas antigas nulas em vez de inventar o custo pelo
+  médio de hoje. A margem do dashboard soma só as vendas com custo e conta as
+  que ficaram de fora (RF-52)
 
 ### Campos só leitura (#48)
 - D-48: campo só leitura ganha a classe `app-readonly`, aplicada pela tela e
@@ -276,10 +284,13 @@ Toda rota nova entra no `appsettings.json` e no `appsettings.Docker.json` do
 gateway, na mesma posição.
 
 ## Ordem de implementação
-1. #37, #38, #41, #42, #43, #44, #45, #47 e #48: pequenas e independentes
+1. #37, #38, #41, #42, #43, #44, #45, #47, #48 e #49: pequenas e
+   independentes; e a gravação do custo da #50, cedo, porque venda feita sem
+   ela fica para sempre fora da margem
 2. #30 → #34 → #31 → #32 → #33: as lacunas de segurança antes de feature
    nova na mesma área, como manda a constituição
-3. #35 e #36, e depois a #46, que usa o mês e o ano da #36
+3. #35 e #36, e depois a #46, que usa o mês e o ano da #36, e o card de
+   margem da #50
 4. #28 → #29 → #39 e #40
 5. #27 → #5
 6. #13, sem prioridade
