@@ -259,7 +259,7 @@ Toda rota nova entra no `appsettings.json` e no `appsettings.Docker.json` do
 gateway, na mesma posição.
 
 ## Ordem de implementação
-1. #37, #38, #41, #42 e #43: pequenas e independentes
+1. #37, #38, #41, #42, #43 e #44: pequenas e independentes
 2. #30 → #34 → #31 → #32 → #33: as lacunas de segurança antes de feature
    nova na mesma área, como manda a constituição
 3. #35 e #36

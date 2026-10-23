@@ -263,6 +263,11 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 |---|---|---|---|---|---|
 | T-43.01 | Colunas da grade de cards por faixa de largura, com contagens que dividem o tamanho da página, e o `pageSize` de Produtos em estoque ajustado a elas | RF-06, D-10 | T-00.29 | bUnit: a tela pede a página com o novo `pageSize`; conferida em celular, tablet, desktop e tela larga, com toda página que não é a última terminando com a linha cheia | |
 
+### #44 Botão Voltar no formulário de produto (T-44)
+| ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|
+| T-44.01 | Botão Voltar no `ProductForm`, com o destino por parâmetro: Produtos em estoque na edição e no cadastro, Produtos nas prateleiras na transferência e Vendas na devolução | RF-05, RF-07, RF-18, RF-26 | T-00.29 | bUnit: na edição, Voltar navega para Produtos em estoque sem enviar o `PUT`, e na transferência e na devolução para a listagem de cada uma sem enviar nada; as quatro telas conferidas em desktop e celular | |
+
 ### #30 Segurança da AuthenticationAPI (T-30)
 | ID | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|
