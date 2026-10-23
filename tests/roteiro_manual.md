@@ -104,16 +104,20 @@ Checklist para testar pela tela as features de set/2026 (NF-e, alocação em lot
 
 ## 7. Transferência
 
-- [ ] **7.1** Em Produtos nas prateleiras, no Produto C, clique em **Transferir** e escolha a Prateleira C1.
+**Aprovado em 23/10/2026.** O C já não estava no carrinho, então o 7.2 foi feito com o Capacete de Segurança Branco, do seed, transferido da A2 para a B1.
+
+- [x] **7.1** Em Produtos nas prateleiras, no Produto C, clique em **Transferir** e escolha a Prateleira C1.
   **Esperado:** "2 unidade(s) transferida(s)"; C aparece na C1 com preço 7,50.
-- [ ] **7.2** Abra o carrinho (o C ainda está lá, apontando para a B2).
+- [x] **7.2** Abra o carrinho (o C ainda está lá, apontando para a B2).
   **Esperado:** "Há 0 na prateleira" e botão bloqueado. Clique em **Limpar carrinho** e confirme.
 
 ## 8. Inventário
 
-- [ ] **8.1** Em Produtos nas prateleiras → **Inventário**, escolha a C1.
+**Aprovado em 23/10/2026.**
+
+- [x] **8.1** Em Produtos nas prateleiras → **Inventário**, escolha a C1.
   **Esperado:** C listado com 2 no sistema e **Registrar inventário** desabilitado (nenhuma diferença).
-- [ ] **8.2** Mude a contagem para 1 e escreva o motivo "Contagem de teste" → registrar.
+- [x] **8.2** Mude a contagem para 1 e escreva o motivo "Contagem de teste" → registrar.
   **Esperado:** "1 ajuste(s)"; C passa a ter 1 na C1.
 
 ## 9. Listagens
