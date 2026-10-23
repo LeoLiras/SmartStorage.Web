@@ -54,15 +54,17 @@ Checklist para testar pela tela as features de set/2026 (NF-e, alocação em lot
 
 ## 3. Alocação em lote
 
-- [ ] **3.1** Em Produtos em estoque, pesquise "ZZ Roteiro UI", marque A, B e C e clique em **Alocar selecionados (3)**.
+**Aprovado em 23/10/2026.**
+
+- [x] **3.1** Em Produtos em estoque, pesquise "ZZ Roteiro UI", marque A, B e C e clique em **Alocar selecionados (3)**.
   **Esperado:** cada produto com quantidade 1; A já com preço 15,90 ("Preço inicial do produto"); responsável Admin.
-- [ ] **3.2** No Produto A, digite quantidade 11.
+- [x] **3.2** No Produto A, digite quantidade 11.
   **Esperado:** campo vermelho (o depósito tem 10).
-- [ ] **3.3** Preencha A = 3 a `15,90`, B = 4 a `9,90` e C = 2 a `7,50`, todos na **Prateleira B2**. No C, troque o responsável para Bruno.
+- [x] **3.3** Preencha A = 3 a `15,90`, B = 4 a `9,90` e C = 2 a `7,50`, todos na **Prateleira B2**. No C, troque o responsável para Bruno.
   **Esperado:** o painel "Prateleiras do lote" mostra B2 com 0,09 L.
-- [ ] **3.4** Clique em **Alocar 3 produto(s)**.
+- [x] **3.4** Clique em **Alocar 3 produto(s)**.
   **Esperado:** sucesso. Em Produtos nas prateleiras os três aparecem na B2 com esses preços. Ao editar o C, o responsável é Bruno.
-- [ ] **3.5** Selecione só o A de novo, alocação em lote, e troque a prateleira para a C1.
+- [x] **3.5** Selecione só o A de novo, alocação em lote, e troque a prateleira para a C1.
   **Esperado:** alerta vermelho "O produto já está na Prateleira B2…". Clique em alocar: a API recusa com "Item 1 (…)" e nada é gravado.
 
 ## 4. Carrinho
