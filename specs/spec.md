@@ -299,7 +299,7 @@ movimentação com autor e instante.
 - RN-11: transferência leva todo o saldo e o preço da origem. Como o produto
   só tem saldo numa prateleira (RN-10), o destino que já tem o produto é
   sempre uma entrada zerada, de quando ele esteve lá; ela passa a usar o
-  preço da origem [planejado #37], e não o preço antigo que guardava
+  preço da origem [feito], e não o preço antigo que guardava
 - RN-40 [planejado #32]: o volume da prateleira não pode ser reduzido abaixo do
   volume já usado. Reduzido a um valor em que o usado passa de 90% sem passar
   de 100%, é aceito: a prateleira fica acima do teto e só recusa novas
@@ -565,8 +565,6 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 - a venda aceita qualquer data, inclusive futura ou de um mês já fechado
   (#35, RN-39)
 - o relatório só sai para o mês corrente (#36, RF-50)
-- transferir para a prateleira onde o produto já esteve mantém o preço antigo
-  dela, e não o da origem (#37, RN-11)
 - o ajuste de estoque do depósito não avalia o alerta de estoque mínimo
   (#38, RF-28)
 
