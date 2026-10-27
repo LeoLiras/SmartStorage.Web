@@ -29,7 +29,7 @@ issues; as abertas seguem a "Ordem de implementação" do plano.
 - O commit que conclui a última tarefa de um requisito troca, na `spec.md`,
   o `[planejado #N]` dele por `[feito]`
 - Casos novos do roteiro recebem o próximo `CT-xx` livre (o último é o
-  CT-48) quando forem escritos
+  CT-49) quando forem escritos
 
 ## Concluídas
 
@@ -246,8 +246,8 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 ### #37 Transferência leva o preço da origem (T-37)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|---|
-| T-37.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | A transferência passa `shelfPrice: enter.EntPrice` ao ledger, exista ou não entrada do produto no destino | RN-11, D-34 | T-00.29 | Caso novo: alocar na A1, transferir para a A2, repreçar a A2 e voltar para a A1 deixa na A1 o preço da A2, com os dois `Transferencia` no mesmo instante; o CT-28 passa a esperar o preço da origem; o CT-29 continua passando e vale como a recusa que a constituição exige, porque a regra não cria recusa nova | |
-| T-37.02 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Atualizar a transferência no `CLAUDE.md` | RN-11 | T-37.01 | O `CLAUDE.md` não diz mais que o destino existente mantém o próprio preço | |
+| T-37.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | A transferência passa `shelfPrice: enter.EntPrice` ao ledger, exista ou não entrada do produto no destino | RN-11, D-34 | T-00.29 | Caso novo: alocar na A1, transferir para a A2, repreçar a A2 e voltar para a A1 deixa na A1 o preço da A2, com os dois `Transferencia` no mesmo instante; o CT-28 passa a esperar o preço da origem; o CT-29 continua passando e vale como a recusa que a constituição exige, porque a regra não cria recusa nova | `67f1bd0` |
+| T-37.02 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | Atualizar a transferência no `CLAUDE.md` | RN-11 | T-37.01 | O `CLAUDE.md` não diz mais que o destino existente mantém o próprio preço | |
 
 ### #38 Alerta no ajuste do depósito (T-38)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
