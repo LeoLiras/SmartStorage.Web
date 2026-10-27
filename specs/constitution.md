@@ -21,7 +21,9 @@ nenhuma mudança pode quebrar.
 - Cada responsabilidade vive em um serviço próprio, com sua imagem Docker:
   AuthenticationAPI, API core, ReportsAPI, AIAPI, EmailAPI, gateway e Blazor
 - O Blazor só conhece o gateway; rota nova entra no `appsettings.json` e no
-  `appsettings.Docker.json` do gateway, na mesma posição dos dois arquivos
+  `appsettings.Docker.json` do gateway, na mesma posição dos dois arquivos, e
+  na coleção do Postman em `docs/postman/`; rota alterada ou removida muda
+  nos três no mesmo commit
 - Na API core o fluxo é `Controller → Business → SmartStorageContext`, com
   `Converter` traduzindo Model ↔ VO:
   - o controller valida a entrada, chama o business e traduz o resultado em
@@ -170,8 +172,8 @@ nenhuma mudança pode quebrar.
 - Testes: `src/SmartStorage.API.Tests`, `src/SmartStorage.Blazor.Tests`, um
   `src/SmartStorage.<Serviço>.Tests` por serviço que tenha regra própria (a
   partir da #30 o da AuthenticationAPI e o do `SmartStorage.Configurations`,
-  da #36 o da ReportsAPI, da #27 o da AIAPI e da #29 o da EmailAPI), e o
-  roteiro em `tests/`
+  da #36 o da ReportsAPI, da #27 o da AIAPI, da #29 o da EmailAPI e da #52
+  o do gateway), e o roteiro em `tests/`
 - Especificações: `specs/constitution.md`, `specs/spec.md`, `specs/plan.md`
   (decisões técnicas) e `specs/tasks.md` (tarefas de cada issue)
 
