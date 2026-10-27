@@ -311,15 +311,14 @@ namespace SmartStorage_API.Service.Implementations
             if (toShelfId != enter.EntSheId)
                 EnsureShelfFits(enter.EntProId, toShelfId, enter.EntQntd);
 
-            var destinationExists = _context.Enters.Any(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
-
+            // O produto só tem saldo numa prateleira, então a entrada que já exista no destino está zerada e o preço dela é de uma alocação antiga
             _movementRepository.TransferProductBetweenLocations(
                 enter.EntProId,
                 fromShelfId: enter.EntSheId,
                 toShelfId: toShelfId,
                 quantity: enter.EntQntd,
                 type: TipoMovimentacao.Transferencia,
-                shelfPrice: destinationExists ? null : enter.EntPrice);
+                shelfPrice: enter.EntPrice);
 
             var destination = _context.Enters.First(e => e.EntProId == enter.EntProId && e.EntSheId == toShelfId);
 

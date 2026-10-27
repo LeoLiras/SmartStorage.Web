@@ -1019,8 +1019,8 @@ def ct28(ctx):
     confere_invariante(pid, antes, {ctx.prateleira_a: 0, ctx.prateleira_b: 5}, movs)
     destino = entrada_de(pid, ctx.prateleira_b)
     if destino:
-        R.exige(abs(destino["preco"] - 30.0) < 0.001,
-                "transferencia repreciou o destino", "gravado %s, esperado 30.00" % destino["preco"])
+        R.exige(abs(destino["preco"] - 10.0) < 0.001,
+                "destino manteve o preco antigo em vez do preco da origem", "gravado %s, esperado 10.00" % destino["preco"])
     enters = int(sql("SELECT COUNT(*) FROM dbo.Enter WHERE EntProId=%d AND EntSheId=%d" % (pid, ctx.prateleira_b))[0][0])
     R.exige(enters == 1, "transferencia criou outro Enter no destino", "%d linhas" % enters)
 
@@ -1878,6 +1878,37 @@ def ct48(ctx):
         "dateEnter": datetime.now().isoformat()})
     R.exige(status == 200 and _produto_no_banco(pid)["responsavel"] == colaborador_padrao(),
             "alocacao sem responsavel apagou o responsavel atual", "%r" % _produto_no_banco(pid))
+
+
+@caso("CT-49", "Transferir de volta leva o preco atual da origem")
+def ct49(ctx):
+    pid = ctx.cria_produto(20, "CT49")
+    R.exige(_aloca(ctx, pid, ctx.prateleira_a, 5, 10.0) == 200, "pre-condicao falhou: alocacao recusada")
+    primeira = entrada_de(pid, ctx.prateleira_a)
+    if not R.exige(primeira is not None, "pre-condicao falhou: entrada nao criada"):
+        return
+    status, _ = _transfere(ctx, primeira["id"], ctx.prateleira_b)
+    R.exige(status == 200, "pre-condicao falhou: transferencia de ida recusada", "HTTP %s" % status)
+    R.exige(_aloca(ctx, pid, ctx.prateleira_b, 1, 15.0) == 200, "pre-condicao falhou: repreco do destino recusado")
+    origem = entrada_de(pid, ctx.prateleira_b)
+    if not R.exige(origem is not None and origem["qntd"] == 6 and abs(origem["preco"] - 15.0) < 0.001,
+                   "pre-condicao falhou: destino devia ter 6 a 15.00", "%r" % origem):
+        return
+    R.exige(entrada_de(pid, ctx.prateleira_a)["qntd"] == 0, "pre-condicao falhou: a primeira prateleira devia estar zerada")
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status, corpo = _transfere(ctx, origem["id"], ctx.prateleira_a)
+    R.exige(status == 200, "transferencia de volta recusada", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    movs = movimentos_depois(marca, pid)
+    confere_linhas(movs, [(ctx.prateleira_b, TRANSFERENCIA, -6), (ctx.prateleira_a, TRANSFERENCIA, 6)])
+    confere_carimbo(movs)
+    confere_autor(ctx, movs)
+    confere_invariante(pid, antes, {None: 14, ctx.prateleira_a: 6, ctx.prateleira_b: 0}, movs)
+    volta = entrada_de(pid, ctx.prateleira_a)
+    R.exige(abs(volta["preco"] - 15.0) < 0.001,
+            "prateleira de volta manteve o preco antigo em vez do preco da origem", "gravado %s, esperado 15.00" % volta["preco"])
+    enters = int(sql("SELECT COUNT(*) FROM dbo.Enter WHERE EntProId=%d AND EntSheId=%d" % (pid, ctx.prateleira_a))[0][0])
+    R.exige(enters == 1, "transferencia criou outro Enter na prateleira de volta", "%d linhas" % enters)
 
 
 # --------------------------------------------------------------------------- #
