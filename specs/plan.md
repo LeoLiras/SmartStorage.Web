@@ -193,8 +193,8 @@ que for abandonada deixa o número sem uso.
 ### Campos só leitura (#48)
 - D-48: campo só leitura ganha a classe `app-readonly`, aplicada pela tela e
   não por seletor sobre `input[readonly]`, com fundo preenchido e sem
-  destaque de foco nos dois temas; `Disabled` fica para o que está
-  indisponível, não para valor que só se mostra
+  destaque de foco no tema escuro, o único do Blazor (RF-54); `Disabled`
+  fica para o que está indisponível, não para valor que só se mostra
 
 ### Transferência (#37)
 - D-34: a transferência manda sempre `shelfPrice: enter.EntPrice` ao ledger
