@@ -292,6 +292,26 @@ que for abandonada deixa o número sem uso.
   `SmartStorage.Configurations.Tests`, e a EmailAPI, que passa a ter regra
   própria na #29, o `SmartStorage.EmailAPI.Tests`, pelo mesmo motivo da D-21
 
+### Coleção do Postman (#52)
+- D-54: a coleção do Postman fica em `docs/postman/`, no formato v2.1, com
+  uma requisição por rota do gateway, todas pelo 4480, em pastas por domínio;
+  nada chama os serviços direto, porque o gateway é a única porta. Dois
+  ambientes, Local (`https://localhost:4480`) e Docker
+  (`http://localhost:4480`), com o usuário e a senha do seed e nenhum
+  segredo. A requisição "Entrar" guarda o token numa variável da coleção, que
+  o usa no `Authorization`; login manual, e não automático, para a coleção
+  não esconder o vencimento do token. Corpo e IDs são exemplos válidos no
+  banco do seed, em variáveis da coleção, e a descrição diz a regra e o papel
+  exigido; sem testes Postman, porque quem confere o ledger é o roteiro
+- D-55: projeto `SmartStorage.APIGateway.Tests` (xUnit, sem pacote novo), que
+  lê os arquivos do repositório e confere duas coisas: cada rota do
+  `appsettings.json` do gateway (método e caminho, sem a query string, com
+  `{id}` e `{{productId}}` contando como o mesmo trecho variável) tem uma
+  requisição na coleção, e a coleção não tem requisição sem rota; e o
+  `appsettings.Docker.json` declara as mesmas rotas na mesma ordem. A
+  paridade entra aqui porque o merge de arrays por índice do .NET deixa uma
+  rota fora de ordem passar em silêncio, e é o mesmo arquivo que o teste já lê
+
 ## Modelo de dados
 Atual:
 - `Product`, `Shelf`, `Enter`, `Sale`, `Employee`, `Invoice`, `InvoiceItem`,
@@ -333,12 +353,15 @@ Entram ou mudam:
 - #13: `?code=` em `GET /api/storage/products/v1`
 
 Toda rota nova entra no `appsettings.json` e no `appsettings.Docker.json` do
-gateway, na mesma posição.
+gateway, na mesma posição, e na coleção do Postman (D-54); rota que muda de
+corpo, query ou papel exigido muda também na coleção, e rota que sai, sai
+dela.
 
 ## Ordem de implementação
-1. #37, #38, #41, #42, #43, #44, #45, #47, #48, #49 e #51: pequenas e
+1. #37, #38, #41, #42, #43, #44, #45, #47, #48, #49, #51 e #52: pequenas e
    independentes, com a #51 antes da #13, porque corrige uma lacuna de
-   segurança em produtos; e a gravação do custo da #50, cedo, porque venda
+   segurança em produtos, e a #52 antes da #30, para as rotas novas já
+   nascerem na coleção; e a gravação do custo da #50, cedo, porque venda
    feita sem ela fica para sempre fora da margem. A #50 vem antes da #30 sem
    contrariar a constituição: a lacuna da #30 é o texto de erro devolvido ao
    cliente, e a #50 só copia um valor para uma coluna nova, sem criar recusa

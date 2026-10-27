@@ -620,4 +620,6 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
   esperar o token vencer
 - [planejado #35] Nenhuma venda nova tem data futura nem cai num mês já encerrado
 - [planejado #34] A API recusa senha fora da RN-34, mesmo com a tela contornada
+- [planejado #52] A coleção do Postman tem uma requisição para cada rota do
+  gateway, e nenhuma a mais
 - Todos os casos de `tests/ledger_e2e.py` e os testes de `dotnet test` passam
