@@ -95,7 +95,8 @@ movimentação com autor e instante.
   esse limite, e sair revoga o refresh token no servidor
 - RF-02 [feito]: toda API, exceto login e refresh, exige token válido;
   resposta 401 que o refresh não resolve leva o Blazor de volta ao login com o
-  aviso de sessão expirada
+  aviso de sessão expirada. Pela #29, a confirmação de e-mail e a recuperação
+  de senha também são anônimas (RN-35)
 - RF-03 [feito]: o administrador cadastra, edita, lista e exclui usuários e
   define o papel de cada um
 - RF-03a [planejado #30]: cada usuário altera o próprio nome completo e a
@@ -105,7 +106,9 @@ movimentação com autor e instante.
 - RF-04 [feito]: a interface esconde as ações fora do papel, e a API verifica
   o papel de novo
 - RF-41 [planejado #30]: os endpoints de usuário respondem só com id,
-  usuário, nome completo e papel, nunca com hash de senha nem refresh token;
+  usuário, nome completo e papel (com a #33, também se está ativo; com a
+  #29, o e-mail e se está confirmado), nunca com hash de senha nem refresh
+  token;
   listar e buscar usuários por id exige administrador, `user-by-username` sai
   da API e do gateway, e cada usuário lê os próprios dados por
   `GET /api/auth/v1/me`
@@ -115,9 +118,12 @@ movimentação com autor e instante.
   banco, então a troca de papel vale no próximo refresh
 - RF-46 [planejado #33]: excluir ou desativar o usuário, desativar a empresa e
   redefinir a senha encerram as sessões dele na hora: a próxima requisição
-  recebe 401, mesmo com o token ainda no prazo. A troca de papel não encerra
-  a sessão e vale no próximo refresh, em até 60 minutos (RF-43). A empresa
-  depende da #28, e a redefinição de senha da #29
+  recebe 401, mesmo com o token ainda no prazo. Redefinir a senha é tanto o
+  administrador definir a senha de outro usuário quanto o "Esqueci minha
+  senha"; o próprio usuário trocar a senha pela conta não derruba a sessão
+  dele. A troca de papel não encerra a sessão e vale no próximo refresh, em
+  até 60 minutos (RF-43). A empresa depende da #28, e o "Esqueci minha senha"
+  da #29
 
 ### Produtos
 - RF-05 [feito]: cadastro de produto com nome, descrição, imagem (PNG ou
@@ -139,6 +145,10 @@ movimentação com autor e instante.
 - RF-47 [planejado #32]: a edição de prateleiras e colaboradores também exige
   administrador, como o cadastro, porque o volume da prateleira é o que limita
   a alocação (RN-08, RN-40)
+- RF-53 [planejado #51]: a API confere o que hoje só o Blazor confere: a
+  imagem do produto é PNG ou JPEG, pela assinatura do arquivo, e tem até
+  10 MB, no cadastro, na edição e no produto novo da NF-e; e a alocação
+  individual recusa preço menor ou igual a zero, como o lote
 
 ### Entrada de mercadoria (NF-e) (#25)
 - RF-09 [feito]: o operador envia o XML da NF-e modelo 55 e recebe uma prévia
@@ -191,8 +201,8 @@ movimentação com autor e instante.
 - RF-28 [feito]: alerta por e-mail quando uma operação que reduz o saldo
   total do produto o leva para abaixo do estoque mínimo (RN-28): venda,
   carrinho, edição que aumenta a venda e inventário (#8). O ajuste do depósito
-  e a perda também avaliam o alerta [planejado #38]; a alocação não, porque não
-  muda o saldo total
+  também avalia o alerta [planejado #38], inclusive quando registra uma perda;
+  a alocação não, porque não muda o saldo total
 - RF-48 [planejado #39]: os avisos de produto novo e de
   estoque baixo de uma empresa vão para os administradores dela com e-mail
   confirmado, e não mais para um endereço único
@@ -216,7 +226,7 @@ movimentação com autor e instante.
 - RF-31 [planejado #5]: o PDF inclui um resumo das vendas escrito pela IA
 - RF-32 [planejado #27]: o provedor de IA é escolhido por configuração entre
   Gemini e um modelo local no Ollama
-- RF-33 [planejado #27]: a IA recebe ao menos 100 vendas, com nomes de
+- RF-33 [planejado #27]: a IA recebe as 100 vendas mais recentes, com nomes de
   produto e prateleira em vez de IDs, e agregados já calculados por produto e
   por mês, sem dado pessoal
 
@@ -239,12 +249,24 @@ movimentação com autor e instante.
 
 ### E-mail do usuário e senha (#29)
 - RF-38 [planejado #29]: o usuário tem e-mail, confirmado por link de uso
-  único válido por 24 horas
+  único válido por 24 horas; trocar o e-mail exige confirmar o novo endereço,
+  e até lá o antigo continua valendo
 - RF-39 [planejado #29]: "Esqueci minha senha" envia um link de uso único
   válido por 30 minutos, que define a senha nova e derruba as sessões abertas
   na hora (RF-46)
 - RF-40 [planejado #29]: os e-mails de confirmação, de redefinição e de aviso
   de senha alterada vão para o endereço do usuário
+
+### Interface
+- RF-54 [feito]: o Blazor tem um tema escuro único, com a tipografia, o
+  esqueleto de carregamento e a transição entre telas do layout, e desliga as
+  animações quando o sistema pede movimento reduzido (#19)
+- RF-55 [feito]: toda tela cabe na largura do celular, inclusive as tabelas,
+  sem rolagem horizontal da página (#19)
+- RF-56 [planejado #47]: o sistema tem ícone próprio, legível em 16 px, na
+  aba do navegador, na barra superior e no login
+- RF-57 [planejado #48]: o campo só leitura se distingue do editável sem ser
+  preciso clicar nele
 
 ## Regras de negócio
 
@@ -306,7 +328,8 @@ movimentação com autor e instante.
 - RN-20: venda com devolução não pode ser cancelada nem editada abaixo do
   devolvido
 - RN-21: venda totalmente devolvida some da listagem e dos relatórios, mas
-  continua no banco
+  continua no banco; a série de devolvidas do dashboard (RF-51) a conta, no
+  mês da venda, para não subcontar as devoluções
 - RN-22: cada item do carrinho é uma venda independente
 - RN-39 [planejado #35]: a data da venda é hoje ou um dia anterior do mês
   corrente, pelo relógio do servidor; data futura ou de mês anterior é
@@ -382,6 +405,15 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
   hoje é aceito; pela #32 e pelo RF-47 recebe 403 e nada é gravado
 - Usuário excluído ou desativado com a sessão aberta [planejado #33]: a próxima
   requisição recebe 401 e o Blazor volta ao login (RF-46)
+- Administrador tenta desativar a si mesmo [planejado #33]: recusado, para a
+  empresa não ficar sem quem a administre por engano
+- Login de usuário desativado [planejado #33]: 401 com a mesma mensagem de
+  usuário ou senha errados
+- Login de empresa desativada [planejado #28]: com usuário e senha certos, a
+  tela avisa que a empresa está inativa; com a senha errada, a mensagem é a
+  genérica, para não revelar usuários
+- Refresh com access token adulterado ou de outro emissor [planejado #30]: 401,
+  e não 500
 - Usuário altera os próprios dados com a senha atual errada [planejado #30]:
   recusado
 - Senha sem letra, sem número, com menos de 8 caracteres ou igual à atual
@@ -398,7 +430,8 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
   sistema lança a diferença
 - Nome igual ao de outro produto: recusado
 - Imagem que não é PNG ou JPEG: o seletor não a aceita; a imagem é
-  redimensionada no navegador e recusada se ainda passar de 10 MB
+  redimensionada no navegador e recusada se ainda passar de 10 MB. Pela #51,
+  a API recusa também quando a tela é contornada (RF-53)
 
 ### Entrada por NF-e
 - Arquivo que não é NF-e, ou NF-e modelo 65: recusado na prévia, nada é lido
@@ -463,6 +496,8 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
   mostra o aviso, para o carregamento e não põe o erro no chat
 - ReportsAPI fora do ar: o Insights mostra o aviso e libera o botão de
   exportar
+- IA fora do ar ou lenta ao gerar o PDF [planejado #5]: o PDF sai sem o resumo,
+  com uma linha avisando, em vez de falhar o relatório inteiro (RF-31)
 - Cadastro de produto com o RabbitMQ fora do ar: hoje responde erro com o
   produto já gravado (ver as lacunas abaixo)
 - Banco ainda aplicando migrations: os serviços não sobem até o `migrator`
@@ -538,10 +573,11 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 ### Regras (sem issue)
 - O tipo de movimentação `Perda` existe no ledger, mas nenhuma tela ou
   endpoint o lança
-- A alocação individual aceita preço zero ou negativo; o lote recusa
+- A alocação individual aceita preço zero ou negativo; o lote recusa (#51,
+  RF-53)
 - Toda recusa responde 400, inclusive recurso inexistente, que seria 404
 - A imagem do produto só é conferida no Blazor: a API grava qualquer
-  conteúdo, sem checar PNG ou JPEG nem o limite de 10 MB
+  conteúdo, sem checar PNG ou JPEG nem o limite de 10 MB (#51, RF-53)
 
 ### Código (sem issue)
 - As mensagens de validação da AuthenticationAPI estão em inglês ("Username
@@ -549,7 +585,8 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 - `POST /api/storage/email/v1/new-product` está roteado no gateway, mas
   ninguém o chama: a chamada em `CreateProduct.razor` está comentada e o
   `IEmailService` do Blazor ficou sem uso. Ele deixa o administrador
-  disparar o e-mail de produto novo pelo navegador, por fora da fila
+  disparar o e-mail de produto novo pelo navegador, por fora da fila. Sai na
+  #39, junto com o `Email:Destinatario` (RF-48)
 
 ### Falhas (sem issue)
 - Cadastrar produto com o RabbitMQ fora do ar grava o produto e responde 400:

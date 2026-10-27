@@ -61,8 +61,10 @@ que for abandonada deixa o número sem uso.
 
 ### Segurança da AuthenticationAPI (#30)
 - D-14: VOs de usuário em `SmartStorage.Shared/VO`: `UserAccountVO` (id,
-  username, fullName, type) em toda resposta; `UserUpdateVO` (com senha
-  opcional) na edição pelo administrador; `MyAccountUpdateVO` (fullName,
+  username, fullName, type; `active` a partir da #33, `email` e
+  `emailConfirmed` a partir da #29) em toda resposta; `UserUpdateVO`
+  (fullName, type, sem senha) na edição pelo administrador, porque a senha
+  definida por ele tem rota própria (D-50); `MyAccountUpdateVO` (fullName,
   currentPassword, newPassword) no `PUT /me`. A entidade `User` não entra nem
   sai de controller (RF-03a, RF-41, RF-42)
 - D-15: toda recusa de regra lança `BusinessException`, em
@@ -88,17 +90,25 @@ que for abandonada deixa o número sem uso.
 - D-21: projeto novo `SmartStorage.AuthenticationAPI.Tests` (xUnit e
   NSubstitute, sem banco), na solution e portanto no CI; dentro do
   `SmartStorage.API.Tests` ele misturaria dois serviços num projeto
+- D-50: o administrador define a senha de outro usuário por
+  `PUT /api/auth/v1/{userId}/password`, só administrador, e o
+  `update-credentials` deixa de mexer em senha. Rota própria, e não um campo
+  opcional na edição, para a troca de senha ter um ponto só onde, a partir da
+  #33, troca o `UseSessionStamp` e zera o refresh token (RF-46)
 
 ### Regra de senha (#34)
 - D-22: `PasswordPolicy` em `SmartStorage.Shared`, chamado pela API e pelo
   Blazor, que já referencia o Shared, para a regra existir num lugar só; o
-  "diferente da atual" só a API confere, pelo `IPasswordHasher.Verify`
-  (RN-34)
+  "diferente da atual" só a API confere, pelo `IPasswordHasher.Verify`, nos
+  três pontos onde a senha muda: o `PUT /me`, a rota de senha do
+  administrador (D-50) e, com a #29, o `reset-password` (RN-34)
 
 ### Sessão de 9 horas (#31)
 - D-23: `TokenConfigurations:SessionHours` (9) substitui `DaysToExpiry`; o
   login fixa `RefreshTokenExpiryTime`, e o refresh troca o refresh token sem
-  estender esse prazo (RF-44)
+  estender esse prazo (RF-44). O access token vence no que vier primeiro, 60
+  minutos ou o `RefreshTokenExpiryTime`, porque com 60 minutos fixos um
+  refresh perto do fim levaria a sessão até 10 horas
 - D-24: o Blazor guarda o refresh token em `refreshTokenKey`; um
   `RefreshHandler` entre o `AuthHandler` e o `SessionExpiredHandler` renova no
   401 e repete a requisição, com um `SemaphoreSlim` singleton para haver uma
@@ -118,14 +128,19 @@ que for abandonada deixa o número sem uso.
 ### Encerrar a sessão na hora (#33)
 - D-28: `User` ganha `UseActive` (padrão verdadeiro) e `UseSessionStamp`
   (GUID), e o token leva a claim `session_stamp`; desativar e redefinir a
-  senha trocam o carimbo, e excluir apaga a linha
+  senha (a rota do administrador da D-50 e, com a #29, o `reset-password`)
+  trocam o carimbo, e excluir apaga a linha. A troca pelo `PUT /me` não troca,
+  para não derrubar a própria sessão de quem trocou
 - D-29: um `OnTokenValidated` no `AddAuthConfiguration` lê, a cada
   requisição, `UseActive` e `UseSessionStamp` do usuário do token (e, com a
   #28, `ComActive`), numa consulta de uma linha pelo índice único do
   username; usuário ausente, inativo, com carimbo diferente ou de empresa
   inativa falha a autenticação, e a requisição recebe 401 (RF-46). Banco a
   cada requisição, e não cache, porque o RF-46 pede "na hora", e a consulta
-  por índice único é barata no volume de um almoxarifado
+  por índice único é barata no volume de um almoxarifado. É a leitura direta
+  fora do `*Repository` que a constituição permite na AIAPI e na ReportsAPI;
+  perguntar à AuthenticationAPI por HTTP faria dela um ponto único de falha
+  em toda requisição
 - D-30: a troca de papel não troca o carimbo; vale no próximo refresh
   (RF-43)
 - D-31: `PATCH /api/auth/v1/{userId}/active`, só administrador; ninguém
@@ -148,12 +163,25 @@ que for abandonada deixa o número sem uso.
 - D-47: `GET /api/storage/reports/v1/dashboard?year=&month=` na ReportsAPI,
   que já só lê o banco, devolve um `DashboardVO` (em `SmartStorage.Shared`)
   com os indicadores e as séries agregados no servidor, pelo mesmo `(year,
-  month)` da D-33; o Insights deixa de baixar a lista inteira de vendas para
+  month)` da D-33; o `DashboardVO` só responde um agregado, então dispensa o
+  `Parse`/`ParseList`, como a constituição permite. A série de devolvidas
+  soma o `SalReturnedQntd` de todas as vendas do mês, inclusive as
+  totalmente devolvidas, pelo mês da venda, na mesma base das vendidas
+  (RN-21). O Insights deixa de baixar a lista inteira de vendas para
   desenhar os gráficos. As agregações são funções puras testadas no
   `SmartStorage.ReportsAPI.Tests`, e os gráficos usam o `MudChart`, sem
   biblioteca nova. Margem fica de fora: a venda não grava o custo do momento,
   e o custo médio atual reescreveria a margem de vendas antigas (RF-51); ela
   entra pela #50 (D-49)
+
+### Validação na API (#51)
+- D-53: a conferência da imagem é uma função pura em `SmartStorage.Shared`
+  (assinatura de PNG ou JPEG e até 10 MB), chamada no cadastro e na edição
+  do produto e no produto novo da NF-e, que recusa com `Item N (...): motivo`
+  como o resto da nota; imagem vazia continua permitida. A alocação
+  individual recusa `ProductPrice <= 0` com a mesma mensagem do lote (RF-53).
+  Pela assinatura, e não pela extensão ou pelo `Content-Type`, porque o corpo
+  só traz os bytes
 
 ### Custo na venda (#50)
 - D-49: `Sale.SalCusto`, `decimal(18,4)` e anulável, copiado do `ProCusto` na
@@ -185,6 +213,11 @@ que for abandonada deixa o número sem uso.
   ajustes da spec revisada: o administrador geral só vê os administradores
   das outras empresas (RF-49), e a empresa inativa derruba a sessão na hora,
   pela D-29, e não só no refresh (RF-37)
+- D-51: o login confere usuário e senha antes da situação da empresa; só com
+  os dois certos responde "empresa inativa", e com a senha errada a mensagem
+  é a genérica. Quem lê o aviso já provou ter a senha, então ele não revela
+  usuários a quem não tem (constituição: endpoint anônimo responde igual
+  exista o recurso ou não), e o usuário legítimo entende por que não entra
 - D-37: ReportsAPI e AIAPI herdam o filtro por usarem o mesmo contexto; o
   consumidor da EmailAPI não tem token, então empresa e destinatário são
   decididos por quem publica (D-40)
@@ -204,11 +237,14 @@ que for abandonada deixa o número sem uso.
   administradores ativos da empresa com e-mail confirmado) e os põe na
   mensagem, em `Recipients`; a EmailAPI só envia para a lista recebida.
   Lista vazia não publica e vai para o log, e `Email:Destinatario` sai da
-  configuração (RF-48)
+  configuração (RF-48). Sai junto o `POST /api/storage/email/v1/new-product`,
+  que ninguém chama e que enviava para esse endereço por fora da fila: a rota
+  nos dois `appsettings` do gateway, o endpoint da EmailAPI e o
+  `IEmailService` do Blazor
 
 ### Administrador geral (#40)
 - D-41: `GET` e `POST /api/companies/v1/{companyId}/admins`, e o `PATCH
-  .../active` e a redefinição de senha aceitam o `AdministradorGeral` só
+  .../active` e a rota de senha (D-50) aceitam o `AdministradorGeral` só
   quando o alvo tem `UseType = Administrador`; esse caminho usa
   `IgnoreQueryFilters()` com o filtro de tipo explícito, e nenhum outro o usa
   (RF-49)
@@ -219,10 +255,10 @@ que for abandonada deixa o número sem uso.
   Gemini entra por um adaptador sobre o `Google.GenAI` se o pacote não expuser
   `IChatClient` (RF-32). As dependências se justificam por trocar o provedor
   sem mexer no repositório
-- D-43: o contexto da IA leva ao menos 100 vendas (configurável) em CSV, com
-  data, produto, prateleira, quantidade e total líquido, mais agregados por
-  produto e por mês calculados em C# (RF-33); nada de colaborador nem de
-  outro dado pessoal, como manda a constituição
+- D-43: o contexto da IA leva as 100 vendas mais recentes, número fixo, em
+  CSV, com data, produto, prateleira, quantidade e total líquido, mais
+  agregados por produto e por mês calculados em C# (RF-33); nada de
+  colaborador nem de outro dado pessoal, como manda a constituição
 - D-44: a ReportsAPI chama a AIAPI pelo endereço interno, repassando o
   `Authorization` do usuário, para o resumo do PDF (RF-31); se a IA falhar ou
   demorar, o PDF sai sem o resumo e com uma linha avisando. Pela AIAPI, e não
@@ -243,6 +279,19 @@ que for abandonada deixa o número sem uso.
   por serviço, pelo mesmo motivo da D-21: cada um referencia só o serviço que
   testa
 
+### Infraestrutura de teste
+- D-52: o que é preciso do pipeline HTTP para provar (401, 403, a rota
+  anônima, o handler de erro e a checagem da sessão) usa o
+  `Microsoft.AspNetCore.Mvc.Testing`, com o serviço de pé em memória e as
+  dependências de banco trocadas por falsos, e roda no CI; a dependência se
+  justifica porque essas são as regras de segurança, e fora do CI elas só
+  seriam conferidas quando alguém rodasse o roteiro. O que depende do SQL
+  Server de verdade (global query filter, índices únicos por empresa,
+  `DbUpdateException`) fica como caso do `ledger_e2e.py`, sem pacote novo. O
+  código do `SmartStorage.Configurations` ganha o
+  `SmartStorage.Configurations.Tests`, e a EmailAPI, que passa a ter regra
+  própria na #29, o `SmartStorage.EmailAPI.Tests`, pelo mesmo motivo da D-21
+
 ## Modelo de dados
 Atual:
 - `Product`, `Shelf`, `Enter`, `Sale`, `Employee`, `Invoice`, `InvoiceItem`,
@@ -253,6 +302,7 @@ Atual:
   usuário; `PsmSheId` nulo é o depósito
 
 Mudanças:
+- #50: `Sale.SalCusto`, `decimal(18,4)` e anulável
 - #33: `User.UseActive` e `User.UseSessionStamp`
 - #28: tabela `Company` (`ComId`, `ComName`, `ComCnpj` único,
   `ComDateRegister`, `ComActive`); `UseComId`, `ProComId`, `SheComId`,
@@ -265,9 +315,10 @@ Mudanças:
 ## Contratos
 Os atuais são as rotas do gateway (`SmartStorage.APIGateway/appsettings.json`).
 Entram ou mudam:
-- #30: `GET` e `PUT /api/auth/v1/me`; sai `user-by-username`;
-  `update-credentials` recebe `UserUpdateVO`; respostas de usuário em
-  `UserAccountVO`
+- #50: o `SaleVO` passa a trazer o custo da venda
+- #30: `GET` e `PUT /api/auth/v1/me`; `PUT /api/auth/v1/{userId}/password`;
+  sai `user-by-username`; `update-credentials` recebe `UserUpdateVO`, sem
+  senha; respostas de usuário em `UserAccountVO`
 - #31: `POST /api/auth/v1/refresh` e `POST /api/auth/v1/revoke` no gateway
 - #32: `POST`, `PUT` e `DELETE` de `shelf` e `employees` exigem administrador
 - #33: `PATCH /api/auth/v1/{userId}/active`
@@ -277,6 +328,7 @@ Entram ou mudam:
   `PATCH {id}/active`)
 - #29: `confirm-email`, `resend-confirmation`, `forgot-password` e
   `reset-password`, anônimos
+- #39: sai `POST /api/storage/email/v1/new-product`
 - #40: `/api/companies/v1/{companyId}/admins`
 - #13: `?code=` em `GET /api/storage/products/v1`
 
@@ -284,9 +336,13 @@ Toda rota nova entra no `appsettings.json` e no `appsettings.Docker.json` do
 gateway, na mesma posição.
 
 ## Ordem de implementação
-1. #37, #38, #41, #42, #43, #44, #45, #47, #48 e #49: pequenas e
-   independentes; e a gravação do custo da #50, cedo, porque venda feita sem
-   ela fica para sempre fora da margem
+1. #37, #38, #41, #42, #43, #44, #45, #47, #48, #49 e #51: pequenas e
+   independentes, com a #51 antes da #13, porque corrige uma lacuna de
+   segurança em produtos; e a gravação do custo da #50, cedo, porque venda
+   feita sem ela fica para sempre fora da margem. A #50 vem antes da #30 sem
+   contrariar a constituição: a lacuna da #30 é o texto de erro devolvido ao
+   cliente, e a #50 só copia um valor para uma coluna nova, sem criar recusa
+   nem caminho de erro novo
 2. #30 → #34 → #31 → #32 → #33: as lacunas de segurança antes de feature
    nova na mesma área, como manda a constituição
 3. #35 e #36, e depois a #46, que usa o mês e o ano da #36, e o card de
