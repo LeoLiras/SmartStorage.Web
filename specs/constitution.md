@@ -32,6 +32,10 @@ nenhuma mudança pode quebrar.
     nunca uma consulta por item
 - AIAPI e ReportsAPI só leem o banco, por um `*Repository`, sem business nem
   ledger
+- O que vale para todos os serviços (autenticação, checagem da sessão,
+  tratamento de erro) vive no `SmartStorage.Configurations`; a checagem da
+  sessão consulta direto o usuário do token, por índice único, e é a única
+  leitura de banco fora do `*Repository` na AIAPI e na ReportsAPI
 - Comunicação entre serviços que não precisa de resposta vai pela fila do
   RabbitMQ, uma fila por tipo de mensagem; a requisição não espera o consumidor
 - Todo efeito de estoque passa pelo `ProductStockMovementRepository`, que
@@ -50,9 +54,11 @@ nenhuma mudança pode quebrar.
   `ApiException` em resposta de erro
 
 ## Padrão de código
-- VO novo implementa `ISupportHyperMedia`, herda `BaseMessage` e expõe
-  `Parse`/`ParseList`; se precisar de links, ganha um enricher registrado no
-  `Program.cs`
+- VO novo que espelha uma entidade implementa `ISupportHyperMedia`, herda
+  `BaseMessage` e expõe `Parse`/`ParseList`; se precisar de links, ganha um
+  enricher registrado no `Program.cs`. VO que só responde um agregado
+  calculado, sem entidade por trás (como o dashboard), dispensa o
+  `Parse`/`ParseList`
 - Listagem paginada é opcional por query string (`page`, `pageSize` até 100,
   `search`) e devolve o total em `X-Total-Count`; sem `page`, devolve a lista
   inteira
@@ -84,7 +90,8 @@ nenhuma mudança pode quebrar.
   celular, antes do commit
 
 ## Segurança e tratamento de dados
-- Toda API exige JWT, exceto login e refresh
+- Toda API exige JWT, exceto login, refresh e, a partir da #29, os endpoints
+  de confirmação de e-mail e de recuperação de senha
 - A sessão dura no máximo 9 horas desde o login: o token vale 60 minutos e o
   Blazor o renova pelo refresh até esse limite, que a renovação não estende;
   sair revoga o refresh token no servidor
@@ -162,8 +169,9 @@ nenhuma mudança pode quebrar.
   em `Services/IServices/`
 - Testes: `src/SmartStorage.API.Tests`, `src/SmartStorage.Blazor.Tests`, um
   `src/SmartStorage.<Serviço>.Tests` por serviço que tenha regra própria (a
-  partir da #30 o da AuthenticationAPI, da #36 o da ReportsAPI e da #27 o da
-  AIAPI), e o roteiro em `tests/`
+  partir da #30 o da AuthenticationAPI e o do `SmartStorage.Configurations`,
+  da #36 o da ReportsAPI, da #27 o da AIAPI e da #29 o da EmailAPI), e o
+  roteiro em `tests/`
 - Especificações: `specs/constitution.md`, `specs/spec.md`, `specs/plan.md`
   (decisões técnicas) e `specs/tasks.md` (tarefas de cada issue)
 
