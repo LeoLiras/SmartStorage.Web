@@ -155,16 +155,12 @@ namespace SmartStorage_API.Service.Implementations
 
             AssignResponsible(newAllocation.ProductId, newAllocation.EmployeeId);
 
-            var totalBefore = _movementRepository.FindProductTotalBalance(newAllocation.ProductId);
-
             _movementRepository.TransferProductBetweenLocations(
                 newAllocation.ProductId,
                 fromShelfId: null,
                 toShelfId: newAllocation.ShelfId,
                 quantity: newAllocation.ProductQuantity,
                 shelfPrice: newAllocation.ProductPrice);
-
-            _stockAlert.NotifyIfBelowMinimum(newAllocation.ProductId, totalBefore, "Alocação");
 
             var enter = _context.Enters.First(e => e.EntProId == newAllocation.ProductId && e.EntSheId == newAllocation.ShelfId);
 
@@ -243,10 +239,6 @@ namespace SmartStorage_API.Service.Implementations
                 }
             }
 
-            var totalsBefore = productIds.ToDictionary(
-                productId => productId,
-                productId => _movementRepository.FindProductTotalBalance(productId));
-
             var movementDate = DateTime.Now;
 
             using (var transaction = _context.Database.BeginTransaction())
@@ -265,9 +257,6 @@ namespace SmartStorage_API.Service.Implementations
 
                 transaction.Commit();
             }
-
-            foreach (var (productId, totalBefore) in totalsBefore)
-                _stockAlert.NotifyIfBelowMinimum(productId, totalBefore, "Alocação");
 
             var enters = _context.Enters
                 .Where(e => productIds.Contains(e.EntProId) && shelfIds.Contains(e.EntSheId))
