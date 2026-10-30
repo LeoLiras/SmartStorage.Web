@@ -201,7 +201,7 @@ movimentação com autor e instante.
 - RF-28 [feito]: alerta por e-mail quando uma operação que reduz o saldo
   total do produto o leva para abaixo do estoque mínimo (RN-28): venda,
   carrinho, edição que aumenta a venda e inventário (#8). O ajuste do depósito
-  também avalia o alerta [planejado #38], inclusive quando registra uma perda;
+  também avalia o alerta [feito], inclusive quando registra uma perda;
   a alocação não, porque não muda o saldo total
 - RF-48 [planejado #39]: os avisos de produto novo e de
   estoque baixo de uma empresa vão para os administradores dela com e-mail
@@ -565,8 +565,6 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 - a venda aceita qualquer data, inclusive futura ou de um mês já fechado
   (#35, RN-39)
 - o relatório só sai para o mês corrente (#36, RF-50)
-- o ajuste de estoque do depósito não avalia o alerta de estoque mínimo
-  (#38, RF-28)
 
 ### Regras (sem issue)
 - O tipo de movimentação `Perda` existe no ledger, mas nenhuma tela ou
