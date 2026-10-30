@@ -65,14 +65,17 @@ else
                                     }
                                 </MudSelect>
                             </MudItem>
-                            <MudItem xs="12" sm="4">
+                            <MudItem xs="12" sm="6" md="3">
                                 <MudNumericField T="int" Label="Fator de conversão" Value="row.FatorConversao" ValueChanged="@((int value) => ChangeFactor(row, value))" Min="1" HelperText="@($"Unidades por {row.Item.Unidade}")" Variant="Variant.Outlined" />
                             </MudItem>
-                            <MudItem xs="12" sm="4">
+                            <MudItem xs="12" sm="6" md="3">
                                 <MudNumericField T="int" Label="Quantidade de entrada" Value="row.QntdEstoque" ValueChanged="@((int value) => ChangeQuantity(row, value))" Min="1" Error="@(row.QntdEstoque < 1)" ErrorText="Informe a quantidade que entra no estoque" HelperText="@SuggestedText(row)" Variant="Variant.Outlined" />
                             </MudItem>
-                            <MudItem xs="12" sm="4">
-                                <MudTextField T="string" Label="Custo unitário" Value="@UnitCost(row)" ReadOnly="true" HelperText="Valor do item ÷ quantidade" Variant="Variant.Outlined" />
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudTextField T="string" Label="Valor na nota" Value="@row.Item.ValorTotal.ToString("N2", PtBr)" ReadOnly="true" HelperText="@InvoiceValueText(row)" Variant="Variant.Outlined" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudTextField T="string" Label="Custo unitário" Value="@UnitCost(row)" ReadOnly="true" HelperText="Valor na nota ÷ quantidade" Variant="Variant.Outlined" />
                             </MudItem>
                             @if (row.ProductId is null)
                             {
@@ -323,6 +326,8 @@ else
     private string ProductLabel(int? productId) => productId is null ? "Cadastrar novo produto" : products.FirstOrDefault(p => p.Id == productId)?.Name ?? string.Empty;
 
     private static string SuggestedText(ImportRow row) => $"{row.Item.QntdNota.ToString("0.####", PtBr)} {row.Item.Unidade} × {row.FatorConversao}";
+
+    private static string InvoiceValueText(ImportRow row) => $"{row.Item.QntdNota.ToString("0.####", PtBr)} {row.Item.Unidade} × {row.Item.ValorUnitario.ToString("N2", PtBr)}";
 
     private static string UnitCost(ImportRow row) => row.QntdEstoque < 1 ? "—" : (row.Item.ValorTotal / row.QntdEstoque).ToString("N4", PtBr);
 

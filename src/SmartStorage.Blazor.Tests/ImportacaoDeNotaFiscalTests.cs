@@ -187,6 +187,41 @@ public class ImportacaoDeNotaFiscalTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Valor_na_nota_fica_fixo_enquanto_o_fator_muda_o_custo_unitario()
+    {
+        var previa = new
+        {
+            chave = "35260912345678000195550010000012351000012346",
+            numero = "1235",
+            serie = "1",
+            emitenteCnpj = "12345678000195",
+            emitenteNome = "Distribuidora de Ferramentas Ltda",
+            dataEmissao = "2026-09-15T10:30:00",
+            importadaEm = (string?)null,
+            items = new object[]
+            {
+                new { numero = 1, codigo = "7891000100103", codigoInvalido = (string?)null, descricao = "Martelo Unha 27mm Tramontina", unidade = "CX", qntdNota = 2m, valorUnitario = 120m, valorTotal = 240m, productId = (int?)4, productName = "Martelo Unha 27mm", fatorConversao = 6, qntdEstoque = (int?)12 },
+                new { numero = 2, codigo = (string?)null, codigoInvalido = (string?)null, descricao = "Fita Isolante 19mm", unidade = "CX", qntdNota = 2m, valorUnitario = 60m, valorTotal = 120m, productId = (int?)null, productName = (string?)null, fatorConversao = 1, qntdEstoque = (int?)2 },
+            },
+        };
+        Monta(previa);
+        var cut = RenderizaComNota();
+
+        MudTextField<string> Texto(string rotulo) => cut.FindComponents<MudTextField<string>>().Where(t => t.Instance.Label == rotulo).ElementAt(1).Instance;
+
+        Assert.Equal("120,00", Texto("Valor na nota").Value);
+        Assert.Equal("2 CX × 60,00", Texto("Valor na nota").HelperText);
+        Assert.True(Texto("Valor na nota").ReadOnly);
+        Assert.Equal("60,0000", Texto("Custo unitário").Value);
+
+        cut.InvokeAsync(() => Numero(cut, "Fator de conversão", 1).Instance.ValueChanged.InvokeAsync(12));
+
+        cut.WaitForAssertion(() => Assert.Equal("5,0000", Texto("Custo unitário").Value), TimeSpan.FromSeconds(5));
+        Assert.Equal(24, Numero(cut, "Quantidade de entrada", 1).Instance.Value);
+        Assert.Equal("120,00", Texto("Valor na nota").Value);
+    }
+
+    [Fact]
     public void Ligar_o_item_a_um_produto_existente_usa_o_fator_dele_e_esconde_o_cadastro()
     {
         Monta(Previa());
