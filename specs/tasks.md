@@ -245,16 +245,16 @@ navegador.
 | T-37.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | A transferência passa `shelfPrice: enter.EntPrice` ao ledger, exista ou não entrada do produto no destino | RN-11, D-34 | T-00.29 | Caso novo: alocar na A1, transferir para a A2, repreçar a A2 e voltar para a A1 deixa na A1 o preço da A2, com os dois `Transferencia` no mesmo instante; o CT-28 passa a esperar o preço da origem; o CT-29 continua passando e vale como a recusa que a constituição exige, porque a regra não cria recusa nova | `67f1bd0` |
 | T-37.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Atualizar a transferência no `CLAUDE.md` | RN-11 | T-37.01 | O `CLAUDE.md` não diz mais que o destino existente mantém o próprio preço | `048b13f` |
 
-## Abertas
-Na ordem de implementação do plano. Cada issue é desenvolvida numa
-`feature/<número>-<descrição>` criada a partir de `develop`.
-
 ### #38 Alerta no ajuste do depósito (T-38)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|---|
 | T-38.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | `ProductBusinessImplementation` recebe `IStockAlertBusiness` e avalia o alerta no `adjust-stock` e no ajuste do `PUT`, com o saldo total de antes | RF-28, RN-28, D-35 | T-00.29 | Caso novo no padrão do CT-34: ajustar o depósito para abaixo do mínimo gera um aviso nos logs de `smartstorage-api` e `emailapi`, e um segundo ajuste ainda abaixo não gera outro || `9b0e180` |
 | T-38.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Tirar a avaliação do alerta da alocação individual e da em lote | RF-28, D-35 | T-38.01 | `ShelfBusinessImplementation` só avalia o alerta no inventário; CT-34, CT-40 e CT-43 passam || `7066a82` |
-| T-38.03 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | Atualizar os gatilhos do alerta no `CLAUDE.md` | RF-28 | T-38.02 | O `CLAUDE.md` lista venda, carrinho, aumento de venda, inventário e ajuste, e não a alocação | |
+| T-38.03 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Atualizar os gatilhos do alerta no `CLAUDE.md` | RF-28 | T-38.02 | O `CLAUDE.md` lista venda, carrinho, aumento de venda, inventário e ajuste, e não a alocação || `6f4d364` |
+
+## Abertas
+Na ordem de implementação do plano. Cada issue é desenvolvida numa
+`feature/<número>-<descrição>` criada a partir de `develop`.
 
 ### #41 Valor do item da NF-e na importação (T-41)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
