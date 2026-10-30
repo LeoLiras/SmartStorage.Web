@@ -162,6 +162,9 @@ movimentação com autor e instante.
   produtos novos e grava a nota e seus itens; o produto existente passa a usar
   o fator do item e, se não tinha código, recebe o da nota
 - RF-13 [feito]: a importação recalcula o custo médio ponderado do produto
+- RF-58 [planejado #53]: na prévia, a quantidade de entrada acompanha o fator
+  até o operador editá-la; editada, a tela diz que ela foi editada e qual é a
+  sugerida, e o operador pode voltar à sugerida
 
 ### Prateleiras e alocação
 - RF-14 [feito]: prateleira tem nome e volume em litros, e mostra volume

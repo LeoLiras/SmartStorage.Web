@@ -312,6 +312,15 @@ que for abandonada deixa o número sem uso.
   paridade entra aqui porque o merge de arrays por índice do .NET deixa uma
   rota fora de ordem passar em silêncio, e é o mesmo arquivo que o teste já lê
 
+### Quantidade editada na NF-e (#53)
+- D-56: a trava continua só no Blazor, no `QuantityEdited` da linha da
+  prévia. Com ela ligada, o `HelperText` da quantidade passa a "Editada à mão
+  · sugerida: N" (ou "sem sugestão inteira"), e um `MudButton` de texto
+  "Usar sugerida", só quando há sugestão inteira, volta a quantidade a
+  `qCom × fator` e desliga a trava (RF-58). A API não muda, porque recebe a
+  quantidade de entrada pronta; e a quantidade não muda o fator, porque o
+  fator é do produto e é gravado nele na importação
+
 ## Modelo de dados
 Atual:
 - `Product`, `Shelf`, `Enter`, `Sale`, `Employee`, `Invoice`, `InvoiceItem`,
@@ -358,7 +367,7 @@ corpo, query ou papel exigido muda também na coleção, e rota que sai, sai
 dela.
 
 ## Ordem de implementação
-1. #37, #38, #41, #42, #43, #44, #45, #47, #48, #49, #51 e #52: pequenas e
+1. #37, #38, #41, #42, #43, #44, #45, #47, #48, #49, #51, #52 e #53: pequenas e
    independentes, com a #51 antes da #13, porque corrige uma lacuna de
    segurança em produtos, e a #52 antes da #30, para as rotas novas já
    nascerem na coleção; e a gravação do custo da #50, cedo, porque venda

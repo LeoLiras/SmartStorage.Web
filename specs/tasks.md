@@ -321,6 +321,11 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-52.03 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Teste de cobertura: cada rota do gateway tem uma requisição na coleção, e nenhuma requisição fica sem rota | D-55 | T-52.01, T-52.02 | Tirar uma requisição da coleção, ou acrescentar uma sem rota, faz o teste falhar apontando método e caminho | |
 | T-52.04 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Documentar a coleção | D-54 | T-52.03 | O README explica como importar a coleção e os ambientes e que no Local é preciso desligar a verificação de SSL do Postman; o `CLAUDE.md` diz que rota nova entra nos dois `appsettings` e na coleção, e que o teste confere | |
 
+### #53 Quantidade editada na NF-e (T-53)
+| ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|---|
+| T-53.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | Na prévia da NF-e, a quantidade editada à mão mostra "Editada à mão · sugerida: N" (ou "sem sugestão inteira") no texto de ajuda e o botão "Usar sugerida", que volta a `qCom × fator` e religa o recálculo pelo fator | RF-58, D-56 | T-00.29 | bUnit: editar a quantidade do item 2 para 9 mostra "Editada à mão · sugerida: 10", e o fator em 12 não a muda e passa o texto a "sugerida: 120"; "Usar sugerida" a leva a 120 e some, e o fator em 6 volta a recalcular para 60; o `Fator_recalcula_a_quantidade_ate_ela_ser_editada` continua passando; tela conferida em desktop e celular | |
+
 ### #30 Segurança da AuthenticationAPI (T-30)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|---|
