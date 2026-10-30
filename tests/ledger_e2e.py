@@ -1911,6 +1911,49 @@ def ct49(ctx):
     R.exige(enters == 1, "transferencia criou outro Enter na prateleira de volta", "%d linhas" % enters)
 
 
+@caso("CT-50", "Ajuste do deposito avisa o estoque minimo uma vez ao cruzar o limite")
+def ct50(ctx):
+    desde = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    pid = ctx.cria_produto(10, "CT50", minimo=6)
+
+    def ajusta(quantidade):
+        status, _ = ctx.api("POST", "/api/storage/products/v1/%d/adjust-stock" % pid,
+                            {"quantity": quantidade, "reason": "Perda no roteiro"})
+        return status
+
+    R.exige(ajusta(8) == 200, "ajuste para 8 recusado")
+    R.exige(ajusta(5) == 200, "ajuste para 5 recusado")
+    R.exige(ajusta(5) == 400, "ajuste igual ao saldo foi aceito")
+    R.exige(ajusta(3) == 200, "ajuste para 3 recusado")
+    R.exige(ajusta(10) == 200, "ajuste de volta para 10 recusado")
+    status, corpo = ctx.api("PUT", "/api/storage/products/v1/%d" % pid, {
+        "name": "%s %s CT50 editado" % (PREFIXO, EXECUCAO), "descricao": DESCRICAO,
+        "employeeId": ctx.funcionario, "proImage": None, "minimumStock": 6, "volume": 0.01,
+        "stockAdjustment": {"quantity": 4, "reason": "Perda na edicao"}})
+    R.exige(status == 200, "edicao com ajuste para 4 recusada", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(saldos(pid) == {None: 4}, "saldo inesperado depois dos ajustes", "banco %s" % saldos(pid))
+
+    publicado = "Alerta de estoque mínimo publicado para o produto %d:" % pid
+    enviado = "E-mail de estoque mínimo enviado para o produto %d." % pid
+    logs_api, logs_email = "", ""
+    for _ in range(30):
+        logs_api = _logs_desde("smartstorage-api", desde)
+        logs_email = _logs_desde("emailapi", desde)
+        if logs_email.count(enviado) >= 2:
+            break
+        time.sleep(2)
+
+    linhas = [l for l in logs_api.splitlines() if publicado in l]
+    R.exige(len(linhas) == 2, "alerta devia sair so nos ajustes que cruzaram o minimo (8 -> 5 e 10 -> 4)",
+            "publicados %d" % len(linhas))
+    R.exige(all("origem Ajuste" in l for l in linhas), "alerta nao registrou o ajuste como origem",
+            "\n".join(linhas))
+    R.exige(logs_email.count(enviado) == 2, "EmailAPI nao registrou os dois envios em 60 s",
+            "enviados %d" % logs_email.count(enviado))
+    R.nota("minimo 6: ajuste para 8 sem aviso, para 5 avisa, igual recusado, para 3 nao repete, "
+           "edicao de 10 para 4 avisa de novo")
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #

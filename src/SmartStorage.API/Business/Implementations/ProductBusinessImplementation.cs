@@ -18,15 +18,18 @@ namespace SmartStorage_API.Service.Implementations
 
         private readonly IProductStockMovementRepository _movementRepository;
 
+        private readonly IStockAlertBusiness _stockAlert;
+
         #endregion
 
         #region Construtores
 
-        public ProductBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository)
+        public ProductBusinessImplementation(SmartStorageContext context, IProductStockMovementRepository movementRepository, IStockAlertBusiness stockAlert)
         {
             _context = context;
             _converter = new ProductConverter(_context);
             _movementRepository = movementRepository;
+            _stockAlert = stockAlert;
         }
 
         #endregion
@@ -177,12 +180,20 @@ namespace SmartStorage_API.Service.Implementations
             if (product.StockAdjustment is null)
                 _context.SaveChanges();
             else
+            {
+                var delta = CalculateStockAdjustmentDelta(searchProduct, product.StockAdjustment.Quantity);
+
+                var totalBefore = _movementRepository.FindProductTotalBalance(productId);
+
                 _movementRepository.CreateNewStockMovement(
                     productId,
                     shelfId: null,
                     TipoMovimentacao.Ajuste,
-                    CalculateStockAdjustmentDelta(searchProduct, product.StockAdjustment.Quantity),
+                    delta,
                     product.StockAdjustment.Reason);
+
+                _stockAlert.NotifyIfBelowMinimum(productId, totalBefore, "Ajuste");
+            }
 
             return _converter.Parse(searchProduct);
         }
@@ -194,12 +205,18 @@ namespace SmartStorage_API.Service.Implementations
             if (product is null)
                 throw new Exception("Produto não encontrado com o ID informado.");
 
+            var delta = CalculateStockAdjustmentDelta(product, newQuantity);
+
+            var totalBefore = _movementRepository.FindProductTotalBalance(productId);
+
             _movementRepository.CreateNewStockMovement(
                 productId,
                 shelfId: null,
                 TipoMovimentacao.Ajuste,
-                CalculateStockAdjustmentDelta(product, newQuantity),
+                delta,
                 reason);
+
+            _stockAlert.NotifyIfBelowMinimum(productId, totalBefore, "Ajuste");
 
             return _converter.Parse(product);
         }
