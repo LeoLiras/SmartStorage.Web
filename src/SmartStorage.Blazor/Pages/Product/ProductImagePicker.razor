@@ -1,27 +1,30 @@
 @inject VariablesExtensions app
 
-<div class="app-form-image">
-    <img src="@ImageSource" alt="@AltText" />
-</div>
-@if (!string.IsNullOrWhiteSpace(fileName))
-{
-    <MudText Typo="Typo.caption" Class="app-muted">@fileName</MudText>
-}
-@if (!ReadOnly)
-{
-    <div class="d-flex flex-wrap gap-2">
-        <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
-            <ActivatorContent>
-                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Image">
-                    Adicionar Imagem
-                </MudButton>
-            </ActivatorContent>
-        </MudFileUpload>
-        <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Clear" OnClick="@Clear">
-            Limpar
-        </MudButton>
+@* Uma raiz só: no ProductForm o picker fica dentro do grid do app-panel, cujo gap somaria à margem dos botões, e na NF-e não; com a raiz, o espaço é o mesmo nas três telas *@
+<div class="app-image-picker">
+    <div class="app-form-image">
+        <img src="@ImageSource" alt="@AltText" />
     </div>
-}
+    @if (!string.IsNullOrWhiteSpace(fileName))
+    {
+        <MudText Typo="Typo.caption" Class="app-muted mt-2">@fileName</MudText>
+    }
+    @if (!ReadOnly)
+    {
+        <div class="d-flex flex-wrap gap-2 mt-4">
+            <MudFileUpload T="IBrowserFile" Accept=".png, .jpg, .jpeg" MaximumFileCount="1" FilesChanged="@UploadFile">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Image">
+                        Adicionar Imagem
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+            <MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Clear" OnClick="@Clear">
+                Limpar
+            </MudButton>
+        </div>
+    }
+</div>
 
 @code {
 
