@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using Bunit;
@@ -24,6 +25,8 @@ public class ListagemDeProdutosTests : BunitContext, IAsyncLifetime
     Task IAsyncLifetime.DisposeAsync() => DisposeAsync().AsTask();
 
     private const string Produtos = "api/storage/products/v1";
+
+    private IDialogService _dialogo = null!;
 
     private static readonly object Capacete = new
     {
@@ -53,10 +56,16 @@ public class ListagemDeProdutosTests : BunitContext, IAsyncLifetime
     {
         var api = new ApiFalsa().Responde(HttpMethod.Get, Produtos, produtos, total: total);
 
+        _dialogo = Substitute.For<IDialogService>();
+        var referencia = Substitute.For<IDialogReference>();
+        referencia.Result.Returns(Task.FromResult<DialogResult?>(DialogResult.Ok(true)));
+        _dialogo.ShowAsync<Pages.Dialog.Dialog>(default, default, default)
+                .ReturnsForAnyArgs(Task.FromResult(referencia));
+
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMudServices();
         Services.AddSingleton(app ?? new VariablesExtensions());
-        Services.AddSingleton(new Dialogo(Substitute.For<IDialogService>(), new SessionExpiration()));
+        Services.AddSingleton(new Dialogo(_dialogo, new SessionExpiration()));
         Services.AddSingleton<IProductService>(new ProductService(api.Cliente()));
         AddAuthorization().SetAuthorized("admin");
 
@@ -153,41 +162,68 @@ public class ListagemDeProdutosTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
-    public void Primeira_pagina_pede_dez_produtos_a_api_e_pagina_pelo_total_do_servidor()
+    public void Primeira_pagina_pede_doze_produtos_a_api_e_pagina_pelo_total_do_servidor()
     {
-        var api = Monta(Pagina(10), total: 25);
+        var api = Monta(Pagina(12), total: 30);
 
         var cut = RenderizaProdutos();
 
-        cut.WaitForAssertion(() => Assert.Contains("Produto 10", cut.Markup));
-        Assert.Equal(new[] { "?page=1&pageSize=10" }, api.Consultas);
+        cut.WaitForAssertion(() => Assert.Contains("Produto 12", cut.Markup));
+        Assert.Equal(new[] { "?page=1&pageSize=12" }, api.Consultas);
         Assert.Equal(3, cut.FindComponent<MudPagination>().Instance.Count);
+    }
+
+    [Fact]
+    public void Cards_ficam_na_grade_de_colunas_que_dividem_a_pagina()
+    {
+        Monta(Pagina(12), total: 30);
+
+        var cut = RenderizaProdutos();
+
+        cut.WaitForAssertion(() => Assert.Equal(12, cut.FindAll(".app-card-frame > .app-card-grid-paged > .app-product-card").Count));
+    }
+
+    [Fact]
+    public void Erro_da_api_mostra_o_motivo_e_para_o_carregamento()
+    {
+        Monta(Pagina(0), total: 0).Responde(HttpMethod.Get, Produtos, "Falha ao buscar os produtos.", HttpStatusCode.InternalServerError);
+
+        var cut = RenderizaProdutos();
+
+        cut.WaitForAssertion(() => _dialogo.ReceivedWithAnyArgs().ShowAsync<Pages.Dialog.Dialog>(default, default, default));
+        var chamada = _dialogo.ReceivedCalls().Last(c => c.GetMethodInfo().Name == nameof(IDialogService.ShowAsync));
+        var parametros = (DialogParameters)chamada.GetArguments()[1]!;
+        Assert.Equal("Erro", chamada.GetArguments()[0]);
+        Assert.Contains("Erro ao buscar os produtos.", (string)parametros["ContentText"]!);
+        Assert.Contains("Falha ao buscar os produtos.", (string)parametros["ContentText"]!);
+        cut.WaitForAssertion(() => Assert.Contains("Não há produtos registrados no banco de dados.", cut.Markup));
+        Assert.Empty(cut.FindAll(".app-skeleton"));
     }
 
     [Fact]
     public void Trocar_de_pagina_pede_a_pagina_a_api()
     {
-        var api = Monta(Pagina(10), total: 25);
+        var api = Monta(Pagina(12), total: 30);
         var cut = RenderizaProdutos();
-        cut.WaitForAssertion(() => Assert.Contains("Produto 10", cut.Markup));
+        cut.WaitForAssertion(() => Assert.Contains("Produto 12", cut.Markup));
 
         cut.Find("button[aria-label='Next page']").Click();
 
-        cut.WaitForAssertion(() => Assert.Contains("?page=2&pageSize=10", api.Consultas));
+        cut.WaitForAssertion(() => Assert.Contains("?page=2&pageSize=12", api.Consultas));
     }
 
     [Fact]
     public void Pesquisa_vai_para_a_api_a_partir_da_primeira_pagina()
     {
-        var api = Monta(Pagina(10), total: 25);
+        var api = Monta(Pagina(12), total: 30);
         var cut = RenderizaProdutos();
-        cut.WaitForAssertion(() => Assert.Contains("Produto 10", cut.Markup));
+        cut.WaitForAssertion(() => Assert.Contains("Produto 12", cut.Markup));
         cut.Find("button[aria-label='Next page']").Click();
-        cut.WaitForAssertion(() => Assert.Contains("?page=2&pageSize=10", api.Consultas));
+        cut.WaitForAssertion(() => Assert.Contains("?page=2&pageSize=12", api.Consultas));
 
         cut.Find("input").Input("capacete branco");
 
-        cut.WaitForAssertion(() => Assert.Equal("?page=1&pageSize=10&search=capacete%20branco", api.Consultas.Last()), TimeSpan.FromSeconds(5));
+        cut.WaitForAssertion(() => Assert.Equal("?page=1&pageSize=12&search=capacete%20branco", api.Consultas.Last()), TimeSpan.FromSeconds(5));
         cut.WaitForAssertion(() => Assert.Equal(1, cut.FindComponent<MudPagination>().Instance.Selected), TimeSpan.FromSeconds(5));
     }
 

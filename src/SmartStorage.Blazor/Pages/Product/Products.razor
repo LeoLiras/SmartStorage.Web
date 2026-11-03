@@ -30,7 +30,8 @@ else if(products.Count == 0)
 }
 else
 {
-    <div class="app-card-grid mt-4">
+    <div class="app-card-frame mt-4">
+    <div class="app-card-grid app-card-grid-paged">
         @foreach (var product in products)
         {
             <article class="@(selected.ContainsKey(product.Id) ? "app-product-card is-selected" : "app-product-card")">
@@ -77,6 +78,7 @@ else
             </article>
         }
     </div>
+    </div>
 
     <div class="d-flex justify-center mt-6">
         <MudPagination Color="Color.Primary" Count="PageCount" Selected="currentPage" SelectedChanged="ChangePage" />
@@ -92,7 +94,7 @@ else
     List<ProductVO> products = new();
 
     private int currentPage = 1;
-    private int pageSize = 10;
+    private int pageSize = 12;
     private int total = 0;
     private int request = 0;
 

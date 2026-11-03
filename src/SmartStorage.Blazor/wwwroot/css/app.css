@@ -278,6 +278,42 @@ code {
     gap: 16px;
 }
 
+/* Grade paginada: o auto-fill chega a 5 colunas, e uma página de 12 terminava
+   com buraco. Só 1, 2, 3, 4 e 6 colunas, que dividem o tamanho da página, nos
+   mesmos 240px mínimos por card. A faixa vem de container query e não de
+   media query porque a largura útil muda com o menu lateral aberto ou fechado. */
+.app-card-frame {
+    container-type: inline-size;
+}
+
+.app-card-grid-paged {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+@container (min-width: 496px) {
+    .app-card-grid-paged {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@container (min-width: 752px) {
+    .app-card-grid-paged {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@container (min-width: 1008px) {
+    .app-card-grid-paged {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@container (min-width: 1520px) {
+    .app-card-grid-paged {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
+
 .app-product-card {
     display: flex;
     flex-direction: column;
