@@ -262,14 +262,14 @@ navegador.
 |---|---|---|---|---|---|---|
 | T-42.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Margem entre a moldura da imagem e a linha de botões no `ProductImagePicker` | RF-05 | T-00.29 | Cadastro e edição de produto e produto novo na NF-e conferidos em desktop e celular, com e sem o nome do arquivo: os botões não encostam na moldura || `c461189` |
 
-## Abertas
-Na ordem de implementação do plano. Cada issue é desenvolvida numa
-`feature/<número>-<descrição>` criada a partir de `develop`.
-
 ### #43 Página de produtos com a linha cheia (T-43)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|---|
-| T-43.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | Colunas da grade de cards por faixa de largura, com contagens que dividem o tamanho da página, e o `pageSize` de Produtos em estoque ajustado a elas | RF-06, D-10 | T-00.29 | bUnit: a tela pede a página com o novo `pageSize`; conferida em celular, tablet, desktop e tela larga, com toda página que não é a última terminando com a linha cheia | |
+| T-43.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Colunas da grade de cards por faixa de largura, com contagens que dividem o tamanho da página, e o `pageSize` de Produtos em estoque ajustado a elas | RF-06, D-10 | T-00.29 | bUnit: a tela pede a página com o novo `pageSize`; conferida em celular, tablet, desktop e tela larga, com toda página que não é a última terminando com a linha cheia || `ea58928` |
+
+## Abertas
+Na ordem de implementação do plano. Cada issue é desenvolvida numa
+`feature/<número>-<descrição>` criada a partir de `develop`.
 
 ### #44 Botão Voltar no formulário de produto (T-44)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
