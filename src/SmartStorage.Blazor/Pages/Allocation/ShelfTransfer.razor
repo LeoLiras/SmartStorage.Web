@@ -20,7 +20,7 @@ else if (entry.ProductQuantity == 0)
 }
 else
 {
-    <ProductForm ProductId="entry.ProductId" ReadOnly="true" SubmitText="Transferir" OnSave="TransferProduct">
+    <ProductForm ProductId="entry.ProductId" ReadOnly="true" SubmitText="Transferir" BackHref="@app.productsInShelvesPage" OnSave="TransferProduct">
         <MudItem xs="12">
             <section class="app-panel">
                 <MudText Typo="Typo.subtitle1" Class="app-panel-title">Transferência</MudText>

@@ -101,7 +101,13 @@ else if(product is not null)
             @ChildContent
 
             <MudItem xs="12">
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">@(SubmitText ?? (ProductId != 0 ? "Atualizar" : "Criar"))</MudButton>
+                <div class="d-flex flex-wrap gap-2">
+                    @if (BackHref is not null)
+                    {
+                        <MudButton Variant="Variant.Text" Href="@BackHref">Voltar</MudButton>
+                    }
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">@(SubmitText ?? (ProductId != 0 ? "Atualizar" : "Criar"))</MudButton>
+                </div>
             </MudItem>
         </MudGrid>
     </EditForm>
@@ -124,6 +130,9 @@ else if(product is not null)
 
     [Parameter]
     public string SubmitText { get; set; }
+
+    [Parameter]
+    public string BackHref { get; set; }
 
     [Parameter]
     public RenderFragment ChildContent { get; set; }

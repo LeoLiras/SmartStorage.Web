@@ -86,6 +86,22 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Voltar_leva_a_produtos_em_estoque_sem_enviar_a_edicao()
+    {
+        var api = Monta();
+        var cut = Renderiza();
+
+        Campo(cut, "Saldo real conferido").Change("40");
+        Campo(cut, "Motivo").Change("Recontagem do inventario");
+        var voltar = cut.FindAll("a").Single(a => a.TextContent.Trim() == "Voltar");
+
+        Assert.Equal("products", voltar.GetAttribute("href"));
+        voltar.Click();
+
+        Assert.DoesNotContain(api.Requisicoes, r => r.Metodo != HttpMethod.Get);
+    }
+
+    [Fact]
     public void Atualizar_envia_edicao_e_ajuste_numa_unica_requisicao()
     {
         var api = Monta();

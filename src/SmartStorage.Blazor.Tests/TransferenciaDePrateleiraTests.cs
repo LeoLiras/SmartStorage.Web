@@ -112,6 +112,22 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Voltar_leva_a_produtos_nas_prateleiras_sem_transferir()
+    {
+        var api = Monta(EntradaNaPrateleira(8));
+        var cut = RenderizaTransferencia();
+
+        var destino = cut.FindComponent<MudSelect<int>>();
+        cut.InvokeAsync(() => destino.Instance.ValueChanged.InvokeAsync(2));
+        var voltar = cut.FindAll("a").Single(a => a.TextContent.Trim() == "Voltar");
+
+        Assert.Equal("products/shelves", voltar.GetAttribute("href"));
+        voltar.Click();
+
+        Assert.DoesNotContain(api.Requisicoes, r => r.Metodo != HttpMethod.Get);
+    }
+
+    [Fact]
     public void Transferir_envia_a_prateleira_de_destino()
     {
         var api = Monta(EntradaNaPrateleira(8));

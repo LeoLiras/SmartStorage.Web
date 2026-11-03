@@ -7,7 +7,7 @@
 
 <MudText Typo="Typo.h5" Class="app-page-title mt-2">Editar produto</MudText>
 
-<ProductForm ProductId="productId" OnSave="UpdateProduct"></ProductForm>
+<ProductForm ProductId="productId" BackHref="@app.productsInStockPage" OnSave="UpdateProduct"></ProductForm>
 
 @code {
 

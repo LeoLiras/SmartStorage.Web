@@ -105,6 +105,21 @@ public class DevolucaoDeVendaTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Voltar_leva_a_vendas_sem_registrar_a_devolucao()
+    {
+        var api = Monta(VendaComDevolucao(vendida: 5, devolvida: 1));
+        var cut = RenderizaDevolucao();
+
+        Campo(cut, "Quantidade a devolver").Change("2");
+        var voltar = cut.FindAll("a").Single(a => a.TextContent.Trim() == "Voltar");
+
+        Assert.Equal("products/sales", voltar.GetAttribute("href"));
+        voltar.Click();
+
+        Assert.DoesNotContain(api.Requisicoes, r => r.Metodo != HttpMethod.Get);
+    }
+
+    [Fact]
     public void Devolver_envia_a_quantidade_para_a_rota_de_devolucao_da_venda()
     {
         var api = Monta(VendaComDevolucao(vendida: 5, devolvida: 1));
