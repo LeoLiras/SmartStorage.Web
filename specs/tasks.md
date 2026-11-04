@@ -292,8 +292,8 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 ### #47 Ícone próprio (T-47)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|---|
-| T-47.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | Ícone em SVG nas cores do layout, legível em 16 px | RF-56 | T-00.29 | O SVG está em `wwwroot` e foi aprovado pelo usuário | |
-| T-47.02 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | O ícone no lugar do `.brand-mark` na barra superior e no login; `favicon.svg`, `favicon.png` de reserva e `apple-touch-icon`; título "Smart Storage"; o `icon-192.png` do template trocado ou removido | RF-56 | T-47.01 | Aba, barra superior e login conferidos em desktop e celular, sem o "@" do template; a imagem do Docker serve o `favicon.svg` como `image/svg+xml` | |
+| T-47.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Ícone em SVG nas cores do layout, legível em 16 px | RF-56 | T-00.29 | O SVG está em `wwwroot` e foi aprovado pelo usuário | `9974674` |
+| T-47.02 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | O ícone no lugar do `.brand-mark` na barra superior e no login; `favicon.svg`, `favicon.png` de reserva e `apple-touch-icon`; título "Smart Storage"; o `icon-192.png` do template trocado ou removido | RF-56 | T-47.01 | Aba, barra superior e login conferidos em desktop e celular, sem o "@" do template; a imagem do Docker serve o `favicon.svg` como `image/svg+xml` | |
 
 ### #48 Campo só leitura distinto do editável (T-48)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
