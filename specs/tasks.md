@@ -272,14 +272,22 @@ navegador.
 |---|---|---|---|---|---|---|
 | T-44.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Botão Voltar no `ProductForm`, com o destino por parâmetro: Produtos em estoque na edição e no cadastro, Produtos nas prateleiras na transferência e Vendas na devolução | RF-05, RF-07, RF-18, RF-26 | T-00.29 | bUnit: na edição, Voltar navega para Produtos em estoque sem enviar o `PUT`, e na transferência e na devolução para a listagem de cada uma sem enviar nada; as quatro telas conferidas em desktop e celular || `4a3d584` |
 
+### #45 Campo numérico vermelho sem o motivo (T-45)
+A causa não era a falta de `HelperText`. No MudBlazor 8.15, a validação que
+roda quando o usuário digita regrava o `ErrorText` com o próprio resultado, e o
+texto vindo da tela não volta enquanto não mudar: o `Error` fica ligado e o
+motivo some. O carrinho tinha o mesmo defeito, que o teste manual não pegou
+porque o erro vinha da conferência ao abrir, sem digitação, e entrou na tarefa
+com o ok do usuário. A NF-e não tem: a quantidade só chega a zero pela
+sugestão, sem digitação no campo.
+
+| ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|---|
+| T-45.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O motivo da quantidade aparece também depois da digitação, na alocação em lote e no carrinho: a regra vai no `Validation` do campo, e `Error`/`ErrorText` ficam para o estado ao abrir | RF-16, RF-22 | T-00.29 | bUnit, falhando antes da correção: digitar acima do depósito no lote mostra "Há N no depósito" e acima da prateleira no carrinho mostra "Há N na prateleira"; produto sem saldo no lote abre com o motivo; a quantidade zero da NF-e mostra o motivo; tela conferida em desktop e celular | `91c6f2f` |
+
 ## Abertas
 Na ordem de implementação do plano. Cada issue é desenvolvida numa
 `feature/<número>-<descrição>` criada a partir de `develop`.
-
-### #45 Campo numérico vermelho sem o motivo (T-45)
-| ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
-|---|---|---|---|---|---|---|
-| T-45.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | O `ErrorText` da quantidade na alocação em lote aparece, como já aparece no carrinho | RF-16 | T-00.29 | bUnit, falhando antes da correção: lote acima do depósito mostra "Há N no depósito"; testes do carrinho ("Há N na prateleira") e da NF-e (quantidade zero mostra o motivo) seguem passando; tela conferida em desktop e celular | |
 
 ### #47 Ícone próprio (T-47)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
