@@ -50,6 +50,17 @@ public class LoginTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Login_mostra_o_icone_da_marca()
+    {
+        Monta();
+        var cut = Render<Login>();
+
+        var icone = cut.Find(".brand img.brand-mark");
+        Assert.Equal("favicon.svg", icone.GetAttribute("src"));
+        Assert.Contains("Smart Storage", cut.Find(".brand").TextContent);
+    }
+
+    [Fact]
     public void Formulario_sem_senha_nao_chama_o_login()
     {
         var auth = Monta();

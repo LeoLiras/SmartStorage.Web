@@ -133,10 +133,9 @@ code {
 
 .brand-mark {
     display: block;
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    background: linear-gradient(135deg, #6D4AFF, #2A3D8F);
+    flex: none;
+    width: 24px;
+    height: 24px;
 }
 
 .app-user {
