@@ -167,6 +167,20 @@ public class CarrinhoDeVendasTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Digitar_quantidade_acima_da_prateleira_mostra_o_motivo_no_campo()
+    {
+        var api = Monta(Item(1, 1, 10.0m, disponivel: 3));
+        api.Responde(HttpMethod.Get, Alocacoes, new[] { Entrada(1, 3, 10.0m) });
+        var cut = Renderiza<Cart>();
+        cut.WaitForAssertion(() => Assert.Contains("Disponível: 3", cut.Markup));
+        Assert.DoesNotContain("Há 3 na prateleira", cut.Markup);
+
+        cut.FindAll("td input")[0].Change("4");
+
+        cut.WaitForAssertion(() => Assert.Contains("Há 3 na prateleira", cut.Markup));
+    }
+
+    [Fact]
     public void Alterar_quantidade_e_remover_item_recalculam_o_total()
     {
         var api = Monta(Item(1, 2, 10.0m, disponivel: 10), Item(2, 1, 5.5m, disponivel: 10));

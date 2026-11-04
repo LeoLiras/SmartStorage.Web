@@ -36,7 +36,7 @@ else
                     <MudTd DataLabel="Prateleira">@context.ShelfName</MudTd>
                     <MudTd DataLabel="Preço" Class="app-cell-number num">@context.Price.ToString("N2", PtBr)</MudTd>
                     <MudTd DataLabel="Quantidade" Class="app-cell-number">
-                        <MudNumericField T="int" Value="context.Qntd" ValueChanged="@(q => cart.SetQuantityAsync(context.EnterId, q))" Min="1" Error="context.ExceedsAvailable" ErrorText="@($"Há {context.Available} na prateleira")" HelperText="@($"Disponível: {context.Available}")" Variant="Variant.Outlined" Margin="Margin.Dense" aria-label="@($"Quantidade de {context.ProductName}")" />
+                        <MudNumericField T="int" Value="context.Qntd" ValueChanged="@(q => cart.SetQuantityAsync(context.EnterId, q))" Min="1" Validation="@(new Func<int, string>(qntd => QuantityError(context, qntd)))" Error="context.ExceedsAvailable" ErrorText="@QuantityError(context, context.Qntd)" HelperText="@($"Disponível: {context.Available}")" Variant="Variant.Outlined" Margin="Margin.Dense" aria-label="@($"Quantidade de {context.ProductName}")" />
                     </MudTd>
                     <MudTd DataLabel="Subtotal" Class="app-cell-number num">@context.Subtotal.ToString("N2", PtBr)</MudTd>
                     <MudTd DataLabel="Ações" Class="app-cell-actions">
@@ -96,6 +96,11 @@ else
     #endregion
 
     #region Methods
+
+    // O motivo vai no Validation e não só no ErrorText: na digitação a validação
+    // do MudBlazor regrava o ErrorText com o próprio resultado, e o texto vindo da
+    // tela some se não mudar. Error e ErrorText ficam para o saldo conferido ao abrir.
+    private static string QuantityError(SaleCartItem item, int qntd) => qntd > item.Available ? $"Há {item.Available} na prateleira" : null;
 
     private async Task RefreshAvailability()
     {

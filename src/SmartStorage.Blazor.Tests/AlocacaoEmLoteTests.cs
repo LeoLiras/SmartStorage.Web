@@ -186,6 +186,37 @@ public class AlocacaoEmLoteTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Quantidade_acima_do_deposito_mostra_o_motivo_no_campo()
+    {
+        Monta(new[] { Produto(41, 10m, deposito: 10) }, new[] { Entrada(1, 41, 1, 3) });
+        var cut = RenderizaLote("41");
+        Assert.DoesNotContain("Há 10 no depósito", cut.Markup);
+
+        Quantidade(cut).Find("input").Change("11");
+
+        cut.WaitForAssertion(() => Assert.Contains("Há 10 no depósito", cut.Markup));
+        Assert.True(Quantidade(cut).Instance.Error);
+
+        Quantidade(cut).Find("input").Change("10");
+
+        cut.WaitForAssertion(() => Assert.DoesNotContain("Há 10 no depósito", cut.Markup));
+        Assert.False(Quantidade(cut).Instance.Error);
+    }
+
+    [Fact]
+    public void Produto_sem_saldo_no_deposito_abre_com_o_motivo_no_campo()
+    {
+        Monta(new[] { Produto(41, 10m, deposito: 0) }, Array.Empty<object>());
+
+        var cut = RenderizaLote("41");
+
+        Assert.Contains("Há 0 no depósito", cut.Markup);
+    }
+
+    private static IRenderedComponent<MudNumericField<int>> Quantidade(IRenderedComponent<IComponent> cut)
+        => cut.FindComponents<MudNumericField<int>>().Single(n => n.Instance.Label == "Quantidade");
+
+    [Fact]
     public void Escolher_outra_prateleira_para_produto_ja_alocado_mostra_a_regra()
     {
         Monta(new[] { Produto(41, 10m) }, new[] { Entrada(1, 41, 1, 3) });

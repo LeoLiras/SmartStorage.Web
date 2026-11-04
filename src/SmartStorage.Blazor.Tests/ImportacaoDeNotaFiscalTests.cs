@@ -187,6 +187,37 @@ public class ImportacaoDeNotaFiscalTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Quantidade_zero_mostra_o_motivo_no_campo()
+    {
+        var previa = new
+        {
+            chave = "35260912345678000195550010000012361000012347",
+            numero = "1236",
+            serie = "1",
+            emitenteCnpj = "12345678000195",
+            emitenteNome = "Distribuidora de Ferramentas Ltda",
+            dataEmissao = "2026-09-15T10:30:00",
+            importadaEm = (string?)null,
+            items = new object[]
+            {
+                new { numero = 1, codigo = (string?)null, codigoInvalido = (string?)null, descricao = "Fita Isolante 20 Metros", unidade = "RL", qntdNota = 2.5m, valorUnitario = 4m, valorTotal = 10m, productId = (int?)null, productName = (string?)null, fatorConversao = 1, qntdEstoque = (int?)null },
+            },
+        };
+        Monta(previa);
+        var cut = RenderizaComNota();
+
+        Assert.Contains("Informe a quantidade que entra no estoque", cut.Markup);
+
+        cut.InvokeAsync(() => Numero(cut, "Fator de conversão", 0).Instance.ValueChanged.InvokeAsync(2));
+        cut.WaitForAssertion(() => Assert.Equal(5, Numero(cut, "Quantidade de entrada", 0).Instance.Value), TimeSpan.FromSeconds(5));
+        Assert.DoesNotContain("Informe a quantidade que entra no estoque", cut.Markup);
+
+        cut.InvokeAsync(() => Numero(cut, "Fator de conversão", 0).Instance.ValueChanged.InvokeAsync(3));
+        cut.WaitForAssertion(() => Assert.Equal(0, Numero(cut, "Quantidade de entrada", 0).Instance.Value), TimeSpan.FromSeconds(5));
+        Assert.Contains("Informe a quantidade que entra no estoque", cut.Markup);
+    }
+
+    [Fact]
     public void Valor_na_nota_fica_fixo_enquanto_o_fator_muda_o_custo_unitario()
     {
         var previa = new

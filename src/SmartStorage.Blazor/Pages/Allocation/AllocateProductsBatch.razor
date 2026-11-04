@@ -43,7 +43,7 @@ else
                         </div>
                         <MudGrid Spacing="3">
                             <MudItem xs="12" sm="4">
-                                <MudNumericField T="int" Label="Quantidade" @bind-Value="row.Qntd" Min="1" Error="@(row.Qntd > row.Product.Qntd)" ErrorText="@($"Há {row.Product.Qntd} no depósito")" Variant="Variant.Outlined" />
+                                <MudNumericField T="int" Label="Quantidade" @bind-Value="row.Qntd" Min="1" Validation="@(new Func<int, string>(qntd => QuantityError(row, qntd)))" Error="@(QuantityError(row, row.Qntd) is not null)" ErrorText="@QuantityError(row, row.Qntd)" Variant="Variant.Outlined" />
                             </MudItem>
                             <MudItem xs="12" sm="4">
                                 <MudNumericField Culture="InputCulture.PtBr" T="decimal" Label="Preço" @bind-Value="row.Price" Format="F2" Min="0m" HelperText="@(row.Product.PrecoInicial is null ? "Produto sem preço inicial" : "Preço inicial do produto")" Variant="Variant.Outlined" />
@@ -275,6 +275,11 @@ else
     {
         rows.Remove(row);
     }
+
+    // O motivo vai no Validation e não só no ErrorText: na digitação a validação
+    // do MudBlazor regrava o ErrorText com o próprio resultado, e o texto vindo da
+    // tela some se não mudar. Error e ErrorText ficam para o estado ao abrir.
+    private static string QuantityError(BatchRow row, int qntd) => qntd > row.Product.Qntd ? $"Há {row.Product.Qntd} no depósito" : null;
 
     private static decimal RequiredVolume(BatchRow row) => row.Qntd * (row.Product.Volume ?? 0);
 
