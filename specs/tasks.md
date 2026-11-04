@@ -285,15 +285,21 @@ sugestão, sem digitação no campo.
 |---|---|---|---|---|---|---|
 | T-45.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O motivo da quantidade aparece também depois da digitação, na alocação em lote e no carrinho: a regra vai no `Validation` do campo, e `Error`/`ErrorText` ficam para o estado ao abrir | RF-16, RF-22 | T-00.29 | bUnit, falhando antes da correção: digitar acima do depósito no lote mostra "Há N no depósito" e acima da prateleira no carrinho mostra "Há N na prateleira"; produto sem saldo no lote abre com o motivo; a quantidade zero da NF-e mostra o motivo; tela conferida em desktop e celular | `91c6f2f` |
 
-## Abertas
-Na ordem de implementação do plano. Cada issue é desenvolvida numa
-`feature/<número>-<descrição>` criada a partir de `develop`.
-
 ### #47 Ícone próprio (T-47)
+Na T-47.02, a pedido do usuário, o `favicon.svg` perdeu o quadrado de fundo,
+que destoava da barra superior: o mesmo arquivo serve a aba, a barra e o
+login. Numa aba clara do navegador o brilho branco some e fica só a caixa,
+aceito pelo usuário. O `apple-touch-icon` mantém o fundo, porque o iOS pinta
+de preto o que é transparente.
+
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|---|
 | T-47.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Ícone em SVG nas cores do layout, legível em 16 px | RF-56 | T-00.29 | O SVG está em `wwwroot` e foi aprovado pelo usuário | `9974674` |
-| T-47.02 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | O ícone no lugar do `.brand-mark` na barra superior e no login; `favicon.svg`, `favicon.png` de reserva e `apple-touch-icon`; título "Smart Storage"; o `icon-192.png` do template trocado ou removido | RF-56 | T-47.01 | Aba, barra superior e login conferidos em desktop e celular, sem o "@" do template; a imagem do Docker serve o `favicon.svg` como `image/svg+xml` | |
+| T-47.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O ícone no lugar do `.brand-mark` na barra superior e no login; `favicon.svg`, `favicon.png` de reserva e `apple-touch-icon`; título "Smart Storage"; o `icon-192.png` do template trocado ou removido | RF-56 | T-47.01 | Aba, barra superior e login conferidos em desktop e celular, sem o "@" do template; a imagem do Docker serve o `favicon.svg` como `image/svg+xml` | `9298dce` |
+
+## Abertas
+Na ordem de implementação do plano. Cada issue é desenvolvida numa
+`feature/<número>-<descrição>` criada a partir de `develop`.
 
 ### #48 Campo só leitura distinto do editável (T-48)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
