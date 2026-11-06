@@ -297,15 +297,22 @@ de preto o que é transparente.
 | T-47.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Ícone em SVG nas cores do layout, legível em 16 px | RF-56 | T-00.29 | O SVG está em `wwwroot` e foi aprovado pelo usuário | `9974674` |
 | T-47.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O ícone no lugar do `.brand-mark` na barra superior e no login; `favicon.svg`, `favicon.png` de reserva e `apple-touch-icon`; título "Smart Storage"; o `icon-192.png` do template trocado ou removido | RF-56 | T-47.01 | Aba, barra superior e login conferidos em desktop e celular, sem o "@" do template; a imagem do Docker serve o `favicon.svg` como `image/svg+xml` | `9298dce` |
 
+### #48 Campo só leitura distinto do editável (T-48)
+O fundo do só leitura chegou ao roxo da cor primária a 10% depois de o
+usuário recusar o roxo a 16%, o cinza claro e o tom do fundo da página; o
+campo fica sem borda, sem destaque de foco, sem as setas do numérico e com o
+rótulo parado no foco quando está vazio, porque o MudBlazor o subia ao clicar.
+A transferência não tem quantidade a transferir, porque move o saldo inteiro:
+o campo editável conferido no bUnit é a prateleira de destino.
+
+| ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|---|
+| T-48.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Estilo de campo só leitura em `app.css` (classe `app-readonly`, tokens do tema escuro), mostrado num campo editável ao lado de um só leitura | RF-57, D-48 | T-00.29 | Proposta aprovada pelo usuário no tema escuro | `ea011a3` |
+| T-48.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | A classe nos campos sempre só leitura (`ProductForm`, alocação individual e em lote, NF-e, transferência, devolução) e nos do `ProductForm`, `EmployeeSelect`, `MudDatePicker` e `ProductImagePicker` quando `ReadOnly`; o Produto da venda individual troca `Disabled` por `ReadOnly` | RF-05, RF-57, D-48 | T-48.01 | bUnit: na transferência, os campos do produto saem com `app-readonly` e a quantidade a transferir sem; as sete telas conferidas em desktop e celular, com o só leitura reconhecível sem clicar | `f1b833b` |
+
 ## Abertas
 Na ordem de implementação do plano. Cada issue é desenvolvida numa
 `feature/<número>-<descrição>` criada a partir de `develop`.
-
-### #48 Campo só leitura distinto do editável (T-48)
-| ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
-|---|---|---|---|---|---|---|
-| T-48.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | Estilo de campo só leitura em `app.css` (classe `app-readonly`, tokens do tema escuro), mostrado num campo editável ao lado de um só leitura | RF-57, D-48 | T-00.29 | Proposta aprovada pelo usuário no tema escuro | |
-| T-48.02 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | A classe nos campos sempre só leitura (`ProductForm`, alocação individual e em lote, NF-e, transferência, devolução) e nos do `ProductForm`, `EmployeeSelect`, `MudDatePicker` e `ProductImagePicker` quando `ReadOnly`; o Produto da venda individual troca `Disabled` por `ReadOnly` | RF-05, RF-57, D-48 | T-48.01 | bUnit: na transferência, os campos do produto saem com `app-readonly` e a quantidade a transferir sem; as sete telas conferidas em desktop e celular, com o só leitura reconhecível sem clicar | |
 
 ### #49 Texto do preço no lote (T-49)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
