@@ -160,6 +160,28 @@ public class TransferenciaDePrateleiraTests : BunitContext, IAsyncLifetime
         Assert.Equal("Transferir", cut.Find("button[type=submit]").TextContent.Trim());
     }
 
+    private static bool TemEstiloSomenteLeitura(IRenderedComponent<IComponent> cut, string rotulo) =>
+        cut.FindAll("label").First(l => l.TextContent.Trim() == rotulo).Closest(".app-readonly") is not null;
+
+    [Fact]
+    public void Campos_so_leitura_saem_com_app_readonly_e_o_destino_sem()
+    {
+        Monta(EntradaNaPrateleira(8));
+        var cut = RenderizaTransferencia();
+
+        string[] somenteLeitura =
+        [
+            "Nome do Produto", "Colaborador Responsável", "Código de barras", "Descrição",
+            "Quantidade no depósito", "Total (depósito + prateleiras)", "Data de registro",
+            "Estoque mínimo", "Volume (L)", "Preço inicial", "Fator de conversão", "Custo médio",
+            "Prateleira atual", "Quantidade na prateleira",
+        ];
+
+        Assert.All(somenteLeitura, rotulo => Assert.True(TemEstiloSomenteLeitura(cut, rotulo), $"{rotulo} saiu sem app-readonly"));
+        Assert.False(TemEstiloSomenteLeitura(cut, "Prateleira de destino"));
+        Assert.Contains("app-readonly", cut.Find(".app-image-picker").ClassList);
+    }
+
     [Fact]
     public void Destino_comeca_vazio_e_mostra_a_prateleira_escolhida()
     {

@@ -26,10 +26,10 @@ else
                 <MudText Typo="Typo.subtitle1" Class="app-panel-title">Transferência</MudText>
                 <MudGrid Spacing="3">
                     <MudItem xs="12" sm="4">
-                        <MudTextField T="string" Label="Prateleira atual" Value="entry.ShelfName" ReadOnly="true" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Prateleira atual" Value="entry.ShelfName" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="4">
-                        <MudNumericField T="int" Label="Quantidade na prateleira" Value="entry.ProductQuantity" ReadOnly="true" Variant="Variant.Outlined" />
+                        <MudNumericField T="int" Label="Quantidade na prateleira" Value="entry.ProductQuantity" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="4">
                         <MudSelect T="int" @bind-Value="transfer.ShelfId" ToStringFunc="ShelfLabel" Label="Prateleira de destino" OpenIcon="@Icons.Material.Filled.Storefront" HelperText="Todo o saldo da prateleira atual vai para o destino" Variant="Variant.Outlined">

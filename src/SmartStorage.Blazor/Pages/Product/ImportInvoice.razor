@@ -72,10 +72,10 @@ else
                                 <MudNumericField T="int" Label="Quantidade de entrada" Value="row.QntdEstoque" ValueChanged="@((int value) => ChangeQuantity(row, value))" Min="1" Error="@(row.QntdEstoque < 1)" ErrorText="Informe a quantidade que entra no estoque" HelperText="@SuggestedText(row)" Variant="Variant.Outlined" />
                             </MudItem>
                             <MudItem xs="12" sm="6" md="3">
-                                <MudTextField T="string" Label="Valor na nota" Value="@row.Item.ValorTotal.ToString("N2", PtBr)" ReadOnly="true" HelperText="@InvoiceValueText(row)" Variant="Variant.Outlined" />
+                                <MudTextField T="string" Label="Valor na nota" Value="@row.Item.ValorTotal.ToString("N2", PtBr)" ReadOnly="true" Class="app-readonly" HelperText="@InvoiceValueText(row)" Variant="Variant.Outlined" />
                             </MudItem>
                             <MudItem xs="12" sm="6" md="3">
-                                <MudTextField T="string" Label="Custo unitário" Value="@UnitCost(row)" ReadOnly="true" HelperText="Valor na nota ÷ quantidade" Variant="Variant.Outlined" />
+                                <MudTextField T="string" Label="Custo unitário" Value="@UnitCost(row)" ReadOnly="true" Class="app-readonly" HelperText="Valor na nota ÷ quantidade" Variant="Variant.Outlined" />
                             </MudItem>
                             @if (row.ProductId is null)
                             {

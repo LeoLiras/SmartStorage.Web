@@ -268,7 +268,7 @@ movimentação com autor e instante.
   sem rolagem horizontal da página (#19)
 - RF-56 [feito]: o sistema tem ícone próprio, legível em 16 px, na
   aba do navegador, na barra superior e no login
-- RF-57 [planejado #48]: o campo só leitura se distingue do editável sem ser
+- RF-57 [feito]: o campo só leitura se distingue do editável sem ser
   preciso clicar nele
 
 ## Regras de negócio

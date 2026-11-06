@@ -1,7 +1,7 @@
 @inject VariablesExtensions app
 
 @* Uma raiz só: no ProductForm o picker fica dentro do grid do app-panel, cujo gap somaria à margem dos botões, e na NF-e não; com a raiz, o espaço é o mesmo nas três telas *@
-<div class="app-image-picker">
+<div class="app-image-picker @(ReadOnly ? "app-readonly" : null)">
     <div class="app-form-image">
         <img src="@ImageSource" alt="@AltText" />
     </div>

@@ -1,4 +1,4 @@
-<MudSelect T="int?" Value="Value" ValueChanged="ValueChanged" ToStringFunc="EmployeeLabel" Label="@Label" HelperText="@HelperText" OpenIcon="@Icons.Material.Filled.Person" ReadOnly="ReadOnly" Variant="Variant.Outlined">
+<MudSelect T="int?" Value="Value" ValueChanged="ValueChanged" ToStringFunc="EmployeeLabel" Label="@Label" HelperText="@HelperText" OpenIcon="@Icons.Material.Filled.Person" ReadOnly="ReadOnly" Class="@(ReadOnly ? "app-readonly" : null)" Variant="Variant.Outlined">
     @foreach (var employee in Employees ?? new())
     {
         <MudSelectItem T="int?" Value="@((int?)employee.Id)">@employee.Name</MudSelectItem>

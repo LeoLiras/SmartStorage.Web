@@ -18,16 +18,16 @@ else if(product is not null)
                     <MudText Typo="Typo.subtitle1" Class="app-panel-title">Dados do produto</MudText>
                     <MudGrid Spacing="3">
                         <MudItem xs="12" sm="6">
-                            <MudTextField Label="Nome do Produto" @bind-Value="product.Name" For="@(() => product.Name)" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudTextField Label="Nome do Produto" @bind-Value="product.Name" For="@(() => product.Name)" ReadOnly="ReadOnly" Class="@ReadOnlyClass" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6">
                             <EmployeeSelect @bind-Value="product.EmployeeId" Employees="employees" ReadOnly="ReadOnly" />
                         </MudItem>
                         <MudItem xs="12" sm="6">
-                            <MudTextField Label="Código de barras" @bind-Value="product.Codigo" For="@(() => product.Codigo)" InputMode="InputMode.numeric" MaxLength="14" HelperText="EAN/GTIN do fabricante" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudTextField Label="Código de barras" @bind-Value="product.Codigo" For="@(() => product.Codigo)" InputMode="InputMode.numeric" MaxLength="14" HelperText="EAN/GTIN do fabricante" ReadOnly="ReadOnly" Class="@ReadOnlyClass" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12">
-                            <MudTextField Label="Descrição" @bind-Value="product.Descricao" For="@(() => product.Descricao)" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudTextField Label="Descrição" @bind-Value="product.Descricao" For="@(() => product.Descricao)" ReadOnly="ReadOnly" Class="@ReadOnlyClass" Variant="Variant.Outlined" />
                         </MudItem>
                     </MudGrid>
                 </section>
@@ -42,34 +42,34 @@ else if(product is not null)
                             }
                             else
                             {
-                                <MudNumericField T="int" Label="Quantidade no depósito" Value="product.Qntd" ReadOnly="true" Variant="Variant.Outlined" />
+                                <MudNumericField T="int" Label="Quantidade no depósito" Value="product.Qntd" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                             }
                         </MudItem>
                         @if (ProductId != 0)
                         {
                             <MudItem xs="12" sm="6" lg="4">
-                                <MudNumericField T="int" Label="Total (depósito + prateleiras)" Value="product.TotalQntd" ReadOnly="true" Variant="Variant.Outlined" />
+                                <MudNumericField T="int" Label="Total (depósito + prateleiras)" Value="product.TotalQntd" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                             </MudItem>
                         }
                         <MudItem xs="12" sm="6" lg="4">
-                            <MudDatePicker Culture="InputCulture.PtBr" Label="Data de registro" @bind-Date="productDate" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudDatePicker Culture="InputCulture.PtBr" Label="Data de registro" @bind-Date="productDate" ReadOnly="ReadOnly" Class="@ReadOnlyClass" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6" lg="4">
-                            <MudNumericField T="int" Label="Estoque mínimo" @bind-Value="product.MinimumStock" For="(() => product.MinimumStock)" Min="0" HelperText="0 desativa o aviso por e-mail" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudNumericField T="int" Label="Estoque mínimo" @bind-Value="product.MinimumStock" For="(() => product.MinimumStock)" Min="0" HelperText="0 desativa o aviso por e-mail" ReadOnly="ReadOnly" Class="@ReadOnlyClass" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6" lg="4">
-                            <MudNumericField Culture="InputCulture.PtBr" T="decimal?" Label="Volume (L)" @bind-Value="product.Volume" For="(() => product.Volume)" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudNumericField Culture="InputCulture.PtBr" T="decimal?" Label="Volume (L)" @bind-Value="product.Volume" For="(() => product.Volume)" Min="0.001m" Format="0.###" HelperText="Obrigatório para alocar em prateleira" ReadOnly="ReadOnly" Class="@ReadOnlyClass" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6" lg="4">
-                            <MudNumericField Culture="InputCulture.PtBr" T="decimal?" Label="Preço inicial" @bind-Value="product.PrecoInicial" For="(() => product.PrecoInicial)" Min="0.01m" Format="F2" HelperText="Preço padrão ao alocar em prateleira" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudNumericField Culture="InputCulture.PtBr" T="decimal?" Label="Preço inicial" @bind-Value="product.PrecoInicial" For="(() => product.PrecoInicial)" Min="0.01m" Format="F2" HelperText="Preço padrão ao alocar em prateleira" ReadOnly="ReadOnly" Class="@ReadOnlyClass" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6" lg="4">
-                            <MudNumericField T="int" Label="Fator de conversão" @bind-Value="product.FatorConversao" For="(() => product.FatorConversao)" Min="1" HelperText="Unidades de estoque por unidade da nota fiscal" ReadOnly="ReadOnly" Variant="Variant.Outlined" />
+                            <MudNumericField T="int" Label="Fator de conversão" @bind-Value="product.FatorConversao" For="(() => product.FatorConversao)" Min="1" HelperText="Unidades de estoque por unidade da nota fiscal" ReadOnly="ReadOnly" Class="@ReadOnlyClass" Variant="Variant.Outlined" />
                         </MudItem>
                         @if (ProductId != 0)
                         {
                             <MudItem xs="12" sm="6" lg="4">
-                                <MudTextField T="string" Label="Custo médio" Value="@(product.Custo?.ToString("N2", PtBr) ?? "Sem custo")" ReadOnly="true" HelperText="Calculado pelas notas fiscais importadas" Variant="Variant.Outlined" />
+                                <MudTextField T="string" Label="Custo médio" Value="@(product.Custo?.ToString("N2", PtBr) ?? "Sem custo")" ReadOnly="true" Class="app-readonly" HelperText="Calculado pelas notas fiscais importadas" Variant="Variant.Outlined" />
                             </MudItem>
                         }
                     </MudGrid>
@@ -127,6 +127,8 @@ else if(product is not null)
 
     [Parameter]
     public bool ReadOnly { get; set; }
+
+    private string ReadOnlyClass => ReadOnly ? "app-readonly" : null;
 
     [Parameter]
     public string SubmitText { get; set; }

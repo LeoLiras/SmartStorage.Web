@@ -86,6 +86,24 @@ public class EdicaoDeProdutoTests : BunitContext, IAsyncLifetime
     }
 
     [Fact]
+    public void Na_edicao_so_os_campos_calculados_saem_com_app_readonly()
+    {
+        Monta();
+        var cut = Renderiza();
+        cut.WaitForElement("form");
+
+        bool TemEstilo(string rotulo) =>
+            cut.FindAll("label").First(l => l.TextContent.Trim() == rotulo).Closest(".app-readonly") is not null;
+
+        Assert.All(["Quantidade no depósito", "Total (depósito + prateleiras)", "Custo médio"],
+            rotulo => Assert.True(TemEstilo(rotulo), $"{rotulo} saiu sem app-readonly"));
+        Assert.All(["Nome do Produto", "Colaborador Responsável", "Código de barras", "Descrição", "Data de registro",
+                    "Estoque mínimo", "Volume (L)", "Preço inicial", "Fator de conversão", "Saldo real conferido", "Motivo"],
+            rotulo => Assert.False(TemEstilo(rotulo), $"{rotulo} é editável e saiu com app-readonly"));
+        Assert.DoesNotContain("app-readonly", cut.Find(".app-image-picker").ClassList);
+    }
+
+    [Fact]
     public void Voltar_leva_a_produtos_em_estoque_sem_enviar_a_edicao()
     {
         var api = Monta();

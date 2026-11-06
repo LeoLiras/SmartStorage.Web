@@ -26,10 +26,10 @@ else
                 <MudText Typo="Typo.subtitle1" Class="app-panel-title">Devolução da venda de <span class="num">@sale.DateSale.ToString("dd/MM/yyyy")</span> · @sale.ShelfName</MudText>
                 <MudGrid Spacing="3">
                     <MudItem xs="12" sm="4">
-                        <MudNumericField T="int" Label="Quantidade vendida" Value="sale.Qntd" ReadOnly="true" Variant="Variant.Outlined" />
+                        <MudNumericField T="int" Label="Quantidade vendida" Value="sale.Qntd" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="4">
-                        <MudNumericField T="int" Label="Já devolvida" Value="sale.ReturnedQntd" ReadOnly="true" Variant="Variant.Outlined" />
+                        <MudNumericField T="int" Label="Já devolvida" Value="sale.ReturnedQntd" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="4">
                         <MudNumericField T="int" Label="Quantidade a devolver" @bind-Value="saleReturn.Quantity" Min="1" Max="sale.NetQntd" HelperText="@($"Até {sale.NetQntd}; volta para o depósito")" Variant="Variant.Outlined" />

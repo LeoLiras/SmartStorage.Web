@@ -24,7 +24,7 @@ else
                     <MudText Typo="Typo.subtitle1" Class="app-panel-title">Venda</MudText>
                     <MudGrid Spacing="3">
                         <MudItem xs="12">
-                            <MudTextField Label="Produto" @bind-Value="newSale.ProductName" For="@(() => newSale.ProductName)" Disabled="true" Variant="Variant.Outlined" />
+                            <MudTextField Label="Produto" @bind-Value="newSale.ProductName" For="@(() => newSale.ProductName)" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                         </MudItem>
                         <MudItem xs="12" sm="6">
                             <MudNumericField T="int" Label="Quantidade da venda" For="(() => newSale.Qntd)" ValueChanged="CalculateTotal" HelperText="@($"Disponível nesta prateleira: {entry.ProductQuantity}")" Variant="Variant.Outlined" />

@@ -105,11 +105,35 @@ public class RegistroDeVendaTests : BunitContext, IAsyncLifetime
             builder.CloseComponent();
         });
 
-        cut.FindAll("input:not([disabled])").First().Change(quantidade.ToString());
+        cut.FindAll("input:not([readonly])").First().Change(quantidade.ToString());
 
         cut.Find("form").Submit();
 
         cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Post));
+    }
+
+    [Fact]
+    public void Produto_da_venda_e_so_leitura_e_nao_desabilitado()
+    {
+        Monta(new VariablesExtensions());
+
+        var cut = Render(builder =>
+        {
+            builder.OpenComponent<MudPopoverProvider>(0);
+            builder.CloseComponent();
+
+            builder.OpenComponent<NewSale>(1);
+            builder.AddAttribute(2, nameof(NewSale.entryId), Entrada);
+            builder.CloseComponent();
+        });
+
+        var controle = cut.FindAll("label").First(l => l.TextContent.Trim() == "Produto").Closest(".mud-input-control")!;
+        var produto = controle.QuerySelector("input")!;
+
+        Assert.Contains("app-readonly", controle.ClassList);
+        Assert.True(produto.HasAttribute("readonly"));
+        Assert.False(produto.HasAttribute("disabled"));
+        Assert.Equal("Capacete de Seguranca Branco", produto.GetAttribute("value"));
     }
 
     [Fact]
