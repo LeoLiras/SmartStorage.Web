@@ -444,6 +444,50 @@ code {
     max-width: 720px;
 }
 
+/* Campo só leitura (#48): a tela aplica a classe, em vez de um seletor sobre
+   input[readonly], porque o MudSelect e o MudDatePicker também deixam o input
+   readonly quando são editáveis pelo menu. O seletor é por descendente para
+   valer onde o MudBlazor puser o Class, no input-control ou num wrapper. As
+   regras de hover e de foco repetem as do MudBlazor com o prefixo, porque as
+   dele têm mais especificidade que uma regra simples. A cor de erro do
+   MudBlazor usa !important e continua valendo. */
+.app-readonly .mud-input.mud-input-outlined {
+    background-color: color-mix(in srgb, var(--mud-palette-primary) 10%, transparent);
+    border-radius: var(--mud-default-borderradius);
+}
+
+.app-readonly .mud-input.mud-input-outlined .mud-input-outlined-border,
+.app-readonly .mud-input.mud-input-outlined:not(.mud-disabled):not(:focus-within):hover .mud-input-outlined-border,
+.app-readonly .mud-input.mud-input-outlined:focus-within > .mud-input-outlined-border {
+    border-width: 1px;
+    border-color: transparent;
+}
+
+.app-readonly .mud-input ~ label.mud-input-label.mud-input-label-inputcontrol,
+.app-readonly .mud-input:focus-within ~ label.mud-input-label.mud-input-label-inputcontrol {
+    color: var(--mud-palette-text-secondary);
+}
+
+/* Sem valor, o MudBlazor sobe o rótulo no foco para abrir espaço à digitação;
+   no só leitura ele fica no lugar, com a posição de repouso do outlined. */
+.app-readonly .mud-input:focus-within:not(.mud-shrink) ~ label.mud-input-label.mud-input-label-inputcontrol.mud-input-label-outlined {
+    transform: translate(14px, 20px) scale(1);
+    max-width: calc(100% - 14px);
+}
+
+.app-readonly .mud-input > input.mud-input-root {
+    cursor: default;
+}
+
+.app-readonly .mud-input.mud-input-outlined .mud-input-numeric-spin {
+    display: none;
+}
+
+.app-image-picker.app-readonly .app-form-image {
+    border-color: transparent;
+    background-color: color-mix(in srgb, var(--mud-palette-primary) 10%, transparent);
+}
+
 .app-table {
     border: 1px solid #243056;
     border-radius: 12px;
