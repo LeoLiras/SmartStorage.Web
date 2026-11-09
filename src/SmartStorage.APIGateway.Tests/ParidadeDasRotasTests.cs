@@ -14,28 +14,12 @@ public class ParidadeDasRotasTests
         return $$"""{ "Routes": [ {{string.Join(",", itens)}} ] }""";
     }
 
-    // Sobe das pastas de saída até a raiz da solution, porque o teste confere os
-    // arquivos versionados e não uma cópia feita no build.
-    private static string LerDoGateway(string arquivo)
-    {
-        var pasta = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (pasta is not null && !File.Exists(Path.Combine(pasta.FullName, "SmartStorageWeb.sln")))
-        {
-            pasta = pasta.Parent;
-        }
-
-        Assert.NotNull(pasta);
-
-        return File.ReadAllText(Path.Combine(pasta.FullName, "SmartStorage.APIGateway", arquivo));
-    }
-
     [Fact]
     public void Arquivos_do_gateway_declaram_as_mesmas_rotas_na_mesma_ordem()
     {
         var divergencias = RouteParity.FindDivergences(
-            LerDoGateway("appsettings.json"),
-            LerDoGateway("appsettings.Docker.json"));
+            RepositoryFiles.ReadFromSolutionFolder("SmartStorage.APIGateway", "appsettings.json"),
+            RepositoryFiles.ReadFromSolutionFolder("SmartStorage.APIGateway", "appsettings.Docker.json"));
 
         Assert.True(divergencias.Count == 0, string.Join(Environment.NewLine, divergencias));
     }

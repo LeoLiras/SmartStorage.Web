@@ -6,7 +6,7 @@ public static class RouteParity
 {
     // O appsettings.json do gateway separa os serviços com comentários, que o
     // JsonDocument recusa por padrão.
-    private static readonly JsonDocumentOptions ReadOptions = new()
+    internal static readonly JsonDocumentOptions ReadOptions = new()
     {
         CommentHandling = JsonCommentHandling.Skip,
         AllowTrailingCommas = true
