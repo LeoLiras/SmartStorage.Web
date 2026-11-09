@@ -158,8 +158,8 @@ namespace SmartStorage_API.Controllers
                 if (newAllocation.ShelfId.Equals(0))
                     throw new Exception("O campo ID da Prateleira é obrigatório.");
 
-                if (newAllocation.ProductPrice.Equals(0))
-                    throw new Exception("O campo Preço do Produto é obrigatório.");
+                if (newAllocation.ProductPrice <= 0)
+                    throw new Exception("O preço deve ser maior que zero.");
 
                 if (newAllocation.ProductQuantity.Equals(0))
                     throw new Exception("O campo Quantidade do Produto é obrigatório.");

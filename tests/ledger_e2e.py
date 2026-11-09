@@ -2031,6 +2031,41 @@ def ct51(ctx):
     R.exige(_nota_no_banco(chave) is not None, "nota com PNG nao gravada")
 
 
+def _confere_recusa_de_preco(ctx, pid, preco_gravado):
+    for preco in (0, -5.0):
+        antes = saldos(pid)
+        marca = ultimo_movimento()
+        status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+            "productId": pid, "shelfId": ctx.prateleira_a,
+            "productQuantity": 1, "productPrice": preco,
+            "dateEnter": datetime.now().isoformat(),
+        })
+        R.exige(status == 400 and "O preço deve ser maior que zero." in _mensagem(corpo),
+                "alocacao com preco %s nao foi recusada como o lote" % preco, "HTTP %s: %s" % (status, _mensagem(corpo)))
+        confere_linhas(movimentos_depois(marca, pid), [])
+        R.exige(saldos(pid) == antes, "saldo mudou numa alocacao recusada")
+        entrada = entrada_de(pid, ctx.prateleira_a)
+        gravado = entrada["preco"] if entrada else None
+        R.exige(gravado == preco_gravado, "alocacao recusada mexeu no preco da prateleira", "esperado %s, gravado %s" % (preco_gravado, gravado))
+
+
+@caso("CT-52", "Alocacao individual recusa preco zero ou negativo")
+def ct52(ctx):
+    pid = ctx.cria_produto(10, "CT52")
+    _confere_recusa_de_preco(ctx, pid, None)
+
+    antes = saldos(pid)
+    marca = ultimo_movimento()
+    status = _aloca(ctx, pid, ctx.prateleira_a, 4, 12.5)
+    if not R.exige(status == 200, "alocacao com preco positivo recusada", "HTTP %s" % status):
+        return
+    movs = movimentos_depois(marca, pid)
+    confere_linhas(movs, [(None, ALOCACAO, -4), (ctx.prateleira_a, ALOCACAO, 4)])
+    confere_invariante(pid, antes, {None: 6, ctx.prateleira_a: 4}, movs)
+
+    _confere_recusa_de_preco(ctx, pid, 12.5)
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
