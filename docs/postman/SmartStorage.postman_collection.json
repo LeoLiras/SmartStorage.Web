@@ -1,0 +1,1472 @@
+{
+  "info": {
+    "_postman_id": "7d2f6c1e-52a0-4b52-9c52-5a52e7a10052",
+    "name": "SmartStorage",
+    "description": "Uma requisição por rota do gateway, todas pela porta 4480. Escolha o ambiente, rode \"Entrar\" e use as demais. Corpos e IDs são exemplos válidos no banco recém-criado pelo seed, com a coleção rodada na ordem; em um banco já usado, ajuste as variáveis da coleção.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "newUserId",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "newProductId",
+      "value": "11",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "newEmployeeId",
+      "value": "7",
+      "type": "string"
+    },
+    {
+      "key": "shelfId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "newShelfId",
+      "value": "11",
+      "type": "string"
+    },
+    {
+      "key": "enterId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "undoEnterId",
+      "value": "9",
+      "type": "string"
+    },
+    {
+      "key": "transferEnterId",
+      "value": "6",
+      "type": "string"
+    },
+    {
+      "key": "transferShelfId",
+      "value": "5",
+      "type": "string"
+    },
+    {
+      "key": "inventoryShelfId",
+      "value": "4",
+      "type": "string"
+    },
+    {
+      "key": "inventoryEnterId",
+      "value": "10",
+      "type": "string"
+    },
+    {
+      "key": "saleId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "returnSaleId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "nfeXml",
+      "value": "<nfeProc xmlns='http://www.portalfiscal.inf.br/nfe' versao='4.00'><NFe><infNFe Id='NFe35260912345678000195550010000000011000000015' versao='4.00'><ide><mod>55</mod><serie>1</serie><nNF>1</nNF><dhEmi>2026-09-17T09:00:00-03:00</dhEmi></ide><emit><CNPJ>12345678000195</CNPJ><xNome>Fornecedor de Exemplo Ltda</xNome></emit><det nItem='1'><prod><cProd>EX-1</cProd><cEAN>SEM GTIN</cEAN><xProd>Fita Isolante de Exemplo</xProd><uCom>UN</uCom><qCom>10</qCom><vUnCom>5.0000</vUnCom><vProd>50.00</vProd></prod></det></infNFe></NFe></nfeProc>",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticação",
+      "description": "Usuários e login. Rode \"Entrar\" primeiro: as demais requisições usam o token que ela guarda.",
+      "item": [
+        {
+          "name": "Entrar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/signin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "signin"
+              ]
+            },
+            "description": "Autentica com o usuário e a senha do ambiente e guarda o token de acesso na variável accessToken da coleção. O token vale 60 minutos; depois disso, rode de novo. Papel exigido: nenhum, a rota é anônima.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('accessToken', pm.response.json().accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuários",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1"
+              ]
+            },
+            "description": "Lista os usuários cadastrados. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar usuário por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "{{userId}}"
+              ]
+            },
+            "description": "Devolve o usuário do id informado. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar usuário por username",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/user-by-username?userName=admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "user-by-username"
+              ],
+              "query": [
+                {
+                  "key": "userName",
+                  "value": "admin",
+                  "description": "Username do usuário."
+                }
+              ]
+            },
+            "description": "Devolve o usuário do username informado; username vazio ou inexistente responde 400. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Criar usuário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "create"
+              ]
+            },
+            "description": "Cria um usuário. type 0 é Usuário comum e 1 é Administrador. No banco do seed, ele nasce com o id da variável newUserId. Papel exigido: Administrador.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"postman.exemplo\",\n  \"password\": \"Exemplo123\",\n  \"fullname\": \"Usuário de Exemplo do Postman\",\n  \"type\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar credenciais",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/update-credentials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "update-credentials"
+              ]
+            },
+            "description": "Regrava nome, usuário e senha do id informado; os três são obrigatórios. Aponta para o usuário criado pelo exemplo anterior, para não mudar a senha dos usuários do seed. Papel exigido: Administrador.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{newUserId}},\n  \"username\": \"postman.exemplo\",\n  \"password\": \"Exemplo456\",\n  \"fullName\": \"Usuário de Exemplo Atualizado\",\n  \"useType\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir usuário",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/{{newUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "{{newUserId}}"
+              ]
+            },
+            "description": "Exclui o usuário criado pelo exemplo. Usuário que já movimentou estoque não pode ser excluído. Papel exigido: Administrador."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Produtos",
+      "description": "Cadastro e saldo de depósito. Produto não tem exclusão, porque o histórico de movimentações não se apaga.",
+      "item": [
+        {
+          "name": "Listar produtos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/products/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "products",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Página, a partir de 1. Sem page, a resposta traz a lista inteira.",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10",
+                  "description": "Itens por página, até 100.",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Texto de busca.",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista os produtos. Paginação opcional: ative page, pageSize e search; o total vem no cabeçalho X-Total-Count. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar produto por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/products/v1/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "products",
+                "v1",
+                "{{productId}}"
+              ]
+            },
+            "description": "Devolve o produto do id informado. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/products/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "products",
+                "v1"
+              ]
+            },
+            "description": "Cria o produto e publica na fila o e-mail de produto novo. Atenção: com o .env preenchido, o e-mail é enviado de verdade. O nome não pode repetir; imagem é opcional. No banco do seed, ele nasce com o id da variável newProductId. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto de Exemplo do Postman\",\n  \"descricao\": \"Produto criado pela coleção do Postman.\",\n  \"qntd\": 5,\n  \"minimumStock\": 0,\n  \"volume\": 1.5,\n  \"precoInicial\": 19.90,\n  \"employeeId\": {{employeeId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/products/v1/{{newProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "products",
+                "v1",
+                "{{newProductId}}"
+              ]
+            },
+            "description": "Altera os dados do produto criado pelo exemplo. O nome não pode ser o de outro produto. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto de Exemplo do Postman\",\n  \"descricao\": \"Descrição alterada pela coleção do Postman.\",\n  \"minimumStock\": 0,\n  \"volume\": 1.5,\n  \"precoInicial\": 24.90,\n  \"employeeId\": {{employeeId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ajustar estoque do depósito",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/products/v1/{{newProductId}}/adjust-stock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "products",
+                "v1",
+                "{{newProductId}}",
+                "adjust-stock"
+              ]
+            },
+            "description": "Define o saldo do depósito: quantity é o valor final, não a diferença. Não pode ser negativa nem igual ao saldo atual, e o motivo é obrigatório. Lança um Ajuste no ledger. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 8,\n  \"reason\": \"Ajuste de exemplo da coleção do Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Colaboradores",
+      "description": "Colaboradores responsáveis pelos produtos.",
+      "item": [
+        {
+          "name": "Listar colaboradores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/employees/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "employees",
+                "v1"
+              ]
+            },
+            "description": "Lista os colaboradores. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar colaborador por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/employees/v1/{{employeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "employees",
+                "v1",
+                "{{employeeId}}"
+              ]
+            },
+            "description": "Devolve o colaborador do id informado. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar colaborador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/employees/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "employees",
+                "v1"
+              ]
+            },
+            "description": "Cria o colaborador. Nome, RG e CPF são obrigatórios, e o CPF não pode repetir. No banco do seed, ele nasce com o id da variável newEmployeeId. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Colaborador de Exemplo\",\n  \"rg\": \"EX1234567\",\n  \"cpf\": \"98765432100\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar colaborador",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/employees/v1/{{newEmployeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "employees",
+                "v1",
+                "{{newEmployeeId}}"
+              ]
+            },
+            "description": "Altera o colaborador criado pelo exemplo. O CPF não pode ser o de outro colaborador. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Colaborador de Exemplo Atualizado\",\n  \"rg\": \"EX1234567\",\n  \"cpf\": \"98765432100\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir colaborador",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/employees/v1/{{newEmployeeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "employees",
+                "v1",
+                "{{newEmployeeId}}"
+              ]
+            },
+            "description": "Exclui o colaborador criado pelo exemplo. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Prateleiras",
+      "description": "Prateleiras e alocações. A ordem das requisições importa no banco do seed: cada exemplo usa um produto ou uma entrada diferente.",
+      "item": [
+        {
+          "name": "Listar prateleiras",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1"
+              ]
+            },
+            "description": "Lista as prateleiras com volume, uso e ocupação. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar alocações",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/allocation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "allocation"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Página, a partir de 1. Sem page, a resposta traz a lista inteira.",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10",
+                  "description": "Itens por página, até 100.",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Texto de busca.",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista os produtos nas prateleiras. Sem page, inclui as entradas zeradas; com page, traz só as que têm saldo, e o total vem em X-Total-Count. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar alocação por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/allocation/{{enterId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "allocation",
+                "{{enterId}}"
+              ]
+            },
+            "description": "Devolve a entrada do id informado. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar prateleira por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/{{shelfId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "{{shelfId}}"
+              ]
+            },
+            "description": "Devolve a prateleira do id informado. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastrar prateleira",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1"
+              ]
+            },
+            "description": "Cria a prateleira. O nome é obrigatório; o volume é em litros. No banco do seed, ela nasce com o id da variável newShelfId. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Prateleira de Exemplo\",\n  \"volume\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar prateleira",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/{{newShelfId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "{{newShelfId}}"
+              ]
+            },
+            "description": "Altera a prateleira criada pelo exemplo. O nome é obrigatório. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Prateleira de Exemplo Atualizada\",\n  \"volume\": 120\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir prateleira",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/{{newShelfId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "{{newShelfId}}"
+              ]
+            },
+            "description": "Exclui a prateleira criada pelo exemplo. Prateleira que já teve entrada de produto não pode ser excluída. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Alocar produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/allocation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "allocation"
+              ]
+            },
+            "description": "Move unidades do depósito para a prateleira e define o preço dela. Recusa preço menor ou igual a zero, falta de saldo no depósito, produto com saldo em outra prateleira e volume acima de 90% da prateleira. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"shelfId\": {{shelfId}},\n  \"productQuantity\": 1,\n  \"productPrice\": 289.90\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alocar em lote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/allocation/batch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "allocation",
+                "batch"
+              ]
+            },
+            "description": "Aloca vários produtos, tudo ou nada: valida todos os itens antes de gravar e recusa com \"Item N (...): motivo\". Produto repetido no lote é recusado. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"productId\": 3, \"shelfId\": 1, \"qntd\": 1, \"price\": 529.90 },\n    { \"productId\": 5, \"shelfId\": 2, \"qntd\": 1, \"price\": 79.90 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Desfazer alocação",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/allocation/{{undoEnterId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "allocation",
+                "{{undoEnterId}}"
+              ]
+            },
+            "description": "Devolve ao depósito todo o saldo da entrada, que continua existindo com saldo zero. Não tem corpo. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Transferir entre prateleiras",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/allocation/{{transferEnterId}}/transfer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "allocation",
+                "{{transferEnterId}}",
+                "transfer"
+              ]
+            },
+            "description": "Move todo o saldo da entrada para a prateleira de destino, que recebe o preço da origem. Recusa destino sem volume disponível. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shelfId\": {{transferShelfId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar inventário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/shelf/v1/{{inventoryShelfId}}/inventory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "shelf",
+                "v1",
+                "{{inventoryShelfId}}",
+                "inventory"
+              ]
+            },
+            "description": "Registra a contagem, tudo ou nada. countedQntd é a quantidade absoluta contada; cada diferença vira um Ajuste no ledger. Recusa entrada de outra prateleira, entrada repetida e contagem sem nenhuma diferença. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Contagem de exemplo da coleção do Postman\",\n  \"items\": [\n    { \"enterId\": {{inventoryEnterId}}, \"countedQntd\": 119 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vendas",
+      "description": "Vendas, carrinho, cancelamento e devolução. O seed não tem vendas: no banco do seed, rode a pasta na ordem, porque \"Registrar venda\" e \"Registrar carrinho\" criam as vendas usadas pelas outras.",
+      "item": [
+        {
+          "name": "Listar vendas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/sales/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "sales",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Página, a partir de 1. Sem page, a resposta traz a lista inteira.",
+                  "disabled": true
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10",
+                  "description": "Itens por página, até 100.",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Texto de busca.",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista as vendas com quantidade e total líquidos de devolução; a venda totalmente devolvida não aparece. Paginação opcional, com o total em X-Total-Count. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar venda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/sales/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "sales",
+                "v1"
+              ]
+            },
+            "description": "Vende a partir da entrada informada, com o preço da prateleira no momento. Recusa quantidade acima do saldo da entrada. No banco do seed, é a venda da variável saleId. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idEnter\": {{enterId}},\n  \"qntd\": 2,\n  \"dateSale\": \"{{$isoTimestamp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar venda por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/sales/v1/{{saleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "sales",
+                "v1",
+                "{{saleId}}"
+              ]
+            },
+            "description": "Devolve a venda do id informado. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Editar venda",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/sales/v1/{{saleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "sales",
+                "v1",
+                "{{saleId}}"
+              ]
+            },
+            "description": "Altera a quantidade da venda e ajusta o saldo da prateleira. Não aceita quantidade abaixo do que já foi devolvido. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qntd\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar carrinho",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/sales/v1/batch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "sales",
+                "v1",
+                "batch"
+              ]
+            },
+            "description": "Grava várias vendas, tudo ou nada: valida todos os itens antes de gravar e recusa com \"Item N (...): motivo\". No banco do seed, o primeiro item é a venda da variável returnSaleId. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateSale\": \"{{$isoTimestamp}}\",\n  \"items\": [\n    { \"idEnter\": 2, \"qntd\": 2 },\n    { \"idEnter\": 3, \"qntd\": 1 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Devolver venda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/sales/v1/{{returnSaleId}}/return",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "sales",
+                "v1",
+                "{{returnSaleId}}",
+                "return"
+              ]
+            },
+            "description": "Devolve unidades da venda para o depósito, não para a prateleira. A quantidade não pode passar do que ainda não foi devolvido. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar venda",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/sales/v1/{{saleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "sales",
+                "v1",
+                "{{saleId}}"
+              ]
+            },
+            "description": "Cancela a venda e estorna as unidades para a prateleira. Venda com devolução não pode ser cancelada. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notas fiscais",
+      "description": "Importação de NF-e modelo 55. A variável nfeXml traz uma nota de exemplo com um item.",
+      "item": [
+        {
+          "name": "Pré-visualizar NF-e",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/invoices/v1/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "invoices",
+                "v1",
+                "preview"
+              ]
+            },
+            "description": "Lê o XML e devolve cabeçalho e itens, sem gravar nada. A assinatura do XML não é validada. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"xml\": \"{{nfeXml}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Importar NF-e",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/invoices/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "invoices",
+                "v1"
+              ]
+            },
+            "description": "Grava a nota e dá entrada no depósito, tudo ou nada. Cada item leva productId ou newProduct, com fator de conversão e quantidade de entrada. A chave da nota é única: rodar de novo responde 400. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"xml\": \"{{nfeXml}}\",\n  \"items\": [\n    { \"numero\": 1, \"productId\": 10, \"fatorConversao\": 1, \"qntdEstoque\": 10 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Relatórios",
+      "description": "Relatórios das vendas do mês corrente, líquidos de devolução. Mês sem vendas responde 400. Use Send and Download para salvar o arquivo.",
+      "item": [
+        {
+          "name": "Exportar Excel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/reports/v1/export-excel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "reports",
+                "v1",
+                "export-excel"
+              ]
+            },
+            "description": "Gera o relatório do mês corrente em .xlsx. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Exportar PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/reports/v1/export-pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "reports",
+                "v1",
+                "export-pdf"
+              ]
+            },
+            "description": "Gera o relatório do mês corrente em PDF. Papel exigido: qualquer usuário autenticado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "IA",
+      "description": "Perguntas sobre as vendas recentes.",
+      "item": [
+        {
+          "name": "Analisar vendas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/ai/v1/analyse-sales",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "ai",
+                "v1",
+                "analyse-sales"
+              ]
+            },
+            "description": "Envia a pergunta e as 10 vendas mais recentes ao Gemini e devolve o texto da resposta. A pergunta é obrigatória, e o serviço precisa da GOOGLE_API_KEY. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aiQuestion\": \"Qual foi o produto mais vendido?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "E-mail",
+      "description": "Envio direto de e-mail.",
+      "item": [
+        {
+          "name": "Enviar e-mail de produto novo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storage/email/v1/new-product",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storage",
+                "email",
+                "v1",
+                "new-product"
+              ]
+            },
+            "description": "Envia na hora, por SMTP, o aviso de produto novo. Atenção: com o .env preenchido, o e-mail é enviado de verdade. Papel exigido: Administrador.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto de Exemplo do Postman\",\n  \"descricao\": \"Aviso de exemplo da coleção do Postman.\",\n  \"qntd\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
