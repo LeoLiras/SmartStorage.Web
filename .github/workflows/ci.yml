@@ -24,8 +24,8 @@ jobs:
       - name: Build
         run: dotnet build src/SmartStorageWeb.sln -c Release --no-restore
 
-      # Só os testes de componente do Blazor (bUnit) e os de unidade da API rodam
-      # aqui: eles não precisam de nada de pé. O roteiro tests/ledger_e2e.py exige
+      # Só os testes de componente do Blazor (bUnit) e os de unidade da API e do
+      # gateway rodam aqui: eles não precisam de nada de pé. O roteiro tests/ledger_e2e.py exige
       # o compose inteiro com banco e gateway, por isso continua fora do CI e é
       # rodado à mão.
       - name: Testes de componente
