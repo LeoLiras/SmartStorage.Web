@@ -29,7 +29,7 @@ issues; as abertas seguem a "Ordem de implementação" do plano.
 - O commit que conclui a última tarefa de um requisito troca, na `spec.md`,
   o `[planejado #N]` dele por `[feito]`
 - Casos novos do roteiro recebem o próximo `CT-xx` livre (o último é o
-  CT-50) quando forem escritos
+  CT-52) quando forem escritos
 
 ## Concluídas
 
@@ -315,6 +315,14 @@ o campo editável conferido no bUnit é a prateleira de destino.
 |---|---|---|---|---|---|---|
 | T-49.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O `HelperText` do preço na alocação em lote diz "Preço inicial do produto" só quando o valor é o preço inicial, e "Preço inicial: R$ …" quando é outro | RF-16, RN-16 | T-00.29 | bUnit: o texto troca ao mudar o preço e volta ao restaurar o valor; produto sem preço inicial mostra "Produto sem preço inicial"; tela conferida em desktop e celular | `68f5c25` |
 
+### #51 Validação da imagem e do preço na API (T-51)
+| ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
+|---|---|---|---|---|---|---|
+| T-51.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Função pura em `SmartStorage.Shared` que confere a imagem: assinatura de PNG ou JPEG e até 10 MB, com imagem vazia permitida | RF-53, D-53 | T-00.29 | Testes de unidade: PNG, JPEG e vazia passam; GIF, texto e 10 MB + 1 byte são recusados, com a mensagem em português | `406b3e1` |
+| T-51.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O cadastro e a edição do produto e o produto novo da NF-e chamam a conferência | RF-53, D-53 | T-51.01 | Caso novo no roteiro: imagem que não é PNG nem JPEG responde 400 sem gravar o produto, e na NF-e recusa a nota com `Item N (...)`; PNG passa | `cbb3291` |
+| T-51.03 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | A alocação individual recusa preço menor ou igual a zero, com a mesma mensagem do lote | RF-53, D-53 | T-00.29 | Caso novo no roteiro: preço 0 e negativo respondem 400 sem movimentação nem repreço; preço positivo passa | `dc8508f` |
+| T-51.04 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Tirar as duas lacunas da spec e descrever a validação no `CLAUDE.md` | RF-53 | T-51.02, T-51.03 | A spec não lista mais as lacunas, e o RF-53 está `[feito]` | `0a83e55` |
+
 ## Abertas
 Na ordem de implementação do plano. Cada issue é desenvolvida numa
 `feature/<número>-<descrição>` criada a partir de `develop`.
@@ -325,14 +333,6 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-50.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | `Sale.SalCusto` e a migration, sem preencher as vendas antigas | RN-41, D-49 | T-00.29 | `has-pending-model-changes` limpo; o `migrator` aplica sobre um banco com vendas, que ficam com `SalCusto` nulo | |
 | T-50.02 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | A venda individual e o carrinho copiam o `ProCusto` para o `SalCusto`; o `SaleVO` expõe o custo | RF-52, RN-41, D-49 | T-50.01 | Caso novo no `ledger_e2e.py`: venda individual e pelo carrinho gravam o custo do momento, uma NF-e depois não muda o `SalCusto` e produto sem custo vende com nulo; o roteiro inteiro passa | |
 | T-50.03 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Card de margem bruta do mês no dashboard, só sobre as vendas com custo e com a contagem das que ficaram de fora | RF-52, D-49 | T-50.02, T-46.03 | Teste de unidade da agregação com vendas com e sem custo e com devolução; bUnit do card; tela conferida em desktop e celular | |
-
-### #51 Validação da imagem e do preço na API (T-51)
-| ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
-|---|---|---|---|---|---|---|
-| T-51.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | Função pura em `SmartStorage.Shared` que confere a imagem: assinatura de PNG ou JPEG e até 10 MB, com imagem vazia permitida | RF-53, D-53 | T-00.29 | Testes de unidade: PNG, JPEG e vazia passam; GIF, texto e 10 MB + 1 byte são recusados, com a mensagem em português | |
-| T-51.02 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | O cadastro e a edição do produto e o produto novo da NF-e chamam a conferência | RF-53, D-53 | T-51.01 | Caso novo no roteiro: imagem que não é PNG nem JPEG responde 400 sem gravar o produto, e na NF-e recusa a nota com `Item N (...)`; PNG passa | |
-| T-51.03 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | A alocação individual recusa preço menor ou igual a zero, com a mesma mensagem do lote | RF-53, D-53 | T-00.29 | Caso novo no roteiro: preço 0 e negativo respondem 400 sem movimentação nem repreço; preço positivo passa | |
-| T-51.04 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Tirar as duas lacunas da spec e descrever a validação no `CLAUDE.md` | RF-53 | T-51.02, T-51.03 | A spec não lista mais as lacunas, e o RF-53 está `[feito]` | |
 
 ### #52 Coleção do Postman (T-52)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
