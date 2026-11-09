@@ -1,4 +1,5 @@
 ﻿using SmartStorage.Shared.Enum;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
 using SmartStorage_API.Repository.Interfaces;
@@ -97,6 +98,8 @@ namespace SmartStorage_API.Service.Implementations
 
             ValidateInitialPrice(product.PrecoInicial);
 
+            ValidateImage(product.ProImage);
+
             var code = ValidateCode(product.Codigo, productId: 0);
 
             ValidateConversionFactor(product.FatorConversao);
@@ -152,6 +155,8 @@ namespace SmartStorage_API.Service.Implementations
             ValidateVolume(product.Volume);
 
             ValidateInitialPrice(product.PrecoInicial);
+
+            ValidateImage(product.ProImage);
 
             var code = ValidateCode(product.Codigo, productId);
 
@@ -249,6 +254,14 @@ namespace SmartStorage_API.Service.Implementations
         {
             if (minimumStock < 0)
                 throw new Exception("O estoque mínimo não pode ser negativo.");
+        }
+
+        private static void ValidateImage(byte[] image)
+        {
+            var refusal = ProductImagePolicy.Validate(image);
+
+            if (refusal is not null)
+                throw new Exception(refusal);
         }
 
         private static void ValidateVolume(decimal? volume)

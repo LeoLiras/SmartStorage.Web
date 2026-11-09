@@ -1,4 +1,5 @@
 using SmartStorage.Shared.Enum;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Model.Context;
 using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_API.Service.Nfe;
@@ -335,6 +336,11 @@ namespace SmartStorage_API.Service.Implementations
 
             if (newProduct.PrecoInicial <= 0)
                 throw new Exception("o preço inicial do produto deve ser maior que zero.");
+
+            var imageRefusal = ProductImagePolicy.Validate(newProduct.ProImage);
+
+            if (imageRefusal is not null)
+                throw new Exception(char.ToLowerInvariant(imageRefusal[0]) + imageRefusal[1..]);
         }
 
         private Product CreateProduct(NfeItem item, ProductVO newProduct, int? defaultEmployeeId)

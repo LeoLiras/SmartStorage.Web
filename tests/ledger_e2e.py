@@ -16,6 +16,7 @@ Saida: relatorio por caso e codigo de saida 1 se houver falha.
 """
 
 import argparse
+import base64
 import json
 import os
 import subprocess
@@ -1952,6 +1953,82 @@ def ct50(ctx):
             "enviados %d" % logs_email.count(enviado))
     R.nota("minimo 6: ajuste para 8 sem aviso, para 5 avisa, igual recusado, para 3 nao repete, "
            "edicao de 10 para 4 avisa de novo")
+
+
+_IMAGEM_PNG = base64.b64encode(b"\x89PNG\r\n\x1a\n" + bytes(16)).decode("ascii")
+_IMAGEM_JPEG = base64.b64encode(b"\xff\xd8\xff\xe0" + bytes(16)).decode("ascii")
+_IMAGEM_GIF = base64.b64encode(b"GIF89a" + bytes(16)).decode("ascii")
+_INICIO_PNG, _INICIO_JPEG = "89504E", "FFD8FF"
+
+
+def _inicio_da_imagem(pid):
+    return sql("SELECT ISNULL(CONVERT(varchar(20), SUBSTRING(ProImage,1,3), 2),'NULL') "
+               "FROM dbo.Product WHERE ProId=%d" % pid)[0][0]
+
+
+def _cadastra_com_imagem(ctx, nome, imagem):
+    return ctx.api("POST", "/api/storage/products/v1", {
+        "name": nome, "descricao": DESCRICAO, "dateRegister": datetime.now().isoformat(), "qntd": 0,
+        "minimumStock": 0, "volume": 0.01, "employeeId": ctx.funcionario, "proImage": imagem})
+
+
+def _edita_imagem(ctx, pid, imagem):
+    status, vo = ctx.api("GET", "/api/storage/products/v1/%d" % pid)
+    if status != 200 or not isinstance(vo, dict):
+        raise Erro("produto %d nao encontrado (HTTP %s)" % (pid, status))
+    vo.pop("links", None)
+    vo["proImage"], vo["stockAdjustment"] = imagem, None
+    return ctx.api("PUT", "/api/storage/products/v1/%d" % pid, vo)
+
+
+def _item_novo_com_imagem(numero, nome, quantidade, imagem):
+    item = _item_novo(numero, nome, 1, quantidade)
+    item["newProduct"]["proImage"] = imagem
+    return item
+
+
+@caso("CT-51", "Imagem que nao e PNG nem JPEG e recusada no cadastro, na edicao e na NF-e")
+def ct51(ctx):
+    marca = ultimo_movimento()
+    nome_gif = "%s %s CT51 Gif" % (PREFIXO, EXECUCAO)
+    status, corpo = _cadastra_com_imagem(ctx, nome_gif, _IMAGEM_GIF)
+    R.exige(status == 400 and "PNG ou JPEG" in _mensagem(corpo), "cadastro com GIF aceito", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(_id_pelo_nome(ctx, nome_gif) is None, "produto recusado ficou gravado")
+
+    nome_png = "%s %s CT51 Png" % (PREFIXO, EXECUCAO)
+    status, corpo = _cadastra_com_imagem(ctx, nome_png, _IMAGEM_PNG)
+    pid = _id_pelo_nome(ctx, nome_png)
+    if not R.exige(status == 200 and pid is not None, "cadastro com PNG recusado", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+    R.exige(_inicio_da_imagem(pid) == _INICIO_PNG, "imagem PNG nao gravada", _inicio_da_imagem(pid))
+
+    status, corpo = _edita_imagem(ctx, pid, _IMAGEM_GIF)
+    R.exige(status == 400 and "PNG ou JPEG" in _mensagem(corpo), "edicao com GIF aceita", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(_inicio_da_imagem(pid) == _INICIO_PNG, "edicao recusada trocou a imagem", _inicio_da_imagem(pid))
+
+    status, corpo = _edita_imagem(ctx, pid, _IMAGEM_JPEG)
+    R.exige(status == 200, "edicao com JPEG recusada", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(_inicio_da_imagem(pid) == _INICIO_JPEG, "imagem JPEG nao gravada", _inicio_da_imagem(pid))
+    confere_linhas(movimentos_depois(marca), [])
+
+    nome_1 = "%s %s CT51 Nota 1" % (PREFIXO, EXECUCAO)
+    nome_2 = "%s %s CT51 Nota 2" % (PREFIXO, EXECUCAO)
+    xml, chave, _ = _nota([(None, "Item um CT51", "UN", 3, 30.0), (None, "Item dois CT51", "UN", 2, 20.0)])
+
+    status, corpo = _importa(ctx, xml, [_item_novo_com_imagem(1, nome_1, 3, _IMAGEM_PNG), _item_novo_com_imagem(2, nome_2, 2, _IMAGEM_GIF)])
+    R.exige(status == 400 and "Item 2 (" in _mensagem(corpo) and "PNG ou JPEG" in _mensagem(corpo),
+            "nota com GIF no produto novo aceita", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.nota(_mensagem(corpo))
+    R.exige(_nota_no_banco(chave) is None, "nota recusada ficou gravada")
+    R.exige(_id_pelo_nome(ctx, nome_1) is None and _id_pelo_nome(ctx, nome_2) is None, "produto de nota recusada foi criado")
+    confere_linhas(movimentos_depois(marca), [])
+
+    status, corpo = _importa(ctx, xml, [_item_novo_com_imagem(1, nome_1, 3, _IMAGEM_PNG), _item_novo_com_imagem(2, nome_2, 2, _IMAGEM_PNG)])
+    novo, outro = _id_pelo_nome(ctx, nome_1), _id_pelo_nome(ctx, nome_2)
+    if not R.exige(status == 200 and novo is not None and outro is not None, "nota com PNG recusada", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+    R.exige(_inicio_da_imagem(novo) == _INICIO_PNG, "imagem PNG do produto novo nao gravada", _inicio_da_imagem(novo))
+    R.exige(_nota_no_banco(chave) is not None, "nota com PNG nao gravada")
 
 
 # --------------------------------------------------------------------------- #
