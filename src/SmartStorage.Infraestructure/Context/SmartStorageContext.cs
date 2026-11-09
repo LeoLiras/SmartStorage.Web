@@ -100,6 +100,8 @@ public partial class SmartStorageContext : DbContext
 
             entity.Property(p => p.SalPrice).HasPrecision(18, 2);
 
+            entity.Property(p => p.SalCusto).HasPrecision(18, 4);
+
             entity.HasOne(d => d.Enter).WithMany(p => p.Sales).HasForeignKey(d => d.SalEntId);
         });
 

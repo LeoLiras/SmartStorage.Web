@@ -22,5 +22,7 @@ public partial class Sale
 
     public decimal SalPrice { get; set; }
 
+    public decimal? SalCusto { get; set; }
+
     public virtual Enter Enter { get; set; }
 }

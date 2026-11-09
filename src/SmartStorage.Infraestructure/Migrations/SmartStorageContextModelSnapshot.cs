@@ -594,6 +594,10 @@ namespace SmartStorage_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SalId"));
 
+                    b.Property<decimal?>("SalCusto")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<DateTime>("SalDateSale")
                         .HasColumnType("datetime2");
 
