@@ -91,6 +91,7 @@ namespace SmartStorage_API.Service.Implementations
                 SalQntd = saleQntd,
                 SalDateSale = dateSale,
                 SalPrice = enter.EntPrice,
+                SalCusto = _context.Products.Where(p => p.ProId == enter.EntProId).Select(p => p.ProCusto).First(),
             };
 
             var totalBefore = _movementRepository.FindProductTotalBalance(enter.EntProId);
@@ -153,6 +154,13 @@ namespace SmartStorage_API.Service.Implementations
                 .Distinct()
                 .ToDictionary(productId => productId, productId => _movementRepository.FindProductTotalBalance(productId));
 
+            var productIds = totalsBefore.Keys.ToList();
+
+            var costs = _context.Products
+                .Where(p => productIds.Contains(p.ProId))
+                .Select(p => new { p.ProId, p.ProCusto })
+                .ToDictionary(p => p.ProId, p => p.ProCusto);
+
             var movementDate = DateTime.Now;
 
             var sales = new List<Sale>();
@@ -169,6 +177,7 @@ namespace SmartStorage_API.Service.Implementations
                         SalQntd = item.Qntd,
                         SalDateSale = dateSale,
                         SalPrice = enter.EntPrice,
+                        SalCusto = costs[enter.EntProId],
                     };
 
                     _context.Sales.Add(sale);

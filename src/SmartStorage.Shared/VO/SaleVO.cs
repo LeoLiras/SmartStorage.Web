@@ -14,6 +14,8 @@ namespace SmartStorage_Shared.VO
 
         public decimal SalePrice { get; set; }
 
+        public decimal? SaleCost { get; set; }
+
         public decimal SaleTotal { get; set; }
 
         public int Id { get; set; }

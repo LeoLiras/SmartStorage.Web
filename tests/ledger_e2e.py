@@ -2066,6 +2066,75 @@ def ct52(ctx):
     _confere_recusa_de_preco(ctx, pid, 12.5)
 
 
+def _custo_da_venda(venda):
+    custo = sql("SELECT ISNULL(CAST(SalCusto AS varchar(30)),'NULL') FROM dbo.Sale WHERE SalId=%d" % venda)[0][0]
+    return None if custo == "NULL" else float(custo)
+
+
+def _vende_e_carrinho(ctx, pid, entrada):
+    status, individual = ctx.api("POST", "/api/storage/sales/v1", {
+        "idEnter": entrada, "productId": pid, "qntd": 1, "dateSale": datetime.now().isoformat()})
+    status_carrinho, carrinho = _carrinho(ctx, [(entrada, 1)])
+    if not R.exige(status == 200 and isinstance(individual, dict) and status_carrinho == 200 and isinstance(carrinho, list) and len(carrinho) == 1,
+                   "venda individual ou pelo carrinho recusada", "HTTP %s: %s; HTTP %s: %s" % (status, _mensagem(individual), status_carrinho, _mensagem(carrinho))):
+        return None
+    return [individual["id"], carrinho[0]["id"]]
+
+
+def _confere_custo(ctx, vendas, esperado):
+    for venda in vendas:
+        gravado = _custo_da_venda(venda)
+        status, vo = ctx.api("GET", "/api/storage/sales/v1/%d" % venda)
+        exposto = vo.get("saleCost") if status == 200 and isinstance(vo, dict) else "HTTP %s" % status
+        R.exige(gravado == esperado and exposto == esperado, "custo da venda %d diferente do esperado" % venda,
+                "esperado %s, banco %s, API %s" % (esperado, gravado, exposto))
+
+
+@caso("CT-53", "Venda guarda o custo do momento e a nota seguinte nao o muda")
+def ct53(ctx):
+    pid = ctx.cria_produto(0, "CT53")
+    codigo = _gtin(5)
+    status, corpo = _define_codigo(ctx, pid, codigo)
+    if not R.exige(status == 200, "pre-condicao falhou: codigo nao gravado", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+    xml, _, _ = _nota([(codigo, "Item CT53", "UN", 10, 100.0)])
+    status, corpo = _importa(ctx, xml, [_item_existente(1, pid, 1, 10)])
+    if not R.exige(status == 200, "primeira nota recusada", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+    if not R.exige(_aloca(ctx, pid, ctx.prateleira_a, 8, 25.0) == 200, "pre-condicao falhou: alocacao recusada"):
+        return
+    entrada = entrada_de(pid, ctx.prateleira_a)
+    if not R.exige(entrada is not None, "pre-condicao falhou: entrada nao criada"):
+        return
+
+    vendas = _vende_e_carrinho(ctx, pid, entrada["id"])
+    if vendas is None:
+        return
+    _confere_custo(ctx, vendas, 10.0)
+
+    xml, _, _ = _nota([(codigo, "Item CT53", "UN", 10, 200.0)])
+    status, corpo = _importa(ctx, xml, [_item_existente(1, pid, 1, 10)])
+    if not R.exige(status == 200, "segunda nota recusada", "HTTP %s: %s" % (status, _mensagem(corpo))):
+        return
+    custo_novo = _produto_no_banco(pid)["custo"]
+    R.exige(custo_novo not in (None, 10.0), "a segunda nota nao mudou o custo do produto", "%r" % custo_novo)
+    _confere_custo(ctx, vendas, 10.0)
+
+    novas = _vende_e_carrinho(ctx, pid, entrada["id"])
+    if novas is not None:
+        _confere_custo(ctx, novas, custo_novo)
+
+    sem_custo = ctx.cria_produto(5, "CT53 Sem Custo")
+    if not R.exige(_aloca(ctx, sem_custo, ctx.prateleira_a, 4, 9.0) == 200, "pre-condicao falhou: alocacao do produto sem custo recusada"):
+        return
+    entrada = entrada_de(sem_custo, ctx.prateleira_a)
+    if not R.exige(entrada is not None, "pre-condicao falhou: entrada do produto sem custo nao criada"):
+        return
+    vendas = _vende_e_carrinho(ctx, sem_custo, entrada["id"])
+    if vendas is not None:
+        _confere_custo(ctx, vendas, None)
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #

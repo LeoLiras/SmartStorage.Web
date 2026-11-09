@@ -82,6 +82,7 @@ namespace SmartStorage_API.Data.Converter.Implementations
                 ProductName = enter.ProductName ?? string.Empty,
                 ShelfName = enter.ShelfName ?? string.Empty,
                 SalePrice = origin.SalPrice,
+                SaleCost = origin.SalCusto,
                 SaleTotal = origin.SalPrice * (origin.SalQntd - origin.SalReturnedQntd)
             };
         }
