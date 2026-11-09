@@ -253,6 +253,21 @@ No Docker nada disso é necessário: o compose injeta tudo por variável de ambi
 </details>
 
 <details>
+<summary><b>Testando a API pelo Postman</b></summary>
+
+A pasta [`docs/postman`](docs/postman) traz uma requisição para cada rota do gateway, todas pela porta 4480, em pastas por domínio.
+
+1. No Postman, clique em **Import** e selecione os três arquivos da pasta: a coleção `SmartStorage.postman_collection.json` e os ambientes `SmartStorage-Docker.postman_environment.json` e `SmartStorage-Local.postman_environment.json`.
+2. No seletor de ambientes, escolha **SmartStorage Docker** para o stack do compose ou **SmartStorage Local** para os serviços rodando fora do Docker.
+3. Rode **Autenticação › Entrar**. O token fica guardado numa variável da coleção e vale 60 minutos; depois disso, rode de novo.
+
+No ambiente **Local**, o gateway responde em HTTPS com o certificado de desenvolvimento, então é preciso desligar a verificação de SSL em **Settings › General › SSL certificate verification**.
+
+Os corpos e IDs de exemplo valem para um banco recém-criado pelo seed, com a coleção rodada na ordem; em um banco já usado, ajuste as variáveis da coleção. Rodar a coleção altera os dados, e com o `.env` preenchido **Cadastrar produto** e **Enviar e-mail de produto novo** enviam e-mails de verdade.
+
+</details>
+
+<details>
 <summary><b>Publicando novas imagens no Docker Hub</b></summary>
 
 ```bash
@@ -310,6 +325,7 @@ SmartStorage.Web/
 ├── docker-compose.yml              # orquestração dos 10 containers
 ├── .env.example                    # modelo das variáveis de ambiente
 ├── docs/screenshots/               # telas usadas neste README
+├── docs/postman/                   # coleção e ambientes do Postman
 ├── tests/                          # roteiro fim a fim do ledger
 └── src/
     ├── SmartStorage.API/           # API core (domínio + HATEOAS)

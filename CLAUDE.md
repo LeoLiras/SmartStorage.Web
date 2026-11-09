@@ -75,7 +75,9 @@ Cada projeto executável tem seu próprio `UserSecretsId`. Os `appsettings.json`
 
 O Blazor não conhece o endereço de nenhum serviço — as cinco chaves `ServiceUrls:*` em `wwwroot/appsettings*.json` apontam todas para o gateway (4480). São 42 rotas em `SmartStorage.APIGateway/appsettings.json` (dev) e `appsettings.Docker.json` (compose, ativado por `ASPNETCORE_ENVIRONMENT: Docker`).
 
-**Os dois arquivos precisam declarar as rotas na mesma ordem.** A configuração JSON do .NET faz merge de arrays por índice, então `appsettings.Docker.json` só sobrescreve corretamente se cada rota estiver na mesma posição e com todos os campos redeclarados. Ao adicionar um endpoint, edite os dois.
+**Os dois arquivos precisam declarar as rotas na mesma ordem.** A configuração JSON do .NET faz merge de arrays por índice, então `appsettings.Docker.json` só sobrescreve corretamente se cada rota estiver na mesma posição e com todos os campos redeclarados. Ao adicionar um endpoint, edite os dois e acrescente a requisição na coleção do Postman (`docs/postman/SmartStorage.postman_collection.json`); rota alterada ou removida muda nos três no mesmo commit, inclusive quando só muda o corpo, a query ou o papel exigido.
+
+`SmartStorage.APIGateway.Tests` confere isso no `dotnet test`, lendo os arquivos do repositório: os dois `appsettings` declaram as mesmas rotas na mesma ordem, cada rota tem exatamente uma requisição na coleção e nenhuma requisição fica sem rota. A comparação é por método e caminho, sem a query string e com `{id}` e `{{productId}}` valendo como o mesmo trecho; corpo, papel e campos do downstream não são conferidos.
 
 Cuidado com as portas: as rotas de **dev** apontam para as portas **HTTPS** dos serviços (5100, 5102, 5104, 5106, 5202), que são diferentes das portas publicadas pelo compose (5100, 5103, 5105, 5107, 5202).
 
