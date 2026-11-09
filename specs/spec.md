@@ -320,7 +320,7 @@ movimentação com autor e instante.
   muda ao alocar
 - RN-17: o custo do produto é a média ponderada pelo saldo total antes da
   entrada; o custo do item da nota é `vProd ÷ quantidade de entrada`
-- RN-41 [planejado #50]: a venda congela o custo médio do produto no momento,
+- RN-41 [feito]: a venda congela o custo médio do produto no momento,
   e uma nota importada depois não muda a margem de vendas antigas; venda de
   produto sem custo, e as anteriores à #50, ficam sem custo e fora da margem
 

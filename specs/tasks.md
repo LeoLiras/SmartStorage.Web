@@ -29,7 +29,7 @@ issues; as abertas seguem a "Ordem de implementação" do plano.
 - O commit que conclui a última tarefa de um requisito troca, na `spec.md`,
   o `[planejado #N]` dele por `[feito]`
 - Casos novos do roteiro recebem o próximo `CT-xx` livre (o último é o
-  CT-52) quando forem escritos
+  CT-53) quando forem escritos
 
 ## Concluídas
 
@@ -330,8 +330,8 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 ### #50 Custo na venda (T-50)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|---|
-| T-50.01 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | `Sale.SalCusto` e a migration, sem preencher as vendas antigas | RN-41, D-49 | T-00.29 | `has-pending-model-changes` limpo; o `migrator` aplica sobre um banco com vendas, que ficam com `SalCusto` nulo | |
-| T-50.02 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | A venda individual e o carrinho copiam o `ProCusto` para o `SalCusto`; o `SaleVO` expõe o custo | RF-52, RN-41, D-49 | T-50.01 | Caso novo no `ledger_e2e.py`: venda individual e pelo carrinho gravam o custo do momento, uma NF-e depois não muda o `SalCusto` e produto sem custo vende com nulo; o roteiro inteiro passa | |
+| T-50.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | `Sale.SalCusto` e a migration, sem preencher as vendas antigas | RN-41, D-49 | T-00.29 | `has-pending-model-changes` limpo; o `migrator` aplica sobre um banco com vendas, que ficam com `SalCusto` nulo | `b6ffdde` |
+| T-50.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | A venda individual e o carrinho copiam o `ProCusto` para o `SalCusto`; o `SaleVO` expõe o custo | RF-52, RN-41, D-49 | T-50.01 | Caso novo no `ledger_e2e.py`: venda individual e pelo carrinho gravam o custo do momento, uma NF-e depois não muda o `SalCusto` e produto sem custo vende com nulo; o roteiro inteiro passa | `662fac0` |
 | T-50.03 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Card de margem bruta do mês no dashboard, só sobre as vendas com custo e com a contagem das que ficaram de fora | RF-52, D-49 | T-50.02, T-46.03 | Teste de unidade da agregação com vendas com e sem custo e com devolução; bUnit do card; tela conferida em desktop e celular | |
 
 ### #52 Coleção do Postman (T-52)
