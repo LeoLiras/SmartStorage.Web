@@ -171,6 +171,42 @@ public class AlocacaoEmLoteTests : BunitContext, IAsyncLifetime
         Assert.True(Botao(cut, "Alocar 2 produto(s)").HasAttribute("disabled"));
     }
 
+    private static IRenderedComponent<MudNumericField<decimal>> Preco(IRenderedComponent<IComponent> cut)
+        => cut.FindComponents<MudNumericField<decimal>>().Single(n => n.Instance.Label == "Preço");
+
+    // O formato "C" do pt-BR separa o R$ do valor com espaço inquebrável.
+    private static string TextoDoPreco(IRenderedComponent<IComponent> cut)
+        => Preco(cut).Find(".mud-input-helper-text").TextContent.Replace(' ', ' ').Trim();
+
+    [Fact]
+    public void Texto_do_preco_troca_ao_mudar_o_valor_e_volta_ao_restaurar_o_preco_inicial()
+    {
+        Monta(new[] { Produto(41, 25.5m) }, new[] { Entrada(1, 41, 1, 3) });
+        var cut = RenderizaLote("41");
+        Assert.Equal("Preço inicial do produto", TextoDoPreco(cut));
+
+        Preco(cut).Find("input").Change("30,00");
+
+        cut.WaitForAssertion(() => Assert.Equal("Preço inicial: R$ 25,50", TextoDoPreco(cut)));
+
+        Preco(cut).Find("input").Change("25,50");
+
+        cut.WaitForAssertion(() => Assert.Equal("Preço inicial do produto", TextoDoPreco(cut)));
+    }
+
+    [Fact]
+    public void Produto_sem_preco_inicial_mantem_o_texto_ao_digitar_um_preco()
+    {
+        Monta(new[] { Produto(41, null) }, new[] { Entrada(1, 41, 1, 3) });
+        var cut = RenderizaLote("41");
+        Assert.Equal("Produto sem preço inicial", TextoDoPreco(cut));
+
+        Preco(cut).Find("input").Change("30,00");
+
+        cut.WaitForAssertion(() => Assert.Equal(30m, Preco(cut).Instance.Value));
+        Assert.Equal("Produto sem preço inicial", TextoDoPreco(cut));
+    }
+
     [Fact]
     public void Teto_da_prateleira_e_somado_entre_os_itens_do_lote()
     {

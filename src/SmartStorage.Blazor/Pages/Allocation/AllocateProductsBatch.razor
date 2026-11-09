@@ -46,7 +46,7 @@ else
                                 <MudNumericField T="int" Label="Quantidade" @bind-Value="row.Qntd" Min="1" Validation="@(new Func<int, string>(qntd => QuantityError(row, qntd)))" Error="@(QuantityError(row, row.Qntd) is not null)" ErrorText="@QuantityError(row, row.Qntd)" Variant="Variant.Outlined" />
                             </MudItem>
                             <MudItem xs="12" sm="4">
-                                <MudNumericField Culture="InputCulture.PtBr" T="decimal" Label="Preço" @bind-Value="row.Price" Format="F2" Min="0m" HelperText="@(row.Product.PrecoInicial is null ? "Produto sem preço inicial" : "Preço inicial do produto")" Variant="Variant.Outlined" />
+                                <MudNumericField Culture="InputCulture.PtBr" T="decimal" Label="Preço" @bind-Value="row.Price" Format="F2" Min="0m" HelperText="@PriceHelperText(row)" Variant="Variant.Outlined" />
                             </MudItem>
                             <MudItem xs="12" sm="4">
                                 <MudNumericField Culture="InputCulture.PtBr" T="decimal" Label="Volume necessário (L)" Value="RequiredVolume(row)" Format="0.###" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
@@ -282,6 +282,14 @@ else
     private static string QuantityError(BatchRow row, int qntd) => qntd > row.Product.Qntd ? $"Há {row.Product.Qntd} no depósito" : null;
 
     private static decimal RequiredVolume(BatchRow row) => row.Qntd * (row.Product.Volume ?? 0);
+
+    private static string PriceHelperText(BatchRow row)
+    {
+        if (row.Product.PrecoInicial is not decimal initialPrice)
+            return "Produto sem preço inicial";
+
+        return row.Price == initialPrice ? "Preço inicial do produto" : $"Preço inicial: {initialPrice.ToString("C", PtBr)}";
+    }
 
     private string ShelfLabel(int shelfId)
     {
