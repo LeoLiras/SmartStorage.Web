@@ -145,10 +145,10 @@ movimentação com autor e instante.
 - RF-47 [planejado #32]: a edição de prateleiras e colaboradores também exige
   administrador, como o cadastro, porque o volume da prateleira é o que limita
   a alocação (RN-08, RN-40)
-- RF-53 [planejado #51]: a API confere o que hoje só o Blazor confere: a
-  imagem do produto é PNG ou JPEG, pela assinatura do arquivo, e tem até
-  10 MB, no cadastro, na edição e no produto novo da NF-e; e a alocação
-  individual recusa preço menor ou igual a zero, como o lote
+- RF-53 [feito]: a API confere que a imagem do produto é PNG ou JPEG, pela
+  assinatura do arquivo, e tem até 10 MB, no cadastro, na edição e no produto
+  novo da NF-e; e a alocação individual recusa preço menor ou igual a zero,
+  como o lote
 
 ### Entrada de mercadoria (NF-e) (#25)
 - RF-09 [feito]: o operador envia o XML da NF-e modelo 55 e recebe uma prévia
@@ -433,8 +433,8 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
   sistema lança a diferença
 - Nome igual ao de outro produto: recusado
 - Imagem que não é PNG ou JPEG: o seletor não a aceita; a imagem é
-  redimensionada no navegador e recusada se ainda passar de 10 MB. Pela #51,
-  a API recusa também quando a tela é contornada (RF-53)
+  redimensionada no navegador e recusada se ainda passar de 10 MB. A API
+  recusa também quando a tela é contornada (RF-53)
 
 ### Entrada por NF-e
 - Arquivo que não é NF-e, ou NF-e modelo 65: recusado na prévia, nada é lido
@@ -572,11 +572,7 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 ### Regras (sem issue)
 - O tipo de movimentação `Perda` existe no ledger, mas nenhuma tela ou
   endpoint o lança
-- A alocação individual aceita preço zero ou negativo; o lote recusa (#51,
-  RF-53)
 - Toda recusa responde 400, inclusive recurso inexistente, que seria 404
-- A imagem do produto só é conferida no Blazor: a API grava qualquer
-  conteúdo, sem checar PNG ou JPEG nem o limite de 10 MB (#51, RF-53)
 
 ### Código (sem issue)
 - As mensagens de validação da AuthenticationAPI estão em inglês ("Username

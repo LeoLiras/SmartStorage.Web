@@ -33,14 +33,14 @@ Três atritos do bUnit 2 com MudBlazor, já resolvidos em `RegistroDeVendaTests`
 
 ### Testes de unidade da API (`dotnet test`)
 
-`SmartStorage.API.Tests` (xUnit, sem banco) cobre o que é função pura na API core: a leitura do XML da NF-e em `NfeXmlReader` (cabeçalho, itens, `SEM GTIN`, dígito verificador do GTIN, modelo 65 e arquivo que não é NF-e) e o custo médio de `InvoiceBusinessImplementation.AverageCost`. Roda no CI junto com o bUnit, porque o passo de testes chama a solution inteira.
+`SmartStorage.API.Tests` (xUnit, sem banco) cobre o que é função pura na API core: a leitura do XML da NF-e em `NfeXmlReader` (cabeçalho, itens, `SEM GTIN`, dígito verificador do GTIN, modelo 65 e arquivo que não é NF-e), o custo médio de `InvoiceBusinessImplementation.AverageCost`, a conferência de imagem em `ProductImagePolicy` e a recusa de preço da alocação individual no `ShelfController`. Roda no CI junto com o bUnit, porque o passo de testes chama a solution inteira.
 
 ### Roteiro fim-a-fim (`tests/ledger_e2e.py`)
 
 Script Python de biblioteca padrão que entra pelo gateway como cliente e confere o banco a cada passo:
 
 ```bash
-python tests/ledger_e2e.py              # os 50 casos, ~9 min
+python tests/ledger_e2e.py              # os 52 casos, ~9 min
 python tests/ledger_e2e.py --caso CT-08 # um caso só
 python tests/ledger_e2e.py --manter     # preserva os produtos criados, para inspeção
 ```
@@ -153,6 +153,8 @@ Um produto só fica em **uma prateleira por vez**: `EnsureSingleShelf` recusa a 
 A alocação em lote (#20) é `POST /shelf/v1/allocation/batch` (`AllocationBatchVO`), **tudo ou nada** como o carrinho: `AllocateProductsToShelves` valida todos os itens antes de escrever — produto e prateleira existentes, produto repetido no lote (recusado), quantidade e preço positivos, saldo do depósito, `EnsureSingleShelf` e `EnsureShelfFits` com o volume dos itens anteriores do lote na mesma prateleira já descontado — e responde `Item N (produto na prateleira): motivo`. Grava numa transação, dois lançamentos `Alocacao` por item com o mesmo instante, e repreça cada prateleira como a alocação individual. `Product.ProPrecoInicial` (`decimal(18,2)`, opcional, `PrecoInicial` no VO) é só o preço padrão das telas de alocação e nunca muda ao alocar; a migration `AddProductInitialPrice` copiou para os produtos existentes o `EntPrice` da prateleira com saldo, ou da entrada mais recente. No Blazor, os cards de Produtos em estoque têm seleção e levam a `/product/allocation/batch?ids=…`, que abre cada produto com quantidade 1, o preço inicial e a prateleira onde ele já tem saldo, e avisa teto somado e segunda prateleira — quem recusa é a API.
 
 Capacidade de prateleira (#11) é por **volume em litros**: `Product.ProVolume` e `Shelf.SheVolume`, `decimal(18,3)` e opcionais. O teto útil é **90% do volume da prateleira** (`ShelfVO.UsableFraction`), porque volume não considera encaixe. `EnsureShelfFits` em `ShelfBusinessImplementation` recusa a alocação e a transferência quando o produto ou a prateleira destino não têm volume, ou quando `quantidade × volume do produto` passa do que resta do teto — a prateleira no limite não aceita mais nada. O volume usado é `SUM(EntQntd × ProVolume)` das entradas da prateleira, calculado em lote no `ShelfConverter`, que devolve `volume`, `usedVolume`, `usableVolume`, `freeVolume` e `occupancy` no `ShelfVO`. Cancelar venda e desfazer alocação não checam capacidade: devolvem o que já estava lá. Não há tela de cadastro de prateleiras; o volume entra pelo POST/PUT de `/shelf/v1` e pelo seed. A tela de alocação sempre busca as prateleiras na API, porque a ocupação em cache ficaria velha.
+
+A imagem do produto (#51) é conferida na API por `ProductImagePolicy` (`SmartStorage.Shared/Validation`), no cadastro, na edição e no produto novo da NF-e, onde a recusa sai como `Item N (descrição): motivo`: PNG ou JPEG **pela assinatura do arquivo**, porque o corpo da requisição só traz os bytes, e até 10 MB; imagem vazia é permitida. O seletor da tela (`ProductImagePicker`) filtra só a extensão e redimensiona antes de enviar, então é a API que barra o conteúdo errado, e um arquivo acima de 10 MB pode passar pela tela por chegar reduzido. A alocação individual recusa preço menor ou igual a zero no `ShelfController`, antes de qualquer gravação e com a mesma mensagem do lote.
 
 O seed vive em `Context/Seed/SeedData.cs` via `HasData` no `OnModelCreating`, então viaja com as migrations e é aplicado pelo `migrator`. Todas as datas do seed são `static readonly` constantes: qualquer `DateTime.Now` em `HasData` faz o EF detectar mudança de modelo a cada `migrations add`. As imagens dos produtos são PNGs em base64 em `SeedImages.cs`, porque `Product.ProImage` é `varbinary(max)`.
 
