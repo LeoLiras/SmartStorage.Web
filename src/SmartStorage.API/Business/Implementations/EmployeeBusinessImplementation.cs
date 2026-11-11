@@ -1,4 +1,5 @@
-﻿using SmartStorage_API.Data.Converter.Implementations;
+﻿using SmartStorage.Shared.Validation;
+using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
 using SmartStorage_Shared.Model;
 using SmartStorage_Shared.VO;
@@ -37,7 +38,7 @@ namespace SmartStorage_API.Service.Implementations
             var employee = _context.Employees.FirstOrDefault(e => e.EmpId.Equals(employeeId));
 
             if (employee is null)
-                throw new Exception("Funcionário não encontrado com o ID informado");
+                throw new BusinessException("Funcionário não encontrado com o ID informado");
 
             return _converter.Parse(employee);
         }
@@ -47,7 +48,7 @@ namespace SmartStorage_API.Service.Implementations
             var searchEmployee = _context.Employees.FirstOrDefault(x => x.EmpCpf == employee.Cpf);
 
             if (searchEmployee != null)
-                throw new Exception("Funcionário já registrado com o CPF informado.");
+                throw new BusinessException("Funcionário já registrado com o CPF informado.");
 
             var newEmployee = new Employee
             {
@@ -68,14 +69,14 @@ namespace SmartStorage_API.Service.Implementations
             var searchEmployee = _context.Employees.FirstOrDefault(x => x.EmpId == employeeId);
 
             if (searchEmployee == null)
-                throw new Exception("Funcionário com ID informado não encontrado na base de dados.");
+                throw new BusinessException("Funcionário com ID informado não encontrado na base de dados.");
 
             if (!string.IsNullOrWhiteSpace(employee.Cpf))
             {
                 var searchEmployeeCpf = _context.Employees.FirstOrDefault(x => x.EmpCpf == employee.Cpf && x.EmpId != employeeId);
 
                 if (searchEmployeeCpf != null)
-                    throw new Exception("Funcionário já registrado com o CPF informado.");
+                    throw new BusinessException("Funcionário já registrado com o CPF informado.");
 
                 searchEmployee.EmpCpf = employee.Cpf;
             }
@@ -96,7 +97,7 @@ namespace SmartStorage_API.Service.Implementations
             var employee = _context.Employees.FirstOrDefault(e => e.EmpId == employeeId);
 
             if (employee is null)
-                throw new Exception("Funcionário não encontrado com o Id informado");
+                throw new BusinessException("Funcionário não encontrado com o Id informado");
 
             var products = _context.Products.Where(p => p.ProEmpId == employeeId).ToList();
 

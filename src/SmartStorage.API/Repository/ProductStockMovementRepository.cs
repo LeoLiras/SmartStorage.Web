@@ -1,4 +1,5 @@
 ﻿using SmartStorage.Shared.Enum;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Model.Context;
 using SmartStorage_API.Repository.Interfaces;
 using SmartStorage_Shared.Model;
@@ -56,10 +57,10 @@ namespace SmartStorage_API.Repository
             DateTime? date = null)
         {
             if (quantity <= 0)
-                throw new Exception("A quantidade da transferência deve ser maior que zero.");
+                throw new BusinessException("A quantidade da transferência deve ser maior que zero.");
 
             if (fromShelfId == toShelfId)
-                throw new Exception("A origem e o destino da transferência são o mesmo local.");
+                throw new BusinessException("A origem e o destino da transferência são o mesmo local.");
 
             var userId = FindAuthenticatedUserId();
 
@@ -112,10 +113,10 @@ namespace SmartStorage_API.Repository
             DateTime? date)
         {
             if (quantity == 0)
-                throw new Exception("A quantidade da movimentação não pode ser zero.");
+                throw new BusinessException("A quantidade da movimentação não pode ser zero.");
 
             if (type == TipoMovimentacao.Ajuste && string.IsNullOrWhiteSpace(reason))
-                throw new Exception("O motivo é obrigatório no ajuste de estoque.");
+                throw new BusinessException("O motivo é obrigatório no ajuste de estoque.");
 
             var product = FindProductById(productId);
 
@@ -124,7 +125,7 @@ namespace SmartStorage_API.Repository
             if (shelfId is null)
             {
                 if (product.ProQntd + quantity < 0)
-                    throw new Exception($"Saldo insuficiente no depósito: há {product.ProQntd} e a movimentação pede {Math.Abs(quantity)}.");
+                    throw new BusinessException($"Saldo insuficiente no depósito: há {product.ProQntd} e a movimentação pede {Math.Abs(quantity)}.");
 
                 product.ProQntd += quantity;
             }
@@ -135,10 +136,10 @@ namespace SmartStorage_API.Repository
                 if (enter is null)
                 {
                     if (quantity < 0)
-                        throw new Exception($"Saldo insuficiente na prateleira {shelfId}: há 0 e a movimentação pede {Math.Abs(quantity)}.");
+                        throw new BusinessException($"Saldo insuficiente na prateleira {shelfId}: há 0 e a movimentação pede {Math.Abs(quantity)}.");
 
                     var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId.Value)
-                        ?? throw new Exception("Prateleira não encontrada na base de dados");
+                        ?? throw new BusinessException("Prateleira não encontrada na base de dados");
 
                     enter = new Enter
                     {
@@ -153,7 +154,7 @@ namespace SmartStorage_API.Repository
                 }
 
                 if (enter.EntQntd + quantity < 0)
-                    throw new Exception($"Saldo insuficiente na prateleira {shelfId}: há {enter.EntQntd} e a movimentação pede {Math.Abs(quantity)}.");
+                    throw new BusinessException($"Saldo insuficiente na prateleira {shelfId}: há {enter.EntQntd} e a movimentação pede {Math.Abs(quantity)}.");
 
                 enter.EntQntd += quantity;
 
@@ -182,19 +183,19 @@ namespace SmartStorage_API.Repository
             var username = _httpContextAccessor.HttpContext?.User.Identity?.Name;
 
             if (string.IsNullOrWhiteSpace(username))
-                throw new Exception("Não foi possível identificar o usuário autenticado.");
+                throw new InvalidOperationException("Não foi possível identificar o usuário autenticado.");
 
             return _context.Users
                 .Where(u => u.Username == username)
                 .Select(u => (long?)u.Id)
                 .FirstOrDefault()
-                ?? throw new Exception("Usuário autenticado não encontrado na base de dados");
+                ?? throw new InvalidOperationException("Usuário autenticado não encontrado na base de dados");
         }
 
         private Product FindProductById(int productId)
         {
             return _context.Products.FirstOrDefault(p => p.ProId == productId)
-                ?? throw new Exception("Produto não encontrado na base de dados");
+                ?? throw new BusinessException("Produto não encontrado na base de dados");
         }
 
         private Enter FindEnterByProductAndShelf(int productId, int shelfId)

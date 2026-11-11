@@ -45,10 +45,10 @@ namespace SmartStorage_API.Service.Implementations
         public (List<ProductVO> Items, int Total) FindProductsPage(int page, int pageSize, string search)
         {
             if (page < 1)
-                throw new Exception("A página deve ser maior que zero.");
+                throw new BusinessException("A página deve ser maior que zero.");
 
             if (pageSize < 1 || pageSize > Pagination.MaxPageSize)
-                throw new Exception($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
+                throw new BusinessException($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
 
             var query = _context.Products.AsQueryable();
 
@@ -72,7 +72,7 @@ namespace SmartStorage_API.Service.Implementations
             var product = _context.Products.SingleOrDefault(x => x.ProId.Equals(id));
 
             if (product is null)
-                throw new Exception("Produto não encontrado com o ID informado");
+                throw new BusinessException("Produto não encontrado com o ID informado");
 
             return _converter.Parse(product);
         }
@@ -82,15 +82,15 @@ namespace SmartStorage_API.Service.Implementations
             var productSearch = _context.Products.FirstOrDefault(x => x.ProName == product.Name);
 
             if (productSearch != null)
-                throw new Exception("Produto já cadastrado.");
+                throw new BusinessException("Produto já cadastrado.");
 
             var emplyeeSearch = _context.Employees.FirstOrDefault(x => x.EmpId == product.EmployeeId);
 
             if (emplyeeSearch == null)
-                throw new Exception("Funcionario não encontrado com o ID informado.");
+                throw new BusinessException("Funcionario não encontrado com o ID informado.");
 
             if (product.Qntd < 0)
-                throw new Exception("A quantidade do produto não pode ser negativa.");
+                throw new BusinessException("A quantidade do produto não pode ser negativa.");
 
             ValidateMinimumStock(product.MinimumStock);
 
@@ -138,17 +138,17 @@ namespace SmartStorage_API.Service.Implementations
             var searchProduct = _context.Products.FirstOrDefault(x => x.ProId == productId);
 
             if (searchProduct == null)
-                throw new Exception("Produto não encontrado com o ID informado.");
+                throw new BusinessException("Produto não encontrado com o ID informado.");
 
             var prod = _context.Products.FirstOrDefault(x => x.ProName == product.Name && x.ProId != productId);
 
             if (prod != null)
-                throw new Exception("Já existe um produto cadastrado com esse nome.");
+                throw new BusinessException("Já existe um produto cadastrado com esse nome.");
 
             var employee = _context.Employees.FirstOrDefault(x => x.EmpId == product.EmployeeId);
 
             if (employee == null)
-                throw new Exception("Colaborador com o ID informado não encontrado.");
+                throw new BusinessException("Colaborador com o ID informado não encontrado.");
 
             ValidateMinimumStock(product.MinimumStock);
 
@@ -208,7 +208,7 @@ namespace SmartStorage_API.Service.Implementations
             var product = _context.Products.FirstOrDefault(x => x.ProId == productId);
 
             if (product is null)
-                throw new Exception("Produto não encontrado com o ID informado.");
+                throw new BusinessException("Produto não encontrado com o ID informado.");
 
             var delta = CalculateStockAdjustmentDelta(product, newQuantity);
 
@@ -234,12 +234,12 @@ namespace SmartStorage_API.Service.Implementations
             code = code.Trim();
 
             if (!NfeXmlReader.IsValidGtin(code))
-                throw new Exception("O código de barras não é um GTIN válido: confira os dígitos.");
+                throw new BusinessException("O código de barras não é um GTIN válido: confira os dígitos.");
 
             var owner = _context.Products.FirstOrDefault(p => p.ProCodigo == code && p.ProId != productId);
 
             if (owner is not null)
-                throw new Exception($"O código de barras {code} já pertence ao produto {owner.ProName}.");
+                throw new BusinessException($"O código de barras {code} já pertence ao produto {owner.ProName}.");
 
             return code;
         }
@@ -247,13 +247,13 @@ namespace SmartStorage_API.Service.Implementations
         private static void ValidateConversionFactor(int factor)
         {
             if (factor < 1)
-                throw new Exception("O fator de conversão deve ser maior que zero.");
+                throw new BusinessException("O fator de conversão deve ser maior que zero.");
         }
 
         private static void ValidateMinimumStock(int minimumStock)
         {
             if (minimumStock < 0)
-                throw new Exception("O estoque mínimo não pode ser negativo.");
+                throw new BusinessException("O estoque mínimo não pode ser negativo.");
         }
 
         private static void ValidateImage(byte[] image)
@@ -261,30 +261,30 @@ namespace SmartStorage_API.Service.Implementations
             var refusal = ProductImagePolicy.Validate(image);
 
             if (refusal is not null)
-                throw new Exception(refusal);
+                throw new BusinessException(refusal);
         }
 
         private static void ValidateVolume(decimal? volume)
         {
             if (volume <= 0)
-                throw new Exception("O volume do produto deve ser maior que zero.");
+                throw new BusinessException("O volume do produto deve ser maior que zero.");
         }
 
         private static void ValidateInitialPrice(decimal? price)
         {
             if (price <= 0)
-                throw new Exception("O preço inicial do produto deve ser maior que zero.");
+                throw new BusinessException("O preço inicial do produto deve ser maior que zero.");
         }
 
         private static int CalculateStockAdjustmentDelta(Product product, int newQuantity)
         {
             if (newQuantity < 0)
-                throw new Exception("A quantidade do ajuste não pode ser negativa.");
+                throw new BusinessException("A quantidade do ajuste não pode ser negativa.");
 
             var quantityDelta = newQuantity - product.ProQntd;
 
             if (quantityDelta == 0)
-                throw new Exception("A quantidade informada é igual ao saldo atual do depósito.");
+                throw new BusinessException("A quantidade informada é igual ao saldo atual do depósito.");
 
             return quantityDelta;
         }
