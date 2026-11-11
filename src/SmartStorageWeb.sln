@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.APIGateway.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.AuthenticationAPI.Tests", "SmartStorage.AuthenticationAPI.Tests\SmartStorage.AuthenticationAPI.Tests.csproj", "{CEC10BC6-02D4-4706-B741-566080A14686}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartStorage.Configurations.Tests", "SmartStorage.Configurations.Tests\SmartStorage.Configurations.Tests.csproj", "{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -235,6 +237,18 @@ Global
 		{CEC10BC6-02D4-4706-B741-566080A14686}.Release|x64.Build.0 = Release|Any CPU
 		{CEC10BC6-02D4-4706-B741-566080A14686}.Release|x86.ActiveCfg = Release|Any CPU
 		{CEC10BC6-02D4-4706-B741-566080A14686}.Release|x86.Build.0 = Release|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Debug|x64.Build.0 = Debug|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Debug|x86.Build.0 = Debug|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Release|x64.ActiveCfg = Release|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Release|x64.Build.0 = Release|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Release|x86.ActiveCfg = Release|Any CPU
+		{EF9EC43D-8D8A-4A30-952D-2BF849A58CB6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
