@@ -186,6 +186,72 @@ public class ImportacaoDeNotaFiscalTests : BunitContext, IAsyncLifetime
         Assert.Equal(100, Numero(cut, "Quantidade de entrada", 1).Instance.Value);
     }
 
+    private static IElement? BotaoUsarSugerida(IRenderedComponent<IComponent> cut)
+        => cut.FindAll("button").FirstOrDefault(b => b.TextContent.Trim() == "Usar sugerida");
+
+    [Fact]
+    public void Quantidade_editada_mostra_a_sugerida_e_volta_a_ela()
+    {
+        var api = Monta(Previa());
+        var cut = RenderizaComNota();
+
+        Assert.Equal("10 UN × 1", Numero(cut, "Quantidade de entrada", 1).Instance.HelperText);
+        Assert.Null(BotaoUsarSugerida(cut));
+
+        cut.InvokeAsync(() => Numero(cut, "Quantidade de entrada", 1).Instance.ValueChanged.InvokeAsync(9));
+        cut.WaitForAssertion(() => Assert.Equal("Editada à mão · sugerida: 10", Numero(cut, "Quantidade de entrada", 1).Instance.HelperText), TimeSpan.FromSeconds(5));
+        Assert.NotNull(BotaoUsarSugerida(cut));
+
+        cut.InvokeAsync(() => Numero(cut, "Fator de conversão", 1).Instance.ValueChanged.InvokeAsync(12));
+        cut.WaitForAssertion(() => Assert.Equal("Editada à mão · sugerida: 120", Numero(cut, "Quantidade de entrada", 1).Instance.HelperText), TimeSpan.FromSeconds(5));
+        Assert.Equal(9, Numero(cut, "Quantidade de entrada", 1).Instance.Value);
+
+        BotaoUsarSugerida(cut)!.Click();
+        cut.WaitForAssertion(() => Assert.Equal(120, Numero(cut, "Quantidade de entrada", 1).Instance.Value), TimeSpan.FromSeconds(5));
+        Assert.Null(BotaoUsarSugerida(cut));
+        Assert.Equal("10 UN × 12", Numero(cut, "Quantidade de entrada", 1).Instance.HelperText);
+
+        cut.InvokeAsync(() => Numero(cut, "Fator de conversão", 1).Instance.ValueChanged.InvokeAsync(6));
+        cut.WaitForAssertion(() => Assert.Equal(60, Numero(cut, "Quantidade de entrada", 1).Instance.Value), TimeSpan.FromSeconds(5));
+
+        BotaoImportar(cut).Click();
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Post && r.Caminho == CaminhoImportacao), TimeSpan.FromSeconds(5));
+        var item = api.JsonDe(HttpMethod.Post, CaminhoImportacao).RootElement.GetProperty("items").EnumerateArray().ElementAt(1);
+        Assert.Equal(6, item.GetProperty("fatorConversao").GetInt32());
+        Assert.Equal(60, item.GetProperty("qntdEstoque").GetInt32());
+    }
+
+    [Fact]
+    public void Quantidade_editada_sem_sugestao_inteira_nao_oferece_voltar()
+    {
+        var previa = new
+        {
+            chave = "35260912345678000195550010000012371000012348",
+            numero = "1237",
+            serie = "1",
+            emitenteCnpj = "12345678000195",
+            emitenteNome = "Distribuidora de Ferramentas Ltda",
+            dataEmissao = "2026-09-15T10:30:00",
+            importadaEm = (string?)null,
+            items = new object[]
+            {
+                new { numero = 1, codigo = (string?)null, codigoInvalido = (string?)null, descricao = "Fita Isolante 20 Metros", unidade = "RL", qntdNota = 2.5m, valorUnitario = 4m, valorTotal = 10m, productId = (int?)null, productName = (string?)null, fatorConversao = 1, qntdEstoque = (int?)null },
+            },
+        };
+        Monta(previa);
+        var cut = RenderizaComNota();
+
+        cut.InvokeAsync(() => Numero(cut, "Quantidade de entrada", 0).Instance.ValueChanged.InvokeAsync(3));
+
+        cut.WaitForAssertion(() => Assert.Equal("Editada à mão · sem sugestão inteira", Numero(cut, "Quantidade de entrada", 0).Instance.HelperText), TimeSpan.FromSeconds(5));
+        Assert.Null(BotaoUsarSugerida(cut));
+
+        cut.InvokeAsync(() => Numero(cut, "Fator de conversão", 0).Instance.ValueChanged.InvokeAsync(2));
+        cut.WaitForAssertion(() => Assert.Equal("Editada à mão · sugerida: 5", Numero(cut, "Quantidade de entrada", 0).Instance.HelperText), TimeSpan.FromSeconds(5));
+        Assert.Equal(3, Numero(cut, "Quantidade de entrada", 0).Instance.Value);
+        Assert.NotNull(BotaoUsarSugerida(cut));
+    }
+
     [Fact]
     public void Quantidade_zero_mostra_o_motivo_no_campo()
     {
