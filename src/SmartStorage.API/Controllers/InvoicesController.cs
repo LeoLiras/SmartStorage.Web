@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Service;
 using SmartStorage_Shared.VO;
 
@@ -35,7 +36,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (import is null)
-                    throw new Exception("O XML da nota fiscal é obrigatório.");
+                    throw new BusinessException("O XML da nota fiscal é obrigatório.");
 
                 return Ok(_invoiceService.PreviewInvoice(import.Xml));
             }
@@ -51,7 +52,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (import is null)
-                    throw new Exception("Os dados da importação são obrigatórios.");
+                    throw new BusinessException("Os dados da importação são obrigatórios.");
 
                 return Ok(_invoiceService.ImportInvoice(import));
             }

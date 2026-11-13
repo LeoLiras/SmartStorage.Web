@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Service;
 using SmartStorage_Shared.VO;
@@ -58,7 +59,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (saleId.Equals(0))
-                    throw new Exception("O ID da Venda é obrigatório.");
+                    throw new BusinessException("O ID da Venda é obrigatório.");
 
                 return Ok(_saleService.FindSaleById(saleId));
             }
@@ -75,10 +76,10 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (newSale.IdEnter.Equals(0))
-                    throw new Exception("O campo ID da Entrada é obrigatório.");
+                    throw new BusinessException("O campo ID da Entrada é obrigatório.");
 
                 if (newSale.Qntd.Equals(0))
-                    throw new Exception("O campo Quantidade da Venda é obrigatório.");
+                    throw new BusinessException("O campo Quantidade da Venda é obrigatório.");
 
                 return Ok(_saleService.CreateNewSale(newSale.IdEnter, newSale.Qntd, newSale.DateSale));
             }
@@ -95,10 +96,10 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (newSales is null)
-                    throw new Exception("Os dados do carrinho são obrigatórios.");
+                    throw new BusinessException("Os dados do carrinho são obrigatórios.");
 
                 if (newSales.DateSale == default)
-                    throw new Exception("O campo Data da Venda é obrigatório.");
+                    throw new BusinessException("O campo Data da Venda é obrigatório.");
 
                 return Ok(_saleService.CreateNewSales(newSales.Items, newSales.DateSale));
             }
@@ -115,10 +116,10 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (saleId.Equals(0))
-                    throw new Exception("O campo ID da Venda é obrigatório.");
+                    throw new BusinessException("O campo ID da Venda é obrigatório.");
 
                 if (newSale.Qntd.Equals(0))
-                    throw new Exception("O campo Quantidade da Venda é obrigatório.");
+                    throw new BusinessException("O campo Quantidade da Venda é obrigatório.");
 
                 return Ok(_saleService.UpdateSale(saleId, newSale.Qntd));
             }
@@ -135,7 +136,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (saleId.Equals(0))
-                    throw new Exception("O campo ID da Venda é obrigatório.");
+                    throw new BusinessException("O campo ID da Venda é obrigatório.");
 
                 return Ok(_saleService.DeleteSale(saleId));
             }
@@ -152,10 +153,10 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (saleId.Equals(0))
-                    throw new Exception("O campo ID da Venda é obrigatório.");
+                    throw new BusinessException("O campo ID da Venda é obrigatório.");
 
                 if (saleReturn is null)
-                    throw new Exception("Os dados da devolução são obrigatórios.");
+                    throw new BusinessException("Os dados da devolução são obrigatórios.");
 
                 return Ok(_saleService.ReturnSale(saleId, saleReturn.Quantity));
             }

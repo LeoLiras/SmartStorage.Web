@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.RabbitMQSender;
 using SmartStorage_API.Service;
@@ -75,7 +76,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(newProduct.Name))
-                    throw new Exception("O Nome do Produto é obrigatório.");
+                    throw new BusinessException("O Nome do Produto é obrigatório.");
 
                 _productService.CreateNewProduct(newProduct);
 
@@ -96,7 +97,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (productId.Equals(0))
-                    throw new Exception("O campo ID do Produto é obrigatório.");
+                    throw new BusinessException("O campo ID do Produto é obrigatório.");
 
                 return Ok(_productService.UpdateProduct(productId, product));
             }
@@ -113,10 +114,10 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (productId.Equals(0))
-                    throw new Exception("O campo ID do Produto é obrigatório.");
+                    throw new BusinessException("O campo ID do Produto é obrigatório.");
 
                 if (adjustment is null)
-                    throw new Exception("Os dados do ajuste são obrigatórios.");
+                    throw new BusinessException("Os dados do ajuste são obrigatórios.");
 
                 return Ok(_productService.AdjustProductStock(productId, adjustment.Quantity, adjustment.Reason));
             }

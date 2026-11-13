@@ -1,6 +1,7 @@
 ﻿using SmartStorage.AuthenticationAPI.Contract;
 using SmartStorage.AuthenticationAPI.Repositories;
 using SmartStorage.Shared.VO;
+using SmartStorage.Shared.Validation;
 using SmartStorage_Shared.Model;
 
 namespace SmartStorage.AuthenticationAPI.Services.Implementations
@@ -22,7 +23,7 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             var user = _repository.FindById(userId);
 
             if (user is null)
-                throw new Exception("Usuário não encontrado com o ID informado");
+                throw new BusinessException("Usuário não encontrado com o ID informado");
 
             return user;
         }
@@ -74,7 +75,7 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
         public void DeleteUser(int userId)
         {
             if (_repository.HasStockMovements(userId))
-                throw new Exception("Não é possível excluir o usuário pois há movimentações de estoque registradas por ele.");
+                throw new BusinessException("Não é possível excluir o usuário pois há movimentações de estoque registradas por ele.");
 
             _repository.Delete(userId);
         }

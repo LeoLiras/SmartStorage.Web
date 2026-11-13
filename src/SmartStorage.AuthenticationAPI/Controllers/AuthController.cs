@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartStorage.AuthenticationAPI.Services;
 using SmartStorage.Shared.Auth;
 using SmartStorage.Shared.VO;
+using SmartStorage.Shared.Validation;
 using SmartStorage_Shared.Model;
 
 namespace SmartStorage.AuthenticationAPI.Controllers
@@ -56,7 +57,7 @@ namespace SmartStorage.AuthenticationAPI.Controllers
             try
             {
                 if (userId.Equals(0))
-                    throw new Exception("O campo ID do Usuário é obrigatório.");
+                    throw new BusinessException("O campo ID do Usuário é obrigatório.");
 
                 return Ok(_userAuthService.FindUserById(userId));
             }

@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Service;
 using SmartStorage_Shared.VO;
@@ -44,7 +45,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (id.Equals(0))
-                    throw new Exception("O campo Id da Prateleira é obrigatório.");
+                    throw new BusinessException("O campo Id da Prateleira é obrigatório.");
 
                 return Ok(_shelfService.FindShelfById(id));
             }
@@ -99,7 +100,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(newShelf.Name))
-                    throw new Exception("O campo Nome da Prateleira é obrigatório.");
+                    throw new BusinessException("O campo Nome da Prateleira é obrigatório.");
 
                 return Ok(_shelfService.CreateNewShelf(newShelf));
             }
@@ -119,7 +120,7 @@ namespace SmartStorage_API.Controllers
                     return BadRequest("O campo Id é obrigatório.");
 
                 if (string.IsNullOrWhiteSpace(shelf.Name))
-                    throw new Exception("O campo Nome da Prateleira é obrigatório.");
+                    throw new BusinessException("O campo Nome da Prateleira é obrigatório.");
 
                 return Ok(_shelfService.UpdateShelf(shelfId, shelf));
             }
@@ -136,7 +137,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (shelfId.Equals(0))
-                    throw new Exception("O campo ID da Prateleira é obrigatório.");
+                    throw new BusinessException("O campo ID da Prateleira é obrigatório.");
 
                 return Ok(_shelfService.DeleteShelf(shelfId));
             }
@@ -153,16 +154,16 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (newAllocation.ProductId.Equals(0))
-                    throw new Exception("O campo ID do Produto é obrigatório.");
+                    throw new BusinessException("O campo ID do Produto é obrigatório.");
 
                 if (newAllocation.ShelfId.Equals(0))
-                    throw new Exception("O campo ID da Prateleira é obrigatório.");
+                    throw new BusinessException("O campo ID da Prateleira é obrigatório.");
 
                 if (newAllocation.ProductPrice <= 0)
-                    throw new Exception("O preço deve ser maior que zero.");
+                    throw new BusinessException("O preço deve ser maior que zero.");
 
                 if (newAllocation.ProductQuantity.Equals(0))
-                    throw new Exception("O campo Quantidade do Produto é obrigatório.");
+                    throw new BusinessException("O campo Quantidade do Produto é obrigatório.");
 
                 return Ok(_shelfService.AllocateProductToShelf(newAllocation));
             }
@@ -179,7 +180,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (batch is null)
-                    throw new Exception("Os dados do lote são obrigatórios.");
+                    throw new BusinessException("Os dados do lote são obrigatórios.");
 
                 return Ok(_shelfService.AllocateProductsToShelves(batch.Items));
             }
@@ -196,7 +197,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (enterId.Equals(0))
-                    throw new Exception("O campo ID da entrada é obrigatório.");
+                    throw new BusinessException("O campo ID da entrada é obrigatório.");
 
                 return Ok(_shelfService.UndoAllocate(enterId));
             }
@@ -213,10 +214,10 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (enterId.Equals(0))
-                    throw new Exception("O campo ID da entrada é obrigatório.");
+                    throw new BusinessException("O campo ID da entrada é obrigatório.");
 
                 if (transfer is null)
-                    throw new Exception("Os dados da transferência são obrigatórios.");
+                    throw new BusinessException("Os dados da transferência são obrigatórios.");
 
                 return Ok(_shelfService.TransferProductToShelf(enterId, transfer.ShelfId));
             }
@@ -233,10 +234,10 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (shelfId.Equals(0))
-                    throw new Exception("O campo ID da Prateleira é obrigatório.");
+                    throw new BusinessException("O campo ID da Prateleira é obrigatório.");
 
                 if (count is null)
-                    throw new Exception("Os dados do inventário são obrigatórios.");
+                    throw new BusinessException("Os dados do inventário são obrigatórios.");
 
                 return Ok(_shelfService.CountShelfInventory(shelfId, count));
             }

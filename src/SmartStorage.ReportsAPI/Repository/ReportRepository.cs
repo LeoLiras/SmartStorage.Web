@@ -5,6 +5,7 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using ScottPlot;
 using SmartStorage.ReportsAPI.Repository.IRepository;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Model.Context;
 using System.Globalization;
 
@@ -39,7 +40,7 @@ namespace SmartStorage.ReportsAPI.Repository
                 .Where(s => s.SalDateSale.Year == DateTime.Now.Year && s.SalDateSale.Month == DateTime.Now.Month && s.SalQntd > s.SalReturnedQntd).ToList();
 
             if (!sales.Any())
-                throw new Exception("Ainda não há vendas no mês corrente.");
+                throw new BusinessException("Ainda não há vendas no mês corrente.");
 
             using var wb = new XLWorkbook();
             var ws = wb.Worksheets.Add($"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}");
@@ -94,7 +95,7 @@ namespace SmartStorage.ReportsAPI.Repository
                 .Where(s => s.SalDateSale.Year == DateTime.Now.Year && s.SalDateSale.Month == DateTime.Now.Month && s.SalQntd > s.SalReturnedQntd).ToList();
 
             if (!sales.Any())
-                throw new Exception("Ainda não há vendas no mês corrente.");
+                throw new BusinessException("Ainda não há vendas no mês corrente.");
 
             //Table grade
             Func<IContainer, IContainer> cellStyle = c =>

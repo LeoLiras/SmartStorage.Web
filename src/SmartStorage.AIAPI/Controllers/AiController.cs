@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage.AIAPI.Repository.Interfaces;
 using SmartStorage.Shared.VO.AiService;
+using SmartStorage.Shared.Validation;
 
 namespace SmartStorage.AIAPI.Controllers
 {
@@ -34,7 +35,7 @@ namespace SmartStorage.AIAPI.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(request.aiQuestion))
-                    throw new Exception("O texto da requisição é obrigatório.");
+                    throw new BusinessException("O texto da requisição é obrigatório.");
 
                 var result = await _aiRepository.CallAISales(request.aiQuestion);
 

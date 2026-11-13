@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Service;
 using SmartStorage_Shared.VO;
@@ -44,7 +45,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (employeeId.Equals(0))
-                    throw new Exception("O campo ID do Colaborador é obrigatório.");
+                    throw new BusinessException("O campo ID do Colaborador é obrigatório.");
 
                 return Ok(_employeeService.FindEmployeeById(employeeId));
             }
@@ -61,13 +62,13 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(employee.Name))
-                    throw new Exception("O campo Nome é obrigatório.");
+                    throw new BusinessException("O campo Nome é obrigatório.");
 
                 if (string.IsNullOrWhiteSpace(employee.Rg))
-                    throw new Exception("O campo RG é obrigatório.");
+                    throw new BusinessException("O campo RG é obrigatório.");
 
                 if (string.IsNullOrWhiteSpace(employee.Cpf))
-                    throw new Exception("O campo CPF é obrigatório.");
+                    throw new BusinessException("O campo CPF é obrigatório.");
 
                 return Ok(_employeeService.CreateNewEmployee(employee));
             }
@@ -84,7 +85,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (employeeId.Equals(0))
-                    throw new Exception("O campo ID do Funcionário é obrigatório.");
+                    throw new BusinessException("O campo ID do Funcionário é obrigatório.");
 
                 return Ok(_employeeService.UpdateEmployee(employeeId, employee));
             }
@@ -101,7 +102,7 @@ namespace SmartStorage_API.Controllers
             try
             {
                 if (employeeId.Equals(0))
-                    throw new Exception("O campo ID do Colaborador é obrigatório.");
+                    throw new BusinessException("O campo ID do Colaborador é obrigatório.");
 
                 return Ok(_employeeService.DeleteEmployee(employeeId));
             }

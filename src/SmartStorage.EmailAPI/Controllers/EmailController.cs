@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SmartStorage.EmailAPI.Repository.Interfaces;
 using SmartStorage.Shared.Auth;
+using SmartStorage.Shared.Validation;
 using SmartStorage_Shared.VO;
 
 namespace SmartStorage.EmailAPI.Controllers
@@ -37,7 +38,7 @@ namespace SmartStorage.EmailAPI.Controllers
             try
             {
                 if (product is null)
-                    throw new Exception("É necessário fornecer dados do produto.");
+                    throw new BusinessException("É necessário fornecer dados do produto.");
 
                 await _emailRepository.NewProductEmail(product);
 

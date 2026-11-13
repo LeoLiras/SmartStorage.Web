@@ -140,4 +140,28 @@ public class RecusaDeRegraTests
         // O lote, o inventário e a NF-e prefixam a recusa com "Item N (...)": capturar Exception embrulharia um erro inesperado como recusa.
         Assert.DoesNotContain("catch (Exception", codigo);
     }
+
+    [Fact]
+    public void Nenhum_servico_lanca_Exception_generica()
+    {
+        // Varre todos os projetos, e não uma lista de arquivos, para um throw novo em controller ou serviço também ser pego.
+        var pasta = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (pasta is not null && !File.Exists(Path.Combine(pasta.FullName, "SmartStorageWeb.sln")))
+            pasta = pasta.Parent;
+
+        Assert.NotNull(pasta);
+
+        var separador = Path.DirectorySeparatorChar;
+
+        var lancam = pasta.EnumerateFiles("*.cs", SearchOption.AllDirectories)
+            .Where(f => !f.FullName.Contains($".Tests{separador}")
+                && !f.FullName.Contains($"{separador}bin{separador}")
+                && !f.FullName.Contains($"{separador}obj{separador}"))
+            .Where(f => File.ReadAllText(f.FullName).Contains("throw new Exception("))
+            .Select(f => Path.GetRelativePath(pasta.FullName, f.FullName))
+            .ToList();
+
+        Assert.Empty(lancam);
+    }
 }
