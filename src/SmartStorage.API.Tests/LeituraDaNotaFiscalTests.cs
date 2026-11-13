@@ -1,3 +1,4 @@
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Service.Nfe;
 
 namespace SmartStorage.API.Tests;
@@ -123,7 +124,7 @@ public class LeituraDaNotaFiscalTests
     [InlineData("<pedido><item/></pedido>", "não é uma NF-e")]
     public void Recusa_arquivo_que_nao_e_nfe(string conteudo, string mensagem)
     {
-        var erro = Assert.Throws<Exception>(() => NfeXmlReader.Read(conteudo));
+        var erro = Assert.Throws<BusinessException>(() => NfeXmlReader.Read(conteudo));
 
         Assert.Contains(mensagem, erro.Message);
     }
@@ -131,7 +132,7 @@ public class LeituraDaNotaFiscalTests
     [Fact]
     public void Recusa_nota_de_consumidor()
     {
-        var erro = Assert.Throws<Exception>(() => NfeXmlReader.Read(Nota(Item(1, "SEM GTIN", "Parafuso", "UN", "1", "1", "1"), modelo: "65")));
+        var erro = Assert.Throws<BusinessException>(() => NfeXmlReader.Read(Nota(Item(1, "SEM GTIN", "Parafuso", "UN", "1", "1", "1"), modelo: "65")));
 
         Assert.Contains("modelo 55", erro.Message);
     }
@@ -139,7 +140,7 @@ public class LeituraDaNotaFiscalTests
     [Fact]
     public void Recusa_nota_sem_itens()
     {
-        var erro = Assert.Throws<Exception>(() => NfeXmlReader.Read(Nota(string.Empty)));
+        var erro = Assert.Throws<BusinessException>(() => NfeXmlReader.Read(Nota(string.Empty)));
 
         Assert.Contains("não tem itens", erro.Message);
     }

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Xml;
 using System.Xml.Linq;
+using SmartStorage.Shared.Validation;
 
 namespace SmartStorage_API.Service.Nfe
 {
@@ -55,7 +56,7 @@ namespace SmartStorage_API.Service.Nfe
         public static NfeDocument Read(string xml)
         {
             if (string.IsNullOrWhiteSpace(xml))
-                throw new Exception("O XML da nota fiscal é obrigatório.");
+                throw new BusinessException("O XML da nota fiscal é obrigatório.");
 
             XDocument document;
 
@@ -65,18 +66,18 @@ namespace SmartStorage_API.Service.Nfe
             }
             catch (XmlException)
             {
-                throw new Exception("O arquivo não é um XML válido.");
+                throw new BusinessException("O arquivo não é um XML válido.");
             }
 
             var infNFe = document.Descendants(Ns + "infNFe").FirstOrDefault()
-                ?? throw new Exception("O arquivo não é uma NF-e: o grupo infNFe não foi encontrado.");
+                ?? throw new BusinessException("O arquivo não é uma NF-e: o grupo infNFe não foi encontrado.");
 
             var ide = Required(infNFe, "ide");
 
             var model = Text(ide, "mod");
 
             if (model != "55")
-                throw new Exception($"Só a NF-e modelo 55 é aceita; o arquivo é do modelo {model ?? "desconhecido"}.");
+                throw new BusinessException($"Só a NF-e modelo 55 é aceita; o arquivo é do modelo {model ?? "desconhecido"}.");
 
             var emit = Required(infNFe, "emit");
 
@@ -111,7 +112,7 @@ namespace SmartStorage_API.Service.Nfe
             }
 
             if (nfe.Items.Count == 0)
-                throw new Exception("A NF-e não tem itens.");
+                throw new BusinessException("A NF-e não tem itens.");
 
             return nfe;
         }
@@ -148,7 +149,7 @@ namespace SmartStorage_API.Service.Nfe
             var chave = id is not null && id.StartsWith("NFe") ? id[3..] : Text(document.Descendants(Ns + "infProt").FirstOrDefault(), "chNFe");
 
             if (chave is null || chave.Length != 44 || !chave.All(char.IsAsciiDigit))
-                throw new Exception("A chave de acesso da NF-e não foi encontrada ou não tem 44 dígitos.");
+                throw new BusinessException("A chave de acesso da NF-e não foi encontrada ou não tem 44 dígitos.");
 
             return chave;
         }
@@ -165,13 +166,13 @@ namespace SmartStorage_API.Service.Nfe
             if (dEmi is not null && DateTime.TryParseExact(dEmi, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
                 return date;
 
-            throw new Exception("A data de emissão da NF-e não foi encontrada.");
+            throw new BusinessException("A data de emissão da NF-e não foi encontrada.");
         }
 
         private static XElement Required(XElement parent, string name)
         {
             return parent.Element(Ns + name)
-                ?? throw new Exception($"A NF-e não tem o grupo obrigatório {name}.");
+                ?? throw new BusinessException($"A NF-e não tem o grupo obrigatório {name}.");
         }
 
         private static string Text(XElement parent, string name)
@@ -184,13 +185,13 @@ namespace SmartStorage_API.Service.Nfe
         private static string RequiredText(XElement parent, string name)
         {
             return Text(parent, name)
-                ?? throw new Exception($"A NF-e não tem o campo obrigatório {name}.");
+                ?? throw new BusinessException($"A NF-e não tem o campo obrigatório {name}.");
         }
 
         private static decimal RequiredDecimal(XElement parent, string name)
         {
             if (!decimal.TryParse(RequiredText(parent, name), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value))
-                throw new Exception($"O campo {name} da NF-e não é um número válido.");
+                throw new BusinessException($"O campo {name} da NF-e não é um número válido.");
 
             return value;
         }

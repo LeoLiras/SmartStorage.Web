@@ -1,4 +1,5 @@
 ﻿using SmartStorage.Shared.Enum;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
 using SmartStorage_API.Repository.Interfaces;
@@ -43,10 +44,10 @@ namespace SmartStorage_API.Service.Implementations
         public (List<SaleVO> Items, int Total) FindSalesPage(int page, int pageSize, string search)
         {
             if (page < 1)
-                throw new Exception("A página deve ser maior que zero.");
+                throw new BusinessException("A página deve ser maior que zero.");
 
             if (pageSize < 1 || pageSize > Pagination.MaxPageSize)
-                throw new Exception($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
+                throw new BusinessException($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
 
             var query = _context.Sales.Where(s => s.SalQntd > s.SalReturnedQntd);
 
@@ -70,7 +71,7 @@ namespace SmartStorage_API.Service.Implementations
             var sale = _context.Sales.FirstOrDefault(s => s.SalId.Equals(saleId));
 
             if (sale is null)
-                throw new Exception("Venda não encontrada com o ID informado");
+                throw new BusinessException("Venda não encontrada com o ID informado");
 
             return _converter.Parse(sale);
         }
@@ -80,10 +81,10 @@ namespace SmartStorage_API.Service.Implementations
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
 
             if (enter is null)
-                throw new Exception("Entrada não encontrada com o ID do Produto informado.");
+                throw new BusinessException("Entrada não encontrada com o ID do Produto informado.");
 
             if (saleQntd <= 0)
-                throw new Exception("A quantidade da venda deve ser maior que zero.");
+                throw new BusinessException("A quantidade da venda deve ser maior que zero.");
 
             var sale = new Sale
             {
@@ -112,7 +113,7 @@ namespace SmartStorage_API.Service.Implementations
         public List<SaleVO> CreateNewSales(List<SaleBatchItemVO> items, DateTime dateSale)
         {
             if (items is null || items.Count == 0)
-                throw new Exception("O carrinho está vazio.");
+                throw new BusinessException("O carrinho está vazio.");
 
             var enterIds = items.Select(i => i.IdEnter).Distinct().ToList();
 
@@ -136,15 +137,15 @@ namespace SmartStorage_API.Service.Implementations
                     : $"Item {index + 1}";
 
                 if (!enters.TryGetValue(item.IdEnter, out var enter))
-                    throw new Exception($"{itemName}: entrada não encontrada com o ID informado.");
+                    throw new BusinessException($"{itemName}: entrada não encontrada com o ID informado.");
 
                 if (item.Qntd <= 0)
-                    throw new Exception($"{itemName}: a quantidade da venda deve ser maior que zero.");
+                    throw new BusinessException($"{itemName}: a quantidade da venda deve ser maior que zero.");
 
                 var requested = requestedByEnter.GetValueOrDefault(enter.EntId) + item.Qntd;
 
                 if (requested > enter.EntQntd)
-                    throw new Exception($"{itemName}: saldo insuficiente na prateleira: há {enter.EntQntd} e o carrinho pede {requested}.");
+                    throw new BusinessException($"{itemName}: saldo insuficiente na prateleira: há {enter.EntQntd} e o carrinho pede {requested}.");
 
                 requestedByEnter[enter.EntId] = requested;
             }
@@ -206,18 +207,18 @@ namespace SmartStorage_API.Service.Implementations
             var sale = _context.Sales.FirstOrDefault(s => s.SalId == saleId);
 
             if (sale == null)
-                throw new Exception("Venda não encontrada com o ID informado");
+                throw new BusinessException("Venda não encontrada com o ID informado");
 
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.SalEntId));
 
             if (enter == null)
-                throw new Exception("Entrada não encontrada com o ID de Venda informado");
+                throw new BusinessException("Entrada não encontrada com o ID de Venda informado");
 
             if (saleQntd <= 0)
-                throw new Exception("A quantidade da venda deve ser maior que zero.");
+                throw new BusinessException("A quantidade da venda deve ser maior que zero.");
 
             if (saleQntd < sale.SalReturnedQntd)
-                throw new Exception($"A quantidade da venda não pode ficar abaixo do que já foi devolvido: {sale.SalReturnedQntd}.");
+                throw new BusinessException($"A quantidade da venda não pode ficar abaixo do que já foi devolvido: {sale.SalReturnedQntd}.");
 
             var quantityDelta = sale.SalQntd - saleQntd;
 
@@ -245,15 +246,15 @@ namespace SmartStorage_API.Service.Implementations
             var sale = _context.Sales.FirstOrDefault(s => s.SalId.Equals(saleId));
 
             if (sale is null)
-                throw new Exception("Venda não encontrada com o ID informado");
+                throw new BusinessException("Venda não encontrada com o ID informado");
 
             if (sale.SalReturnedQntd > 0)
-                throw new Exception("Não é possível cancelar a venda pois ela já tem devoluções registradas.");
+                throw new BusinessException("Não é possível cancelar a venda pois ela já tem devoluções registradas.");
 
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.SalEntId));
 
             if (enter is null)
-                throw new Exception("Entrada não encontrada com o ID de Venda informado.");
+                throw new BusinessException("Entrada não encontrada com o ID de Venda informado.");
 
             _context.Sales.Remove(sale);
 
@@ -274,20 +275,20 @@ namespace SmartStorage_API.Service.Implementations
             var sale = _context.Sales.FirstOrDefault(s => s.SalId == saleId);
 
             if (sale is null)
-                throw new Exception("Venda não encontrada com o ID informado");
+                throw new BusinessException("Venda não encontrada com o ID informado");
 
             if (quantity <= 0)
-                throw new Exception("A quantidade a devolver deve ser maior que zero.");
+                throw new BusinessException("A quantidade a devolver deve ser maior que zero.");
 
             var remaining = sale.SalQntd - sale.SalReturnedQntd;
 
             if (quantity > remaining)
-                throw new Exception($"A devolução excede o que resta da venda: restam {remaining} e a devolução pede {quantity}.");
+                throw new BusinessException($"A devolução excede o que resta da venda: restam {remaining} e a devolução pede {quantity}.");
 
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(sale.SalEntId));
 
             if (enter is null)
-                throw new Exception("Entrada não encontrada com o ID de Venda informado.");
+                throw new BusinessException("Entrada não encontrada com o ID de Venda informado.");
 
             sale.SalReturnedQntd += quantity;
 

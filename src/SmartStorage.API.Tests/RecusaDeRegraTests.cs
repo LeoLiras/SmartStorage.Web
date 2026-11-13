@@ -18,6 +18,12 @@ public class RecusaDeRegraTests
     private static ShelfBusinessImplementation Prateleiras()
         => new(new SmartStorageContextFactory().CreateDbContext(Array.Empty<string>()), null, null);
 
+    private static SaleBusinessImplementation Vendas()
+        => new(new SmartStorageContextFactory().CreateDbContext(Array.Empty<string>()), null, null);
+
+    private static InvoiceBusinessImplementation NotasFiscais()
+        => new(new SmartStorageContextFactory().CreateDbContext(Array.Empty<string>()), null);
+
     [Fact]
     public void Transferencia_sem_quantidade_e_recusa_de_regra()
     {
@@ -83,10 +89,40 @@ public class RecusaDeRegraTests
     }
 
     [Theory]
+    [InlineData(0, 10, "A página deve ser maior que zero.")]
+    [InlineData(1, 0, "O tamanho da página deve estar entre 1 e 100.")]
+    [InlineData(1, 101, "O tamanho da página deve estar entre 1 e 100.")]
+    public void Pagina_invalida_de_vendas_e_recusa_de_regra(int pagina, int tamanho, string mensagem)
+    {
+        var recusa = Assert.Throws<BusinessException>(() => Vendas().FindSalesPage(pagina, tamanho, null));
+
+        Assert.Equal(mensagem, recusa.Message);
+    }
+
+    [Fact]
+    public void Carrinho_vazio_e_recusa_de_regra()
+    {
+        var recusa = Assert.Throws<BusinessException>(() => Vendas().CreateNewSales([], DateTime.Now));
+
+        Assert.Equal("O carrinho está vazio.", recusa.Message);
+    }
+
+    [Fact]
+    public void Importacao_sem_xml_e_recusa_de_regra()
+    {
+        var recusa = Assert.Throws<BusinessException>(() => NotasFiscais().ImportInvoice(new() { Xml = " " }));
+
+        Assert.Equal("O XML da nota fiscal é obrigatório.", recusa.Message);
+    }
+
+    [Theory]
     [InlineData("Repository", "ProductStockMovementRepository.cs")]
     [InlineData("Business", "Implementations", "ProductBusinessImplementation.cs")]
     [InlineData("Business", "Implementations", "EmployeeBusinessImplementation.cs")]
     [InlineData("Business", "Implementations", "ShelfBusinessImplementation.cs")]
+    [InlineData("Business", "Implementations", "SaleBusinessImplementation.cs")]
+    [InlineData("Business", "Implementations", "InvoiceBusinessImplementation.cs")]
+    [InlineData("Business", "Nfe", "NfeXmlReader.cs")]
     public void Ledger_e_business_nao_lancam_Exception_generica(params string[] caminho)
     {
         // Lê o arquivo versionado: uma Exception genérica nova, depois do handler ligado, viraria 500 onde era 400.
@@ -101,7 +137,7 @@ public class RecusaDeRegraTests
 
         Assert.DoesNotContain("throw new Exception(", codigo);
 
-        // O lote e o inventário prefixam a recusa com "Item N (...)": capturar Exception embrulharia um erro inesperado como recusa.
+        // O lote, o inventário e a NF-e prefixam a recusa com "Item N (...)": capturar Exception embrulharia um erro inesperado como recusa.
         Assert.DoesNotContain("catch (Exception", codigo);
     }
 }

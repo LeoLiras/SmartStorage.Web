@@ -84,14 +84,14 @@ namespace SmartStorage_API.Service.Implementations
             var imported = _context.Invoices.FirstOrDefault(i => i.InvChave == nfe.Chave);
 
             if (imported is not null)
-                throw new Exception($"A NF-e {nfe.Numero}/{nfe.Serie} já foi importada em {imported.InvDataImportacao:dd/MM/yyyy HH:mm}.");
+                throw new BusinessException($"A NF-e {nfe.Numero}/{nfe.Serie} já foi importada em {imported.InvDataImportacao:dd/MM/yyyy HH:mm}.");
 
             var requests = import.Items ?? new List<InvoiceImportItemVO>();
 
             var unknown = requests.Select(r => r.Numero).Except(nfe.Items.Select(i => i.Numero)).ToList();
 
             if (unknown.Count > 0)
-                throw new Exception($"A NF-e não tem o item {unknown[0]}.");
+                throw new BusinessException($"A NF-e não tem o item {unknown[0]}.");
 
             var productIds = requests.Where(r => r.ProductId is not null).Select(r => r.ProductId.Value).Distinct().ToList();
 
@@ -127,21 +127,21 @@ namespace SmartStorage_API.Service.Implementations
                     var matching = requests.Where(r => r.Numero == item.Numero).ToList();
 
                     if (matching.Count == 0)
-                        throw new Exception("escolha um produto existente ou cadastre um novo.");
+                        throw new BusinessException("escolha um produto existente ou cadastre um novo.");
 
                     if (matching.Count > 1)
-                        throw new Exception("o item aparece mais de uma vez no envio.");
+                        throw new BusinessException("o item aparece mais de uma vez no envio.");
 
                     var request = matching[0];
 
                     if (request.FatorConversao < 1)
-                        throw new Exception("o fator de conversão deve ser maior que zero.");
+                        throw new BusinessException("o fator de conversão deve ser maior que zero.");
 
                     if (request.QntdEstoque < 1)
-                        throw new Exception("a quantidade de entrada deve ser maior que zero.");
+                        throw new BusinessException("a quantidade de entrada deve ser maior que zero.");
 
                     if ((request.ProductId is null) == (request.NewProduct is null))
-                        throw new Exception("escolha um produto existente ou cadastre um novo, não os dois.");
+                        throw new BusinessException("escolha um produto existente ou cadastre um novo, não os dois.");
 
                     if (request.ProductId is not null)
                         ValidateExistingProduct(item, request, existingProducts, productsByCode, factorByProduct);
@@ -150,9 +150,9 @@ namespace SmartStorage_API.Service.Implementations
 
                     plan.Add((item, request));
                 }
-                catch (Exception ex)
+                catch (BusinessException ex)
                 {
-                    throw new Exception($"{itemName}: {ex.Message}");
+                    throw new BusinessException($"{itemName}: {ex.Message}");
                 }
             }
 
@@ -166,7 +166,7 @@ namespace SmartStorage_API.Service.Implementations
             var missingEmployee = employeeIds.Except(_context.Employees.Where(e => employeeIds.Contains(e.EmpId)).Select(e => e.EmpId)).FirstOrDefault();
 
             if (missingEmployee != 0)
-                throw new Exception($"Colaborador {missingEmployee} não encontrado.");
+                throw new BusinessException($"Colaborador {missingEmployee} não encontrado.");
 
             var userId = _movementRepository.FindAuthenticatedUserId();
 
@@ -278,19 +278,19 @@ namespace SmartStorage_API.Service.Implementations
             Dictionary<int, int> factorByProduct)
         {
             if (!existingProducts.TryGetValue(request.ProductId.Value, out var product))
-                throw new Exception("produto não encontrado com o ID informado.");
+                throw new BusinessException("produto não encontrado com o ID informado.");
 
             if (item.Codigo is not null)
             {
                 if (product.ProCodigo is not null && product.ProCodigo != item.Codigo)
-                    throw new Exception($"o produto {product.ProName} tem o código {product.ProCodigo}, e a nota traz {item.Codigo}.");
+                    throw new BusinessException($"o produto {product.ProName} tem o código {product.ProCodigo}, e a nota traz {item.Codigo}.");
 
                 if (productsByCode.TryGetValue(item.Codigo, out var owner) && owner.ProId != product.ProId)
-                    throw new Exception($"o código {item.Codigo} já pertence ao produto {owner.ProName}.");
+                    throw new BusinessException($"o código {item.Codigo} já pertence ao produto {owner.ProName}.");
             }
 
             if (factorByProduct.TryGetValue(product.ProId, out var factor) && factor != request.FatorConversao)
-                throw new Exception($"o produto {product.ProName} aparece em outro item com fator de conversão diferente.");
+                throw new BusinessException($"o produto {product.ProName} aparece em outro item com fator de conversão diferente.");
 
             factorByProduct[product.ProId] = request.FatorConversao;
         }
@@ -304,43 +304,43 @@ namespace SmartStorage_API.Service.Implementations
             int? defaultEmployeeId)
         {
             if (newProduct.EmployeeId is null && defaultEmployeeId is null)
-                throw new Exception($"escolha um colaborador: nenhum colaborador chamado {Employee.DefaultEmployeeName} está cadastrado.");
+                throw new BusinessException($"escolha um colaborador: nenhum colaborador chamado {Employee.DefaultEmployeeName} está cadastrado.");
 
             var name = newProduct.Name?.Trim();
 
             if (string.IsNullOrEmpty(name) || name.Length < 5 || name.Length > 100)
-                throw new Exception("o nome do produto deve ter entre 5 e 100 caracteres.");
+                throw new BusinessException("o nome do produto deve ter entre 5 e 100 caracteres.");
 
             var description = string.IsNullOrWhiteSpace(newProduct.Descricao) ? item.Descricao : newProduct.Descricao.Trim();
 
             if (description.Length < 5 || description.Length > 300)
-                throw new Exception("a descrição do produto deve ter entre 5 e 300 caracteres.");
+                throw new BusinessException("a descrição do produto deve ter entre 5 e 300 caracteres.");
 
             if (!newNames.Add(name) || _context.Products.Any(p => p.ProName == name))
-                throw new Exception($"já existe um produto chamado {name}.");
+                throw new BusinessException($"já existe um produto chamado {name}.");
 
             if (item.Codigo is not null)
             {
                 if (productsByCode.TryGetValue(item.Codigo, out var owner))
-                    throw new Exception($"o código {item.Codigo} já pertence ao produto {owner.ProName}; vincule o item a ele.");
+                    throw new BusinessException($"o código {item.Codigo} já pertence ao produto {owner.ProName}; vincule o item a ele.");
 
                 if (!newCodes.Add(item.Codigo))
-                    throw new Exception($"outro item da nota já cadastra um produto com o código {item.Codigo}.");
+                    throw new BusinessException($"outro item da nota já cadastra um produto com o código {item.Codigo}.");
             }
 
             if (newProduct.MinimumStock < 0)
-                throw new Exception("o estoque mínimo não pode ser negativo.");
+                throw new BusinessException("o estoque mínimo não pode ser negativo.");
 
             if (newProduct.Volume <= 0)
-                throw new Exception("o volume do produto deve ser maior que zero.");
+                throw new BusinessException("o volume do produto deve ser maior que zero.");
 
             if (newProduct.PrecoInicial <= 0)
-                throw new Exception("o preço inicial do produto deve ser maior que zero.");
+                throw new BusinessException("o preço inicial do produto deve ser maior que zero.");
 
             var imageRefusal = ProductImagePolicy.Validate(newProduct.ProImage);
 
             if (imageRefusal is not null)
-                throw new Exception(char.ToLowerInvariant(imageRefusal[0]) + imageRefusal[1..]);
+                throw new BusinessException(char.ToLowerInvariant(imageRefusal[0]) + imageRefusal[1..]);
         }
 
         private Product CreateProduct(NfeItem item, ProductVO newProduct, int? defaultEmployeeId)
