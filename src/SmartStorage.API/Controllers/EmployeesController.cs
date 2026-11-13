@@ -42,74 +42,46 @@ namespace SmartStorage_API.Controllers
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult FindEmployeeById(int employeeId)
         {
-            try
-            {
-                if (employeeId.Equals(0))
-                    throw new BusinessException("O campo ID do Colaborador é obrigatório.");
+            if (employeeId.Equals(0))
+                throw new BusinessException("O campo ID do Colaborador é obrigatório.");
 
-                return Ok(_employeeService.FindEmployeeById(employeeId));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_employeeService.FindEmployeeById(employeeId));
         }
 
         [HttpPost]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult CreateNewEmployee(EmployeeVO employee)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(employee.Name))
-                    throw new BusinessException("O campo Nome é obrigatório.");
+            if (string.IsNullOrWhiteSpace(employee.Name))
+                throw new BusinessException("O campo Nome é obrigatório.");
 
-                if (string.IsNullOrWhiteSpace(employee.Rg))
-                    throw new BusinessException("O campo RG é obrigatório.");
+            if (string.IsNullOrWhiteSpace(employee.Rg))
+                throw new BusinessException("O campo RG é obrigatório.");
 
-                if (string.IsNullOrWhiteSpace(employee.Cpf))
-                    throw new BusinessException("O campo CPF é obrigatório.");
+            if (string.IsNullOrWhiteSpace(employee.Cpf))
+                throw new BusinessException("O campo CPF é obrigatório.");
 
-                return Ok(_employeeService.CreateNewEmployee(employee));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_employeeService.CreateNewEmployee(employee));
         }
 
         [HttpPut("{employeeId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UpdateEmployee(int employeeId, [FromBody] EmployeeVO employee)
         {
-            try
-            {
-                if (employeeId.Equals(0))
-                    throw new BusinessException("O campo ID do Funcionário é obrigatório.");
+            if (employeeId.Equals(0))
+                throw new BusinessException("O campo ID do Funcionário é obrigatório.");
 
-                return Ok(_employeeService.UpdateEmployee(employeeId, employee));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_employeeService.UpdateEmployee(employeeId, employee));
         }
 
         [HttpDelete("{employeeId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult DeleteEmployee(int employeeId)
         {
-            try
-            {
-                if (employeeId.Equals(0))
-                    throw new BusinessException("O campo ID do Colaborador é obrigatório.");
+            if (employeeId.Equals(0))
+                throw new BusinessException("O campo ID do Colaborador é obrigatório.");
 
-                return Ok(_employeeService.DeleteEmployee(employeeId));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_employeeService.DeleteEmployee(employeeId));
         }
 
         #endregion

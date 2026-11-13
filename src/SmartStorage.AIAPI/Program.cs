@@ -21,6 +21,8 @@ builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddPolicyConfig("Blazor", ["https://localhost:4480"]);
 builder.Services.AddAuthConfiguration(builder.Configuration);
 
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+
 builder.Services.AddScoped<IAiRepository, AiRepository>();
 
 var app = builder.Build();

@@ -28,6 +28,8 @@ builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
 
 builder.Services.AddPolicyConfig("Blazor", ["https://localhost:4480"]);
 builder.Services.AddAuthConfiguration(builder.Configuration);
+
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddSwagger(Utils.apiName, Utils.apiDescription, Utils.apiVersion);
 

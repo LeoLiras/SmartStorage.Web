@@ -37,6 +37,8 @@ builder.Services.AddApiVersioning();
 
 builder.Services.AddAuthConfiguration(builder.Configuration);
 
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IEmployeeBusiness, EmployeeBusinessImplementation>();

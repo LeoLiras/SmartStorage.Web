@@ -164,4 +164,49 @@ public class RecusaDeRegraTests
 
         Assert.Empty(lancam);
     }
+
+    private static readonly string[] Servicos =
+        ["SmartStorage.API", "SmartStorage.AuthenticationAPI", "SmartStorage.ReportsAPI", "SmartStorage.AIAPI", "SmartStorage.EmailAPI"];
+
+    private static DirectoryInfo PastaDaSolution()
+    {
+        var pasta = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (pasta is not null && !File.Exists(Path.Combine(pasta.FullName, "SmartStorageWeb.sln")))
+            pasta = pasta.Parent;
+
+        Assert.NotNull(pasta);
+
+        return pasta;
+    }
+
+    [Fact]
+    public void Nenhum_controller_captura_Exception_generica()
+    {
+        // Um catch que devolve BadRequest(ex.Message) passaria na frente do tratador e voltaria a vazar texto interno com 400.
+        var pasta = PastaDaSolution();
+
+        var capturam = Servicos
+            .SelectMany(s => Directory.EnumerateFiles(Path.Combine(pasta.FullName, s, "Controllers"), "*.cs", SearchOption.AllDirectories))
+            .Where(f => File.ReadAllText(f).Contains("catch (Exception"))
+            .Select(f => Path.GetRelativePath(pasta.FullName, f))
+            .ToList();
+
+        Assert.Empty(capturam);
+    }
+
+    [Theory]
+    [InlineData("SmartStorage.API")]
+    [InlineData("SmartStorage.AuthenticationAPI")]
+    [InlineData("SmartStorage.ReportsAPI")]
+    [InlineData("SmartStorage.AIAPI")]
+    [InlineData("SmartStorage.EmailAPI")]
+    public void Servico_registra_o_tratador_de_erros(string servico)
+    {
+        // O UseApiDefaults liga o middleware; sem o registro, a exceção sairia como 500 vazio, sem passar pelo ApiExceptionHandler.
+        var programa = File.ReadAllText(Path.Combine(PastaDaSolution().FullName, servico, "Program.cs"));
+
+        Assert.Contains("AddExceptionHandler<ApiExceptionHandler>()", programa);
+        Assert.Contains("UseApiDefaults(", programa);
+    }
 }

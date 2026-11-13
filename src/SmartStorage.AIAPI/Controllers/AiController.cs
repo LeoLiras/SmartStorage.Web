@@ -32,19 +32,12 @@ namespace SmartStorage.AIAPI.Controllers
         [HttpPost("analyse-sales")]
         public async Task<IActionResult> AnalyseSalesWithAI([FromBody] AiRequest request)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(request.aiQuestion))
-                    throw new BusinessException("O texto da requisição é obrigatório.");
+            if (string.IsNullOrWhiteSpace(request.aiQuestion))
+                throw new BusinessException("O texto da requisição é obrigatório.");
 
-                var result = await _aiRepository.CallAISales(request.aiQuestion);
+            var result = await _aiRepository.CallAISales(request.aiQuestion);
 
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(result);
         }
 
         #endregion

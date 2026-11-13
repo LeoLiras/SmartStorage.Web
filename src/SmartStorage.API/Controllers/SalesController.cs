@@ -38,132 +38,83 @@ namespace SmartStorage_API.Controllers
             if (page is null)
                 return Ok(_saleService.FindAllSales());
 
-            try
-            {
-                var (items, total) = _saleService.FindSalesPage(page.Value, pageSize, search);
+            var (items, total) = _saleService.FindSalesPage(page.Value, pageSize, search);
 
-                Response.Headers[Pagination.TotalCountHeader] = total.ToString();
+            Response.Headers[Pagination.TotalCountHeader] = total.ToString();
 
-                return Ok(items);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(items);
         }
 
         [HttpGet("{saleId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public ActionResult<List<SaleVO>> FindSaleById(int saleId)
         {
-            try
-            {
-                if (saleId.Equals(0))
-                    throw new BusinessException("O ID da Venda é obrigatório.");
+            if (saleId.Equals(0))
+                throw new BusinessException("O ID da Venda é obrigatório.");
 
-                return Ok(_saleService.FindSaleById(saleId));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_saleService.FindSaleById(saleId));
         }
 
         [HttpPost]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult CreateNewSale([FromBody] SaleVO newSale)
         {
-            try
-            {
-                if (newSale.IdEnter.Equals(0))
-                    throw new BusinessException("O campo ID da Entrada é obrigatório.");
+            if (newSale.IdEnter.Equals(0))
+                throw new BusinessException("O campo ID da Entrada é obrigatório.");
 
-                if (newSale.Qntd.Equals(0))
-                    throw new BusinessException("O campo Quantidade da Venda é obrigatório.");
+            if (newSale.Qntd.Equals(0))
+                throw new BusinessException("O campo Quantidade da Venda é obrigatório.");
 
-                return Ok(_saleService.CreateNewSale(newSale.IdEnter, newSale.Qntd, newSale.DateSale));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_saleService.CreateNewSale(newSale.IdEnter, newSale.Qntd, newSale.DateSale));
         }
 
         [HttpPost("batch")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult CreateNewSales([FromBody] SaleBatchVO newSales)
         {
-            try
-            {
-                if (newSales is null)
-                    throw new BusinessException("Os dados do carrinho são obrigatórios.");
+            if (newSales is null)
+                throw new BusinessException("Os dados do carrinho são obrigatórios.");
 
-                if (newSales.DateSale == default)
-                    throw new BusinessException("O campo Data da Venda é obrigatório.");
+            if (newSales.DateSale == default)
+                throw new BusinessException("O campo Data da Venda é obrigatório.");
 
-                return Ok(_saleService.CreateNewSales(newSales.Items, newSales.DateSale));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_saleService.CreateNewSales(newSales.Items, newSales.DateSale));
         }
 
         [HttpPut("{saleId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UpdateSale(int saleId, [FromBody] SaleVO newSale)
         {
-            try
-            {
-                if (saleId.Equals(0))
-                    throw new BusinessException("O campo ID da Venda é obrigatório.");
+            if (saleId.Equals(0))
+                throw new BusinessException("O campo ID da Venda é obrigatório.");
 
-                if (newSale.Qntd.Equals(0))
-                    throw new BusinessException("O campo Quantidade da Venda é obrigatório.");
+            if (newSale.Qntd.Equals(0))
+                throw new BusinessException("O campo Quantidade da Venda é obrigatório.");
 
-                return Ok(_saleService.UpdateSale(saleId, newSale.Qntd));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_saleService.UpdateSale(saleId, newSale.Qntd));
         }
 
         [HttpDelete("{saleId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult DeleteSale(int saleId)
         {
-            try
-            {
-                if (saleId.Equals(0))
-                    throw new BusinessException("O campo ID da Venda é obrigatório.");
+            if (saleId.Equals(0))
+                throw new BusinessException("O campo ID da Venda é obrigatório.");
 
-                return Ok(_saleService.DeleteSale(saleId));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_saleService.DeleteSale(saleId));
         }
 
         [HttpPost("{saleId}/return")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult ReturnSale(int saleId, [FromBody] SaleReturnVO saleReturn)
         {
-            try
-            {
-                if (saleId.Equals(0))
-                    throw new BusinessException("O campo ID da Venda é obrigatório.");
+            if (saleId.Equals(0))
+                throw new BusinessException("O campo ID da Venda é obrigatório.");
 
-                if (saleReturn is null)
-                    throw new BusinessException("Os dados da devolução são obrigatórios.");
+            if (saleReturn is null)
+                throw new BusinessException("Os dados da devolução são obrigatórios.");
 
-                return Ok(_saleService.ReturnSale(saleId, saleReturn.Quantity));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_saleService.ReturnSale(saleId, saleReturn.Quantity));
         }
 
         #endregion

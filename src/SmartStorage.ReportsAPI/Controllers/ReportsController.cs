@@ -31,38 +31,24 @@ namespace SmartStorage.ReportsAPI.Controllers
         [HttpGet("export-excel")]
         public async Task<ActionResult> GenerateExcel()
         {
-            try
-            {
-                var report = await _reportRepository.GenerateExcel();
+            var report = await _reportRepository.GenerateExcel();
 
-                return File(
-                    report,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.xlsx"
-                );
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return File(
+                report,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.xlsx"
+            );
         }
 
         [Authorize]
         [HttpGet("export-pdf")]
         public async Task<ActionResult> GeneratePdf()
         {
-            try
-            {
-                return File(
-                    await _reportRepository.GeneratePdf(),
-                    "application/pdf",
-                    $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.pdf"
-                );
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return File(
+                await _reportRepository.GeneratePdf(),
+                "application/pdf",
+                $"Vendas {DateTime.Now.Month}-{DateTime.Now.Year}.pdf"
+            );
         }
 
         #endregion

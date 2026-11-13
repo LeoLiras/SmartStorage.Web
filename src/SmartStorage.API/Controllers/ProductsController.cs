@@ -41,90 +41,55 @@ namespace SmartStorage_API.Controllers
             if (page is null)
                 return Ok(_productService.FindAllProducts());
 
-            try
-            {
-                var (items, total) = _productService.FindProductsPage(page.Value, pageSize, search);
+            var (items, total) = _productService.FindProductsPage(page.Value, pageSize, search);
 
-                Response.Headers[Pagination.TotalCountHeader] = total.ToString();
+            Response.Headers[Pagination.TotalCountHeader] = total.ToString();
 
-                return Ok(items);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(items);
         }
 
         [HttpGet("{id}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult FindProductById(int id)
         {
-            try
-            {
-                return Ok(_productService.FindProductById(id));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_productService.FindProductById(id));
         }
 
         [HttpPost]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult CreateNewProduct([FromBody] ProductVO newProduct)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(newProduct.Name))
-                    throw new BusinessException("O Nome do Produto é obrigatório.");
+            if (string.IsNullOrWhiteSpace(newProduct.Name))
+                throw new BusinessException("O Nome do Produto é obrigatório.");
 
-                _productService.CreateNewProduct(newProduct);
+            _productService.CreateNewProduct(newProduct);
 
-                _rabbitMQMessageSender.SendMessage(newProduct, "sendemailqueue");
+            _rabbitMQMessageSender.SendMessage(newProduct, "sendemailqueue");
 
-                return Ok(newProduct);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(newProduct);
         }
 
         [HttpPut("{productId}")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UpdateProduct(int productId, [FromBody] ProductVO product)
         {
-            try
-            {
-                if (productId.Equals(0))
-                    throw new BusinessException("O campo ID do Produto é obrigatório.");
+            if (productId.Equals(0))
+                throw new BusinessException("O campo ID do Produto é obrigatório.");
 
-                return Ok(_productService.UpdateProduct(productId, product));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_productService.UpdateProduct(productId, product));
         }
 
         [HttpPost("{productId}/adjust-stock")]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult AdjustProductStock(int productId, [FromBody] StockAdjustmentVO adjustment)
         {
-            try
-            {
-                if (productId.Equals(0))
-                    throw new BusinessException("O campo ID do Produto é obrigatório.");
+            if (productId.Equals(0))
+                throw new BusinessException("O campo ID do Produto é obrigatório.");
 
-                if (adjustment is null)
-                    throw new BusinessException("Os dados do ajuste são obrigatórios.");
+            if (adjustment is null)
+                throw new BusinessException("Os dados do ajuste são obrigatórios.");
 
-                return Ok(_productService.AdjustProductStock(productId, adjustment.Quantity, adjustment.Reason));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_productService.AdjustProductStock(productId, adjustment.Quantity, adjustment.Reason));
         }
 
         #endregion

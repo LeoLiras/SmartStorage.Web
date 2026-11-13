@@ -33,33 +33,19 @@ namespace SmartStorage_API.Controllers
         [HttpPost("preview")]
         public IActionResult PreviewInvoice([FromBody] InvoiceImportVO import)
         {
-            try
-            {
-                if (import is null)
-                    throw new BusinessException("O XML da nota fiscal é obrigatório.");
+            if (import is null)
+                throw new BusinessException("O XML da nota fiscal é obrigatório.");
 
-                return Ok(_invoiceService.PreviewInvoice(import.Xml));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_invoiceService.PreviewInvoice(import.Xml));
         }
 
         [HttpPost]
         public IActionResult ImportInvoice([FromBody] InvoiceImportVO import)
         {
-            try
-            {
-                if (import is null)
-                    throw new BusinessException("Os dados da importação são obrigatórios.");
+            if (import is null)
+                throw new BusinessException("Os dados da importação são obrigatórios.");
 
-                return Ok(_invoiceService.ImportInvoice(import));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_invoiceService.ImportInvoice(import));
         }
 
         #endregion

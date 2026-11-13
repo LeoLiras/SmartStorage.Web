@@ -35,19 +35,12 @@ namespace SmartStorage.EmailAPI.Controllers
         [Authorize(Roles = Role.Admin)]
         public async Task<IActionResult> SendNewProjectEmail([FromBody] ProductVO product)
         {
-            try
-            {
-                if (product is null)
-                    throw new BusinessException("É necessário fornecer dados do produto.");
+            if (product is null)
+                throw new BusinessException("É necessário fornecer dados do produto.");
 
-                await _emailRepository.NewProductEmail(product);
+            await _emailRepository.NewProductEmail(product);
 
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok();
         }
 
         #endregion

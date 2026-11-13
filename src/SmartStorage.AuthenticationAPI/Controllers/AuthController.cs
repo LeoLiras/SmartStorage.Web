@@ -54,17 +54,10 @@ namespace SmartStorage.AuthenticationAPI.Controllers
         [HttpGet("{userId}")]
         public IActionResult GetUserById(int userId)
         {
-            try
-            {
-                if (userId.Equals(0))
-                    throw new BusinessException("O campo ID do Usuário é obrigatório.");
+            if (userId.Equals(0))
+                throw new BusinessException("O campo ID do Usuário é obrigatório.");
 
-                return Ok(_userAuthService.FindUserById(userId));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(_userAuthService.FindUserById(userId));
         }
 
         [HttpDelete("{userId}")]
@@ -74,16 +67,9 @@ namespace SmartStorage.AuthenticationAPI.Controllers
             if (userId.Equals(0))
                 return BadRequest("O campo ID do Usuário é obrigatório.");
 
-            try
-            {
-                _userAuthService.DeleteUser(userId);
+            _userAuthService.DeleteUser(userId);
 
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok();
         }
 
         [HttpPost("signin")]
