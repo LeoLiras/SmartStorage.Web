@@ -15,6 +15,9 @@ public class RecusaDeRegraTests
     private static ProductBusinessImplementation Produtos()
         => new(new SmartStorageContextFactory().CreateDbContext(Array.Empty<string>()), null, null);
 
+    private static ShelfBusinessImplementation Prateleiras()
+        => new(new SmartStorageContextFactory().CreateDbContext(Array.Empty<string>()), null, null);
+
     [Fact]
     public void Transferencia_sem_quantidade_e_recusa_de_regra()
     {
@@ -53,10 +56,38 @@ public class RecusaDeRegraTests
     }
 
     [Theory]
+    [InlineData(0, 10, "A página deve ser maior que zero.")]
+    [InlineData(1, 0, "O tamanho da página deve estar entre 1 e 100.")]
+    [InlineData(1, 101, "O tamanho da página deve estar entre 1 e 100.")]
+    public void Pagina_invalida_de_produtos_nas_prateleiras_e_recusa_de_regra(int pagina, int tamanho, string mensagem)
+    {
+        var recusa = Assert.Throws<BusinessException>(() => Prateleiras().FindProductsInShelvesPage(pagina, tamanho, null));
+
+        Assert.Equal(mensagem, recusa.Message);
+    }
+
+    [Fact]
+    public void Prateleira_sem_volume_positivo_e_recusa_de_regra()
+    {
+        var recusa = Assert.Throws<BusinessException>(() => Prateleiras().CreateNewShelf(new() { Name = "A9", Volume = 0 }));
+
+        Assert.Equal("O volume da prateleira deve ser maior que zero.", recusa.Message);
+    }
+
+    [Fact]
+    public void Lote_de_alocacao_vazio_e_recusa_de_regra()
+    {
+        var recusa = Assert.Throws<BusinessException>(() => Prateleiras().AllocateProductsToShelves([]));
+
+        Assert.Equal("Selecione ao menos um produto para alocar.", recusa.Message);
+    }
+
+    [Theory]
     [InlineData("Repository", "ProductStockMovementRepository.cs")]
     [InlineData("Business", "Implementations", "ProductBusinessImplementation.cs")]
     [InlineData("Business", "Implementations", "EmployeeBusinessImplementation.cs")]
-    public void Ledger_e_business_de_produtos_e_colaboradores_nao_lancam_Exception_generica(params string[] caminho)
+    [InlineData("Business", "Implementations", "ShelfBusinessImplementation.cs")]
+    public void Ledger_e_business_nao_lancam_Exception_generica(params string[] caminho)
     {
         // Lê o arquivo versionado: uma Exception genérica nova, depois do handler ligado, viraria 500 onde era 400.
         var pasta = new DirectoryInfo(AppContext.BaseDirectory);
@@ -69,5 +100,8 @@ public class RecusaDeRegraTests
         var codigo = File.ReadAllText(Path.Combine([pasta.FullName, "SmartStorage.API", .. caminho]));
 
         Assert.DoesNotContain("throw new Exception(", codigo);
+
+        // O lote e o inventário prefixam a recusa com "Item N (...)": capturar Exception embrulharia um erro inesperado como recusa.
+        Assert.DoesNotContain("catch (Exception", codigo);
     }
 }

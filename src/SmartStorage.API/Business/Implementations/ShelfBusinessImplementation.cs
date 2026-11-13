@@ -1,4 +1,5 @@
 ﻿using SmartStorage.Shared.Enum;
+using SmartStorage.Shared.Validation;
 using SmartStorage_API.Data.Converter.Implementations;
 using SmartStorage_API.Model.Context;
 using SmartStorage_API.Repository.Interfaces;
@@ -48,7 +49,7 @@ namespace SmartStorage_API.Service.Implementations
             var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == id);
 
             if (shelf is null)
-                throw new Exception("Prateleira não encontrada com o ID Informado");
+                throw new BusinessException("Prateleira não encontrada com o ID Informado");
 
             return _converterShelf.Parse(shelf);
         }
@@ -61,10 +62,10 @@ namespace SmartStorage_API.Service.Implementations
         public (List<EnterVO> Items, int Total) FindProductsInShelvesPage(int page, int pageSize, string search)
         {
             if (page < 1)
-                throw new Exception("A página deve ser maior que zero.");
+                throw new BusinessException("A página deve ser maior que zero.");
 
             if (pageSize < 1 || pageSize > Pagination.MaxPageSize)
-                throw new Exception($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
+                throw new BusinessException($"O tamanho da página deve estar entre 1 e {Pagination.MaxPageSize}.");
 
             var query = _context.Enters.Where(e => e.EntQntd > 0);
 
@@ -89,7 +90,7 @@ namespace SmartStorage_API.Service.Implementations
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
 
             if (enter is null)
-                throw new Exception("Entrada não encontrada com o ID informado");
+                throw new BusinessException("Entrada não encontrada com o ID informado");
 
             return _converterEnter.Parse(enter);
         }
@@ -116,7 +117,7 @@ namespace SmartStorage_API.Service.Implementations
             var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId);
 
             if (shelf == null)
-                throw new Exception("Prateleira não encontrada com o ID informado");
+                throw new BusinessException("Prateleira não encontrada com o ID informado");
 
             ValidateShelfVolume(updatedShelf.Volume);
 
@@ -134,12 +135,12 @@ namespace SmartStorage_API.Service.Implementations
             var shelf = _context.Shelves.FirstOrDefault(s => s.SheId.Equals(shelfId));
 
             if (shelf is null)
-                throw new Exception("Prateleira não encontrada com o ID informado");
+                throw new BusinessException("Prateleira não encontrada com o ID informado");
 
             var enters = _context.Enters.Where(e => e.EntSheId.Equals(shelfId)).ToList();
 
             if (enters.Count > 0)
-                throw new Exception("Não é possível excluír a prateleira pois há entradas de produtos associadas a ela");
+                throw new BusinessException("Não é possível excluír a prateleira pois há entradas de produtos associadas a ela");
 
             _context.Shelves.Remove(shelf);
             _context.SaveChanges();
@@ -170,7 +171,7 @@ namespace SmartStorage_API.Service.Implementations
         public List<EnterVO> AllocateProductsToShelves(List<AllocationBatchItemVO> items)
         {
             if (items is null || items.Count == 0)
-                throw new Exception("Selecione ao menos um produto para alocar.");
+                throw new BusinessException("Selecione ao menos um produto para alocar.");
 
             var productIds = items.Select(i => i.ProductId).Distinct().ToList();
 
@@ -205,25 +206,25 @@ namespace SmartStorage_API.Service.Implementations
                 try
                 {
                     if (product is null)
-                        throw new Exception("produto não encontrado com o ID informado.");
+                        throw new BusinessException("produto não encontrado com o ID informado.");
 
                     if (shelf is null)
-                        throw new Exception("prateleira não encontrada com o ID informado.");
+                        throw new BusinessException("prateleira não encontrada com o ID informado.");
 
                     if (!allocatedProducts.Add(product.ProId))
-                        throw new Exception("o produto aparece mais de uma vez no lote.");
+                        throw new BusinessException("o produto aparece mais de uma vez no lote.");
 
                     if (item.Qntd <= 0)
-                        throw new Exception("a quantidade deve ser maior que zero.");
+                        throw new BusinessException("a quantidade deve ser maior que zero.");
 
                     if (item.Price <= 0)
-                        throw new Exception("o preço deve ser maior que zero.");
+                        throw new BusinessException("o preço deve ser maior que zero.");
 
                     if (item.EmployeeId is not null && !_context.Employees.Any(e => e.EmpId == item.EmployeeId))
-                        throw new Exception("colaborador não encontrado com o ID informado.");
+                        throw new BusinessException("colaborador não encontrado com o ID informado.");
 
                     if (item.Qntd > product.ProQntd)
-                        throw new Exception($"saldo insuficiente no depósito: há {product.ProQntd} e o lote pede {item.Qntd}.");
+                        throw new BusinessException($"saldo insuficiente no depósito: há {product.ProQntd} e o lote pede {item.Qntd}.");
 
                     EnsureSingleShelf(product.ProId, shelf.SheId);
 
@@ -233,9 +234,9 @@ namespace SmartStorage_API.Service.Implementations
 
                     pendingVolumeByShelf[shelf.SheId] = pendingVolume + item.Qntd * product.ProVolume.Value;
                 }
-                catch (Exception ex)
+                catch (BusinessException ex)
                 {
-                    throw new Exception($"{itemName}: {ex.Message}");
+                    throw new BusinessException($"{itemName}: {ex.Message}");
                 }
             }
 
@@ -272,7 +273,7 @@ namespace SmartStorage_API.Service.Implementations
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
 
             if (enter is null)
-                throw new Exception("Entrada não encontrada com o ID informado");
+                throw new BusinessException("Entrada não encontrada com o ID informado");
 
             if (enter.EntQntd > 0)
                 _movementRepository.TransferProductBetweenLocations(
@@ -289,13 +290,13 @@ namespace SmartStorage_API.Service.Implementations
             var enter = _context.Enters.FirstOrDefault(e => e.EntId.Equals(enterId));
 
             if (enter is null)
-                throw new Exception("Entrada não encontrada com o ID informado");
+                throw new BusinessException("Entrada não encontrada com o ID informado");
 
             if (enter.EntQntd <= 0)
-                throw new Exception("Não há saldo nesta prateleira para transferir.");
+                throw new BusinessException("Não há saldo nesta prateleira para transferir.");
 
             if (!_context.Shelves.Any(s => s.SheId == toShelfId))
-                throw new Exception("Prateleira de destino não encontrada.");
+                throw new BusinessException("Prateleira de destino não encontrada.");
 
             if (toShelfId != enter.EntSheId)
                 EnsureShelfFits(enter.EntProId, toShelfId, enter.EntQntd);
@@ -317,15 +318,15 @@ namespace SmartStorage_API.Service.Implementations
         public List<EnterVO> CountShelfInventory(int shelfId, InventoryCountVO count)
         {
             var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId)
-                ?? throw new Exception("Prateleira não encontrada com o ID informado");
+                ?? throw new BusinessException("Prateleira não encontrada com o ID informado");
 
             var reason = count?.Reason?.Trim();
 
             if (string.IsNullOrWhiteSpace(reason) || reason.Length < 5 || reason.Length > 180)
-                throw new Exception("Informe o motivo do inventário, entre 5 e 180 caracteres.");
+                throw new BusinessException("Informe o motivo do inventário, entre 5 e 180 caracteres.");
 
             if (count.Items is null || count.Items.Count == 0)
-                throw new Exception("Informe ao menos uma quantidade contada.");
+                throw new BusinessException("Informe ao menos uma quantidade contada.");
 
             var enterIds = count.Items.Select(i => i.EnterId).Distinct().ToList();
 
@@ -354,20 +355,20 @@ namespace SmartStorage_API.Service.Implementations
                 try
                 {
                     if (enter is null)
-                        throw new Exception("entrada não encontrada com o ID informado.");
+                        throw new BusinessException("entrada não encontrada com o ID informado.");
 
                     if (enter.EntSheId != shelfId)
-                        throw new Exception($"o produto não está na {shelf.SheName}.");
+                        throw new BusinessException($"o produto não está na {shelf.SheName}.");
 
                     if (!countedEnters.Add(enter.EntId))
-                        throw new Exception("o produto aparece mais de uma vez na contagem.");
+                        throw new BusinessException("o produto aparece mais de uma vez na contagem.");
 
                     if (item.CountedQntd < 0)
-                        throw new Exception("a quantidade contada não pode ser negativa.");
+                        throw new BusinessException("a quantidade contada não pode ser negativa.");
                 }
-                catch (Exception ex)
+                catch (BusinessException ex)
                 {
-                    throw new Exception($"{itemName}: {ex.Message}");
+                    throw new BusinessException($"{itemName}: {ex.Message}");
                 }
 
                 if (item.CountedQntd != enter.EntQntd)
@@ -375,7 +376,7 @@ namespace SmartStorage_API.Service.Implementations
             }
 
             if (adjustments.Count == 0)
-                throw new Exception("Nenhuma quantidade contada difere do saldo do sistema.");
+                throw new BusinessException("Nenhuma quantidade contada difere do saldo do sistema.");
 
             var totalsBefore = adjustments
                 .Select(a => a.Enter.EntProId)
@@ -410,7 +411,7 @@ namespace SmartStorage_API.Service.Implementations
                 return;
 
             if (!_context.Employees.Any(e => e.EmpId == employeeId))
-                throw new Exception("Colaborador não encontrado com o ID informado.");
+                throw new BusinessException("Colaborador não encontrado com o ID informado.");
 
             _context.Products.First(p => p.ProId == productId).ProEmpId = employeeId;
         }
@@ -423,22 +424,22 @@ namespace SmartStorage_API.Service.Implementations
                 .FirstOrDefault();
 
             if (otherShelf is not null)
-                throw new Exception($"O produto já está alocado na {otherShelf}. Um produto só pode ficar em uma prateleira: aloque nela ou transfira o saldo antes.");
+                throw new BusinessException($"O produto já está alocado na {otherShelf}. Um produto só pode ficar em uma prateleira: aloque nela ou transfira o saldo antes.");
         }
 
         private void EnsureShelfFits(int productId, int shelfId, int quantity, decimal pendingVolume = 0)
         {
             var product = _context.Products.FirstOrDefault(p => p.ProId == productId)
-                ?? throw new Exception("Produto não encontrado na base de dados");
+                ?? throw new BusinessException("Produto não encontrado na base de dados");
 
             if (product.ProVolume is null)
-                throw new Exception("Cadastre o volume do produto antes de alocá-lo em uma prateleira.");
+                throw new BusinessException("Cadastre o volume do produto antes de alocá-lo em uma prateleira.");
 
             var shelf = _context.Shelves.FirstOrDefault(s => s.SheId == shelfId)
-                ?? throw new Exception("Prateleira não encontrada na base de dados");
+                ?? throw new BusinessException("Prateleira não encontrada na base de dados");
 
             if (shelf.SheVolume is null)
-                throw new Exception($"Cadastre o volume da {shelf.SheName} antes de alocar produtos nela.");
+                throw new BusinessException($"Cadastre o volume da {shelf.SheName} antes de alocar produtos nela.");
 
             var usable = shelf.SheVolume.Value * ShelfVO.UsableFraction;
 
@@ -449,13 +450,13 @@ namespace SmartStorage_API.Service.Implementations
             var batchNote = pendingVolume > 0 ? $", já descontados {Liters(pendingVolume)} L de outros itens do lote" : string.Empty;
 
             if (needed > free)
-                throw new Exception($"A {shelf.SheName} não comporta a alocação: são necessários {Liters(needed)} L e restam {Liters(Math.Max(free, 0))} L dos {Liters(usable)} L úteis (90% do volume{batchNote}).");
+                throw new BusinessException($"A {shelf.SheName} não comporta a alocação: são necessários {Liters(needed)} L e restam {Liters(Math.Max(free, 0))} L dos {Liters(usable)} L úteis (90% do volume{batchNote}).");
         }
 
         private static void ValidateShelfVolume(decimal? volume)
         {
             if (volume <= 0)
-                throw new Exception("O volume da prateleira deve ser maior que zero.");
+                throw new BusinessException("O volume da prateleira deve ser maior que zero.");
         }
 
         private static string Liters(decimal value)
