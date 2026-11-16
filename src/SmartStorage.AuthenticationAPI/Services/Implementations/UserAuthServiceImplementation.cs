@@ -1,4 +1,5 @@
-﻿using SmartStorage.AuthenticationAPI.Contract;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartStorage.AuthenticationAPI.Contract;
 using SmartStorage.AuthenticationAPI.Repositories;
 using SmartStorage.Shared.VO;
 using SmartStorage.Shared.Validation;
@@ -33,9 +34,15 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             return _repository.FindAll();
         }
 
+        private const string DuplicateUsernameMessage = "Já existe um usuário com esse nome.";
+
         public User Create(AccountCredentialsVO dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
+
+            if (_repository.FindByUsername(dto.Username) is not null)
+                throw new BusinessException(DuplicateUsernameMessage);
+
             var entity = new User
             {
                 Username = dto.Username,
@@ -46,7 +53,16 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
                 RefreshTokenExpiryTime = null
             };
 
-            return _repository.Create(entity);
+            try
+            {
+                return _repository.Create(entity);
+            }
+            // Dois cadastros do mesmo nome ao mesmo tempo passam os dois pela consulta acima;
+            // quem barra o segundo é o índice único, e só essa violação vira recusa de regra.
+            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("UQ_users_user_name") == true)
+            {
+                throw new BusinessException(DuplicateUsernameMessage);
+            }
         }
 
         public User UpdateUser(long userId, UserUpdateVO data)
