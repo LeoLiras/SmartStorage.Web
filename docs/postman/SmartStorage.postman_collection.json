@@ -179,7 +179,7 @@
                 "v1"
               ]
             },
-            "description": "Lista os usuários cadastrados. Papel exigido: qualquer usuário autenticado."
+            "description": "Lista os usuários cadastrados, com id, usuário, nome completo e papel, sem senha nem refresh token. Papel exigido: Administrador."
           },
           "response": []
         },
@@ -200,7 +200,7 @@
                 "{{userId}}"
               ]
             },
-            "description": "Devolve o usuário do id informado. Papel exigido: qualquer usuário autenticado."
+            "description": "Devolve o usuário do id informado, com id, usuário, nome completo e papel, sem senha nem refresh token. Papel exigido: Administrador."
           },
           "response": []
         },
@@ -228,7 +228,7 @@
                 }
               ]
             },
-            "description": "Devolve o usuário do username informado; username vazio ou inexistente responde 400. Papel exigido: qualquer usuário autenticado."
+            "description": "Devolve o usuário do username informado, com id, usuário, nome completo e papel, sem senha nem refresh token; username vazio ou inexistente responde 400. Papel exigido: qualquer usuário autenticado."
           },
           "response": []
         },

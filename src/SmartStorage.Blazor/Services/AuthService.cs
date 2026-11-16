@@ -23,6 +23,17 @@ namespace SmartStorage.Blazor.Services
             this.session = session;
         }
 
+        // Ponte até a T-30.16 trocar o User do Blazor pelo UserAccountVO: a API responde
+        // "type", e lido direto como User o papel chegaria sempre como Usuario, o que
+        // faria o EditUser rebaixar o administrador ao salvar.
+        private static User ToUser(UserAccountVO account) => account is null ? null : new User
+        {
+            Id = account.Id,
+            Username = account.Username,
+            FullName = account.FullName,
+            UseType = account.Type
+        };
+
         public async Task Login(UserVO user)
         {
             try
@@ -78,7 +89,7 @@ namespace SmartStorage.Blazor.Services
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                var response = await http.GetFromJsonAsync<User>($"{BasePath}/user-by-username?userName={Uri.EscapeDataString(userName)}");
+                var response = ToUser(await http.GetFromJsonAsync<UserAccountVO>($"{BasePath}/user-by-username?userName={Uri.EscapeDataString(userName)}"));
 
                 if (response is not null)
                 {
@@ -102,7 +113,9 @@ namespace SmartStorage.Blazor.Services
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                return await http.GetFromJsonAsync<List<User>>($"{BasePath}");  
+                var response = await http.GetFromJsonAsync<List<UserAccountVO>>($"{BasePath}");
+
+                return response?.Select(ToUser).ToList();
             }
             catch (Exception)
             {
@@ -120,7 +133,7 @@ namespace SmartStorage.Blazor.Services
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                var response = await http.GetFromJsonAsync<User>($"{BasePath}/{userId}");
+                var response = ToUser(await http.GetFromJsonAsync<UserAccountVO>($"{BasePath}/{userId}"));
 
                 if (response is not null)
                 {

@@ -42,22 +42,24 @@ namespace SmartStorage.AuthenticationAPI.Controllers
 
             if (user == null) return BadRequest("Usuário não existe.");
 
-            return Ok(user);
+            return Ok(UserAccountVO.Parse(user));
         }
 
         [HttpGet]
+        [Authorize(Roles = Role.Admin)]
         public IActionResult GetAllUser()
         {
-            return Ok(_userAuthService.FindAllUsers());
+            return Ok(UserAccountVO.ParseList(_userAuthService.FindAllUsers()));
         }
 
         [HttpGet("{userId}")]
+        [Authorize(Roles = Role.Admin)]
         public IActionResult GetUserById(int userId)
         {
             if (userId.Equals(0))
                 throw new BusinessException("O campo ID do Usuário é obrigatório.");
 
-            return Ok(_userAuthService.FindUserById(userId));
+            return Ok(UserAccountVO.Parse(_userAuthService.FindUserById(userId)));
         }
 
         [HttpDelete("{userId}")]
