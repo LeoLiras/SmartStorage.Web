@@ -65,7 +65,7 @@ que for abandonada deixa o número sem uso.
   `emailConfirmed` a partir da #29) em toda resposta; `UserUpdateVO`
   (fullName, type, sem senha) na edição pelo administrador, porque a senha
   definida por ele tem rota própria (D-50); `MyAccountUpdateVO` (fullName,
-  currentPassword, newPassword) no `PUT /me`. A entidade `User` não entra nem
+  currentPassword, newPassword) no `PUT /my-account`. A entidade `User` não entra nem
   sai de controller (RF-03a, RF-41, RF-42)
 - D-15: toda recusa de regra lança `BusinessException`, em
   `SmartStorage.Shared`; um `IExceptionHandler` em
@@ -83,7 +83,7 @@ que for abandonada deixa o número sem uso.
 - D-18: o refresh monta as claims a partir do usuário no banco, pelo mesmo
   `GenerateToken` do login (RF-43); access token inválido no refresh responde
   401, não 500
-- D-19: `GET` e `PUT /me` leem o usuário pelo `unique_name`; listar e buscar
+- D-19: `GET` e `PUT /my-account` leem o usuário pelo `unique_name`; listar e buscar
   usuário por id exigem administrador; saem `user-by-username` e os
   `FindWithPagedSearch` e `GetCount` do `GenericRepository`
 - D-20: `VariablesExtensions.User` passa a ser `UserAccountVO`
@@ -100,7 +100,7 @@ que for abandonada deixa o número sem uso.
 - D-22: `PasswordPolicy` em `SmartStorage.Shared`, chamado pela API e pelo
   Blazor, que já referencia o Shared, para a regra existir num lugar só; o
   "diferente da atual" só a API confere, pelo `IPasswordHasher.Verify`, nos
-  três pontos onde a senha muda: o `PUT /me`, a rota de senha do
+  três pontos onde a senha muda: o `PUT /my-account`, a rota de senha do
   administrador (D-50) e, com a #29, o `reset-password` (RN-34)
 
 ### Sessão de 9 horas (#31)
@@ -129,7 +129,7 @@ que for abandonada deixa o número sem uso.
 - D-28: `User` ganha `UseActive` (padrão verdadeiro) e `UseSessionStamp`
   (GUID), e o token leva a claim `session_stamp`; desativar e redefinir a
   senha (a rota do administrador da D-50 e, com a #29, o `reset-password`)
-  trocam o carimbo, e excluir apaga a linha. A troca pelo `PUT /me` não troca,
+  trocam o carimbo, e excluir apaga a linha. A troca pelo `PUT /my-account` não troca,
   para não derrubar a própria sessão de quem trocou
 - D-29: um `OnTokenValidated` no `AddAuthConfiguration` lê, a cada
   requisição, `UseActive` e `UseSessionStamp` do usuário do token (e, com a
@@ -345,7 +345,7 @@ Mudanças:
 Os atuais são as rotas do gateway (`SmartStorage.APIGateway/appsettings.json`).
 Entram ou mudam:
 - #50: o `SaleVO` passa a trazer o custo da venda
-- #30: `GET` e `PUT /api/auth/v1/me`; `PUT /api/auth/v1/{userId}/password`;
+- #30: `GET` e `PUT /api/auth/v1/my-account`; `PUT /api/auth/v1/{userId}/password`;
   sai `user-by-username`; `update-credentials` recebe `UserUpdateVO`, sem
   senha; respostas de usuário em `UserAccountVO`
 - #31: `POST /api/auth/v1/refresh` e `POST /api/auth/v1/revoke` no gateway

@@ -205,12 +205,12 @@
           "response": []
         },
         {
-          "name": "Buscar usuário por username",
+          "name": "Minha conta",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/v1/user-by-username?userName=admin",
+              "raw": "{{baseUrl}}/api/auth/v1/my-account",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -218,17 +218,10 @@
                 "api",
                 "auth",
                 "v1",
-                "user-by-username"
-              ],
-              "query": [
-                {
-                  "key": "userName",
-                  "value": "admin",
-                  "description": "Username do usuário."
-                }
+                "my-account"
               ]
             },
-            "description": "Devolve o usuário do username informado, com id, usuário, nome completo e papel, sem senha nem refresh token; username vazio ou inexistente responde 400. Papel exigido: qualquer usuário autenticado."
+            "description": "Devolve os dados do usuário logado, identificado pelo token, com id, usuário, nome completo e papel, sem senha nem refresh token. Papel exigido: qualquer usuário autenticado."
           },
           "response": []
         },

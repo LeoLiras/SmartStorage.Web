@@ -50,13 +50,15 @@ public class LeituraDeUsuariosTests
     }
 
     [Fact]
-    public async Task Busca_por_username_mantem_o_papel_de_administrador()
+    public async Task Usuario_logado_vem_da_minha_conta_com_o_papel_de_administrador()
     {
-        var api = new ApiFalsa().Responde(HttpMethod.Get, $"{Usuarios}/user-by-username", Admin);
+        var api = new ApiFalsa().Responde(HttpMethod.Get, $"{Usuarios}/my-account", Admin);
 
         var usuario = await Servico(api).GetUser("admin");
 
         Assert.Equal(TipoUsuario.Administrador, usuario.UseType);
         Assert.Equal(1, usuario.Id);
+        Assert.Single(api.Requisicoes, r => r.Caminho == $"{Usuarios}/my-account");
+        Assert.Equal("", api.Consultas.Single());
     }
 }

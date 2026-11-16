@@ -89,7 +89,9 @@ namespace SmartStorage.Blazor.Services
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                var response = ToUser(await http.GetFromJsonAsync<UserAccountVO>($"{BasePath}/user-by-username?userName={Uri.EscapeDataString(userName)}"));
+                // O userName só confere que há alguém logado: a API identifica o usuário pelo
+                // token. A T-30.16 tira o parâmetro junto com as chamadas da Home e da Account.
+                var response = ToUser(await http.GetFromJsonAsync<UserAccountVO>($"{BasePath}/my-account"));
 
                 if (response is not null)
                 {

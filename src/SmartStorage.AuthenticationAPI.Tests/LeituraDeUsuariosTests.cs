@@ -104,15 +104,43 @@ public class LeituraDeUsuariosTests : IClassFixture<ApiEmMemoria>
     }
 
     [Fact]
-    public async Task Busca_por_username_responde_sem_senha_nem_refresh_token()
+    public async Task Usuario_comum_le_a_propria_conta_sem_senha_nem_refresh_token()
     {
         using var cliente = Cliente("usuario", Role.Client);
 
-        var resposta = await cliente.GetAsync("/api/auth/v1/user-by-username?userName=usuario");
+        var resposta = await cliente.GetAsync("/api/auth/v1/my-account");
         var json = await resposta.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
         SemSegredos(json);
+
+        var conta = JsonDocument.Parse(json).RootElement;
+        Assert.Equal(2, conta.GetProperty("id").GetInt64());
+        Assert.Equal("usuario", conta.GetProperty("username").GetString());
+        Assert.Equal((int)TipoUsuario.Usuario, conta.GetProperty("type").GetInt32());
+    }
+
+    [Fact]
+    public async Task Minha_conta_ignora_username_na_query_e_le_o_do_token()
+    {
+        using var cliente = Cliente("usuario", Role.Client);
+
+        var resposta = await cliente.GetAsync("/api/auth/v1/my-account?userName=admin");
+        var json = await resposta.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
         Assert.Equal("usuario", JsonDocument.Parse(json).RootElement.GetProperty("username").GetString());
+        _api.Usuarios.DidNotReceive().FindByUsername("admin");
+    }
+
+    [Fact]
+    public async Task Busca_por_username_nao_existe_mais()
+    {
+        using var cliente = Cliente("admin", Role.Admin);
+
+        var resposta = await cliente.GetAsync("/api/auth/v1/user-by-username?userName=usuario");
+
+        Assert.NotEqual(HttpStatusCode.OK, resposta.StatusCode);
+        _api.Usuarios.DidNotReceive().FindByUsername("usuario");
     }
 }

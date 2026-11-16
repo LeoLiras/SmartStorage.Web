@@ -111,7 +111,7 @@ movimentação com autor e instante.
   token;
   listar e buscar usuários por id exige administrador, `user-by-username` sai
   da API e do gateway, e cada usuário lê os próprios dados por
-  `GET /api/auth/v1/me`
+  `GET /api/auth/v1/my-account`
 - RF-42 [planejado #30]: a atualização de usuário recebe só os campos que
   podem mudar, nunca o refresh token
 - RF-43 [planejado #30]: o refresh emite as claims a partir do usuário no

@@ -29,18 +29,12 @@ namespace SmartStorage.AuthenticationAPI.Controllers
             _logger = logger;
         }
 
-        [HttpGet("user-by-username")]
-        public IActionResult GetUser([FromQuery] string userName)
+        [HttpGet("my-account")]
+        public IActionResult GetMyAccount()
         {
-            if (string.IsNullOrWhiteSpace(userName))
-            {
-                _logger.LogWarning("Get User failed: Missing username");
+            var user = _userAuthService.FindByUsername(User.Identity?.Name);
 
-                return BadRequest("Username is required.");
-            }
-            var user = _userAuthService.FindByUsername(userName);
-
-            if (user == null) return BadRequest("Usuário não existe.");
+            if (user == null) throw new BusinessException("Usuário não existe.");
 
             return Ok(UserAccountVO.Parse(user));
         }
