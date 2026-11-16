@@ -39,6 +39,14 @@ namespace SmartStorage.AuthenticationAPI.Controllers
             return Ok(UserAccountVO.Parse(user));
         }
 
+        [HttpPut("my-account")]
+        public IActionResult UpdateMyAccount([FromBody] MyAccountUpdateVO data)
+        {
+            var user = _userAuthService.UpdateMyAccount(User.Identity?.Name, data);
+
+            return Ok(UserAccountVO.Parse(user));
+        }
+
         [HttpGet]
         [Authorize(Roles = Role.Admin)]
         public IActionResult GetAllUser()

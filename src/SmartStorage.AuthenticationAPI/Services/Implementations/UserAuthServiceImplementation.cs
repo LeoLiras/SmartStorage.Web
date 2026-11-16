@@ -64,6 +64,26 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             return _repository.Update(user);
         }
 
+        public User UpdateMyAccount(string username, MyAccountUpdateVO data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            var user = _repository.FindByUsername(username);
+
+            if (user is null)
+                throw new BusinessException("Usuário não existe.");
+
+            if (!_passwordHasher.Verify(data.CurrentPassword, user.Password))
+                throw new BusinessException("A senha atual está incorreta.");
+
+            user.FullName = data.FullName;
+
+            if (!string.IsNullOrWhiteSpace(data.NewPassword))
+                user.Password = _passwordHasher.Hash(data.NewPassword);
+
+            return _repository.Update(user);
+        }
+
         public User Update(User user)
         {
             return _repository.Update(user);

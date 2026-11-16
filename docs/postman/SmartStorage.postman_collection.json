@@ -226,6 +226,41 @@
           "response": []
         },
         {
+          "name": "Alterar minha conta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/my-account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "my-account"
+              ]
+            },
+            "description": "Altera o nome completo e, se a senha nova vier preenchida, a senha do usuário logado, identificado pelo token. A senha atual é obrigatória, e errada responde 400 \"A senha atual está incorreta.\". Username e papel não mudam por aqui. O exemplo mantém o nome do seed e deixa a senha nova vazia, para não mudar a senha do admin. Responde com id, usuário, nome completo e papel, sem senha nem refresh token. Papel exigido: qualquer usuário autenticado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Administrador do Sistema\",\n  \"currentPassword\": \"admin123\",\n  \"newPassword\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Criar usuário",
           "request": {
             "method": "POST",
