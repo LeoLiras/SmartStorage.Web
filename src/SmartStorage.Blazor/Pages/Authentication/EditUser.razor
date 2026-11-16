@@ -81,7 +81,11 @@ else
 
         isAdm = userAuth?.FindFirst(ClaimTypes.Role)?.Value == "Administrador" ? true : false;
 
-        user = await auth.GetUser((int)UserId);
+        // A busca por id só aceita administrador: a própria conta, que a tela Conta
+        // embute para qualquer usuário, vem do my-account.
+        user = UserId == app.User.Id
+            ? await auth.GetUser(app.User.Username)
+            : await auth.GetUser((int)UserId);
 
         if (user is null)
             return;
