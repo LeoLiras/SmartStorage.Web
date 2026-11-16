@@ -189,11 +189,13 @@ namespace SmartStorage.Blazor.Services
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                var response = await http.PostAsJsonAsync($"{BasePath}/update-credentials", user);
+                var data = new UserUpdateVO { FullName = user.FullName, Type = user.UseType };
+
+                var response = await http.PostAsJsonAsync($"{BasePath}/update-credentials/{user.Id}", data);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<User>();
+                    return ToUser(await response.Content.ReadFromJsonAsync<UserAccountVO>());
                 }
                 else
                 {

@@ -12,6 +12,7 @@ using SmartStorage.Blazor.Provider;
 using SmartStorage.Blazor.Services;
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.Variables;
+using SmartStorage.Shared.Enum;
 using SmartStorage_Shared.Model;
 using Dialogo = SmartStorage.Blazor.Utils.ShowDialog.ShowDialog;
 
@@ -20,7 +21,8 @@ namespace SmartStorage.Blazor.Tests;
 /// <summary>
 /// A tela Conta embute o EditUser com o id de quem está logado. Depois que a busca
 /// por id passou a exigir administrador, o usuário comum recebia 403 ao abrir a
-/// própria conta.
+/// própria conta. A edição envia só o UserUpdateVO: a senha tem rota própria, e o
+/// username não muda.
 /// </summary>
 public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
 {
@@ -34,7 +36,8 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
     {
         var api = new ApiFalsa()
             .Responde(HttpMethod.Get, $"{Usuarios}/my-account", new { id = 2, username = "usuario", fullName = "Usuário Comum", type = 0 })
-            .Responde(HttpMethod.Get, $"{Usuarios}/3", new { id = 3, username = "maria", fullName = "Maria Souza", type = 0 });
+            .Responde(HttpMethod.Get, $"{Usuarios}/3", new { id = 3, username = "maria", fullName = "Maria Souza", type = 0 })
+            .Responde(HttpMethod.Post, $"{Usuarios}/update-credentials/3", new { id = 3, username = "maria", fullName = "Maria Souza", type = 1 });
 
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMudServices();
@@ -68,5 +71,37 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
         cut.WaitForAssertion(() => Assert.Equal("Maria Souza", cut.Instance.user.FullName));
         Assert.Contains(api.Requisicoes, r => r.Caminho == $"{Usuarios}/3");
         Assert.DoesNotContain(api.Requisicoes, r => r.Caminho == $"{Usuarios}/my-account");
+    }
+
+    [Fact]
+    public void Edicao_envia_so_nome_completo_e_papel_para_o_id_na_rota()
+    {
+        var api = Monta("admin", "Administrador", logadoId: 1);
+
+        var cut = Render<EditUser>(p => p.Add(c => c.UserId, 3L));
+        cut.WaitForAssertion(() => Assert.Equal("Maria Souza", cut.Instance.user.FullName));
+
+        cut.Instance.user.UseType = TipoUsuario.Administrador;
+        cut.FindAll("button").Single(b => b.TextContent.Contains("Atualizar")).Click();
+
+        cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Post));
+        var corpo = api.JsonDe(HttpMethod.Post, $"{Usuarios}/update-credentials/3").RootElement;
+
+        Assert.Equal(new[] { "fullName", "type" }, corpo.EnumerateObject().Select(c => c.Name).OrderBy(n => n));
+        Assert.Equal("Maria Souza", corpo.GetProperty("fullName").GetString());
+        Assert.Equal((int)TipoUsuario.Administrador, corpo.GetProperty("type").GetInt32());
+    }
+
+    [Fact]
+    public void Tela_nao_pede_senha_e_mostra_o_login_so_para_leitura()
+    {
+        Monta("admin", "Administrador", logadoId: 1);
+
+        var cut = Render<EditUser>(p => p.Add(c => c.UserId, 3L));
+        cut.WaitForAssertion(() => Assert.Equal("Maria Souza", cut.Instance.user.FullName));
+
+        Assert.Empty(cut.FindAll("input[type=password]"));
+        var login = cut.FindAll("input").Single(i => i.GetAttribute("value") == "maria");
+        Assert.True(login.HasAttribute("readonly"));
     }
 }

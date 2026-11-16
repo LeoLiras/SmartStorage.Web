@@ -100,9 +100,10 @@ movimentação com autor e instante.
 - RF-03 [feito]: o administrador cadastra, edita, lista e exclui usuários e
   define o papel de cada um
 - RF-03a [planejado #30]: cada usuário altera o próprio nome completo e a
-  própria senha, informando a senha atual; username e papel só mudam pelo
-  administrador. Hoje a tela existe, mas o que ela chama só aceita
-  administrador
+  própria senha, informando a senha atual; o papel só muda pelo
+  administrador, e o username não muda depois do cadastro, porque é ele que
+  identifica o usuário no token. Hoje a tela existe, mas o que ela chama só
+  aceita administrador
 - RF-04 [feito]: a interface esconde as ações fora do papel, e a API verifica
   o papel de novo
 - RF-41 [planejado #30]: os endpoints de usuário respondem só com id,

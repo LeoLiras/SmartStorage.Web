@@ -11,7 +11,7 @@ namespace SmartStorage.AuthenticationAPI.Services
         User Create(AccountCredentialsVO dto);
         bool RevokeToken(string username);
         User Update(User user);
-        User UpdateCredentials(User user);
+        User UpdateUser(long userId, UserUpdateVO data);
 
         void DeleteUser(int userId);
     }

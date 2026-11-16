@@ -49,11 +49,17 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             return _repository.Create(entity);
         }
 
-        public User UpdateCredentials(User user)
+        public User UpdateUser(long userId, UserUpdateVO data)
         {
-            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (data == null) throw new ArgumentNullException(nameof(data));
 
-            user.Password = _passwordHasher.Hash(user.Password);
+            var user = _repository.FindById(userId);
+
+            if (user is null)
+                throw new BusinessException("Usuário não encontrado com o ID informado");
+
+            user.FullName = data.FullName;
+            user.UseType = data.Type;
 
             return _repository.Update(user);
         }

@@ -63,8 +63,10 @@ que for abandonada deixa o número sem uso.
 - D-14: VOs de usuário em `SmartStorage.Shared/VO`: `UserAccountVO` (id,
   username, fullName, type; `active` a partir da #33, `email` e
   `emailConfirmed` a partir da #29) em toda resposta; `UserUpdateVO`
-  (fullName, type, sem senha) na edição pelo administrador, porque a senha
-  definida por ele tem rota própria (D-50); `MyAccountUpdateVO` (fullName,
+  (fullName, type, sem senha nem username) na edição pelo administrador, em
+  `POST update-credentials/{userId}`, com o id na rota para o corpo levar só
+  o que pode mudar; a senha definida por ele tem rota própria (D-50), e o
+  username não muda porque é o `unique_name` do token; `MyAccountUpdateVO` (fullName,
   currentPassword, newPassword) no `PUT /my-account`. A entidade `User` não entra nem
   sai de controller (RF-03a, RF-41, RF-42)
 - D-15: toda recusa de regra lança `BusinessException`, em
@@ -346,8 +348,9 @@ Os atuais são as rotas do gateway (`SmartStorage.APIGateway/appsettings.json`).
 Entram ou mudam:
 - #50: o `SaleVO` passa a trazer o custo da venda
 - #30: `GET` e `PUT /api/auth/v1/my-account`; `PUT /api/auth/v1/{userId}/password`;
-  sai `user-by-username`; `update-credentials` recebe `UserUpdateVO`, sem
-  senha; respostas de usuário em `UserAccountVO`
+  sai `user-by-username`; `update-credentials/{userId}` recebe
+  `UserUpdateVO`, sem senha nem username; respostas de usuário em
+  `UserAccountVO`
 - #31: `POST /api/auth/v1/refresh` e `POST /api/auth/v1/revoke` no gateway
 - #32: `POST`, `PUT` e `DELETE` de `shelf` e `employees` exigem administrador
 - #33: `PATCH /api/auth/v1/{userId}/active`

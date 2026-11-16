@@ -271,7 +271,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/v1/update-credentials",
+              "raw": "{{baseUrl}}/api/auth/v1/update-credentials/{{newUserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -279,13 +279,14 @@
                 "api",
                 "auth",
                 "v1",
-                "update-credentials"
+                "update-credentials",
+                "{{newUserId}}"
               ]
             },
-            "description": "Regrava nome, usuário e senha do id informado; os três são obrigatórios. Aponta para o usuário criado pelo exemplo anterior, para não mudar a senha dos usuários do seed. Papel exigido: Administrador.",
+            "description": "Altera o nome completo e o papel do usuário do id na rota e responde com id, usuário, nome completo e papel, sem senha nem refresh token. Username, senha e refresh token não mudam por aqui, mesmo que venham no corpo. Aponta para o usuário criado pelo exemplo anterior, para não mudar os usuários do seed. Papel exigido: Administrador.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id\": {{newUserId}},\n  \"username\": \"postman.exemplo\",\n  \"password\": \"Exemplo456\",\n  \"fullName\": \"Usuário de Exemplo Atualizado\",\n  \"useType\": 0\n}",
+              "raw": "{\n  \"fullName\": \"Usuário de Exemplo Atualizado\",\n  \"type\": 0\n}",
               "options": {
                 "raw": {
                   "language": "json"

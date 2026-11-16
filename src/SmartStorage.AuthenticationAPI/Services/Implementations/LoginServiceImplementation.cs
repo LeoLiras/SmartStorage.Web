@@ -68,13 +68,6 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             };
         }
 
-        public User UpdateCredentials(User user)
-        {
-            var userUpdate = _userAuthService.UpdateCredentials(user);
-
-            return user;
-        }
-
         public bool RevokeToken(string username)
         {
             return _userAuthService.RevokeToken(username);

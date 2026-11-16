@@ -4,7 +4,6 @@
 
 @using System.Security.Claims
 @using SmartStorage.Shared.Enum
-@using System.Text.RegularExpressions
 
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -25,19 +24,8 @@ else
                     <MudTextField @bind-Value="user.FullName" T="string" Label="Nome Completo" Required="true" RequiredError="O Nome é obrigatório!" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="12">
-                    <MudTextField @bind-Value="user.Username" T="string" Label="Login" Required="true" RequiredError="O Login é obrigatório!" Variant="Variant.Outlined" />
+                    <MudTextField T="string" Value="user.Username" Label="Login" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                 </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="user.Password" T="string" Label="Senha" HelperText="Ao menos 8 caracteres, com maiúscula, minúscula e número." @ref="pwField1"
-                                      InputType="InputType.Password"
-                                      Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
-                                      RequiredError="A senha é obrigatória!" Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField T="string"
-                                      Label="Confirmar Senha" HelperText="Repita a senha." InputType="InputType.Password"
-                                      Validation="@(new Func<string, string>(PasswordMatch))" Variant="Variant.Outlined" />
-                    </MudItem>
                 @if (isAdm)
                 {
                     <MudItem xs="12">
@@ -67,7 +55,6 @@ else
 
     public User user { get; set; } = new();
 
-    MudTextField<string> pwField1;
     bool loading = false;
 
     #endregion
@@ -87,10 +74,6 @@ else
             ? await auth.GetUser(app.User.Username)
             : await auth.GetUser((int)UserId);
 
-        if (user is null)
-            return;
-
-        user.Password = string.Empty;
     }
 
     #endregion
@@ -101,10 +84,7 @@ else
     {
         try
         {
-            if (user is null
-                    || string.IsNullOrWhiteSpace(user.Username)
-                    || string.IsNullOrWhiteSpace(user.Password)
-                    || string.IsNullOrWhiteSpace(user.FullName))
+            if (user is null || string.IsNullOrWhiteSpace(user.FullName))
                 return;
 
             loading = true;
@@ -125,34 +105,5 @@ else
         }
     }
 
-    private IEnumerable<string> PasswordStrength(string pw)
-    {
-        if (string.IsNullOrWhiteSpace(pw))
-        {
-            yield return "A Senha é obrigatória!";
-            yield break;
-        }
-
-        if (pw.Length < 8)
-            yield return "A senha deve ter ao menos 8 caracteres";
-
-        if (!Regex.IsMatch(pw, @"[A-Z]"))
-            yield return "A senha deve ter ao menos uma letra maiúscula";
-
-        if (!Regex.IsMatch(pw, @"[a-z]"))
-            yield return "A senha deve ter ao menos uma letra minúscula";
-
-        if (!Regex.IsMatch(pw, @"[0-9]"))
-            yield return "A senha deve ter ao menos um dígito numérico";
-    }
-
-    private string PasswordMatch(string arg)
-    {
-        if (pwField1.Value != arg)
-            return "As senhas não conferem";
-
-        return null;
-    }
-
-    #endregion  
+    #endregion
 }

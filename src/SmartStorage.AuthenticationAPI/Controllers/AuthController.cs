@@ -91,27 +91,17 @@ namespace SmartStorage.AuthenticationAPI.Controllers
             return Ok(token);
         }
 
-        [HttpPost("update-credentials")]
+        [HttpPost("update-credentials/{userId}")]
         [Authorize(Roles = Role.Admin)]
-        public IActionResult UpdateUserCredentials([FromBody] User user)
+        public IActionResult UpdateUserCredentials(long userId, [FromBody] UserUpdateVO user)
         {
-            _logger.LogInformation("Attempting to update user: {username}", user.Username);
+            _logger.LogInformation("Attempting to update user: {userId}", userId);
 
-            if (user == null ||
-                string.IsNullOrWhiteSpace(user.Username) ||
-                string.IsNullOrWhiteSpace(user.Password) ||
-                string.IsNullOrWhiteSpace(user.FullName))
-            {
-                _logger.LogWarning("Update failed: Missing username, password or full name");
+            var updated = _userAuthService.UpdateUser(userId, user);
 
-                return BadRequest("Username, password and full name are required.");
-            }
+            _logger.LogInformation("User {userId} updated successfully", userId);
 
-            _loginService.UpdateCredentials(user);
-
-            _logger.LogInformation("User {username} updated successfully", user.Username);
-
-            return Ok(user);
+            return Ok(UserAccountVO.Parse(updated));
         }
 
         [HttpPost("refresh")]
