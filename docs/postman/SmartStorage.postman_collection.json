@@ -332,6 +332,42 @@
           "response": []
         },
         {
+          "name": "Definir senha do usuário",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/{{newUserId}}/password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "{{newUserId}}",
+                "password"
+              ]
+            },
+            "description": "Define a senha do usuário do id na rota e responde com id, usuário, nome completo e papel, sem senha nem refresh token. Senha nova vazia responde 400 \"A nova senha é obrigatória.\", e o administrador que aponta para o próprio id recebe 400 \"Para alterar a própria senha, use a sua conta.\", porque a própria senha só muda pelo my-account, com a senha atual. Aponta para o usuário criado pelo exemplo \"Criar usuário\", para não mudar as senhas do seed. Papel exigido: Administrador.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newPassword\": \"NovaSenha1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Excluir usuário",
           "request": {
             "method": "DELETE",

@@ -80,6 +80,27 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             return _repository.Update(user);
         }
 
+        public User SetPassword(long userId, string requesterUsername, UserPasswordVO data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            if (string.IsNullOrWhiteSpace(data.NewPassword))
+                throw new BusinessException("A nova senha é obrigatória.");
+
+            var user = _repository.FindById(userId);
+
+            if (user is null)
+                throw new BusinessException("Usuário não encontrado com o ID informado");
+
+            // A própria senha só muda com a atual, pelo my-account (RF-03a).
+            if (user.Username == requesterUsername)
+                throw new BusinessException("Para alterar a própria senha, use a sua conta.");
+
+            user.Password = _passwordHasher.Hash(data.NewPassword);
+
+            return _repository.Update(user);
+        }
+
         public User UpdateMyAccount(string username, MyAccountUpdateVO data)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));

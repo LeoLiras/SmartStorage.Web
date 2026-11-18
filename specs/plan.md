@@ -96,7 +96,11 @@ que for abandonada deixa o número sem uso.
   `PUT /api/auth/v1/{userId}/password`, só administrador, e o
   `update-credentials` deixa de mexer em senha. Rota própria, e não um campo
   opcional na edição, para a troca de senha ter um ponto só onde, a partir da
-  #33, troca o `UseSessionStamp` e zera o refresh token (RF-46)
+  #33, troca o `UseSessionStamp` e zera o refresh token (RF-46). Recebe o
+  `UserPasswordVO` (newPassword) e responde 200 com o `UserAccountVO`; senha
+  vazia responde 400 "A nova senha é obrigatória.", e o próprio id, 400 "Para
+  alterar a própria senha, use a sua conta.", porque a própria senha só muda
+  com a atual (RF-03a)
 
 ### Regra de senha (#34)
 - D-22: `PasswordPolicy` em `SmartStorage.Shared`, chamado pela API e pelo

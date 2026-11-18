@@ -13,6 +13,7 @@ namespace SmartStorage.AuthenticationAPI.Services
         User Update(User user);
         User UpdateUser(long userId, UserUpdateVO data);
         User UpdateMyAccount(string username, MyAccountUpdateVO data);
+        User SetPassword(long userId, string requesterUsername, UserPasswordVO data);
 
         void DeleteUser(int userId);
     }

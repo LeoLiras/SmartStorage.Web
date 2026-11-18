@@ -112,6 +112,19 @@ namespace SmartStorage.AuthenticationAPI.Controllers
             return Ok(UserAccountVO.Parse(updated));
         }
 
+        [HttpPut("{userId}/password")]
+        [Authorize(Roles = Role.Admin)]
+        public IActionResult SetUserPassword(long userId, [FromBody] UserPasswordVO data)
+        {
+            _logger.LogInformation("Attempting to set the password of user: {userId}", userId);
+
+            var updated = _userAuthService.SetPassword(userId, User.Identity?.Name, data);
+
+            _logger.LogInformation("Password of user {userId} set successfully", userId);
+
+            return Ok(UserAccountVO.Parse(updated));
+        }
+
         [HttpPost("refresh")]
         [AllowAnonymous]
         public IActionResult Refresh(
