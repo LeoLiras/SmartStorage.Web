@@ -17,9 +17,5 @@ namespace SmartStorage.AuthenticationAPI.Repositories.GenericRepository
 
         bool Exists(long id);
 
-        List<T> FindWithPagedSearch(string query);
-
-        int GetCount(string query);
-
     }
 }
