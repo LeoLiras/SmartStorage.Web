@@ -367,9 +367,10 @@ movimentação com autor e instante.
   requisição; ID de outra empresa é tratado como inexistente
 - RN-33 [planejado #28]: empresa não é excluída, só desativada; a empresa do
   administrador geral não pode ser desativada
-- RN-34 [planejado #34]: senha com no mínimo 8
-  caracteres, ao menos uma letra e um número, diferente da atual; a API
-  confere em todo cadastro e troca de senha, e a tela repete a mesma regra
+- RN-34 [planejado #34]: senha com no mínimo 8 caracteres, ao menos uma
+  letra, um número e um caractere especial (qualquer um que não seja letra,
+  número ou espaço), diferente da atual; a API confere em todo cadastro e
+  troca de senha, e a tela repete a mesma regra
 - RN-35 [planejado #29]: os endpoints anônimos de senha e confirmação
   respondem igual exista o usuário ou não, e limitam as tentativas
 - RN-36 [planejado #29]: o banco guarda só o hash do token enviado por e-mail
@@ -420,8 +421,9 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
   e não 500
 - Usuário altera os próprios dados com a senha atual errada [planejado #30]:
   recusado
-- Senha sem letra, sem número, com menos de 8 caracteres ou igual à atual
-  [planejado #34]: recusada pela API, mesmo que a tela tenha sido contornada
+- Senha sem letra, sem número, sem caractere especial, com menos de 8
+  caracteres ou igual à atual [planejado #34]: recusada pela API, mesmo que a
+  tela tenha sido contornada
 
 ### Produtos
 - Nome com menos de 5 ou mais de 100 caracteres, descrição fora de 5 a 300,

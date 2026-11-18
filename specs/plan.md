@@ -107,7 +107,11 @@ que for abandonada deixa o número sem uso.
   Blazor, que já referencia o Shared, para a regra existir num lugar só; o
   "diferente da atual" só a API confere, pelo `IPasswordHasher.Verify`, nos
   três pontos onde a senha muda: o `PUT /my-account`, a rota de senha do
-  administrador (D-50) e, com a #29, o `reset-password` (RN-34)
+  administrador (D-50) e, com a #29, o `reset-password` (RN-34). Caractere
+  especial é qualquer um que não seja letra, número ou espaço, para a tela
+  não precisar listar símbolos. As senhas do seed (`admin123` e
+  `usuario123`) ficam fora da regra e continuam entrando, porque a política
+  só vale no cadastro e na troca de senha
 
 ### Sessão de 9 horas (#31)
 - D-23: `TokenConfigurations:SessionHours` (9) substitui `DaysToExpiry`; o
