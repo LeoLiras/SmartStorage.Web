@@ -247,7 +247,7 @@
                 "my-account"
               ]
             },
-            "description": "Altera o nome completo e, se a senha nova vier preenchida, a senha do usuário logado, identificado pelo token. A senha atual é obrigatória, e errada responde 400 \"A senha atual está incorreta.\". Username e papel não mudam por aqui. O exemplo mantém o nome do seed e deixa a senha nova vazia, para não mudar a senha do admin. Responde com id, usuário, nome completo e papel, sem senha nem refresh token. Papel exigido: qualquer usuário autenticado.",
+            "description": "Altera o nome completo e, se a senha nova vier preenchida, a senha do usuário logado, identificado pelo token. A senha atual é obrigatória, e errada responde 400 \"A senha atual está incorreta.\". A senha nova segue a regra de senha, e fora dela responde 400 \"A senha precisa ter ao menos 8 caracteres, com uma letra, um número e um caractere especial.\"; igual à atual responde 400 \"A nova senha precisa ser diferente da atual.\". Username e papel não mudam por aqui. O exemplo mantém o nome do seed e deixa a senha nova vazia, para não mudar a senha do admin. Responde com id, usuário, nome completo e papel, sem senha nem refresh token. Papel exigido: qualquer usuário autenticado.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"Administrador do Sistema\",\n  \"currentPassword\": \"admin123\",\n  \"newPassword\": \"\"\n}",
@@ -282,10 +282,10 @@
                 "create"
               ]
             },
-            "description": "Cria um usuário. type 0 é Usuário comum e 1 é Administrador. No banco do seed, ele nasce com o id da variável newUserId. Papel exigido: Administrador.",
+            "description": "Cria um usuário. type 0 é Usuário comum e 1 é Administrador. Senha fora da regra responde 400 \"A senha precisa ter ao menos 8 caracteres, com uma letra, um número e um caractere especial.\". No banco do seed, ele nasce com o id da variável newUserId. Papel exigido: Administrador.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"postman.exemplo\",\n  \"password\": \"Exemplo123\",\n  \"fullname\": \"Usuário de Exemplo do Postman\",\n  \"type\": 0\n}",
+              "raw": "{\n  \"username\": \"postman.exemplo\",\n  \"password\": \"Exemplo@123\",\n  \"fullname\": \"Usuário de Exemplo do Postman\",\n  \"type\": 0\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -354,10 +354,10 @@
                 "password"
               ]
             },
-            "description": "Define a senha do usuário do id na rota e responde com id, usuário, nome completo e papel, sem senha nem refresh token. Senha nova vazia responde 400 \"A nova senha é obrigatória.\", e o administrador que aponta para o próprio id recebe 400 \"Para alterar a própria senha, use a sua conta.\", porque a própria senha só muda pelo my-account, com a senha atual. Aponta para o usuário criado pelo exemplo \"Criar usuário\", para não mudar as senhas do seed. Papel exigido: Administrador.",
+            "description": "Define a senha do usuário do id na rota e responde com id, usuário, nome completo e papel, sem senha nem refresh token. Senha nova vazia responde 400 \"A nova senha é obrigatória.\", fora da regra responde 400 \"A senha precisa ter ao menos 8 caracteres, com uma letra, um número e um caractere especial.\", igual à atual responde 400 \"A nova senha precisa ser diferente da atual.\", e o administrador que aponta para o próprio id recebe 400 \"Para alterar a própria senha, use a sua conta.\", porque a própria senha só muda pelo my-account, com a senha atual. Aponta para o usuário criado pelo exemplo \"Criar usuário\", para não mudar as senhas do seed. Papel exigido: Administrador.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"newPassword\": \"NovaSenha1\"\n}",
+              "raw": "{\n  \"newPassword\": \"NovaSenha@1\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

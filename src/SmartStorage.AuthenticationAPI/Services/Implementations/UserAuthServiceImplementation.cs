@@ -36,9 +36,30 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
 
         private const string DuplicateUsernameMessage = "Já existe um usuário com esse nome.";
 
+        private const string SamePasswordMessage = "A nova senha precisa ser diferente da atual.";
+
+        private static void EnsurePasswordPolicy(string password)
+        {
+            var reason = PasswordPolicy.Validate(password);
+
+            if (reason is not null)
+                throw new BusinessException(reason);
+        }
+
+        private void EnsureNewPassword(User user, string newPassword)
+        {
+            EnsurePasswordPolicy(newPassword);
+
+            // Pelo hash, porque a senha atual só existe como hash no banco.
+            if (_passwordHasher.Verify(newPassword, user.Password))
+                throw new BusinessException(SamePasswordMessage);
+        }
+
         public User Create(AccountCredentialsVO dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
+
+            EnsurePasswordPolicy(dto.Password);
 
             if (_repository.FindByUsername(dto.Username) is not null)
                 throw new BusinessException(DuplicateUsernameMessage);
@@ -96,6 +117,8 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             if (user.Username == requesterUsername)
                 throw new BusinessException("Para alterar a própria senha, use a sua conta.");
 
+            EnsureNewPassword(user, data.NewPassword);
+
             user.Password = _passwordHasher.Hash(data.NewPassword);
 
             return _repository.Update(user);
@@ -113,10 +136,14 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             if (!_passwordHasher.Verify(data.CurrentPassword, user.Password))
                 throw new BusinessException("A senha atual está incorreta.");
 
-            user.FullName = data.FullName;
-
             if (!string.IsNullOrWhiteSpace(data.NewPassword))
+            {
+                EnsureNewPassword(user, data.NewPassword);
+
                 user.Password = _passwordHasher.Hash(data.NewPassword);
+            }
+
+            user.FullName = data.FullName;
 
             return _repository.Update(user);
         }

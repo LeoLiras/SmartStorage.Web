@@ -65,12 +65,12 @@ public class MinhaContaTests : IClassFixture<ApiEmMemoria>
         using var cliente = Cliente();
 
         var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/my-account",
-            new { fullName = "Usuário Renomeado", currentPassword = "usuario123", newPassword = "NovaSenha1" });
+            new { fullName = "Usuário Renomeado", currentPassword = "usuario123", newPassword = "NovaSenha@1" });
         var json = await resposta.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
         Assert.Equal("Usuário Renomeado", _usuario.FullName);
-        Assert.True(_hasher.Verify("NovaSenha1", _usuario.Password));
+        Assert.True(_hasher.Verify("NovaSenha@1", _usuario.Password));
         _api.Usuarios.Received(1).Update(_usuario);
 
         Assert.DoesNotContain("password", json, StringComparison.OrdinalIgnoreCase);
@@ -85,7 +85,7 @@ public class MinhaContaTests : IClassFixture<ApiEmMemoria>
         var hashAntes = _usuario.Password;
 
         var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/my-account",
-            new { fullName = "Usuário Renomeado", currentPassword = "errada", newPassword = "NovaSenha1" });
+            new { fullName = "Usuário Renomeado", currentPassword = "errada", newPassword = "NovaSenha@1" });
 
         Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
         Assert.Equal("A senha atual está incorreta.", await resposta.Content.ReadAsStringAsync());
@@ -138,7 +138,7 @@ public class MinhaContaTests : IClassFixture<ApiEmMemoria>
         using var cliente = Cliente();
 
         var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/my-account",
-            new { fullName = "Usuário Renomeado", newPassword = "NovaSenha1" });
+            new { fullName = "Usuário Renomeado", newPassword = "NovaSenha@1" });
 
         Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
         _api.Usuarios.DidNotReceive().Update(Arg.Any<User>());

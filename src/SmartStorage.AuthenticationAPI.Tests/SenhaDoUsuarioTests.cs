@@ -76,11 +76,11 @@ public class SenhaDoUsuarioTests : IClassFixture<ApiEmMemoria>
     {
         using var cliente = Cliente("admin", Role.Admin);
 
-        var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/3/password", new { newPassword = "NovaSenha1" });
+        var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/3/password", new { newPassword = "NovaSenha@1" });
         var json = await resposta.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
-        Assert.True(_hasher.Verify("NovaSenha1", _maria.Password));
+        Assert.True(_hasher.Verify("NovaSenha@1", _maria.Password));
         _api.Usuarios.Received(1).Update(_maria);
 
         Assert.DoesNotContain("password", json, StringComparison.OrdinalIgnoreCase);
@@ -95,7 +95,7 @@ public class SenhaDoUsuarioTests : IClassFixture<ApiEmMemoria>
     {
         using var cliente = Cliente("usuario", Role.Client);
 
-        var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/3/password", new { newPassword = "NovaSenha1" });
+        var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/3/password", new { newPassword = "NovaSenha@1" });
 
         Assert.Equal(HttpStatusCode.Forbidden, resposta.StatusCode);
         Assert.Empty(_api.Usuarios.ReceivedCalls());
@@ -124,7 +124,7 @@ public class SenhaDoUsuarioTests : IClassFixture<ApiEmMemoria>
         using var cliente = Cliente("admin", Role.Admin);
         var hashAntes = _admin.Password;
 
-        var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/1/password", new { newPassword = "NovaSenha1" });
+        var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/1/password", new { newPassword = "NovaSenha@1" });
 
         Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
         Assert.Equal("Para alterar a própria senha, use a sua conta.", await resposta.Content.ReadAsStringAsync());
@@ -137,7 +137,7 @@ public class SenhaDoUsuarioTests : IClassFixture<ApiEmMemoria>
     {
         using var cliente = Cliente("admin", Role.Admin);
 
-        var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/99/password", new { newPassword = "NovaSenha1" });
+        var resposta = await cliente.PutAsJsonAsync("/api/auth/v1/99/password", new { newPassword = "NovaSenha@1" });
 
         Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
         Assert.Equal("Usuário não encontrado com o ID informado", await resposta.Content.ReadAsStringAsync());

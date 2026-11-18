@@ -39,7 +39,7 @@ public class CadastroDeUsuarioTests : IClassFixture<ApiEmMemoria>
     {
         Username = username,
         Fullname = "Nome Completo",
-        Password = "Senha1234",
+        Password = "Senha@1234",
         Type = TipoUsuario.Usuario
     };
 
