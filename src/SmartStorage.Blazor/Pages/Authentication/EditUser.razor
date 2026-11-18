@@ -19,7 +19,7 @@ else
 {
     <section class="app-panel app-form-narrow mt-4">
         <MudText Typo="Typo.subtitle1" Class="app-panel-title">Dados do usuário</MudText>
-        <MudForm Model="user">
+        <MudForm @ref="form" Model="user">
             <MudGrid Spacing="3">
                 <MudItem xs="12">
                     <MudTextField @bind-Value="user.FullName" T="string" Label="Nome Completo" Required="true" RequiredError="O Nome é obrigatório!" Variant="Variant.Outlined" />
@@ -27,7 +27,8 @@ else
                 <MudItem xs="12">
                     <MudTextField T="string" Value="user.Username" Label="Login" ReadOnly="true" Class="app-readonly" Variant="Variant.Outlined" />
                 </MudItem>
-                @if (isAdm)
+                @* O my-account não recebe papel: o próprio papel só muda por outro administrador. *@
+                @if (isAdm && !ownAccount)
                 {
                     <MudItem xs="12">
                         <MudText Typo="Typo.body2" Class="app-muted">Tipo da conta</MudText>
@@ -37,6 +38,18 @@ else
                         </MudRadioGroup>
                     </MudItem>
                 }
+                @if (ownAccount)
+                {
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="currentPassword" T="string" Label="Senha atual" HelperText="Obrigatória para salvar a conta." InputType="InputType.Password" Required="true" RequiredError="A senha atual é obrigatória!" Variant="Variant.Outlined" />
+                    </MudItem>
+                }
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="newPassword" T="string" Label="Nova senha" HelperText="@(ownAccount ? "Deixe em branco para manter a atual." : "Preencha só para redefinir a senha.")" InputType="InputType.Password" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="confirmPassword" T="string" Label="Confirmar nova senha" HelperText="Repita a nova senha." InputType="InputType.Password" Validation="@(new Func<string, string>(PasswordMatch))" Variant="Variant.Outlined" />
+                </MudItem>
                 <MudItem xs="12">
                     <MudButton OnClick="UpdateUser" Variant="Variant.Filled" Color="Color.Primary">Atualizar</MudButton>
                 </MudItem>
@@ -56,7 +69,15 @@ else
 
     public UserAccountVO user { get; set; } = new();
 
+    MudForm form;
+
+    string currentPassword;
+    string newPassword;
+    string confirmPassword;
+
     bool loading = false;
+
+    bool ownAccount => UserId == app.User.Id;
 
     #endregion
 
@@ -71,7 +92,7 @@ else
 
         // A busca por id só aceita administrador: a própria conta, que a tela Conta
         // embute para qualquer usuário, vem do my-account.
-        user = UserId == app.User.Id
+        user = ownAccount
             ? await auth.GetMyAccount()
             : await auth.GetUser(UserId);
 
@@ -85,12 +106,29 @@ else
     {
         try
         {
-            if (user is null || string.IsNullOrWhiteSpace(user.FullName))
+            await form.Validate();
+
+            if (!form.IsValid || user is null || string.IsNullOrWhiteSpace(user.FullName))
                 return;
 
             loading = true;
 
-            var result = await auth.EditUser(user);
+            if (ownAccount)
+            {
+                app.User = await auth.UpdateMyAccount(new MyAccountUpdateVO
+                {
+                    FullName = user.FullName,
+                    CurrentPassword = currentPassword,
+                    NewPassword = newPassword
+                });
+            }
+            else
+            {
+                await auth.EditUser(user.Id, new UserUpdateVO { FullName = user.FullName, Type = user.Type });
+
+                if (!string.IsNullOrWhiteSpace(newPassword))
+                    await auth.SetUserPassword(user.Id, new UserPasswordVO { NewPassword = newPassword });
+            }
 
             await ShowDialog.ShowDialogAsync("Usuário atualizado com sucesso.", "Sucesso", "user/account", EDialogStates.Success);
 
@@ -102,8 +140,18 @@ else
         {
             loading = false;
 
+            StateHasChanged();
+
             await ShowDialog.ShowDialogAsync($"Falha atualizando o usuário.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
+    }
+
+    private string PasswordMatch(string arg)
+    {
+        if ((newPassword ?? "") != (arg ?? ""))
+            return "As senhas não conferem";
+
+        return null;
     }
 
     #endregion

@@ -161,33 +161,34 @@ namespace SmartStorage.Blazor.Services
             }
         }
 
-        public async Task<UserAccountVO> EditUser(UserAccountVO user)
+        public async Task<UserAccountVO> UpdateMyAccount(MyAccountUpdateVO data)
         {
-            try
-            {
-                if (user is null)
-                    throw new ArgumentNullException(nameof(user), message: "Os dados do usuário são obrigatórios.");
+            if (data is null)
+                throw new ArgumentNullException(nameof(data), message: "Os dados da conta são obrigatórios.");
 
-                if (string.IsNullOrWhiteSpace(BasePath))
-                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+            var response = await http.PutAsJsonAsync($"{BasePath}/my-account", data);
 
-                var data = new UserUpdateVO { FullName = user.FullName, Type = user.Type };
+            return await response.ReadApiAsync<UserAccountVO>();
+        }
 
-                var response = await http.PostAsJsonAsync($"{BasePath}/update-credentials/{user.Id}", data);
+        public async Task<UserAccountVO> EditUser(long userId, UserUpdateVO data)
+        {
+            if (data is null)
+                throw new ArgumentNullException(nameof(data), message: "Os dados do usuário são obrigatórios.");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadFromJsonAsync<UserAccountVO>();
-                }
-                else
-                {
-                    throw new ApiException(400, $"Erro ao editar dados do usuário {user.Username}.");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            var response = await http.PostAsJsonAsync($"{BasePath}/update-credentials/{userId}", data);
+
+            return await response.ReadApiAsync<UserAccountVO>();
+        }
+
+        public async Task<UserAccountVO> SetUserPassword(long userId, UserPasswordVO data)
+        {
+            if (data is null)
+                throw new ArgumentNullException(nameof(data), message: "A nova senha é obrigatória.");
+
+            var response = await http.PutAsJsonAsync($"{BasePath}/{userId}/password", data);
+
+            return await response.ReadApiAsync<UserAccountVO>();
         }
 
         public async Task DeleteUser(int userId)

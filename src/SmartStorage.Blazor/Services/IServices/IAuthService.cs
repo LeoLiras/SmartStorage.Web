@@ -10,7 +10,9 @@ namespace SmartStorage.Blazor.Services.IServices
         Task<List<UserAccountVO>> GetUsers();
         Task<UserAccountVO> GetUser(long userId);
         Task<AccountCredentialsVO> RegisterUser(AccountCredentialsVO account);
-        Task<UserAccountVO> EditUser(UserAccountVO user);
+        Task<UserAccountVO> UpdateMyAccount(MyAccountUpdateVO data);
+        Task<UserAccountVO> EditUser(long userId, UserUpdateVO data);
+        Task<UserAccountVO> SetUserPassword(long userId, UserPasswordVO data);
         Task DeleteUser(int userId);
     }
 }
