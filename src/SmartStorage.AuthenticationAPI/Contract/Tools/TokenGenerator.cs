@@ -54,7 +54,9 @@ namespace SmartStorage.AuthenticationAPI.Contract.Tools
                 ValidateLifetime = false
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
+            // Sem isso o handler renomeia unique_name para ClaimTypes.Name ao ler, o NameClaimType acima
+            // não o acha e o Identity.Name volta nulo: o refresh respondia 401 para todo token.
+            var tokenHandler = new JwtSecurityTokenHandler { MapInboundClaims = false };
 
             var principal = tokenHandler.ValidateToken(
                 token,

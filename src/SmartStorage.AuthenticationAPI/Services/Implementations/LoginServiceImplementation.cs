@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using SmartStorage.AuthenticationAPI.Contract;
 using SmartStorage.Shared.Auth;
 using SmartStorage.Shared.VO;
@@ -42,8 +43,22 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
 
         public TokenVO ValidateCredentials(TokenVO token)
         {
-            var principal = _tokenService.GetPrincipalFromExpiredToken(token.AccessToken);
+            ClaimsPrincipal principal;
+
+            // Assinatura errada e texto que nem é JWT lançam do validador; são o cliente
+            // apresentando credencial ruim, então respondem 401 como o refresh token errado.
+            try
+            {
+                principal = _tokenService.GetPrincipalFromExpiredToken(token.AccessToken);
+            }
+            catch (Exception ex) when (ex is SecurityTokenException or ArgumentException)
+            {
+                return null;
+            }
+
             var username = principal.Identity?.Name;
+
+            if (string.IsNullOrWhiteSpace(username)) return null;
 
             var user = _userAuthService.FindByUsername(username);
 
@@ -53,7 +68,8 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
                 )
                 return null;
 
-            return GenerateToken(user, principal.Claims);
+            // As claims saem do usuário no banco, e não do token antigo, para a troca de papel valer já neste refresh.
+            return GenerateToken(user);
         }
 
         public AccountCredentialsVO Create(AccountCredentialsVO dto)
@@ -73,9 +89,9 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             return _userAuthService.RevokeToken(username);
         }
 
-        private TokenVO GenerateToken(User user, IEnumerable<Claim> existingClaims = null)
+        private TokenVO GenerateToken(User user)
         {
-            var claims = existingClaims?.ToList() ??
+            List<Claim> claims =
                 [
                     new Claim(JwtRegisteredClaimNames.Jti,
                         Guid.NewGuid().ToString("N")),
