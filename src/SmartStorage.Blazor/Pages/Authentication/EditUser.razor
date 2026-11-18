@@ -4,6 +4,7 @@
 
 @using System.Security.Claims
 @using SmartStorage.Shared.Enum
+@using SmartStorage.Shared.VO
 
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -30,7 +31,7 @@ else
                 {
                     <MudItem xs="12">
                         <MudText Typo="Typo.body2" Class="app-muted">Tipo da conta</MudText>
-                        <MudRadioGroup @bind-Value="user.UseType" T="TipoUsuario" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
+                        <MudRadioGroup @bind-Value="user.Type" T="TipoUsuario" Required="true" RequiredError="O Tipo da Conta é obrigatório!">
                             <MudRadio Value=TipoUsuario.Usuario Color="Color.Primary">Usuário</MudRadio>
                             <MudRadio Value=TipoUsuario.Administrador Color="Color.Primary">Administrador</MudRadio>
                         </MudRadioGroup>
@@ -53,7 +54,7 @@ else
 
     public bool isAdm { get; set; }
 
-    public User user { get; set; } = new();
+    public UserAccountVO user { get; set; } = new();
 
     bool loading = false;
 
@@ -71,8 +72,8 @@ else
         // A busca por id só aceita administrador: a própria conta, que a tela Conta
         // embute para qualquer usuário, vem do my-account.
         user = UserId == app.User.Id
-            ? await auth.GetUser(app.User.Username)
-            : await auth.GetUser((int)UserId);
+            ? await auth.GetMyAccount()
+            : await auth.GetUser(UserId);
 
     }
 

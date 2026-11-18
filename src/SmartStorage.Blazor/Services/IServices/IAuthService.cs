@@ -1,5 +1,4 @@
 ﻿using SmartStorage.Shared.VO;
-using SmartStorage_Shared.Model;
 
 namespace SmartStorage.Blazor.Services.IServices
 {
@@ -7,11 +6,11 @@ namespace SmartStorage.Blazor.Services.IServices
     {
         Task Login(UserVO user);
         Task Logout();
-        Task<User> GetUser(string userName);
-        Task<List<User>> GetUser();
-        Task<User> GetUser(int userId);
+        Task<UserAccountVO> GetMyAccount();
+        Task<List<UserAccountVO>> GetUsers();
+        Task<UserAccountVO> GetUser(long userId);
         Task<AccountCredentialsVO> RegisterUser(AccountCredentialsVO account);
-        Task<User> EditUser(User user);
+        Task<UserAccountVO> EditUser(UserAccountVO user);
         Task DeleteUser(int userId);
     }
 }

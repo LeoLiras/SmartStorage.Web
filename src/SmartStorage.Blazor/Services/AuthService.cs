@@ -3,7 +3,6 @@ using SmartStorage.Blazor.Provider;
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.API;
 using SmartStorage.Shared.VO;
-using SmartStorage_Shared.Model;
 using System.Net.Http.Json;
 
 namespace SmartStorage.Blazor.Services
@@ -22,17 +21,6 @@ namespace SmartStorage.Blazor.Services
             this.authProvider = authProvider;
             this.session = session;
         }
-
-        // Ponte até a T-30.16 trocar o User do Blazor pelo UserAccountVO: a API responde
-        // "type", e lido direto como User o papel chegaria sempre como Usuario, o que
-        // faria o EditUser rebaixar o administrador ao salvar.
-        private static User ToUser(UserAccountVO account) => account is null ? null : new User
-        {
-            Id = account.Id,
-            Username = account.Username,
-            FullName = account.FullName,
-            UseType = account.Type
-        };
 
         public async Task Login(UserVO user)
         {
@@ -79,19 +67,15 @@ namespace SmartStorage.Blazor.Services
             }
         }
 
-        public async Task<User> GetUser(string userName)
+        public async Task<UserAccountVO> GetMyAccount()
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(userName))
-                    throw new ArgumentNullException(nameof(userName), message: "As credenciais do usuário são obrigatórias.");
-
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                // O userName só confere que há alguém logado: a API identifica o usuário pelo
-                // token. A T-30.16 tira o parâmetro junto com as chamadas da Home e da Account.
-                var response = ToUser(await http.GetFromJsonAsync<UserAccountVO>($"{BasePath}/my-account"));
+                // Sem parâmetro: a API identifica o usuário pelo token.
+                var response = await http.GetFromJsonAsync<UserAccountVO>($"{BasePath}/my-account");
 
                 if (response is not null)
                 {
@@ -99,7 +83,7 @@ namespace SmartStorage.Blazor.Services
                 }
                 else
                 {
-                    throw new ApiException(404, $"Usuário não encontrado com o user-name:{userName}");
+                    throw new ApiException(404, "Usuário logado não encontrado.");
                 }
             }
             catch (Exception)
@@ -108,16 +92,14 @@ namespace SmartStorage.Blazor.Services
             }
         }
 
-        public async Task<List<User>> GetUser()
+        public async Task<List<UserAccountVO>> GetUsers()
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                var response = await http.GetFromJsonAsync<List<UserAccountVO>>($"{BasePath}");
-
-                return response?.Select(ToUser).ToList();
+                return await http.GetFromJsonAsync<List<UserAccountVO>>($"{BasePath}");
             }
             catch (Exception)
             {
@@ -125,7 +107,7 @@ namespace SmartStorage.Blazor.Services
             }
         }
 
-        public async Task<User> GetUser(int userId)
+        public async Task<UserAccountVO> GetUser(long userId)
         {
             try
             {
@@ -135,7 +117,7 @@ namespace SmartStorage.Blazor.Services
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                var response = ToUser(await http.GetFromJsonAsync<UserAccountVO>($"{BasePath}/{userId}"));
+                var response = await http.GetFromJsonAsync<UserAccountVO>($"{BasePath}/{userId}");
 
                 if (response is not null)
                 {
@@ -179,7 +161,7 @@ namespace SmartStorage.Blazor.Services
             }
         }
 
-        public async Task<User> EditUser(User user)
+        public async Task<UserAccountVO> EditUser(UserAccountVO user)
         {
             try
             {
@@ -189,13 +171,13 @@ namespace SmartStorage.Blazor.Services
                 if (string.IsNullOrWhiteSpace(BasePath))
                     throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
 
-                var data = new UserUpdateVO { FullName = user.FullName, Type = user.UseType };
+                var data = new UserUpdateVO { FullName = user.FullName, Type = user.Type };
 
                 var response = await http.PostAsJsonAsync($"{BasePath}/update-credentials/{user.Id}", data);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return ToUser(await response.Content.ReadFromJsonAsync<UserAccountVO>());
+                    return await response.Content.ReadFromJsonAsync<UserAccountVO>();
                 }
                 else
                 {

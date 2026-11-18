@@ -93,7 +93,7 @@ else
                     app.Sales = await saleService.GetSales();
 
                 if (app.User.Id == 0)
-                    app.User = await auth.GetUser(user.FindFirst("unique_name")?.Value);
+                    app.User = await auth.GetMyAccount();
 
                 StateHasChanged();
             }

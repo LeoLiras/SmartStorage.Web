@@ -31,9 +31,9 @@ public class LeituraDeUsuariosTests
             new { id = 2, username = "usuario", fullName = "Usuário Comum", type = 0 },
         });
 
-        var usuarios = await Servico(api).GetUser();
+        var usuarios = await Servico(api).GetUsers();
 
-        Assert.Equal(new[] { TipoUsuario.Administrador, TipoUsuario.Usuario }, usuarios.Select(u => u.UseType));
+        Assert.Equal(new[] { TipoUsuario.Administrador, TipoUsuario.Usuario }, usuarios.Select(u => u.Type));
         Assert.Equal(new long[] { 1, 2 }, usuarios.Select(u => u.Id));
         Assert.Equal("Administrador", usuarios[0].FullName);
     }
@@ -45,7 +45,7 @@ public class LeituraDeUsuariosTests
 
         var usuario = await Servico(api).GetUser(1);
 
-        Assert.Equal(TipoUsuario.Administrador, usuario.UseType);
+        Assert.Equal(TipoUsuario.Administrador, usuario.Type);
         Assert.Equal("admin", usuario.Username);
     }
 
@@ -54,9 +54,9 @@ public class LeituraDeUsuariosTests
     {
         var api = new ApiFalsa().Responde(HttpMethod.Get, $"{Usuarios}/my-account", Admin);
 
-        var usuario = await Servico(api).GetUser("admin");
+        var usuario = await Servico(api).GetMyAccount();
 
-        Assert.Equal(TipoUsuario.Administrador, usuario.UseType);
+        Assert.Equal(TipoUsuario.Administrador, usuario.Type);
         Assert.Equal(1, usuario.Id);
         Assert.Single(api.Requisicoes, r => r.Caminho == $"{Usuarios}/my-account");
         Assert.Equal("", api.Consultas.Single());

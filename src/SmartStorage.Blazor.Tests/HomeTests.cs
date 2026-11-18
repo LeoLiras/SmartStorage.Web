@@ -11,7 +11,7 @@ using SmartStorage.Blazor.Pages;
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.API;
 using SmartStorage.Blazor.Utils.Variables;
-using SmartStorage_Shared.Model;
+using SmartStorage.Shared.VO;
 using Dialogo = SmartStorage.Blazor.Utils.ShowDialog.ShowDialog;
 
 namespace SmartStorage.Blazor.Tests;
@@ -33,7 +33,7 @@ public class HomeTests : BunitContext, IAsyncLifetime
             .Responde(HttpMethod.Get, "api/storage/sales/v1", vazio);
 
         var auth = Substitute.For<IAuthService>();
-        auth.GetUser("admin").Returns(Task.FromResult(new User { Id = 1, Username = "admin", FullName = "Ana Souza" }));
+        auth.GetMyAccount().Returns(Task.FromResult(new UserAccountVO { Id = 1, Username = "admin", FullName = "Ana Souza" }));
 
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMudServices();

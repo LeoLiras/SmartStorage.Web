@@ -13,7 +13,7 @@ using SmartStorage.Blazor.Services;
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.Variables;
 using SmartStorage.Shared.Enum;
-using SmartStorage_Shared.Model;
+using SmartStorage.Shared.VO;
 using Dialogo = SmartStorage.Blazor.Utils.ShowDialog.ShowDialog;
 
 namespace SmartStorage.Blazor.Tests;
@@ -42,7 +42,7 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMudServices();
         Services.AddSingleton<IAuthService>(new AuthService(api.Cliente(), new AuthStateProvider(Substitute.For<IJSRuntime>()), new SessionExpiration()));
-        Services.AddSingleton(new VariablesExtensions { User = new User { Id = logadoId, Username = username } });
+        Services.AddSingleton(new VariablesExtensions { User = new UserAccountVO { Id = logadoId, Username = username } });
         Services.AddSingleton(new Dialogo(Substitute.For<IDialogService>(), new SessionExpiration()));
         AddAuthorization().SetAuthorized(username).SetRoles(papel).SetClaims(new Claim("unique_name", username));
 
@@ -81,7 +81,7 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
         var cut = Render<EditUser>(p => p.Add(c => c.UserId, 3L));
         cut.WaitForAssertion(() => Assert.Equal("Maria Souza", cut.Instance.user.FullName));
 
-        cut.Instance.user.UseType = TipoUsuario.Administrador;
+        cut.Instance.user.Type = TipoUsuario.Administrador;
         cut.FindAll("button").Single(b => b.TextContent.Contains("Atualizar")).Click();
 
         cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Post));
