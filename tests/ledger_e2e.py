@@ -2135,6 +2135,41 @@ def ct53(ctx):
         _confere_custo(ctx, vendas, None)
 
 
+_PREFIXO_USUARIO = "zz_ensaio_ct54_"
+
+_SENHAS_FORA_DA_REGRA = [
+    ("7 caracteres", "Ab1@xyz"),
+    ("so letras", "abcdefgh"),
+    ("so numeros", "12345678"),
+    ("sem especial", "admin123"),
+    ("espaco como unico especial", "abcd 1234"),
+]
+
+
+def _apaga_usuarios_de_teste():
+    """So existe usuario do CT-54 no banco se a regra regredir; ele nunca movimenta
+    estoque, entao a FK do ledger nao impede apaga-lo."""
+    sql("DELETE FROM dbo.[User] WHERE UseUsername LIKE '%s%%'" % _PREFIXO_USUARIO)
+
+
+@caso("CT-54", "Cadastro de usuario recusa senha fora da regra e nao grava o usuario")
+def ct54(ctx):
+    _apaga_usuarios_de_teste()
+    try:
+        for indice, (descricao, senha) in enumerate(_SENHAS_FORA_DA_REGRA, 1):
+            username = "%s%s_%d" % (_PREFIXO_USUARIO, EXECUCAO, indice)
+            status, corpo = ctx.api("POST", "/api/auth/v1/create", {
+                "username": username, "password": senha,
+                "fullname": "%s %s CT54" % (PREFIXO, EXECUCAO), "type": 0,
+            })
+            R.exige(status == 400 and "A senha precisa ter ao menos 8 caracteres" in _mensagem(corpo),
+                    "senha %s aceita no cadastro" % descricao, "HTTP %s: %s" % (status, _mensagem(corpo)))
+            gravados = sql("SELECT COUNT(*) FROM dbo.[User] WHERE UseUsername = '%s'" % username)
+            R.exige(int(gravados[0][0]) == 0, "usuario com senha %s ficou gravado" % descricao)
+    finally:
+        _apaga_usuarios_de_teste()
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
