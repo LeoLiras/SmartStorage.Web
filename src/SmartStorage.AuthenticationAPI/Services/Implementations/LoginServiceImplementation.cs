@@ -108,7 +108,7 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             var refreshToken = _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_configurations.DaysToExpiry);
+            user.RefreshTokenExpiryTime = DateTime.Now.AddHours(_configurations.SessionHours);
 
             _userAuthService.Update(user);
 
