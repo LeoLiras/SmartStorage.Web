@@ -333,6 +333,14 @@ que for abandonada deixa o número sem uso.
   quantidade de entrada pronta; e a quantidade não muda o fator, porque o
   fator é do produto e é gravado nele na importação
 
+### Cadastro de usuário (#54)
+- D-57: o `Register.razor` deixa de chamar `auth.Logout()` depois do
+  cadastro aceito, e o diálogo de sucesso leva a `user/account` em vez de
+  `/` (RF-59). O logout vinha do cadastro pensado como público, e a tela só
+  aceita administrador. O `AuthService.RegisterUser` passa a ler a resposta
+  pelo `ReadApiAsync`, como os outros métodos do serviço (D-12), para o
+  motivo da recusa chegar ao diálogo. A API não muda
+
 ## Modelo de dados
 Atual:
 - `Product`, `Shelf`, `Enter`, `Sale`, `Employee`, `Invoice`, `InvoiceItem`,
@@ -380,7 +388,7 @@ corpo, query ou papel exigido muda também na coleção, e rota que sai, sai
 dela.
 
 ## Ordem de implementação
-1. #37, #38, #41, #42, #43, #44, #45, #47, #48, #49, #51, #52 e #53: pequenas e
+1. #37, #38, #41, #42, #43, #44, #45, #47, #48, #49, #51, #52, #53 e #54: pequenas e
    independentes, com a #51 antes da #13, porque corrige uma lacuna de
    segurança em produtos, e a #52 antes da #30, para as rotas novas já
    nascerem na coleção; e a gravação do custo da #50, cedo, porque venda
