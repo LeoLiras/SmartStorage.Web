@@ -4,7 +4,7 @@ namespace SmartStorage.AuthenticationAPI.Contract
 {
     public interface ITokenGenerator
     {
-        string GenerateAccessToken(IEnumerable<Claim> claims);
+        string GenerateAccessToken(IEnumerable<Claim> claims, DateTime? expires = null);
         string GenerateRefreshToken();
         ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
     }

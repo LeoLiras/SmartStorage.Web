@@ -38,7 +38,7 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             if (!_passwordHasher.Verify(userDto.Password, user.Password))
                 return null;
 
-            return GenerateToken(user);
+            return GenerateToken(user, DateTime.Now.AddHours(_configurations.SessionHours));
         }
 
         public TokenVO ValidateCredentials(TokenVO token)
@@ -62,14 +62,19 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
 
             var user = _userAuthService.FindByUsername(username);
 
+            // O revoke zera o RefreshToken: sem a checagem de vazio, um refresh token nulo no corpo
+            // conferia com o do banco e renovava a sessão de quem já tinha saído.
             if (user == null ||
+                string.IsNullOrEmpty(token.RefreshToken) ||
                 user.RefreshToken != token.RefreshToken ||
-                user.RefreshTokenExpiryTime <= DateTime.Now
+                user.RefreshTokenExpiryTime is not DateTime sessionEnd ||
+                sessionEnd <= DateTime.Now
                 )
                 return null;
 
             // As claims saem do usuário no banco, e não do token antigo, para a troca de papel valer já neste refresh.
-            return GenerateToken(user);
+            // O fim da sessão é o do login: o refresh troca o refresh token sem estender o prazo (D-23).
+            return GenerateToken(user, sessionEnd);
         }
 
         public AccountCredentialsVO Create(AccountCredentialsVO dto)
@@ -89,8 +94,15 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
             return _userAuthService.RevokeToken(username);
         }
 
-        private TokenVO GenerateToken(User user)
+        private TokenVO GenerateToken(User user, DateTime sessionEnd)
         {
+            var createdDate = DateTime.Now;
+
+            // O que vier primeiro: com 60 minutos fixos, um refresh perto do fim levaria a sessão a até 10 horas.
+            var expirationDate = createdDate.AddMinutes(_configurations.Minutes);
+            if (sessionEnd < expirationDate)
+                expirationDate = sessionEnd;
+
             List<Claim> claims =
                 [
                     new Claim(JwtRegisteredClaimNames.Jti,
@@ -103,17 +115,14 @@ namespace SmartStorage.AuthenticationAPI.Services.Implementations
                         user.UseType == 0 ? Role.Client : Role.Admin)
                 ];
 
-            var accessToken = _tokenService.GenerateAccessToken(claims);
+            var accessToken = _tokenService.GenerateAccessToken(claims, expirationDate);
 
             var refreshToken = _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.Now.AddHours(_configurations.SessionHours);
+            user.RefreshTokenExpiryTime = sessionEnd;
 
             _userAuthService.Update(user);
-
-            var createdDate = DateTime.Now;
-            var expirationDate = createdDate.AddMinutes(_configurations.Minutes);
 
             return new TokenVO
             {

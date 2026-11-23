@@ -542,8 +542,6 @@ decidida numa revisão desta spec ([decidido]).
 Planejadas na #31, que deve entrar depois da #30 (RF-44):
 - o gateway não tem rota de `refresh` nem de `revoke`, e o Blazor guarda só o
   access token: a sessão cai em 60 minutos, no meio do turno
-- o refresh grava um prazo novo de 9 horas a cada renovação, então a sessão
-  nunca teria fim
 - sair só apaga o token do navegador; o refresh token continua válido no banco
 
 ### Papéis (#32)

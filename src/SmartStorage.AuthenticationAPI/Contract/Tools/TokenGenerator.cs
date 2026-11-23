@@ -11,7 +11,7 @@ namespace SmartStorage.AuthenticationAPI.Contract.Tools
     {
         private readonly TokenConfiguration _configurations = configurations;
 
-        public string GenerateAccessToken(IEnumerable<Claim> claims)
+        public string GenerateAccessToken(IEnumerable<Claim> claims, DateTime? expires = null)
         {
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configurations.Secret));
 
@@ -21,8 +21,7 @@ namespace SmartStorage.AuthenticationAPI.Contract.Tools
                 issuer: _configurations.Issuer,
                 audience: _configurations.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(
-                    _configurations.Minutes),
+                expires: expires ?? DateTime.Now.AddMinutes(_configurations.Minutes),
                 signingCredentials: signingCredentials
             );
 
