@@ -102,23 +102,22 @@ movimentação com autor e instante.
 - RF-59 [planejado #54]: cadastrar um usuário mantém a sessão do
   administrador e o leva à Conta, com o usuário novo na lista; na recusa, a
   tela mostra o motivo que a API devolveu
-- RF-03a [planejado #30]: cada usuário altera o próprio nome completo e a
+- RF-03a [feito]: cada usuário altera o próprio nome completo e a
   própria senha, informando a senha atual; o papel só muda pelo
   administrador, e o username não muda depois do cadastro, porque é ele que
-  identifica o usuário no token. Hoje a tela existe, mas o que ela chama só
-  aceita administrador
+  identifica o usuário no token
 - RF-04 [feito]: a interface esconde as ações fora do papel, e a API verifica
   o papel de novo
-- RF-41 [planejado #30]: os endpoints de usuário respondem só com id,
+- RF-41 [feito]: os endpoints de usuário respondem só com id,
   usuário, nome completo e papel (com a #33, também se está ativo; com a
   #29, o e-mail e se está confirmado), nunca com hash de senha nem refresh
   token;
   listar e buscar usuários por id exige administrador, `user-by-username` sai
   da API e do gateway, e cada usuário lê os próprios dados por
   `GET /api/auth/v1/my-account`
-- RF-42 [planejado #30]: a atualização de usuário recebe só os campos que
+- RF-42 [feito]: a atualização de usuário recebe só os campos que
   podem mudar, nunca o refresh token
-- RF-43 [planejado #30]: o refresh emite as claims a partir do usuário no
+- RF-43 [feito]: o refresh emite as claims a partir do usuário no
   banco, então a troca de papel vale no próximo refresh
 - RF-46 [planejado #33]: excluir ou desativar o usuário, desativar a empresa e
   redefinir a senha encerram as sessões dele na hora: a próxima requisição
@@ -379,7 +378,7 @@ movimentação com autor e instante.
 - RN-36 [planejado #29]: o banco guarda só o hash do token enviado por e-mail
 - RN-37 [planejado #29]: quem tem e-mail cadastrado e não confirmado não faz
   login; usuário antigo sem e-mail continua entrando
-- RN-38 [planejado #30]: só a recusa de regra de negócio devolve o motivo ao
+- RN-38 [feito]: só a recusa de regra de negócio devolve o motivo ao
   cliente, com 400; erro inesperado responde 500 com mensagem genérica e o
   detalhe vai para o log
 
@@ -402,11 +401,9 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 - Usuário sem papel de administrador chama endpoint de administrador: 403,
   mesmo que a tela tenha sido contornada
 - Usuário e senha errados: o login responde 401 sem dizer qual dos dois errou
-- Cadastro de usuário com username já usado: hoje responde 500 com o erro do
-  banco; pela #30 passa a responder 400 com "Já existe um usuário com esse
-  nome."
-- Usuário comum pede a lista de usuários: hoje recebe todos, com o hash da
-  senha; pela #30 recebe 403
+- Cadastro de usuário com username já usado: 400 com "Já existe um usuário
+  com esse nome."
+- Usuário comum pede a lista de usuários: 403
 - Excluir usuário que já movimentou estoque: recusado, para o histórico não
   perder o autor
 - Usuário comum cadastra, edita ou exclui prateleira ou colaborador pela API:
@@ -420,9 +417,9 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 - Login de empresa desativada [planejado #28]: com usuário e senha certos, a
   tela avisa que a empresa está inativa; com a senha errada, a mensagem é a
   genérica, para não revelar usuários
-- Refresh com access token adulterado ou de outro emissor [planejado #30]: 401,
+- Refresh com access token adulterado ou de outro emissor: 401,
   e não 500
-- Usuário altera os próprios dados com a senha atual errada [planejado #30]:
+- Usuário altera os próprios dados com a senha atual errada:
   recusado
 - Senha sem letra, sem número, sem caractere especial, com menos de 8
   caracteres ou igual à atual: recusada pela API, mesmo que a
@@ -541,17 +538,6 @@ Encontradas na verificação do código em 2026-10-14 e revisadas em
 2026-10-15 e 2026-10-19. Uma lacuna vira requisito quando ganha issue ou é
 decidida numa revisão desta spec ([decidido]).
 
-### Segurança (#30)
-Descritas e planejadas na #30, que deve entrar antes da #28 e da #29:
-- hash de senha e refresh token expostos a qualquer usuário logado
-  (RF-41)
-- `update-credentials` recebendo e devolvendo a entidade `User` (RF-42)
-- refresh reaproveitando as claims antigas (RF-43)
-- mensagem de qualquer exceção devolvida ao cliente, e username repetido
-  respondendo 500 (RN-38)
-- métodos sem uso que executam SQL recebido como texto no
-  `GenericRepository` da AuthenticationAPI
-
 ### Sessão (#31)
 Planejadas na #31, que deve entrar depois da #30 (RF-44):
 - o gateway não tem rota de `refresh` nem de `revoke`, e o Blazor guarda só o
@@ -608,7 +594,7 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 - O relatório do mês não inclui vendas de outros anos nem unidades devolvidas
 - Usuário sem papel de administrador não cadastra nem exclui usuários, nem
   pela tela nem pela API
-- [planejado #30] Nenhuma resposta da API traz hash de senha, refresh token
+- Nenhuma resposta da API traz hash de senha, refresh token
   ou texto de erro interno
 - [planejado #31] O operador trabalha 9 horas sem entrar de novo; depois
   delas, ou depois de sair, o refresh é recusado
