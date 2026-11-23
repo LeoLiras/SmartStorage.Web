@@ -367,7 +367,7 @@ movimentação com autor e instante.
   requisição; ID de outra empresa é tratado como inexistente
 - RN-33 [planejado #28]: empresa não é excluída, só desativada; a empresa do
   administrador geral não pode ser desativada
-- RN-34 [planejado #34]: senha com no mínimo 8 caracteres, ao menos uma
+- RN-34 [feito]: senha com no mínimo 8 caracteres, ao menos uma
   letra, um número e um caractere especial (qualquer um que não seja letra,
   número ou espaço), diferente da atual; a API confere em todo cadastro e
   troca de senha, e a tela repete a mesma regra
@@ -422,7 +422,7 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 - Usuário altera os próprios dados com a senha atual errada [planejado #30]:
   recusado
 - Senha sem letra, sem número, sem caractere especial, com menos de 8
-  caracteres ou igual à atual [planejado #34]: recusada pela API, mesmo que a
+  caracteres ou igual à atual: recusada pela API, mesmo que a
   tela tenha sido contornada
 
 ### Produtos
@@ -565,9 +565,6 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 ### Revisão de 2026-10-19 (#33 a #38)
 - excluir o usuário não encerra a sessão dele: o token segue válido até
   vencer, e não há como desativar quem já movimentou estoque (#33, RF-46)
-- a política de senha (8 caracteres, maiúscula, minúscula e número) só existe
-  no Blazor, com uma regra diferente da RN-34, e a API aceita qualquer senha
-  (#34)
 - a venda aceita qualquer data, inclusive futura ou de um mês já fechado
   (#35, RN-39)
 - o relatório só sai para o mês corrente (#36, RF-50)
@@ -617,7 +614,7 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
 - [planejado #33] Usuário excluído perde o acesso na requisição seguinte, sem
   esperar o token vencer
 - [planejado #35] Nenhuma venda nova tem data futura nem cai num mês já encerrado
-- [planejado #34] A API recusa senha fora da RN-34, mesmo com a tela contornada
+- A API recusa senha fora da RN-34, mesmo com a tela contornada
 - A coleção do Postman tem uma requisição para cada rota do gateway, e nenhuma
   a mais
 - Todos os casos de `tests/ledger_e2e.py` e os testes de `dotnet test` passam
