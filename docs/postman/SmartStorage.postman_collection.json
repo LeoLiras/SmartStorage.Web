@@ -22,6 +22,10 @@
       "type": "string"
     },
     {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
       "key": "userId",
       "value": "1",
       "type": "string"
@@ -134,7 +138,7 @@
                 "signin"
               ]
             },
-            "description": "Autentica com o usuário e a senha do ambiente e guarda o token de acesso na variável accessToken da coleção. O token vale 60 minutos; depois disso, rode de novo. Papel exigido: nenhum, a rota é anônima.",
+            "description": "Autentica com o usuário e a senha do ambiente e guarda o token de acesso e o refresh token nas variáveis accessToken e refreshToken da coleção. O token vale 60 minutos, e a sessão, 9 horas desde o login; no meio delas, use \"Renovar sessão\", e depois, rode de novo. Papel exigido: nenhum, a rota é anônima.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
@@ -157,6 +161,59 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "    pm.collectionVariables.set('accessToken', pm.response.json().accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', pm.response.json().refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Renovar sessão",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "refresh"
+              ]
+            },
+            "description": "Troca o token de acesso, mesmo vencido, e o refresh token guardados pelo \"Entrar\" por um par novo, e guarda os dois nas variáveis da coleção. A renovação não estende a sessão: o fim continua 9 horas depois do login, e o token novo vence em 60 minutos ou no fim da sessão, o que vier primeiro. Refresh token errado, já trocado, revogado pelo \"Sair\" ou com a sessão encerrada responde 401; corpo vazio responde 400. Papel exigido: nenhum, a rota é anônima, porque é chamada com o token de acesso já vencido.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"{{accessToken}}\",\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('accessToken', pm.response.json().accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', pm.response.json().refreshToken);",
                   "}"
                 ]
               }
@@ -385,6 +442,27 @@
               ]
             },
             "description": "Exclui o usuário criado pelo exemplo. Usuário que já movimentou estoque não pode ser excluído. Papel exigido: Administrador."
+          },
+          "response": []
+        },
+        {
+          "name": "Sair",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/v1/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "v1",
+                "revoke"
+              ]
+            },
+            "description": "Revoga o refresh token do usuário logado, identificado pelo token, e responde 204 sem corpo. Depois dele, o \"Renovar sessão\" responde 401 até um novo \"Entrar\"; o token de acesso atual continua valendo até vencer. Papel exigido: qualquer usuário autenticado."
           },
           "response": []
         }
