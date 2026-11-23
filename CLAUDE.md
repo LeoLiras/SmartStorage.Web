@@ -113,6 +113,12 @@ Cada VO implementa `ISupportHyperMedia`, herda `BaseMessage` (do `SmartStorage.M
 
 `AddAuthConfiguration` lança se `TokenConfigurations:Secret` estiver vazio, então configuração errada falha alto no startup.
 
+### Tratamento de erro
+
+Recusa de regra de negócio lança `BusinessException` (`SmartStorage.Shared/Validation`), nunca `Exception`. Quem responde é o `ApiExceptionHandler` (`SmartStorage.Configurations/Config`), registrado com `AddExceptionHandler` no `Program.cs` dos cinco serviços: `BusinessException` vira 400 com a mensagem dela, e qualquer outra exceção vira 500 com "Erro inesperado. Tente novamente.", com o detalhe só no log. Os controllers não têm `try/catch` que devolva `ex.Message`: um ponto só faz a falha segura ser o 500 genérico, e o `throw` que alguém esquecer de converter deixa de vazar texto interno ao cliente.
+
+O corpo é **texto puro**, não `ProblemDetails`, porque é o que o `ReadApiAsync` do Blazor põe na `ApiException` e o que o roteiro compara. O `UseExceptionHandler(_ => { })` no topo do `UseApiDefaults` vem antes da autenticação para pegar também o que falhar nela; o pipeline vazio existe só porque o `UseExceptionHandler()` sem argumento derruba o startup sem `ProblemDetails` registrado. Username repetido é conferido antes de gravar, e a corrida no `UQ_users_user_name` (`DbUpdateException`) também vira `BusinessException`.
+
 ### Mensageria
 
 Criar produto publica o `ProductVO` na fila `sendemailqueue` (`RabbitMQMessageSender` na API core) e retorna imediatamente. `RabbitMQEmailConsumer` na EmailAPI é um `BackgroundService` que consome e só dá `BasicAck` depois do envio SMTP. Cada tipo de mensagem tem a sua fila, porque o consumidor desserializa o corpo pelo tipo da fila.
