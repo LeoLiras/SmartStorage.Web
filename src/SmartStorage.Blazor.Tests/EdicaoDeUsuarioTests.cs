@@ -14,6 +14,7 @@ using SmartStorage.Blazor.Services;
 using SmartStorage.Blazor.Services.IServices;
 using SmartStorage.Blazor.Utils.Variables;
 using SmartStorage.Shared.Enum;
+using SmartStorage.Shared.Validation;
 using SmartStorage.Shared.VO;
 using Dialogo = SmartStorage.Blazor.Utils.ShowDialog.ShowDialog;
 
@@ -145,14 +146,14 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
         var cut = Render<EditUser>(p => p.Add(c => c.UserId, 3L));
         cut.WaitForAssertion(() => Assert.Equal("Maria Souza", cut.Instance.user.FullName));
 
-        Preenche(cut, "Nova senha", "NovaSenha1");
-        Preenche(cut, "Confirmar nova senha", "NovaSenha1");
+        Preenche(cut, "Nova senha", "nova@senha1");
+        Preenche(cut, "Confirmar nova senha", "nova@senha1");
         Atualiza(cut);
 
         cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Caminho == $"{Usuarios}/3/password"));
         var senha = api.JsonDe(HttpMethod.Put, $"{Usuarios}/3/password").RootElement;
         Assert.Equal(new[] { "newPassword" }, senha.EnumerateObject().Select(c => c.Name));
-        Assert.Equal("NovaSenha1", senha.GetProperty("newPassword").GetString());
+        Assert.Equal("nova@senha1", senha.GetProperty("newPassword").GetString());
 
         var edicao = api.JsonDe(HttpMethod.Post, $"{Usuarios}/update-credentials/3").RootElement;
         Assert.Equal(new[] { "fullName", "type" }, edicao.EnumerateObject().Select(c => c.Name).OrderBy(n => n));
@@ -170,8 +171,8 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
 
         Preenche(cut, "Nome Completo", "Usuário Renomeado");
         Preenche(cut, "Senha atual", "usuario123");
-        Preenche(cut, "Nova senha", "NovaSenha1");
-        Preenche(cut, "Confirmar nova senha", "NovaSenha1");
+        Preenche(cut, "Nova senha", "nova@senha1");
+        Preenche(cut, "Confirmar nova senha", "nova@senha1");
         Atualiza(cut);
 
         cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Metodo == HttpMethod.Put));
@@ -180,7 +181,7 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
         Assert.Equal(new[] { "currentPassword", "fullName", "newPassword" }, corpo.EnumerateObject().Select(c => c.Name).OrderBy(n => n));
         Assert.Equal("Usuário Renomeado", corpo.GetProperty("fullName").GetString());
         Assert.Equal("usuario123", corpo.GetProperty("currentPassword").GetString());
-        Assert.Equal("NovaSenha1", corpo.GetProperty("newPassword").GetString());
+        Assert.Equal("nova@senha1", corpo.GetProperty("newPassword").GetString());
         Assert.DoesNotContain(api.Requisicoes, r => r.Caminho.Contains("update-credentials") || r.Caminho.EndsWith("/password"));
         cut.WaitForAssertion(() => Assert.Equal("Usuário Renomeado", _app.User.FullName));
     }
@@ -224,11 +225,46 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
         var cut = Render<EditUser>(p => p.Add(c => c.UserId, 3L));
         cut.WaitForAssertion(() => Assert.Equal("Maria Souza", cut.Instance.user.FullName));
 
+        Preenche(cut, "Nova senha", "nova@senha1");
+        Preenche(cut, "Confirmar nova senha", "nova@senha1");
+        Atualiza(cut);
+
+        cut.WaitForAssertion(() => Assert.Contains("A nova senha é obrigatória.", UltimaMensagem()));
+    }
+
+    [Theory]
+    [InlineData(1L, 3L)]
+    [InlineData(2L, 2L)]
+    public void Nova_senha_mostra_a_regra_da_api_como_ajuda(long logadoId, long editadoId)
+    {
+        Monta(logadoId == 1 ? "admin" : "usuario", logadoId == 1 ? "Administrador" : "Usuario", logadoId);
+
+        var cut = Render<EditUser>(p => p.Add(c => c.UserId, editadoId));
+        cut.WaitForAssertion(() => Assert.NotNull(cut.Instance.user.FullName));
+
+        Assert.Contains(PasswordPolicy.RuleMessage, cut.Markup);
+        Assert.DoesNotContain("maiúscula", cut.Markup);
+    }
+
+    [Theory]
+    [InlineData(1L, 3L)]
+    [InlineData(2L, 2L)]
+    public void Senha_nova_fora_da_regra_nao_envia_e_mostra_a_mensagem(long logadoId, long editadoId)
+    {
+        var api = Monta(logadoId == 1 ? "admin" : "usuario", logadoId == 1 ? "Administrador" : "Usuario", logadoId);
+
+        var cut = Render<EditUser>(p => p.Add(c => c.UserId, editadoId));
+        cut.WaitForAssertion(() => Assert.NotNull(cut.Instance.user.FullName));
+
+        if (logadoId == editadoId)
+            Preenche(cut, "Senha atual", "usuario123");
         Preenche(cut, "Nova senha", "NovaSenha1");
         Preenche(cut, "Confirmar nova senha", "NovaSenha1");
         Atualiza(cut);
 
-        cut.WaitForAssertion(() => Assert.Contains("A nova senha é obrigatória.", UltimaMensagem()));
+        cut.WaitForAssertion(() => Assert.Contains("mud-input-error", cut.Markup));
+        Assert.Contains(PasswordPolicy.RuleMessage, cut.Find(".mud-input-error").TextContent);
+        Assert.DoesNotContain(api.Requisicoes, r => r.Metodo != HttpMethod.Get);
     }
 
     [Fact]
@@ -239,7 +275,7 @@ public class EdicaoDeUsuarioTests : BunitContext, IAsyncLifetime
         var cut = Render<EditUser>(p => p.Add(c => c.UserId, 3L));
         cut.WaitForAssertion(() => Assert.Equal("Maria Souza", cut.Instance.user.FullName));
 
-        Preenche(cut, "Nova senha", "NovaSenha1");
+        Preenche(cut, "Nova senha", "nova@senha1");
         Preenche(cut, "Confirmar nova senha", "Outra1234");
         Atualiza(cut);
 

@@ -1,9 +1,9 @@
 ﻿@page "/user/register"
 @attribute [Authorize(Roles = "Administrador")]
 
-@using System.Text.RegularExpressions
 @using SmartStorage.Shared.Enum
 @using SmartStorage.Shared.VO
+@using SmartStorage.Shared.Validation
 
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -18,7 +18,7 @@
 else
 {
     <section class="app-panel app-form-narrow mt-4">
-        <MudForm Model="accountCredentials">
+        <MudForm @ref="form" Model="accountCredentials">
             <MudGrid Spacing="3">
                 <MudItem xs="12">
                     <MudTextField @bind-Value="accountCredentials.Fullname" T="string" Label="Nome Completo" Required="true" RequiredError="O Nome é obrigatório!" Variant="Variant.Outlined" />
@@ -27,9 +27,9 @@ else
                     <MudTextField @bind-Value="accountCredentials.Username" T="string" Label="Login" Required="true" RequiredError="O Login é obrigatório!" Variant="Variant.Outlined" />
                 </MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="accountCredentials.Password" T="string" Label="Senha" HelperText="Ao menos 8 caracteres, com maiúscula, minúscula e número." @ref="pwField1"
+                        <MudTextField @bind-Value="accountCredentials.Password" T="string" Label="Senha" HelperText="@PasswordPolicy.RuleMessage" @ref="pwField1"
                                       InputType="InputType.Password"
-                                      Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                                      Validation="@(new Func<string, string>(PasswordStrength))" Required="true"
                                       RequiredError="A senha é obrigatória!" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
@@ -57,6 +57,7 @@ else
     #region Properties
 
     bool loading = false;
+    MudForm form;
     MudTextField<string> pwField1;
     AccountCredentialsVO accountCredentials = new();
 
@@ -68,6 +69,11 @@ else
     {
         try
         {
+            await form.Validate();
+
+            if (!form.IsValid)
+                return;
+
             if (string.IsNullOrWhiteSpace(accountCredentials.Username) 
                     || string.IsNullOrWhiteSpace(accountCredentials.Password) 
                     || string.IsNullOrWhiteSpace(accountCredentials.Fullname))
@@ -93,25 +99,12 @@ else
         }
     }
 
-    private IEnumerable<string> PasswordStrength(string pw)
+    private string PasswordStrength(string pw)
     {
         if (string.IsNullOrWhiteSpace(pw))
-        {
-            yield return "A Senha é obrigatória!";
-            yield break;
-        }
+            return "A Senha é obrigatória!";
 
-        if (pw.Length < 8)
-            yield return "A senha deve ter ao menos 8 caracteres";
-
-        if (!Regex.IsMatch(pw, @"[A-Z]"))
-            yield return "A senha deve ter ao menos uma letra maiúscula";
-
-        if (!Regex.IsMatch(pw, @"[a-z]"))
-            yield return "A senha deve ter ao menos uma letra minúscula";
-
-        if (!Regex.IsMatch(pw, @"[0-9]"))
-            yield return "A senha deve ter ao menos um dígito numérico";
+        return PasswordPolicy.Validate(pw);
     }
 
     private string PasswordMatch(string arg)

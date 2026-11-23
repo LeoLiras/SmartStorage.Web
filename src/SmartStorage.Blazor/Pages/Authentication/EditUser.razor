@@ -5,6 +5,7 @@
 @using System.Security.Claims
 @using SmartStorage.Shared.Enum
 @using SmartStorage.Shared.VO
+@using SmartStorage.Shared.Validation
 
 @inject ShowDialog ShowDialog
 @inject VariablesExtensions app
@@ -45,7 +46,7 @@ else
                     </MudItem>
                 }
                 <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="newPassword" T="string" Label="Nova senha" HelperText="@(ownAccount ? "Deixe em branco para manter a atual." : "Preencha só para redefinir a senha.")" InputType="InputType.Password" Variant="Variant.Outlined" />
+                    <MudTextField @bind-Value="newPassword" T="string" Label="Nova senha" HelperText="@($"{(ownAccount ? "Deixe em branco para manter a atual." : "Preencha só para redefinir a senha.")} {PasswordPolicy.RuleMessage}")" InputType="InputType.Password" Validation="@(new Func<string, string>(NewPasswordStrength))" Variant="Variant.Outlined" />
                 </MudItem>
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="confirmPassword" T="string" Label="Confirmar nova senha" HelperText="Repita a nova senha." InputType="InputType.Password" Validation="@(new Func<string, string>(PasswordMatch))" Variant="Variant.Outlined" />
@@ -145,6 +146,10 @@ else
             await ShowDialog.ShowDialogAsync($"Falha atualizando o usuário.\n{ex.Message}", "Erro", state: EDialogStates.Warning);
         }
     }
+
+    // Em branco é válido: a senha nova é opcional e só é conferida quando preenchida.
+    private string NewPasswordStrength(string pw)
+        => string.IsNullOrEmpty(pw) ? null : PasswordPolicy.Validate(pw);
 
     private string PasswordMatch(string arg)
     {
