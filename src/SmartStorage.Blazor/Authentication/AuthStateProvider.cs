@@ -10,6 +10,8 @@ namespace SmartStorage.Blazor.Provider
     {
         public static readonly string tokenKey = "tokenKey";
 
+        public static readonly string refreshTokenKey = "refreshTokenKey";
+
         private AuthenticationState notAuthenticate =>
            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
@@ -93,11 +95,12 @@ namespace SmartStorage.Blazor.Provider
             }
         }
 
-        public async Task Login(string accessToken)
+        public async Task Login(string accessToken, string refreshToken)
         {
             try
             {
                 await js.SetInLocalStorage(tokenKey, accessToken);
+                await js.SetInLocalStorage(refreshTokenKey, refreshToken);
                 var authState = CreateAuthenticationState(accessToken);
                 NotifyAuthenticationStateChanged(Task.FromResult(authState));
             }

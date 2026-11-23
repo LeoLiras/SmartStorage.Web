@@ -40,7 +40,7 @@ namespace SmartStorage.Blazor.Services
                 {
                     var token = await responseSignIn.Content.ReadFromJsonAsync<TokenVO>();
 
-                    await authProvider.Login(token.AccessToken);
+                    await authProvider.Login(token.AccessToken, token.RefreshToken);
                 }
                 else
                 {
