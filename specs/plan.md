@@ -122,10 +122,12 @@ que for abandonada deixa o número sem uso.
   minutos ou o `RefreshTokenExpiryTime`, porque com 60 minutos fixos um
   refresh perto do fim levaria a sessão até 10 horas
 - D-24: o Blazor guarda o refresh token em `refreshTokenKey`; um
-  `RefreshHandler` entre o `AuthHandler` e o `SessionExpiredHandler` renova no
-  401 e repete a requisição, com um `SemaphoreSlim` singleton para haver uma
-  renovação só; o refresh sai por um `HttpClient` nomeado sem esses handlers,
-  para não entrar em laço
+  `RefreshHandler` renova no 401 e repete a requisição, com um `SemaphoreSlim`
+  singleton para haver uma renovação só; o refresh sai por um `HttpClient`
+  nomeado sem esses handlers, para não entrar em laço. A cadeia é `AuthHandler`
+  → `SessionExpiredHandler` → `RefreshHandler`: com o `RefreshHandler` por
+  dentro, o `SessionExpiredHandler` só vê o 401 que sobra quando o refresh é
+  recusado; na ordem inversa, ele mandaria ao login antes de renovar
 - D-25: o logout chama o revoke e limpa o `localStorage` mesmo se o revoke
   falhar; o gateway ganha as rotas `refresh` (anônima) e `revoke`
 

@@ -17,6 +17,10 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddSingleton<SessionExpiration>();
+builder.Services.AddSingleton<RefreshLock>();
+
+builder.Services.AddHttpClient(RefreshHandler.ClientName, c =>
+                c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
 
 builder.Services.AddHttpClient<IReportsService, ReportsService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ReportsAPI"])
@@ -68,5 +72,6 @@ builder.Services.AddScoped<AuthenticationStateProvider>(
 
 builder.Services.AddScoped<AuthHandler>();
 builder.Services.AddTransient<SessionExpiredHandler>();
+builder.Services.AddTransient<RefreshHandler>();
 
 await builder.Build().RunAsync();

@@ -18,6 +18,8 @@ public class ApiFalsa : HttpMessageHandler
 
     public List<string> Consultas { get; } = new();
 
+    public List<string?> Autorizacoes { get; } = new();
+
     public ApiFalsa Responde(HttpMethod metodo, string caminho, object corpo,
                              HttpStatusCode status = HttpStatusCode.OK, int? total = null)
     {
@@ -59,6 +61,7 @@ public class ApiFalsa : HttpMessageHandler
 
         Requisicoes.Add((request.Method, caminho, corpo));
         Consultas.Add(request.RequestUri.Query);
+        Autorizacoes.Add(request.Headers.Authorization?.ToString());
 
         if (!_respostas.TryGetValue(Chave(request.Method, caminho), out var resposta))
             return new HttpResponseMessage(HttpStatusCode.NotFound)
