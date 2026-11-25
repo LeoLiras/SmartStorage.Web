@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
-using Microsoft.JSInterop;
 using SmartStorage.Blazor.Authentication;
 using SmartStorage.Blazor.Provider;
 
@@ -171,33 +170,5 @@ public class RenovacaoDoTokenTests
         {
             BaseAddress = new Uri("http://localhost/"),
         };
-    }
-
-    /// <summary>localStorage que guarda o que recebe, porque o refresh troca os dois tokens.</summary>
-    private class LocalStorageFalso : IJSRuntime
-    {
-        public Dictionary<string, string> Itens { get; } = new();
-
-        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args)
-        {
-            var chave = (string)args![0]!;
-
-            switch (identifier)
-            {
-                case "localStorage.getItem":
-                    return ValueTask.FromResult((TValue)(object)Itens.GetValueOrDefault(chave)!);
-                case "localStorage.setItem":
-                    Itens[chave] = (string)args[1]!;
-                    break;
-                case "localStorage.removeItem":
-                    Itens.Remove(chave);
-                    break;
-            }
-
-            return ValueTask.FromResult(default(TValue)!);
-        }
-
-        public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args)
-            => InvokeAsync<TValue>(identifier, args);
     }
 }

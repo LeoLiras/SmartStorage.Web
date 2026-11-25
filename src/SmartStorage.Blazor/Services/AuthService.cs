@@ -59,12 +59,15 @@ namespace SmartStorage.Blazor.Services
         {
             try
             {
-                await authProvider.Logout();
+                await http.PostAsync($"{BasePath}/revoke", null);
             }
             catch (Exception)
             {
-                throw;
+                // Sair não depende da API: com o revoke fora do ar, o navegador fica sem os
+                // tokens do mesmo jeito, e o refresh token vence no fim da sessão.
             }
+
+            await authProvider.Logout();
         }
 
         public async Task<UserAccountVO> GetMyAccount()

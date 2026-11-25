@@ -87,6 +87,7 @@ namespace SmartStorage.Blazor.Provider
             try
             {
                 await js.RemoveItem(tokenKey);
+                await js.RemoveItem(refreshTokenKey);
                 NotifyAuthenticationStateChanged(Task.FromResult(notAuthenticate));
             }
             catch (Exception)
