@@ -22,41 +22,43 @@ builder.Services.AddSingleton<RefreshLock>();
 builder.Services.AddHttpClient(RefreshHandler.ClientName, c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"]));
 
+// O primeiro handler é o mais externo: o RefreshHandler vem por último para o
+// SessionExpiredHandler só ver o 401 que sobra quando o refresh é recusado.
 builder.Services.AddHttpClient<IReportsService, ReportsService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ReportsAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddHttpClient<IEmailService, EmailService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:EmailAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddHttpClient<IAiService, AiService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AIAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddHttpClient<ISaleService, SaleService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddHttpClient<IShelfService, ShelfService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddHttpClient<IProductService, ProductService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddHttpClient<IEmployeeService, EmployeeService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddHttpClient<IInvoiceService, InvoiceService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:SmartStorageAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
                 c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:AuthAPI"])
-            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>();
+            ).AddHttpMessageHandler<AuthHandler>().AddHttpMessageHandler<SessionExpiredHandler>().AddHttpMessageHandler<RefreshHandler>();
 
 builder.Services.AddAuthorizationCore();
 
