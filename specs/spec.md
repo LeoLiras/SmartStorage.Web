@@ -99,7 +99,7 @@ movimentação com autor e instante.
   de senha também são anônimas (RN-35)
 - RF-03 [feito]: o administrador cadastra, edita, lista e exclui usuários e
   define o papel de cada um
-- RF-59 [planejado #54]: cadastrar um usuário mantém a sessão do
+- RF-59 [feito]: cadastrar um usuário mantém a sessão do
   administrador e o leva à Conta, com o usuário novo na lista; na recusa, a
   tela mostra o motivo que a API devolveu
 - RF-03a [feito]: cada usuário altera o próprio nome completo e a

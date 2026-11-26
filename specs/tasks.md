@@ -351,7 +351,7 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
 |---|---|---|---|---|---|---|
 | T-54.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O `Register.razor` não chama mais o `auth.Logout()` depois do cadastro aceito, e o diálogo de sucesso leva a `user/account` | RF-59, D-57 | T-34.04 | bUnit: depois do cadastro aceito, o token não é removido do `localStorage` e o diálogo de sucesso leva a `user/account`; tela conferida em desktop e celular | `dc5f9d5` |
-| T-54.02 | <span style="background:#b3e5fc;color:#01579b;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Próxima</span> | O `AuthService.RegisterUser` lê a resposta pelo `ReadApiAsync`, e o diálogo de falha do cadastro mostra a mensagem da API | RF-59, D-57, D-12 | T-34.04 | bUnit: com a API respondendo 400 "Já existe um usuário com esse nome.", o diálogo mostra essa mensagem; tela conferida em desktop e celular | |
+| T-54.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O `AuthService.RegisterUser` lê a resposta pelo `ReadApiAsync`, e o diálogo de falha do cadastro mostra a mensagem da API | RF-59, D-57, D-12 | T-34.04 | bUnit: com a API respondendo 400 "Já existe um usuário com esse nome.", o diálogo mostra essa mensagem; tela conferida em desktop e celular | `6d7b5f9` |
 
 ### #30 Segurança da AuthenticationAPI (T-30)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
