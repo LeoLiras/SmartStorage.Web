@@ -139,29 +139,12 @@ namespace SmartStorage.Blazor.Services
 
         public async Task<AccountCredentialsVO> RegisterUser(AccountCredentialsVO account)
         {
-            try
-            {
-                if (account is null)
-                    throw new ArgumentNullException(nameof(account), message: "Os dados do usuário são obrigatórios.");
+            if (account is null)
+                throw new ArgumentNullException(nameof(account), message: "Os dados do usuário são obrigatórios.");
 
-                if (string.IsNullOrWhiteSpace(BasePath))
-                    throw new ArgumentNullException(nameof(BasePath), message: "O parâmetro URL é obrigatório.");
+            var response = await http.PostAsJsonAsync($"{BasePath}/create", account);
 
-                var response = await http.PostAsJsonAsync($"{BasePath}/create", account);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadFromJsonAsync<AccountCredentialsVO>();
-                }
-                else
-                {
-                    throw new ApiException(400, $"Erro ao criar usuário {account.Username}.");
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return await response.ReadApiAsync<AccountCredentialsVO>();
         }
 
         public async Task<UserAccountVO> UpdateMyAccount(MyAccountUpdateVO data)

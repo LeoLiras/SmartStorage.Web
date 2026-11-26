@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using Bunit;
@@ -34,10 +35,10 @@ public class CadastroDeUsuarioTests : BunitContext, IAsyncLifetime
 
     private readonly LocalStorageFalso _storage = new();
 
-    private ApiFalsa Monta()
+    private ApiFalsa Monta(Func<ApiFalsa, ApiFalsa>? respostaDoCadastro = null)
     {
-        var api = new ApiFalsa()
-            .Responde(HttpMethod.Post, Cadastro, new { fullname = "Maria Souza", username = "maria", type = 0 });
+        respostaDoCadastro ??= a => a.Responde(HttpMethod.Post, Cadastro, new { fullname = "Maria Souza", username = "maria", type = 0 });
+        var api = respostaDoCadastro(new ApiFalsa());
 
         var referencia = Substitute.For<IDialogReference>();
         referencia.Result.Returns(Task.FromResult<DialogResult?>(DialogResult.Ok(true)));
@@ -116,6 +117,27 @@ public class CadastroDeUsuarioTests : BunitContext, IAsyncLifetime
         Assert.Equal("token-do-admin", _storage.Itens[AuthStateProvider.tokenKey]);
         Assert.Equal("refresh-do-admin", _storage.Itens[AuthStateProvider.refreshTokenKey]);
         Assert.DoesNotContain(api.Requisicoes, r => r.Caminho == "api/auth/v1/revoke");
+    }
+
+    /// <summary>
+    /// O serviço trocava qualquer recusa por "Erro ao criar usuário X.": o administrador
+    /// não sabia se o login já existia ou se a senha feria a regra.
+    /// </summary>
+    [Fact]
+    public void Recusa_da_api_mostra_o_motivo_no_dialogo()
+    {
+        var api = Monta(a => a.Responde(HttpMethod.Post, Cadastro, "Já existe um usuário com esse nome.", HttpStatusCode.BadRequest));
+
+        var cut = Render<Register>();
+        Cadastra(cut, "nova@senha1", "nova@senha1");
+
+        cut.WaitForAssertion(() => Assert.Contains(_dialogo.ReceivedCalls(), c => c.GetMethodInfo().Name == nameof(IDialogService.ShowAsync)));
+
+        var chamada = _dialogo.ReceivedCalls().Single(c => c.GetMethodInfo().Name == nameof(IDialogService.ShowAsync));
+        var parametros = (DialogParameters)chamada.GetArguments()[1]!;
+        Assert.Contains("Já existe um usuário com esse nome.", (string)parametros["ContentText"]!);
+        Assert.DoesNotContain("Erro ao criar usuário", (string)parametros["ContentText"]!);
+        Assert.Equal("token-do-admin", _storage.Itens[AuthStateProvider.tokenKey]);
     }
 
     [Fact]
