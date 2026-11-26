@@ -83,9 +83,7 @@ else
 
             var result = await auth.RegisterUser(accountCredentials);
 
-            await auth.Logout();
-
-            await ShowDialog.ShowDialogAsync("Cadastro realizado com sucesso.", "Sucesso", "/", EDialogStates.Success);
+            await ShowDialog.ShowDialogAsync("Cadastro realizado com sucesso.", "Sucesso", "user/account", EDialogStates.Success);
 
             StateHasChanged();
 

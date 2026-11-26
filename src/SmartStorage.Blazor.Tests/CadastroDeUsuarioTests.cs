@@ -30,21 +30,27 @@ public class CadastroDeUsuarioTests : BunitContext, IAsyncLifetime
 
     private const string Cadastro = "api/auth/v1/create";
 
+    private readonly IDialogService _dialogo = Substitute.For<IDialogService>();
+
+    private readonly LocalStorageFalso _storage = new();
+
     private ApiFalsa Monta()
     {
         var api = new ApiFalsa()
             .Responde(HttpMethod.Post, Cadastro, new { fullname = "Maria Souza", username = "maria", type = 0 });
 
-        var dialogo = Substitute.For<IDialogService>();
         var referencia = Substitute.For<IDialogReference>();
         referencia.Result.Returns(Task.FromResult<DialogResult?>(DialogResult.Ok(true)));
-        dialogo.ShowAsync<Pages.Dialog.Dialog>(default, default, default).ReturnsForAnyArgs(Task.FromResult(referencia));
+        _dialogo.ShowAsync<Pages.Dialog.Dialog>(default, default, default).ReturnsForAnyArgs(Task.FromResult(referencia));
+
+        _storage.Itens[AuthStateProvider.tokenKey] = "token-do-admin";
+        _storage.Itens[AuthStateProvider.refreshTokenKey] = "refresh-do-admin";
 
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddMudServices();
-        Services.AddSingleton<IAuthService>(new AuthService(api.Cliente(), new AuthStateProvider(Substitute.For<IJSRuntime>()), new SessionExpiration()));
+        Services.AddSingleton<IAuthService>(new AuthService(api.Cliente(), new AuthStateProvider(_storage), new SessionExpiration()));
         Services.AddSingleton(new VariablesExtensions());
-        Services.AddSingleton(new Dialogo(dialogo, new SessionExpiration()));
+        Services.AddSingleton(new Dialogo(_dialogo, new SessionExpiration()));
         AddAuthorization().SetAuthorized("admin").SetRoles("Administrador").SetClaims(new Claim("unique_name", "admin"));
 
         return api;
@@ -86,6 +92,30 @@ public class CadastroDeUsuarioTests : BunitContext, IAsyncLifetime
 
         cut.WaitForAssertion(() => Assert.Contains(api.Requisicoes, r => r.Caminho == Cadastro));
         Assert.Equal("nova@senha1", api.JsonDe(HttpMethod.Post, Cadastro).RootElement.GetProperty("password").GetString());
+    }
+
+    /// <summary>
+    /// O cadastro aceito fazia logout: o administrador que acabava de cadastrar alguém
+    /// perdia a sessão e caía na tela inicial, sem ver o usuário novo na Conta.
+    /// </summary>
+    [Fact]
+    public void Cadastro_aceito_mantem_a_sessao_e_leva_a_conta()
+    {
+        var api = Monta();
+
+        var cut = Render<Register>();
+        Cadastra(cut, "nova@senha1", "nova@senha1");
+
+        cut.WaitForAssertion(() => Assert.Contains(_dialogo.ReceivedCalls(), c => c.GetMethodInfo().Name == nameof(IDialogService.ShowAsync)));
+
+        var chamada = _dialogo.ReceivedCalls().Single(c => c.GetMethodInfo().Name == nameof(IDialogService.ShowAsync));
+        var parametros = (DialogParameters)chamada.GetArguments()[1]!;
+        Assert.Equal("Cadastro realizado com sucesso.", (string)parametros["ContentText"]!);
+        Assert.Equal("user/account", (string)parametros["Navigate"]!);
+
+        Assert.Equal("token-do-admin", _storage.Itens[AuthStateProvider.tokenKey]);
+        Assert.Equal("refresh-do-admin", _storage.Itens[AuthStateProvider.refreshTokenKey]);
+        Assert.DoesNotContain(api.Requisicoes, r => r.Caminho == "api/auth/v1/revoke");
     }
 
     [Fact]
