@@ -29,7 +29,7 @@ das vendas por IA.
   transfere, vende, devolve, faz inventário e consulta relatórios
 - **Administrador** (papel `Administrador`): tudo o que o operador faz, mais
   cadastrar, editar e excluir usuários, e cadastrar, editar e excluir
-  prateleiras e colaboradores [planejado #32]
+  prateleiras e colaboradores
 - **Administrador geral** (papel `AdministradorGeral`) [planejado #28]:
   cadastra empresas e gerencia os administradores de cada uma, sem ver o
   estoque nem as vendas delas (RF-49)
@@ -141,7 +141,7 @@ movimentação com autor e instante.
 - RF-08a [feito]: colaboradores (nome, CPF único e RG) são cadastrados,
   editados e excluídos pela API e pelo seed; o Blazor só os lista, para
   escolher o responsável
-- RF-45 [planejado #32]: só o administrador cadastra e exclui prateleiras e
+- RF-45 [feito]: só o administrador cadastra e exclui prateleiras e
   colaboradores; a leitura continua aberta a qualquer usuário logado
 - RF-47 [feito]: a edição de prateleiras e colaboradores também exige
   administrador, como o cadastro, porque o volume da prateleira é o que limita
@@ -406,7 +406,7 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 - Excluir usuário que já movimentou estoque: recusado, para o histórico não
   perder o autor
 - Usuário comum cadastra, edita ou exclui prateleira ou colaborador pela API:
-  hoje é aceito; pela #32 e pelo RF-47 recebe 403 e nada é gravado
+  403, e nada é gravado
 - Usuário excluído ou desativado com a sessão aberta [planejado #33]: a próxima
   requisição recebe 401 e o Blazor volta ao login (RF-46)
 - Administrador tenta desativar a si mesmo [planejado #33]: recusado, para a
@@ -537,10 +537,6 @@ Encontradas na verificação do código em 2026-10-14 e revisadas em
 2026-10-15 e 2026-10-19. Uma lacuna vira requisito quando ganha issue ou é
 decidida numa revisão desta spec ([decidido]).
 
-### Papéis (#32)
-- cadastro, edição e exclusão de prateleiras e colaboradores aceitam qualquer
-  usuário logado, inclusive o papel `Usuario` (RF-45, RF-47)
-
 ### Revisão de 2026-10-19 (#33 a #38)
 - excluir o usuário não encerra a sessão dele: o token segue válido até
   vencer, e não há como desativar quem já movimentou estoque (#33, RF-46)
@@ -588,7 +584,7 @@ decidida numa revisão desta spec ([decidido]).
   ou texto de erro interno
 - O operador trabalha 9 horas sem entrar de novo; depois
   delas, ou depois de sair, o refresh é recusado
-- [planejado #32] Usuário sem papel de administrador não cadastra, não edita
+- Usuário sem papel de administrador não cadastra, não edita
   nem exclui prateleiras e colaboradores
 - [planejado #33] Usuário excluído perde o acesso na requisição seguinte, sem
   esperar o token vencer
