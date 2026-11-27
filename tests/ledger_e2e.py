@@ -2229,6 +2229,48 @@ def ct55(ctx):
         _apaga_colaboradores_de_teste()
 
 
+def _volume_gravado(prateleira):
+    valor = sql("SELECT SheVolume FROM dbo.Shelf WHERE SheId=%d" % prateleira)[0][0]
+    return None if valor in ("NULL", "") else float(valor)
+
+
+@caso("CT-56", "Volume da prateleira nao pode ficar abaixo do ja ocupado")
+def ct56(ctx):
+    prateleira = _cria_prateleira(ctx, "CT56", 10)
+    nome = "%s %s CT56" % (PREFIXO, EXECUCAO)
+    pid = ctx.cria_produto(6, "CT56", volume=1.0)
+    R.exige(_aloca(ctx, pid, prateleira, 5, 2.0) == 200, "pre-condicao falhou: alocacao de 5 L recusada")
+
+    def edita(volume):
+        return ctx.api("PUT", "/api/storage/shelf/v1/%d" % prateleira, {
+            "name": nome, "dataRegister": datetime.now().isoformat(), "volume": volume})
+
+    for volume, descricao in ((4, "4 L"), (None, "sem volume")):
+        status, corpo = edita(volume)
+        R.exige(status == 400 and "não pode ser menor que os 5 L já ocupados" in _mensagem(corpo),
+                "volume %s abaixo dos 5 L ocupados foi aceito" % descricao,
+                "HTTP %s: %s" % (status, _mensagem(corpo)))
+        R.exige(_volume_gravado(prateleira) == 10, "volume mudou numa edicao recusada (%s)" % descricao,
+                "gravado %s" % _volume_gravado(prateleira))
+
+    # 5,5 L fica entre o ocupado (5 L) e o ocupado / 0,9 (5,56 L): aceito, mas acima do teto de 90%.
+    status, corpo = edita(5.5)
+    R.exige(status == 200 and _volume_gravado(prateleira) == 5.5,
+            "volume entre o ocupado e o teto foi recusado", "HTTP %s: %s" % (status, _mensagem(corpo)))
+
+    marca = ultimo_movimento()
+    antes = saldos(pid)
+    status, corpo = ctx.api("POST", "/api/storage/shelf/v1/allocation", {
+        "productId": pid, "shelfId": prateleira, "productQuantity": 1,
+        "productPrice": 2.0, "dateEnter": datetime.now().isoformat()})
+    R.exige(status == 400 and "não comporta" in _mensagem(corpo),
+            "prateleira acima do teto aceitou nova alocacao", "HTTP %s: %s" % (status, _mensagem(corpo)))
+    R.exige(ultimo_movimento() == marca and saldos(pid) == antes,
+            "alocacao recusada por capacidade gravou no ledger")
+    R.nota("prateleira %d com 5 L ocupados: editada para 4 L, sem volume e 5,5 L, e depois alocada"
+           % prateleira)
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #

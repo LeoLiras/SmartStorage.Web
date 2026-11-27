@@ -307,7 +307,8 @@ movimentação com autor e instante.
 - RN-40 [planejado #32]: o volume da prateleira não pode ser reduzido abaixo do
   volume já usado. Reduzido a um valor em que o usado passa de 90% sem passar
   de 100%, é aceito: a prateleira fica acima do teto e só recusa novas
-  alocações
+  alocações. Sem volume conta como zero: a prateleira ocupada não pode ficar
+  sem volume
 - RN-12: desfazer alocação e cancelar venda não checam capacidade, porque
   devolvem o que já estava lá
 - RN-13: inventário não checa capacidade; a contagem é absoluta e a diferença

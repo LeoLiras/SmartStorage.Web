@@ -957,7 +957,7 @@
                 "{{newShelfId}}"
               ]
             },
-            "description": "Altera a prateleira criada pelo exemplo. O nome é obrigatório. Papel exigido: Administrador; o usuário comum recebe 403.",
+            "description": "Altera a prateleira criada pelo exemplo. O nome é obrigatório, e o volume não pode ficar abaixo do já ocupado por produtos nem vazio com a prateleira ocupada: responde 400 \"O volume da {prateleira} não pode ser menor que os {N} L já ocupados por produtos.\". Papel exigido: Administrador; o usuário comum recebe 403.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Prateleira de Exemplo Atualizada\",\n  \"volume\": 120\n}",

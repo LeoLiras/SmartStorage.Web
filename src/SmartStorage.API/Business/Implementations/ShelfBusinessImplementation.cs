@@ -121,6 +121,12 @@ namespace SmartStorage_API.Service.Implementations
 
             ValidateShelfVolume(updatedShelf.Volume);
 
+            // Sem volume conta como zero: apagar o volume de uma prateleira ocupada a tiraria do controle de capacidade.
+            var used = _converterShelf.UsedVolumeOf(shelfId);
+
+            if (used > 0 && (updatedShelf.Volume ?? 0) < used)
+                throw new BusinessException($"O volume da {shelf.SheName} não pode ser menor que os {Liters(used)} L já ocupados por produtos.");
+
             shelf.SheName = updatedShelf.Name;
 
             shelf.SheVolume = updatedShelf.Volume;
