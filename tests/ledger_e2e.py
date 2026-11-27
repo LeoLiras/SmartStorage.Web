@@ -30,6 +30,9 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GATEWAY = os.environ.get("SMARTSTORAGE_GATEWAY", "http://localhost:4480")
 USUARIO = os.environ.get("SMARTSTORAGE_USER", "admin")
 SENHA = os.environ.get("SMARTSTORAGE_PASSWORD", "admin123")
+# Usuario sem papel de administrador, para os casos que conferem o 403.
+USUARIO_COMUM = os.environ.get("SMARTSTORAGE_COMMON_USER", "usuario")
+SENHA_COMUM = os.environ.get("SMARTSTORAGE_COMMON_PASSWORD", "usuario123")
 BANCO = "SmartStorageWeb.db"
 SERVICO_SQL = "sqlserver"
 
@@ -104,9 +107,9 @@ def http(metodo, caminho, corpo=None, token=None):
         return status, bruto
 
 
-def entrar():
+def entrar(usuario=USUARIO, senha=SENHA):
     status, corpo = http("POST", "/api/auth/v1/signin",
-                         {"userName": USUARIO, "password": SENHA})
+                         {"userName": usuario, "password": senha})
     if status != 200 or not isinstance(corpo, dict) or not corpo.get("accessToken"):
         raise Erro("login falhou (HTTP %s): %s" % (status, corpo))
     return corpo["accessToken"]
