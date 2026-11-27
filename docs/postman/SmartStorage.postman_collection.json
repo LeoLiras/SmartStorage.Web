@@ -714,7 +714,7 @@
                 "v1"
               ]
             },
-            "description": "Cria o colaborador. Nome, RG e CPF são obrigatórios, e o CPF não pode repetir. No banco do seed, ele nasce com o id da variável newEmployeeId. Papel exigido: qualquer usuário autenticado.",
+            "description": "Cria o colaborador. Nome, RG e CPF são obrigatórios, e o CPF não pode repetir. No banco do seed, ele nasce com o id da variável newEmployeeId. Papel exigido: Administrador; o usuário comum recebe 403.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Colaborador de Exemplo\",\n  \"rg\": \"EX1234567\",\n  \"cpf\": \"98765432100\"\n}",
@@ -750,7 +750,7 @@
                 "{{newEmployeeId}}"
               ]
             },
-            "description": "Altera o colaborador criado pelo exemplo. O CPF não pode ser o de outro colaborador. Papel exigido: qualquer usuário autenticado.",
+            "description": "Altera o colaborador criado pelo exemplo. O CPF não pode ser o de outro colaborador. Papel exigido: Administrador; o usuário comum recebe 403.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Colaborador de Exemplo Atualizado\",\n  \"rg\": \"EX1234567\",\n  \"cpf\": \"98765432100\"\n}",
@@ -781,7 +781,7 @@
                 "{{newEmployeeId}}"
               ]
             },
-            "description": "Exclui o colaborador criado pelo exemplo. Papel exigido: qualquer usuário autenticado."
+            "description": "Exclui o colaborador criado pelo exemplo. Papel exigido: Administrador; o usuário comum recebe 403."
           },
           "response": []
         }
@@ -921,7 +921,7 @@
                 "v1"
               ]
             },
-            "description": "Cria a prateleira. O nome é obrigatório; o volume é em litros. No banco do seed, ela nasce com o id da variável newShelfId. Papel exigido: qualquer usuário autenticado.",
+            "description": "Cria a prateleira. O nome é obrigatório; o volume é em litros. No banco do seed, ela nasce com o id da variável newShelfId. Papel exigido: Administrador; o usuário comum recebe 403.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Prateleira de Exemplo\",\n  \"volume\": 100\n}",
@@ -957,7 +957,7 @@
                 "{{newShelfId}}"
               ]
             },
-            "description": "Altera a prateleira criada pelo exemplo. O nome é obrigatório. Papel exigido: qualquer usuário autenticado.",
+            "description": "Altera a prateleira criada pelo exemplo. O nome é obrigatório. Papel exigido: Administrador; o usuário comum recebe 403.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Prateleira de Exemplo Atualizada\",\n  \"volume\": 120\n}",
@@ -988,7 +988,7 @@
                 "{{newShelfId}}"
               ]
             },
-            "description": "Exclui a prateleira criada pelo exemplo. Prateleira que já teve entrada de produto não pode ser excluída. Papel exigido: qualquer usuário autenticado."
+            "description": "Exclui a prateleira criada pelo exemplo. Prateleira que já teve entrada de produto não pode ser excluída. Papel exigido: Administrador; o usuário comum recebe 403."
           },
           "response": []
         },

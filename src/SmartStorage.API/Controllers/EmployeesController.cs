@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartStorage.Shared.Auth;
 using SmartStorage.Shared.Validation;
 using SmartStorage_API.Hypermedia.Filters;
 using SmartStorage_API.Service;
@@ -49,6 +50,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Role.Admin)]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult CreateNewEmployee(EmployeeVO employee)
         {
@@ -65,6 +67,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpPut("{employeeId}")]
+        [Authorize(Roles = Role.Admin)]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult UpdateEmployee(int employeeId, [FromBody] EmployeeVO employee)
         {
@@ -75,6 +78,7 @@ namespace SmartStorage_API.Controllers
         }
 
         [HttpDelete("{employeeId}")]
+        [Authorize(Roles = Role.Admin)]
         [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult DeleteEmployee(int employeeId)
         {

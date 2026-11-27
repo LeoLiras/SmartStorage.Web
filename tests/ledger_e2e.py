@@ -2173,6 +2173,62 @@ def ct54(ctx):
         _apaga_usuarios_de_teste()
 
 
+def _apaga_colaboradores_de_teste():
+    """O colaborador do CT-55 nunca e responsavel por produto, entao sai direto do banco."""
+    sql("DELETE FROM dbo.Employee WHERE EmpName LIKE '%s%%' "
+        "AND NOT EXISTS (SELECT 1 FROM dbo.Product p WHERE p.ProEmpId = EmpId)"
+        % PREFIXO.replace("'", "''"))
+
+
+def _retrato(tabela):
+    """Contagem e checksum da tabela inteira: qualquer insercao, alteracao ou exclusao muda o par."""
+    linha = sql("SELECT COUNT(*), ISNULL(CHECKSUM_AGG(BINARY_CHECKSUM(*)), 0) FROM dbo.%s" % tabela)[0]
+    return int(linha[0]), int(linha[1])
+
+
+@caso("CT-55", "Usuario comum nao cadastra, nao altera nem exclui prateleira e colaborador")
+def ct55(ctx):
+    _apaga_colaboradores_de_teste()
+    nome = "%s %s CT55" % (PREFIXO, EXECUCAO)
+    agora = datetime.now().isoformat()
+    try:
+        # Alvos descartaveis, criados pelo administrador: se a trava regredir, o PUT e o
+        # DELETE do usuario comum mexem neles, e nao no seed.
+        prateleira = _cria_prateleira(ctx, "CT55", 10)
+        status, corpo = ctx.api("POST", "/api/storage/employees/v1", {
+            "name": nome, "rg": "CT55" + EXECUCAO, "cpf": EXECUCAO + "5", "dateRegister": agora})
+        if status != 200 or not isinstance(corpo, dict):
+            raise Erro("administrador nao cadastrou o colaborador de teste (HTTP %s): %s"
+                       % (status, _mensagem(corpo)))
+        colaborador = corpo["id"]
+
+        comum = entrar(USUARIO_COMUM, SENHA_COMUM)
+        antes = {t: _retrato(t) for t in ("Shelf", "Employee")}
+        chamadas = [
+            ("POST", "/api/storage/shelf/v1",
+             {"name": nome + " Nova", "dataRegister": agora, "volume": 10}),
+            ("PUT", "/api/storage/shelf/v1/%d" % prateleira,
+             {"name": nome + " Alterada", "dataRegister": agora, "volume": 20}),
+            ("DELETE", "/api/storage/shelf/v1/%d" % prateleira, None),
+            ("POST", "/api/storage/employees/v1",
+             {"name": nome + " Novo", "rg": "CT55N" + EXECUCAO, "cpf": EXECUCAO + "6", "dateRegister": agora}),
+            ("PUT", "/api/storage/employees/v1/%d" % colaborador,
+             {"name": nome + " Alterado", "rg": "CT55A" + EXECUCAO, "cpf": EXECUCAO + "7"}),
+            ("DELETE", "/api/storage/employees/v1/%d" % colaborador, None),
+        ]
+        for metodo, caminho, corpo in chamadas:
+            status, resposta = http(metodo, caminho, corpo, comum)
+            R.exige(status == 403, "%s %s nao respondeu 403 ao usuario comum" % (metodo, caminho),
+                    "HTTP %s: %s" % (status, _mensagem(resposta)))
+        for tabela, retrato in antes.items():
+            R.exige(_retrato(tabela) == retrato, "o usuario comum mudou a tabela %s" % tabela,
+                    "antes %s, depois %s" % (retrato, _retrato(tabela)))
+        R.nota("%s cadastrou a prateleira %d e o colaborador %d; %s tentou as seis escritas"
+               % (USUARIO, prateleira, colaborador, USUARIO_COMUM))
+    finally:
+        _apaga_colaboradores_de_teste()
+
+
 # --------------------------------------------------------------------------- #
 # conferencia final de toda a base
 # --------------------------------------------------------------------------- #
