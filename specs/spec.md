@@ -54,7 +54,6 @@ das vendas por IA.
   as vendas
 - Como administrador, quero controlar quem acessa o sistema e com qual papel
 - Como operador, quero trabalhar o turno inteiro sem entrar de novo
-  [planejado #31]
 - Como usuário, quero recuperar minha senha sozinho pelo e-mail [planejado #29]
 - Como empresa, quero ver só os meus dados quando outras empresas usam o mesmo
   sistema [planejado #28]
@@ -88,9 +87,8 @@ movimentação com autor e instante.
 
 ### Acesso
 - RF-01 [feito]: login por usuário e senha devolve JWT, válido por 60
-  minutos, e refresh token; a AuthenticationAPI tem refresh e revoke, mas o
-  Blazor ainda não os usa (RF-44)
-- RF-44 [planejado #31]: a sessão dura até 9 horas desde o login; o Blazor
+  minutos, e refresh token, que o Blazor usa para renovar a sessão (RF-44)
+- RF-44 [feito]: a sessão dura até 9 horas desde o login; o Blazor
   renova o token pelo refresh sem o operador perceber, a renovação não estende
   esse limite, e sair revoga o refresh token no servidor
 - RF-02 [feito]: toda API, exceto login e refresh, exige token válido;
@@ -390,13 +388,13 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 ### Sessão e acesso
 - Token vencido, revogado ou adulterado: qualquer API responde 401, o Blazor
   avisa que a sessão expirou, limpa o estado e volta ao login; o carrinho fica
-  salvo para o mesmo usuário. Pela #31, o token vencido dentro das 9 horas é
-  renovado pelo refresh e a requisição é repetida, e só o refresh recusado
-  leva ao login
-- Várias requisições recebem 401 ao mesmo tempo [planejado #31]: o Blazor faz
+  salvo para o mesmo usuário. O token vencido dentro das 9 horas é renovado
+  pelo refresh e a requisição é repetida, e só o refresh recusado leva ao
+  login
+- Várias requisições recebem 401 ao mesmo tempo: o Blazor faz
   um refresh só, porque o refresh troca o refresh token e uma segunda
   renovação com o token antigo seria recusada
-- Sair com a rede fora ou o token já vencido [planejado #31]: o revoke falha,
+- Sair com a rede fora ou o token já vencido: o revoke falha,
   mas o Blazor limpa a sessão local mesmo assim
 - Usuário sem papel de administrador chama endpoint de administrador: 403,
   mesmo que a tela tenha sido contornada
@@ -538,12 +536,6 @@ Encontradas na verificação do código em 2026-10-14 e revisadas em
 2026-10-15 e 2026-10-19. Uma lacuna vira requisito quando ganha issue ou é
 decidida numa revisão desta spec ([decidido]).
 
-### Sessão (#31)
-Planejadas na #31, que deve entrar depois da #30 (RF-44):
-- o gateway não tem rota de `refresh` nem de `revoke`, e o Blazor guarda só o
-  access token: a sessão cai em 60 minutos, no meio do turno
-- sair só apaga o token do navegador; o refresh token continua válido no banco
-
 ### Papéis (#32)
 - cadastro, edição e exclusão de prateleiras e colaboradores aceitam qualquer
   usuário logado, inclusive o papel `Usuario` (RF-45, RF-47)
@@ -594,7 +586,7 @@ Planejadas na #31, que deve entrar depois da #30 (RF-44):
   pela tela nem pela API
 - Nenhuma resposta da API traz hash de senha, refresh token
   ou texto de erro interno
-- [planejado #31] O operador trabalha 9 horas sem entrar de novo; depois
+- O operador trabalha 9 horas sem entrar de novo; depois
   delas, ou depois de sair, o refresh é recusado
 - [planejado #32] Usuário sem papel de administrador não cadastra, não edita
   nem exclui prateleiras e colaboradores
