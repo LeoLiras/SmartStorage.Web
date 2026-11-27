@@ -143,7 +143,7 @@ movimentação com autor e instante.
   escolher o responsável
 - RF-45 [planejado #32]: só o administrador cadastra e exclui prateleiras e
   colaboradores; a leitura continua aberta a qualquer usuário logado
-- RF-47 [planejado #32]: a edição de prateleiras e colaboradores também exige
+- RF-47 [feito]: a edição de prateleiras e colaboradores também exige
   administrador, como o cadastro, porque o volume da prateleira é o que limita
   a alocação (RN-08, RN-40)
 - RF-53 [feito]: a API confere que a imagem do produto é PNG ou JPEG, pela
@@ -304,7 +304,7 @@ movimentação com autor e instante.
   só tem saldo numa prateleira (RN-10), o destino que já tem o produto é
   sempre uma entrada zerada, de quando ele esteve lá; ela passa a usar o
   preço da origem [feito], e não o preço antigo que guardava
-- RN-40 [planejado #32]: o volume da prateleira não pode ser reduzido abaixo do
+- RN-40 [feito]: o volume da prateleira não pode ser reduzido abaixo do
   volume já usado. Reduzido a um valor em que o usado passa de 90% sem passar
   de 100%, é aceito: a prateleira fica acima do teto e só recusa novas
   alocações. Sem volume conta como zero: a prateleira ocupada não pode ficar
@@ -463,7 +463,7 @@ que o usuário já preencheu. As exceções estão descritas em cada caso.
 - Produto repetido no mesmo lote: recusado o lote inteiro
 - Transferência de entrada zerada, para a própria prateleira, para
   prateleira inexistente ou que não cabe no destino: recusada
-- Volume da prateleira editado para menos que o volume já usado [planejado #32]:
+- Volume da prateleira editado para menos que o volume já usado:
   recusado (RN-40)
 - Inventário sem nenhuma diferença, com entrada de outra prateleira ou com
   entrada repetida: recusado; a tela mantém as contagens e atualiza o saldo do
@@ -540,7 +540,6 @@ decidida numa revisão desta spec ([decidido]).
 ### Papéis (#32)
 - cadastro, edição e exclusão de prateleiras e colaboradores aceitam qualquer
   usuário logado, inclusive o papel `Usuario` (RF-45, RF-47)
-- o volume da prateleira pode ser reduzido abaixo do usado (RN-40)
 
 ### Revisão de 2026-10-19 (#33 a #38)
 - excluir o usuário não encerra a sessão dele: o token segue válido até

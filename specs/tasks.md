@@ -32,7 +32,7 @@ issues; as abertas seguem a "Ordem de implementação" do plano.
 - O commit que conclui a última tarefa de um requisito troca, na `spec.md`,
   o `[planejado #N]` dele por `[feito]`
 - Casos novos do roteiro recebem o próximo `CT-xx` livre (o último é o
-  CT-55) quando forem escritos
+  CT-56) quando forem escritos
 
 ## Concluídas
 
@@ -406,7 +406,7 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-32.01 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O roteiro lê as credenciais do usuário comum por variável de ambiente, com o seed como padrão | D-27 | T-00.29 | Sem as variáveis, o roteiro usa `usuario` / `usuario123` | `9a0523c` |
 | T-32.02 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | `[Authorize(Roles = Role.Admin)]` no `POST`, `PUT` e `DELETE` de `shelf` e `employees` | RF-45, RF-47, D-26 | T-32.01, T-52.03 | Caso novo: como `usuario`, os seis respondem 403 e nada é gravado em `Shelf` nem em `Employee`; como administrador, o cadastro de prateleira do roteiro passa; a coleção do Postman acompanha a mudança e o teste de cobertura passa | `764c084` |
 | T-32.03 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | Extrair o cálculo do volume usado do `EnsureShelfFits` para um método só | D-26 | T-00.29 | `EnsureShelfFits` e `ShelfConverter` usam o mesmo cálculo; CT-35 e CT-41 passam | `c94f659` |
-| T-32.04 | <span style="background:#d1c4e9;color:#4527a0;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Não iniciada</span> | O `UpdateShelf` recusa volume menor que o usado | RN-40, D-26 | T-32.03 | Caso novo: volume abaixo do usado responde 400 e não muda; volume entre o usado e o usado ÷ 0,9 é aceito, e a alocação seguinte é recusada | |
+| T-32.04 | <span style="background:#2e7d32;color:#fff;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">OK</span> | O `UpdateShelf` recusa volume menor que o usado | RN-40, D-26 | T-32.03 | Caso novo: volume abaixo do usado responde 400 e não muda; volume entre o usado e o usado ÷ 0,9 é aceito, e a alocação seguinte é recusada | `88c0ba2` |
 | T-32.05 | <span style="background:#d1c4e9;color:#4527a0;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Não iniciada</span> | Documentar que `SMARTSTORAGE_USER` exige administrador e conferir as telas como `usuario` | RF-45 | T-32.02 | O `CLAUDE.md` diz isso; pelo Playwright, como `usuario`, alocação e venda ainda listam prateleiras e colaboradores | |
 
 ### #33 Encerrar a sessão na hora (T-33)
