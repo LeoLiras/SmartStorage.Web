@@ -47,6 +47,8 @@ python tests/ledger_e2e.py --manter     # preserva os produtos criados, para ins
 
 Exige o stack de pé. Cria os próprios produtos (prefixo `ZZ Ensaio Automatizado` mais um identificador por execução, para ser reexecutável) e remove o que criou direto no banco — a aplicação não exclui produto —, varrendo também sobras de execuções anteriores. Os produtos do roteiro nascem com 0,01 L, para não esgotar a capacidade das prateleiras A1 e A2 durante a execução; as prateleiras com o mesmo prefixo saem depois dos produtos. `--caso` pode ser repetido (`--caso CT-31 --caso CT-32`), e cada execução apaga as sobras da anterior, então `--manter` só preserva os dados da última. Depois de cada operação confere quatro coisas: as linhas que o ledger gravou (local, tipo e quantidade com sinal), a invariante `saldo_depois == saldo_antes + SUM(PsmQntd)` por produto e por local, que o `PsmDate` esteja no relógio do servidor — por causa de uma regressão em que a venda gravava o horário local do navegador, três horas atrás das demais movimentações — e que o `PsmUseId` seja o usuário que fez login no roteiro. No fim procura saldo negativo, movimentação órfã e venda sem entrada. Devolve exit code não-zero em falha, mas **não está no CI**: o workflow roda só o build, os testes de `dotnet test` e a publicação das imagens, porque o roteiro exige o compose inteiro de pé.
 
+Entra pelo `SMARTSTORAGE_USER` e `SMARTSTORAGE_PASSWORD` (padrão `admin` / `admin123`), que **precisa ser administrador**: o roteiro cadastra prateleiras e colaboradores, e essas escritas exigem o papel. Os casos que conferem o 403 entram também como usuário comum, pelo `SMARTSTORAGE_COMMON_USER` e `SMARTSTORAGE_COMMON_PASSWORD` (padrão `usuario` / `usuario123`).
+
 O roteiro bate na API, não no Blazor — bugs que vivem só no front, no que a tela monta e envia, passam por ele sem serem notados. Dois já aconteceram assim: `ProductId` zero vindo do estado global (os holders de `VariablesExtensions` eram inicializados com `new()`, o que anulava todo `is null`) e a data perdendo o `Kind` no `MudDatePicker`. Essa classe é coberta pelos testes de componente, não por aqui.
 
 Nenhum caso do roteiro sai pulado ou como lacuna: qualquer resultado diferente de `PASSOU` é regressão.
@@ -137,6 +139,8 @@ O roteiro e2e não chama esses endpoints. `InsightsTests` (bUnit) cobre só o la
 ### Papéis
 
 `SmartStorage.Shared/Auth/Role.cs` é canônico: `Admin = "Administrador"`, `Client = "Usuario"` — os valores em português, porque três `.razor` (`Home`, `Account`, `EditUser`) comparam contra os literais. Endpoints `[Authorize(Roles = Role.Admin)]` só funcionam se a claim emitida no login usar exatamente essas constantes.
+
+Cadastrar, editar e excluir prateleiras e colaboradores (`POST`, `PUT` e `DELETE` de `shelf` e `employees`) exige administrador; a leitura continua aberta a qualquer usuário logado, porque a alocação e a venda listam prateleiras e colaboradores para o usuário comum.
 
 ## Banco
 
