@@ -25,6 +25,9 @@ issues; as abertas seguem a "Ordem de implementação" do plano.
   recusa, tela nova ou alterada tem teste bUnit do envio e do erro da API e é
   conferida no navegador em largura de desktop e de celular. Em toda tarefa
   vale também que `dotnet test` e o roteiro inteiro continuam passando
+- **Conferência no navegador**: a partir da T-31.08 é feita com o Playwright
+  para Python (Chromium), por script, e não mais pela extensão do Chrome; a
+  largura de celular é o viewport do script
 - **Commit**: preenchido quando a tarefa termina; vazio é tarefa aberta
 - O commit que conclui a última tarefa de um requisito troca, na `spec.md`,
   o `[planejado #N]` dele por `[feito]`
@@ -404,7 +407,7 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-32.02 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | `[Authorize(Roles = Role.Admin)]` no `POST`, `PUT` e `DELETE` de `shelf` e `employees` | RF-45, RF-47, D-26 | T-32.01, T-52.03 | Caso novo: como `usuario`, os seis respondem 403 e nada é gravado em `Shelf` nem em `Employee`; como administrador, o cadastro de prateleira do roteiro passa; a coleção do Postman acompanha a mudança e o teste de cobertura passa | |
 | T-32.03 | <span style="background:#d1c4e9;color:#4527a0;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Não iniciada</span> | Extrair o cálculo do volume usado do `EnsureShelfFits` para um método só | D-26 | T-00.29 | `EnsureShelfFits` e `ShelfConverter` usam o mesmo cálculo; CT-35 e CT-41 passam | |
 | T-32.04 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | O `UpdateShelf` recusa volume menor que o usado | RN-40, D-26 | T-32.03 | Caso novo: volume abaixo do usado responde 400 e não muda; volume entre o usado e o usado ÷ 0,9 é aceito, e a alocação seguinte é recusada | |
-| T-32.05 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Documentar que `SMARTSTORAGE_USER` exige administrador e conferir as telas como `usuario` | RF-45 | T-32.02 | O `CLAUDE.md` diz isso; no Chrome, como `usuario`, alocação e venda ainda listam prateleiras e colaboradores | |
+| T-32.05 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Documentar que `SMARTSTORAGE_USER` exige administrador e conferir as telas como `usuario` | RF-45 | T-32.02 | O `CLAUDE.md` diz isso; pelo Playwright, como `usuario`, alocação e venda ainda listam prateleiras e colaboradores | |
 
 ### #33 Encerrar a sessão na hora (T-33)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
@@ -460,7 +463,7 @@ Na ordem de implementação do plano. Cada issue é desenvolvida numa
 | T-28.15 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Blazor: `CompanyService`, telas `/companies`, `/companies/new` e `/companies/edit/{id}` com `CompanyForm`, e o menu "Empresas" só para `AdministradorGeral` | RF-35 | T-28.12 | bUnit: lista, cadastro, edição, ativar e desativar, e o menu escondido para os outros papéis; telas conferidas em desktop e celular | |
 | T-28.16 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Blazor: nome da empresa no cabeçalho, seletor de empresa no cadastro de usuário só para `AdministradorGeral` e mensagem de empresa inativa no login, quando a API a devolve | RF-36, RF-37, D-51 | T-28.15 | bUnit dos três; telas conferidas em desktop e celular | |
 | T-28.17 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Roteiro com duas empresas | RF-36, RN-32 | T-28.14 | Caso novo: entrada, alocação, venda, devolução e NF-e nas duas, sem uma ver saldo, venda ou relatório da outra; ID de outra empresa responde como inexistente | |
-| T-28.18 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Conferir no Chrome com um usuário de cada empresa e documentar | RF-36 | T-28.17 | Conferido; o `CLAUDE.md` descreve o filtro e onde o `IgnoreQueryFilters()` é permitido | |
+| T-28.18 | <span style="background:#ffe0b2;color:#e65100;padding:1px 8px;border-radius:10px;font-size:0.85em;white-space:nowrap">Bloqueada</span> | Conferir pelo Playwright com um usuário de cada empresa e documentar | RF-36 | T-28.17 | Conferido; o `CLAUDE.md` descreve o filtro e onde o `IgnoreQueryFilters()` é permitido | |
 
 ### #29 E-mail do usuário e senha (T-29)
 | ID | Status | Tarefa | Origem | Depende de | Concluída quando | Commit |
